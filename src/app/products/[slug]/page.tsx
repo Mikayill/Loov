@@ -7,8 +7,8 @@ import ProductDetailClient from "./ProductDetailClient";
 import ProductCard from "@/components/ProductCard";
 import ReviewsSection from "@/components/ReviewsSection";
 
-// Read fresh from the DB on every request so stock/price edits show instantly.
-export const dynamic = "force-dynamic";
+// Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
+export const revalidate = 60;
 
 interface Props {
   params: Promise<{ slug: string }>;

@@ -11,8 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("meta.bundles.title"), description: t("meta.bundles.description") };
 }
 
-// Bundles are edited in the admin panel — always render fresh.
-export const dynamic = "force-dynamic";
+// Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
+export const revalidate = 60;
 
 export default async function BundlesPage() {
   const { t } = await getT();

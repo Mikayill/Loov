@@ -4,8 +4,8 @@ import { getAllProducts } from "@/lib/db/products";
 import type { Metadata } from "next";
 import BundleDetailClient from "./BundleDetailClient";
 
-// Bundle contents/prices come from the live DB catalog.
-export const dynamic = "force-dynamic";
+// Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
+export const revalidate = 60;
 
 interface Props {
   params: Promise<{ slug: string }>;

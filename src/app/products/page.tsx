@@ -3,8 +3,8 @@ import CategoryFilter from "@/components/CategoryFilter";
 import { getAllProducts } from "@/lib/db/products";
 import { getT } from "@/lib/i18n/server";
 
-// Read fresh from the DB on every request so stock/price edits show instantly.
-export const dynamic = "force-dynamic";
+// Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();

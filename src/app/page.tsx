@@ -8,8 +8,8 @@ import { formatPrice } from "@/lib/format";
 import BundleQuickView from "@/components/BundleQuickView";
 import { getT } from "@/lib/i18n/server";
 
-// Read fresh from the DB on every request so catalog edits show instantly.
-export const dynamic = "force-dynamic";
+// Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
+export const revalidate = 60;
 
 export default async function HomePage() {
   const { t } = await getT();
