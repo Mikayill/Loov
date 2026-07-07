@@ -530,7 +530,6 @@ export const ru: Dictionary = {
   // ── Auth pages ──
   "auth.or": "ИЛИ",
   "auth.google": "Google",
-  "auth.facebook": "Facebook",
   "auth.welcomeBack": "С возвращением",
   "auth.signInSubtitle": "Войдите в свой аккаунт",
   "auth.tabEmail": "📧 Эл. почта",

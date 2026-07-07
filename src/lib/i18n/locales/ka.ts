@@ -532,7 +532,6 @@ export const ka: Dictionary = {
   // ── Auth pages (DRAFT — needs native review) ──
   "auth.or": "ან",
   "auth.google": "Google",
-  "auth.facebook": "Facebook",
   "auth.welcomeBack": "კეთილი იყოს თქვენი დაბრუნება",
   "auth.signInSubtitle": "შედით თქვენს ანგარიშში",
   "auth.tabEmail": "📧 ელფოსტა",

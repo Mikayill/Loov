@@ -3,14 +3,14 @@
 /**
  * Auth — real Supabase Auth (Phase 2).
  *
- * Email/password, Google & Facebook OAuth and phone OTP all go through
- * Supabase. The session lives in cookies (via @supabase/ssr), so Server
- * Components and Route Handlers see the same login — orders placed while
- * signed in get their user_id attached automatically in /api/orders.
+ * Email/password, Google OAuth and phone OTP all go through Supabase. The
+ * session lives in cookies (via @supabase/ssr), so Server Components and
+ * Route Handlers see the same login — orders placed while signed in get
+ * their user_id attached automatically in /api/orders.
  *
- * OAuth providers must be enabled in the Supabase dashboard
- * (Authentication → Providers) with their own credentials; until then the
- * buttons surface Supabase's "provider is not enabled" error.
+ * Google must be enabled in the Supabase dashboard (Authentication →
+ * Providers) with its own credentials; until then the button surfaces
+ * Supabase's "provider is not enabled" error.
  */
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
@@ -37,7 +37,6 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<AuthResult>;
   signUpWithEmail: (name: string, email: string, password: string) => Promise<AuthResult>;
   signInWithGoogle: () => Promise<AuthResult>;
-  signInWithFacebook: () => Promise<AuthResult>;
   sendPhoneOtp: (phone: string) => Promise<AuthResult>;
   signInWithPhone: (phone: string, otp: string) => Promise<AuthResult>;
   /** Update the display name and/or email of the signed-in user. */
@@ -138,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return {};
   }, [supabase]);
 
-  const oauth = useCallback(async (provider: "google" | "facebook"): Promise<AuthResult> => {
+  const oauth = useCallback(async (provider: "google"): Promise<AuthResult> => {
     if (!supabase) return { error: "Auth is not configured." };
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -148,8 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error ? { error: friendly(error.message) } : {};
   }, [supabase]);
 
-  const signInWithGoogle   = useCallback(() => oauth("google"),   [oauth]);
-  const signInWithFacebook = useCallback(() => oauth("facebook"), [oauth]);
+  const signInWithGoogle = useCallback(() => oauth("google"), [oauth]);
 
   const sendPhoneOtp = useCallback(async (phone: string): Promise<AuthResult> => {
     if (!supabase) return { error: "Auth is not configured." };
@@ -231,7 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail,
-      signInWithGoogle, signInWithFacebook, sendPhoneOtp, signInWithPhone, updateProfile,
+      signInWithGoogle, sendPhoneOtp, signInWithPhone, updateProfile,
       sendPasswordReset, updatePassword, deleteAccount, signOut }}>
       {children}
     </AuthContext.Provider>

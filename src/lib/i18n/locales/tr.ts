@@ -530,7 +530,6 @@ export const tr: Dictionary = {
   // ── Auth pages ──
   "auth.or": "VEYA",
   "auth.google": "Google",
-  "auth.facebook": "Facebook",
   "auth.welcomeBack": "Tekrar hoş geldiniz",
   "auth.signInSubtitle": "Hesabınıza giriş yapın",
   "auth.tabEmail": "📧 E-posta",

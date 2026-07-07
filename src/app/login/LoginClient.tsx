@@ -26,16 +26,10 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-  </svg>
-);
-
 export default function LoginClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { signInWithEmail, signInWithGoogle, signInWithFacebook, sendPhoneOtp, signInWithPhone } = useAuth();
+  const { signInWithEmail, signInWithGoogle, sendPhoneOtp, signInWithPhone } = useAuth();
 
   const [tab,        setTab]        = useState<Tab>("email");
   const [email,      setEmail]      = useState("");
@@ -45,7 +39,7 @@ export default function LoginClient() {
   const [otpSent,    setOtpSent]    = useState(false);
   const [showPass,   setShowPass]   = useState(false);
   const [loading,    setLoading]    = useState(false);
-  const [socialLoad, setSocialLoad] = useState<"google" | "facebook" | null>(null);
+  const [socialLoad, setSocialLoad] = useState<"google" | null>(null);
   const [error,      setError]      = useState("");
 
   /* Surface errors passed back from /auth/callback (?error=...) */
@@ -82,10 +76,9 @@ export default function LoginClient() {
     router.push("/account");
   }
 
-  async function handleSocial(provider: "google" | "facebook") {
+  async function handleSocial(provider: "google") {
     setError(""); setSocialLoad(provider);
-    const fn = provider === "google" ? signInWithGoogle : signInWithFacebook;
-    const res = await fn();
+    const res = await signInWithGoogle();
     if (res.error) { setSocialLoad(null); setError(res.error); }
     /* On success the browser redirects to the provider — keep the spinner. */
   }
@@ -106,22 +99,14 @@ export default function LoginClient() {
         <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
 
           {/* Social buttons */}
-          <div className="grid grid-cols-2 gap-3">
+          <div>
             <button
               onClick={() => handleSocial("google")}
               disabled={!!socialLoad}
-              className="flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all disabled:opacity-60"
             >
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
-            </button>
-            <button
-              onClick={() => handleSocial("facebook")}
-              disabled={!!socialLoad}
-              className="flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all disabled:opacity-60"
-            >
-              {socialLoad === "facebook" ? <Spinner /> : <FacebookIcon />}
-              <span>{t("auth.facebook")}</span>
             </button>
           </div>
 

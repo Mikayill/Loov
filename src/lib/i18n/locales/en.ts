@@ -559,7 +559,6 @@ export const en = {
   // ── Auth pages ──
   "auth.or": "OR",
   "auth.google": "Google",
-  "auth.facebook": "Facebook",
   "auth.welcomeBack": "Welcome back",
   "auth.signInSubtitle": "Sign in to your account",
   "auth.tabEmail": "📧 Email",
