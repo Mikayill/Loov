@@ -1,0 +1,178 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t("meta.about.title"), description: t("meta.about.description") };
+}
+
+const team = [
+  { name: "Nino Beridze",  emoji: "👩‍🎨", color: "#C8DDD8" },
+  { name: "Giorgi Kobaia", emoji: "👨‍💼", color: "#C4D4E4" },
+  { name: "Tamar Lomia",   emoji: "👩‍💻", color: "#D4CAE4" },
+];
+
+export default async function AboutPage() {
+  const { t } = await getT();
+
+  const values = [
+    { emoji: "🌿", title: t("about.value1Title"), desc: t("about.value1Desc"), bg: "#EAF2F0" },
+    { emoji: "🔬", title: t("about.value2Title"), desc: t("about.value2Desc"), bg: "#EDF2E8" },
+    { emoji: "💝", title: t("about.value3Title"), desc: t("about.value3Desc"), bg: "#EDE8F2" },
+    { emoji: "🌍", title: t("about.value4Title"), desc: t("about.value4Desc"), bg: "#F2EDE8" },
+  ];
+
+  const stats = [
+    { value: "2021",  label: t("about.statYearFounded") },
+    { value: "500+",  label: t("about.statHappyFamilies") },
+    { value: "100%",  label: t("about.statOrganicMaterials") },
+    { value: "4.9★",  label: t("about.statCustomerRating") },
+  ];
+
+  const teamRoles = [t("about.teamRole1"), t("about.teamRole2"), t("about.teamRole3")];
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-12">
+
+      {/* ── Hero ── */}
+      <section
+        className="text-center rounded-2xl sm:rounded-3xl px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #F5F0EB 0%, #E8F0EE 60%, #EAE8F0 100%)" }}
+      >
+        <div className="absolute top-6 left-8 w-20 h-20 rounded-full opacity-30" style={{ backgroundColor: "#C8DDD8" }} />
+        <div className="absolute bottom-6 right-8 w-28 h-28 rounded-full opacity-20" style={{ backgroundColor: "#D4CAE4" }} />
+        <div className="relative">
+          <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🌿</div>
+          <h1 className="text-2xl sm:text-5xl font-extrabold text-[#2A2320] mb-3 sm:mb-5 leading-tight">
+            {t("about.heroTitleA")}<br />
+            <span style={{ color: "#5E9E8C" }}>{t("about.heroTitleB")}</span>
+          </h1>
+          <p className="text-sm sm:text-lg text-[#5E5450] max-w-2xl mx-auto leading-snug sm:leading-relaxed">
+            {t("about.heroSubtitle")}
+          </p>
+        </div>
+      </section>
+
+      {/* ── Story ── */}
+      <section className="mb-8 sm:mb-16 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-center">
+        <div>
+          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.storyEyebrow")}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2 mb-5 leading-tight">
+            {t("about.storyTitleA")}<br />{t("about.storyTitleB")}
+          </h2>
+          <div className="space-y-4 text-[#5E5450] leading-relaxed text-sm sm:text-base">
+            <p>{t("about.storyP1")}</p>
+            <p>{t("about.storyP2")}</p>
+            <p>{t("about.storyP3")}</p>
+          </div>
+        </div>
+
+        {/* Visual block */}
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { emoji: "👶", bg: "#C8DDD8", caption: t("about.visualNewbornReady") },
+            { emoji: "🌿", bg: "#D0E0CC", caption: t("about.visualOrganicCertified") },
+            { emoji: "☁️", bg: "#C4D4E4", caption: t("about.visualCloudSoft") },
+            { emoji: "🎀", bg: "#D4CAE4", caption: t("about.visualGiftPerfect") },
+          ].map((card) => (
+            <div
+              key={card.caption}
+              className="rounded-2xl flex flex-col items-center justify-center gap-2 py-6 sm:py-8 border border-[#DDD5CC]"
+              style={{ backgroundColor: card.bg }}
+            >
+              <span className="text-4xl">{card.emoji}</span>
+              <span className="text-xs font-bold text-[#5E5450]">{card.caption}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="mb-8 sm:mb-16">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="bg-white rounded-2xl border border-[#DDD5CC] p-4 sm:p-6 text-center shadow-sm"
+            >
+              <p className="text-2xl sm:text-3xl font-extrabold mb-1" style={{ color: "#5E9E8C" }}>
+                {s.value}
+              </p>
+              <p className="text-xs text-[#9A8E88] font-semibold">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Values ── */}
+      <section className="mb-8 sm:mb-16">
+        <div className="text-center mb-5 sm:mb-10">
+          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.valuesEyebrow")}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2">{t("about.valuesTitle")}</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
+          {values.map((v) => (
+            <div
+              key={v.title}
+              className="rounded-2xl p-4 sm:p-6 border border-[#DDD5CC] flex gap-3 sm:gap-5 items-start"
+              style={{ backgroundColor: v.bg }}
+            >
+              <span className="text-3xl flex-shrink-0">{v.emoji}</span>
+              <div>
+                <h3 className="font-bold text-[#2A2320] mb-1.5">{v.title}</h3>
+                <p className="text-sm text-[#5E5450] leading-relaxed">{v.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Team ── */}
+      <section className="mb-8 sm:mb-16">
+        <div className="text-center mb-5 sm:mb-10">
+          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.teamEyebrow")}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2">{t("about.teamTitle")}</h2>
+        </div>
+        <div className="grid grid-cols-3 gap-3 sm:gap-6">
+          {team.map((member, i) => (
+            <div
+              key={member.name}
+              className="bg-white rounded-2xl border border-[#DDD5CC] p-4 sm:p-7 text-center shadow-sm"
+            >
+              <div
+                className="w-14 h-14 sm:w-20 sm:h-20 rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center text-2xl sm:text-4xl"
+                style={{ backgroundColor: member.color }}
+              >
+                {member.emoji}
+              </div>
+              <h3 className="font-extrabold text-[#2A2320] mb-1">{member.name}</h3>
+              <p className="text-sm text-[#9A8E88] font-medium">{teamRoles[i]}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section
+        className="rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center"
+        style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EDF5 100%)" }}
+      >
+        <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🌸</div>
+        <h2 className="text-2xl font-extrabold text-[#2A2320] mb-3">
+          {t("about.ctaTitle")}
+        </h2>
+        <p className="text-[#5E5450] mb-6 max-w-md mx-auto text-sm leading-relaxed">
+          {t("about.ctaBody")}
+        </p>
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 transition-opacity shadow-sm"
+          style={{ backgroundColor: "#5E9E8C" }}
+        >
+          {t("about.ctaButton")} →
+        </Link>
+      </section>
+    </div>
+  );
+}

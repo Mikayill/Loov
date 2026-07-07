@@ -1,0 +1,140 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getArticles, getArticleBySlug, getAllSlugs, blogCategoryLabel } from "@/lib/articles";
+import { getT } from "@/lib/i18n/server";
+import { fmtDate } from "@/lib/i18n/format";
+
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  return getAllSlugs().map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug, "en");
+  if (!article) return { title: "Not Found — Loov" };
+  return {
+    title: `${article.title} — Loov Journal`,
+    description: article.excerpt,
+  };
+}
+
+export default async function ArticlePage({ params }: Props) {
+  const { slug } = await params;
+  const { t, locale } = await getT();
+  const article = getArticleBySlug(slug, locale);
+  if (!article) notFound();
+
+  const related = getArticles(locale).filter((a) => a.slug !== slug).slice(0, 2);
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-8">
+        <Link href="/" className="hover:text-[#5E9E8C] transition-colors font-medium">{t("nav.home")}</Link>
+        <span>›</span>
+        <Link href="/blog" className="hover:text-[#5E9E8C] transition-colors font-medium">{t("blog.breadcrumb")}</Link>
+        <span>›</span>
+        <span className="text-[#2A2320] font-semibold line-clamp-1">{article.title}</span>
+      </nav>
+
+      {/* Hero */}
+      <div
+        className="rounded-3xl flex items-center justify-center py-14 mb-8 text-8xl select-none border border-[#DDD5CC]"
+        style={{ backgroundColor: article.cardColor + "80" }}
+      >
+        {article.emoji}
+      </div>
+
+      {/* Meta */}
+      <div className="flex items-center flex-wrap gap-2 mb-4">
+        <span className="text-[11px] font-bold text-[#5E9E8C] bg-[#EAF2F0] px-3 py-1 rounded-full border border-[#C8DDD8]">
+          {blogCategoryLabel(article.categoryId, t)}
+        </span>
+        <span className="text-[11px] text-[#9A8E88] font-medium">{article.readMinutes} {t("blog.minRead")}</span>
+        <span className="text-[11px] text-[#9A8E88]">·</span>
+        <span className="text-[11px] text-[#9A8E88]">{fmtDate(article.dateISO, locale, "long")}</span>
+      </div>
+
+      {/* Title */}
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2A2320] leading-tight mb-4">
+        {article.title}
+      </h1>
+      <p className="text-[#5E5450] text-base leading-relaxed mb-8 border-l-4 pl-4" style={{ borderColor: "#5E9E8C" }}>
+        {article.excerpt}
+      </p>
+
+      <div className="h-px bg-[#DDD5CC] mb-8" />
+
+      {/* Body */}
+      <div className="space-y-5">
+        {article.body.map((para, i) => (
+          <p key={i} className="text-[#5E5450] leading-relaxed text-sm sm:text-base">
+            {para}
+          </p>
+        ))}
+      </div>
+
+      {/* Author note */}
+      <div className="mt-10 flex items-center gap-4 p-5 bg-[#EAF2F0] rounded-2xl border border-[#C8DDD8]">
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
+          style={{ backgroundColor: "#5E9E8C" }}
+        >
+          🌿
+        </div>
+        <div>
+          <p className="font-bold text-[#2A2320] text-sm">{t("blog.authorName")}</p>
+          <p className="text-xs text-[#5E5450] leading-relaxed">
+            {t("blog.authorNote")}
+          </p>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div
+        className="mt-10 rounded-2xl p-6 text-center"
+        style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EDF5 100%)" }}
+      >
+        <p className="font-extrabold text-[#2A2320] mb-1">{t("blog.shopBebeco")}</p>
+        <p className="text-xs text-[#5E5450] mb-4">{t("blog.shopBebecoSubtitle")}</p>
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "#5E9E8C" }}
+        >
+          {t("blog.browseCollection")} →
+        </Link>
+      </div>
+
+      {/* Related */}
+      {related.length > 0 && (
+        <div className="mt-12 pt-8 border-t border-[#DDD5CC]">
+          <h2 className="text-lg font-extrabold text-[#2A2320] mb-5">{t("blog.moreFromJournal")}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {related.map((a) => (
+              <Link key={a.slug} href={`/blog/${a.slug}`} className="group flex gap-3 bg-white rounded-2xl border border-[#DDD5CC] p-4 hover:shadow-sm transition-shadow">
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+                  style={{ backgroundColor: a.cardColor + "80" }}
+                >
+                  {a.emoji}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-[#5E9E8C] mb-1">{blogCategoryLabel(a.categoryId, t)}</p>
+                  <p className="text-sm font-bold text-[#2A2320] group-hover:text-[#5E9E8C] transition-colors leading-snug line-clamp-2">
+                    {a.title}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

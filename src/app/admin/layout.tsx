@@ -1,0 +1,19 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { requireAdmin } from "@/lib/admin/auth";
+import AdminShell from "./AdminShell";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Admin — Loov",
+  robots: { index: false, follow: false }, // never index the admin panel
+};
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const admin = await requireAdmin();
+  // Non-admins (and guests) get a plain 404 — the panel's existence isn't disclosed.
+  if (!admin) notFound();
+
+  return <AdminShell admin={admin}>{children}</AdminShell>;
+}

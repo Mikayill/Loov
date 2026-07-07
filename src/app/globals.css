@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F5F0EB;
+  --color-cream-dark: #EDE5D8;
+  --color-sage: #C8DDD8;
+  --color-sage-dark: #A8C8C0;
+  --color-dusty-blue: #C4D4E4;
+  --color-soft-green: #D0E0CC;
+  --color-warm-sand: #E4D8C4;
+  --color-lavender: #D4CAE4;
+  --color-warm-peach: #EED4BC;
+  --color-border: #DDD5CC;
+  --color-text-primary: #2A2320;
+  --color-text-secondary: #5E5450;
+  --color-text-muted: #9A8E88;
+  --color-teal: #5E9E8C;
+  --color-teal-dark: #4D8A78;
+  --font-nunito: var(--font-nunito);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  background-color: #F5F0EB;
+  color: #2A2320;
+  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+  /* Guard against horizontal overflow at any viewport (320px → 4K).
+     `clip` (not `hidden`) so it never turns into an x-scroll container
+     and never breaks the sticky navbar. */
+  overflow-x: clip;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Never let a stray element push the layout wider than the screen */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* Accessible keyboard focus for every interactive element.
+   Uses :focus-visible so it only shows for keyboard users, not mouse clicks. */
+:focus-visible {
+  outline: 2px solid #5E9E8C;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hide scrollbar for filter row */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Adidas-style search panel: slide down from the header, dim the rest */
+@keyframes loov-slide-down {
+  from { transform: translateY(-16px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+@keyframes loov-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-search-panel { animation: loov-slide-down 0.22s ease-out; }
+.animate-search-overlay { animation: loov-fade-in 0.22s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-search-panel,
+  .animate-search-overlay { animation: none; }
+}
