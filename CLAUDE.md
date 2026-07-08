@@ -38,6 +38,19 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Doğrulama:** `tsc` + `next build` temiz · 15 sayfa 200 · API guard'lar (contact origin 403, admin 404, delete 401) · 12 sayfa × 4 dil ham-anahtar sızıntısı SIFIR · contact maili canlı gitti
 - **KALAN (bu turdan):** kullanıcı `supabase/addresses.sql` çalıştıracak · business WhatsApp numarası admin'den girilecek · gerçek ekip/kuruluş bilgisi eklenecek · yeni ka metinleri abla incelemesine dahil edilmeli (rev/news/sec.mfa/checkout.saved anahtarları)
 
+### 🎟️ PROMO KODLARI ADMIN'E TAŞINDI (8 Tem 2026) — TAMAMLANDI
+- **Koda gömülü kodlar SİLİNDİ** (`src/lib/promo.ts`'te sadece `PromoDef` tipi + saf `promoDiscountAmount` kaldı). YENIDOGAN + HEDIYE tamamen gitti; **LOOV10 `supabase/promos.sql` seed'iyle DB'ye taşındı**
+- **`promo_codes` tablosu** (`supabase/promos.sql` — ⚠️ KULLANICI PANELDE ÇALIŞTIRACAK): code (UPPERCASE, unique), type percent/shipping, value (0-90), expires_at (null=süresiz), usage_limit (null=sınırsız toplam), times_used, active. RLS: public read YOK (kod listesi sızdırılamaz), admin `is_admin()` okur, yazma service-role
+- **KURALLAR (kullanıcı kararı):** kodlar **ÜYELERE ÖZEL** (misafir uygulayamaz → "üyelere özel, giriş yap" + login linki) · **kişi başı 1 kullanım** (orders.promo_code+user_id sayımı, cancelled hariç) · toplam limit + son kullanma tarihi admin'den
+- **Ortak doğrulayıcı** `src/lib/promoValidation.ts` (`validatePromoServer`/`promoAvailable`/`recordPromoUse`) — hem `/api/promo` hem `/api/orders` kullanır, kurallar ayrışamaz. Sipariş başarılı olunca `times_used` koşullu artar (son-kullanım yarışı bilinçli kabul, puan-race kararıyla tutarlı)
+- **`/api/promo`**: POST = üye doğrulaması (hata kodları: invalid/expired/limit/used/signin → sepette ayrı ayrı i18n mesajlar ×4); GET `?code=` = sadece `{available}` (popup için, auth'suz, değer sızdırmaz)
+- **Client:** `src/lib/db/promo.ts validatePromo()` fetch sarmalayıcı; CartClient Apply async + hata mesajları + login linki; CheckoutClient mount'ta taşınan kodu yeniden doğrular. `cart.promo10/promo15` anahtarları silindi → `cart.promoPercentOff` ("{n}% discount applied") + promoExpired/LimitReached/AlreadyUsed/MembersOnly/SignIn ×4
+- **Admin:** `/admin/promos` (nav 🎟️ Promos) + `/api/admin/promos` GET/POST/PATCH/DELETE (bundles deseni, audit'li). Oluştur: kod A-Z0-9 3-20, %1-90 veya free shipping, bitiş tarihi (gün sonu kaydedilir), toplam limit. Satırda: kullanım sayacı, satır içi tarih/limit düzenleme, Active toggle, Delete. Tablo yoksa "run promos.sql" uyarısı
+- **Popup dönüşümü:** NewsletterPopup artık **üye-ol popup'ı** — e-posta formu SİLİNDİ (boş mail suistimali gerekçesiyle, kullanıcı kararı). Sadece misafirlere; göstermeden `GET /api/promo?code=LOOV10` ile kodun canlı olduğunu doğrular (admin LOOV10'u silerse/pasifleştirirse popup hiç çıkmaz). CTA → /register + "Sign in" linki. `news.*` anahtarları revize (invalidEmail/noSpam/welcome/yourCode/startShopping silindi; body/cta/signin/copyHint yenilendi ×4)
+- **Temizlik:** `cart.promoPlaceholder`'dan "e.g. LOOV10" çıktı; `faq.ord.a4` kod adlarından arındırıldı ("üyelere özel, üye ol" genellemesi) ×4
+- **Doğrulama:** tsc + build temiz · guard'lar canlı test (no-origin 403, misafir 401 signin, admin API yetkisiz 404) · tablo yokken zarif düşüş (kod invalid, popup gizli, admin uyarı banner'ı) · sızıntı taraması temiz
+- ⚠️ NOT: Bu oturumda dev sunucuda Turbopack `.next` cache bozulması yaşandı (0xc0000142 panic, tüm sayfalar 500) — `rm -rf .next` + yeniden başlatma çözdü. Kod hatası değildi
+
 ---
 
 ## ✅ TAMAMLANAN ÖZELLİKLER

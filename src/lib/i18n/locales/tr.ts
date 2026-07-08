@@ -1141,7 +1141,7 @@ export const tr: Dictionary = {
   "faq.ord.q3": "Hediye paketi sunuyor musunuz?",
   "faq.ord.a3": "Evet! Kurdeleli ve kişiselleştirilmiş mesaj kartlı güzel bir hediye paketi sunuyoruz — tamamen ücretsiz. Ödemede 'Hediye paketi'ni seçin.",
   "faq.ord.q4": "Promosyon kodu kullanabilir miyim?",
-  "faq.ord.a4": "Evet! Ödemeden önce sepetinize promosyon kodunuzu girin. İlk siparişinizde %10 indirim için LOOV10'u veya yenidoğanlara özel %15 indirim için YENIDOGAN'ı deneyin.",
+  "faq.ord.a4": "Evet! Promosyon kodları üyelere özeldir — ücretsiz hesap oluşturun, ardından ödemeden önce kodunuzu sepette girin. Yeni üyelere ilk sipariş indirim kodu verilir.",
 
   // ── Privacy policy ──
   "legal.privacy.breadcrumb": "Gizlilik Politikası",
@@ -1239,14 +1239,10 @@ export const tr: Dictionary = {
   "meta.resetPassword.title": "Yeni Şifre Belirle — Loov",
 
   "news.title": "İlk siparişinde %10 indirim",
-  "news.body": "Özel fırsatlar, ebeveynlik ipuçları ve yeni ürünlere erken erişim için listemize katıl.",
-  "news.invalidEmail": "Lütfen geçerli bir e-posta adresi gir.",
-  "news.cta": "%10 İndirimimi Al",
-  "news.noSpam": "Spam yok. İstediğin zaman ayrılabilirsin.",
+  "news.body": "Ücretsiz Loov hesabı oluştur ve bu kodu sepetinde kullan — promosyon kodları üyelere özeldir.",
+  "news.cta": "Hesabımı Oluştur",
+  "news.signin": "Zaten hesabın var mı? Giriş yap",
   "news.noThanks": "Hayır, teşekkürler — tam fiyat öderim",
-  "news.welcome": "Aileye hoş geldin!",
-  "news.yourCode": "Sana özel indirim kodun:",
-  "news.copyHint": "Kopyalamak için tıkla · 30 gün geçerli",
-  "news.startShopping": "Alışverişe Başla",
+  "news.copyHint": "Kopyalamak için tıkla · Üye olduktan sonra sepette kullan",
   "news.socialProof": "Gürcistan'daki ailelerin favorisi",
 };

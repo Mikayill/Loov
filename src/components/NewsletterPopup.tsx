@@ -1,36 +1,44 @@
 "use client";
 
+/**
+ * Sign-up promo popup — offers the first-order promo code to GUESTS and
+ * routes them to /register (promo codes are members-only, so collecting
+ * bare emails here would just invite abuse).
+ *
+ * Honesty guard: before showing, it asks the server whether the promised
+ * code is still live (active, not expired, limit not reached). If the admin
+ * deleted or paused it in /admin/promos, the popup simply never appears.
+ */
+
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
-import { fetchMyProfile } from "@/lib/db/profile";
 
 const STORAGE_KEY = "loov_newsletter_seen";
-const PROMO_CODE = "LOOV10";
+const PROMO_CODE = "LOOV10"; // the code promised in the copy below
 
 export default function NewsletterPopup() {
   const { t } = useLocale();
   const { user } = useAuth();
   const [show, setShow] = useState(false);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (user) return; // members already have access to promo codes
     try {
       if (sessionStorage.getItem(STORAGE_KEY)) return;
     } catch {
       return;
     }
     const timer = setTimeout(async () => {
-      // Respect the account notification preference: a signed-in customer who
-      // turned "Promotions" off never sees the promo popup.
-      if (user) {
-        try {
-          const { profile } = await fetchMyProfile();
-          const prefs = (profile?.notificationPrefs ?? {}) as Record<string, boolean>;
-          if (prefs.promo === false) return;
-        } catch { /* profile unavailable → default to showing */ }
+      try {
+        // Never promise a dead code — check it's still live first.
+        const res = await fetch(`/api/promo?code=${PROMO_CODE}`);
+        const d = await res.json().catch(() => ({}));
+        if (!d.available) return;
+      } catch {
+        return; // can't verify → don't promise
       }
       setShow(true);
     }, 45000);
@@ -42,18 +50,14 @@ export default function NewsletterPopup() {
     try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch { /* */ }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.includes("@") || !email.includes(".")) {
-      setError(t("news.invalidEmail"));
-      return;
-    }
-    setError("");
-    setSubmitted(true);
-    try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch { /* */ }
+  function copyCode() {
+    navigator.clipboard?.writeText(PROMO_CODE).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }
 
-  if (!show) return null;
+  if (!show || user) return null;
 
   return (
     <div
@@ -69,7 +73,7 @@ export default function NewsletterPopup() {
         <button
           onClick={close}
           className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#9A8E88] hover:text-[#2A2320] hover:bg-white transition-all shadow-sm"
-          aria-label="Close newsletter popup"
+          aria-label="Close popup"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -91,74 +95,43 @@ export default function NewsletterPopup() {
         </div>
 
         {/* Content */}
-        <div className="px-7 pb-6 pt-5">
-          {!submitted ? (
-            <>
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
-                    placeholder="your@email.com"
-                    className={`w-full h-12 px-4 rounded-xl border-2 text-sm font-medium outline-none transition-colors ${
-                      error
-                        ? "border-red-400 focus:border-red-400"
-                        : "border-[#DDD5CC] focus:border-[#5E9E8C]"
-                    }`}
-                  />
-                  {error && <p className="text-xs text-red-400 font-semibold mt-1.5">{error}</p>}
-                </div>
-                <button
-                  type="submit"
-                  className="w-full h-12 rounded-xl font-extrabold text-white text-sm hover:opacity-90 active:scale-95 transition-all shadow-sm"
-                  style={{ backgroundColor: "#5E9E8C" }}
-                >
-                  {t("news.cta")} →
-                </button>
-              </form>
-              <p className="text-center text-[10px] text-[#9A8E88] mt-3">
-                {t("news.noSpam")}
-              </p>
-              <button
-                onClick={close}
-                className="w-full text-center text-xs text-[#C8B8B0] hover:text-[#9A8E88] transition-colors mt-1.5 py-1"
-              >
-                {t("news.noThanks")}
-              </button>
-            </>
-          ) : (
-            <div className="text-center py-3">
-              <div className="text-5xl mb-4">🎉</div>
-              <p className="font-extrabold text-[#2A2320] text-xl mb-1">{t("news.welcome")}</p>
-              <p className="text-sm text-[#5E5450] mb-4">{t("news.yourCode")}</p>
-              <button
-                className="bg-[#EAF2F0] border-2 border-dashed border-[#5E9E8C] rounded-2xl py-4 px-6 font-mono font-extrabold text-[#5E9E8C] text-2xl tracking-[0.2em] mb-1 w-full hover:bg-[#D8EDE9] transition-colors"
-                onClick={() => navigator.clipboard?.writeText(PROMO_CODE)}
-                title={t("news.copyHint")}
-              >
-                {PROMO_CODE}
-              </button>
-              <p className="text-[10px] text-[#9A8E88] mb-5">{t("news.copyHint")}</p>
-              <button
-                onClick={close}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#5E9E8C" }}
-              >
-                {t("news.startShopping")} →
-              </button>
-            </div>
-          )}
+        <div className="px-7 pb-6 pt-5 text-center">
+          <button
+            className="bg-[#EAF2F0] border-2 border-dashed border-[#5E9E8C] rounded-2xl py-4 px-6 font-mono font-extrabold text-[#5E9E8C] text-2xl tracking-[0.2em] mb-1 w-full hover:bg-[#D8EDE9] transition-colors"
+            onClick={copyCode}
+            title={t("news.copyHint")}
+          >
+            {copied ? "✓" : PROMO_CODE}
+          </button>
+          <p className="text-[10px] text-[#9A8E88] mb-4">{t("news.copyHint")}</p>
+
+          <Link
+            href="/register"
+            onClick={close}
+            className="block w-full h-12 rounded-xl font-extrabold text-white text-sm leading-[48px] hover:opacity-90 active:scale-95 transition-all shadow-sm"
+            style={{ backgroundColor: "#5E9E8C" }}
+          >
+            {t("news.cta")} →
+          </Link>
+          <p className="text-xs text-[#9A8E88] mt-3">
+            <Link href="/login" onClick={close} className="font-bold text-[#5E9E8C] hover:underline">
+              {t("news.signin")}
+            </Link>
+          </p>
+          <button
+            onClick={close}
+            className="w-full text-center text-xs text-[#C8B8B0] hover:text-[#9A8E88] transition-colors mt-2 py-1"
+          >
+            {t("news.noThanks")}
+          </button>
         </div>
 
         {/* Social proof strip */}
-        {!submitted && (
-          <div className="bg-[#F5F0EB] px-7 py-2.5 text-center border-t border-[#DDD5CC]">
-            <p className="text-[10px] text-[#9A8E88] font-semibold">
-              ⭐⭐⭐⭐⭐ {t("news.socialProof")}
-            </p>
-          </div>
-        )}
+        <div className="bg-[#F5F0EB] px-7 py-2.5 text-center border-t border-[#DDD5CC]">
+          <p className="text-[10px] text-[#9A8E88] font-semibold">
+            ⭐⭐⭐⭐⭐ {t("news.socialProof")}
+          </p>
+        </div>
       </div>
     </div>
   );

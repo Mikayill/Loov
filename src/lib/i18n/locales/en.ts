@@ -1170,7 +1170,7 @@ export const en = {
   "faq.ord.q3": "Do you offer gift packaging?",
   "faq.ord.a3": "Yes! We offer beautiful gift packaging with a ribbon and a personalised message card — completely free. Select 'Gift packaging' at checkout.",
   "faq.ord.q4": "Can I use a promo code?",
-  "faq.ord.a4": "Yes! Enter your promo code in the cart before checkout. Try LOOV10 for 10% off your first order, or YENIDOGAN for a 15% newborn discount.",
+  "faq.ord.a4": "Yes! Promo codes are exclusive to members — create a free account, then enter your code in the cart before checkout. New members get a first-order discount code.",
 
   // ── Privacy policy ──
   "legal.privacy.breadcrumb": "Privacy Policy",
@@ -1268,15 +1268,11 @@ export const en = {
   "meta.resetPassword.title": "Set a New Password — Loov",
 
   "news.title": "10% off your first order",
-  "news.body": "Join our list for exclusive deals, parenting tips, and early access to new arrivals.",
-  "news.invalidEmail": "Please enter a valid email address.",
-  "news.cta": "Get My 10% Off",
-  "news.noSpam": "No spam. Unsubscribe anytime.",
+  "news.body": "Create a free Loov account and use this code in your cart — promo codes are exclusive to members.",
+  "news.cta": "Create My Account",
+  "news.signin": "Already have an account? Sign in",
   "news.noThanks": "No thanks, I'll pay full price",
-  "news.welcome": "Welcome to the family!",
-  "news.yourCode": "Your exclusive discount code:",
-  "news.copyHint": "Click to copy · Valid for 30 days",
-  "news.startShopping": "Start Shopping",
+  "news.copyHint": "Click to copy · Use it in your cart after signing up",
   "news.socialProof": "Loved by families across Georgia",
 } as const;
 
