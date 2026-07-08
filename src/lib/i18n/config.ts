@@ -16,7 +16,9 @@
 export const LOCALES = ["en", "ka", "ru", "tr"] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const DEFAULT_LOCALE: Locale = "en";
+// First-time visitors see Georgian — it's a Georgian store. The cookie
+// (loov-locale) set by the language switcher/profile overrides this.
+export const DEFAULT_LOCALE: Locale = "ka";
 
 /** Locales that ship with a (partially) populated dictionary today. */
 export const SEEDED_LOCALES: Locale[] = ["en", "ka", "ru"];
