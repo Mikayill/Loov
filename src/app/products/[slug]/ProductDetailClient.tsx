@@ -156,8 +156,12 @@ export default function ProductDetailClient({
     setDeliveryRange(`${fmt(addBizDays(now, 2))} – ${fmt(addBizDays(now, 4))}`);
   }, [locale]);
 
-  /* Share / copy link */
+  /* Share — native share sheet where available (mobile), else copy link */
   function handleShare() {
+    if (typeof navigator.share === "function") {
+      navigator.share({ title: product.name, url: window.location.href }).catch(() => {});
+      return;
+    }
     navigator.clipboard.writeText(window.location.href).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
@@ -286,18 +290,22 @@ export default function ProductDetailClient({
             </div>
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#9A8E88] hover:text-[#5E9E8C] transition-colors"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all ${
+                copied
+                  ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#5E9E8C]"
+                  : "border-[#DDD5CC] bg-white text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] hover:shadow-sm"
+              }`}
             >
               {copied ? (
                 <>
-                  <svg className="w-4 h-4 text-[#5E9E8C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-[#5E9E8C]">{t("pdp.copied")}</span>
+                  {t("pdp.copied")}
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
                   {t("pdp.share")}
@@ -480,7 +488,7 @@ export default function ProductDetailClient({
           </div>
 
           {atMax && !outOfStock && (
-            <p className="text-xs font-semibold text-orange-500 mb-3 -mt-1">
+            <p className="text-sm font-bold text-orange-600 mb-3 -mt-1 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 inline-block">
               {t("pdp.thatsAll").replace("{n}", String(stock))}
             </p>
           )}

@@ -236,9 +236,9 @@ export default function CartDrawer() {
                 <span className="font-bold text-[#2A2320]">{formatPrice(shipping)}</span>
               )}
             </div>
-            <div className="flex items-center justify-between pt-1 border-t border-[#F0E8E0]">
-              <span className="font-extrabold text-[#2A2320]">{t("cart.total")}</span>
-              <span className="font-extrabold text-[#2A2320] text-xl">{formatPrice(total)}</span>
+            <div className="flex items-center justify-between pt-2 border-t border-[#F0E8E0]">
+              <span className="font-extrabold text-[#2A2320] text-lg">{t("cart.total")}</span>
+              <span className="font-extrabold text-[#2A2320] text-2xl">{formatPrice(total)}</span>
             </div>
 
             {/* CTA buttons */}
