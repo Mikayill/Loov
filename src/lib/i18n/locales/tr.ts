@@ -1214,4 +1214,16 @@ export const tr: Dictionary = {
   "meta.wishlist.title": "Favorilerim — Loov",
   "meta.cart.title": "Sepetiniz — Loov",
   "meta.resetPassword.title": "Yeni Şifre Belirle — Loov",
+
+  "news.title": "İlk siparişinde %10 indirim",
+  "news.body": "Özel fırsatlar, ebeveynlik ipuçları ve yeni ürünlere erken erişim için listemize katıl.",
+  "news.invalidEmail": "Lütfen geçerli bir e-posta adresi gir.",
+  "news.cta": "%10 İndirimimi Al",
+  "news.noSpam": "Spam yok. İstediğin zaman ayrılabilirsin.",
+  "news.noThanks": "Hayır, teşekkürler — tam fiyat öderim",
+  "news.welcome": "Aileye hoş geldin!",
+  "news.yourCode": "Sana özel indirim kodun:",
+  "news.copyHint": "Kopyalamak için tıkla · 30 gün geçerli",
+  "news.startShopping": "Alışverişe Başla",
+  "news.socialProof": "Gürcistan'daki ailelerin favorisi",
 };

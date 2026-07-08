@@ -15,6 +15,7 @@ import CartDrawer from "@/components/CartDrawer";
 import CookieConsent from "@/components/CookieConsent";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FooterPhone from "@/components/FooterPhone";
+import NewsletterPopup from "@/components/NewsletterPopup";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -234,6 +235,7 @@ export default async function RootLayout({
           <CartDrawer />
           <WhatsAppButton />
           <CookieConsent />
+          <NewsletterPopup />
           </StoreChromeGate>
           </LoyaltyProvider>
           </WishlistProvider>

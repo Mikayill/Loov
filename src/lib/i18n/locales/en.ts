@@ -1243,6 +1243,18 @@ export const en = {
   "meta.wishlist.title": "My Wishlist — Loov",
   "meta.cart.title": "Your Cart — Loov",
   "meta.resetPassword.title": "Set a New Password — Loov",
+
+  "news.title": "10% off your first order",
+  "news.body": "Join our list for exclusive deals, parenting tips, and early access to new arrivals.",
+  "news.invalidEmail": "Please enter a valid email address.",
+  "news.cta": "Get My 10% Off",
+  "news.noSpam": "No spam. Unsubscribe anytime.",
+  "news.noThanks": "No thanks, I'll pay full price",
+  "news.welcome": "Welcome to the family!",
+  "news.yourCode": "Your exclusive discount code:",
+  "news.copyHint": "Click to copy · Valid for 30 days",
+  "news.startShopping": "Start Shopping",
+  "news.socialProof": "Loved by families across Georgia",
 } as const;
 
 export type TranslationKey = keyof typeof en;

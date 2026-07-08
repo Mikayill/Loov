@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useLocale } from "@/context/LocaleContext";
+import { fetchMyProfile } from "@/lib/db/profile";
 
 const STORAGE_KEY = "loov_newsletter_seen";
 const PROMO_CODE = "LOOV10";
 
 export default function NewsletterPopup() {
+  const { t } = useLocale();
+  const { user } = useAuth();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -17,9 +22,20 @@ export default function NewsletterPopup() {
     } catch {
       return;
     }
-    const t = setTimeout(() => setShow(true), 45000);
-    return () => clearTimeout(t);
-  }, []);
+    const timer = setTimeout(async () => {
+      // Respect the account notification preference: a signed-in customer who
+      // turned "Promotions" off never sees the promo popup.
+      if (user) {
+        try {
+          const { profile } = await fetchMyProfile();
+          const prefs = (profile?.notificationPrefs ?? {}) as Record<string, boolean>;
+          if (prefs.promo === false) return;
+        } catch { /* profile unavailable → default to showing */ }
+      }
+      setShow(true);
+    }, 45000);
+    return () => clearTimeout(timer);
+  }, [user]);
 
   function close() {
     setShow(false);
@@ -29,7 +45,7 @@ export default function NewsletterPopup() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.includes("@") || !email.includes(".")) {
-      setError("Please enter a valid email address.");
+      setError(t("news.invalidEmail"));
       return;
     }
     setError("");
@@ -67,11 +83,10 @@ export default function NewsletterPopup() {
         >
           <div className="text-6xl mb-4">🌿</div>
           <h2 className="text-2xl font-extrabold text-[#2A2320] mb-2 leading-tight">
-            10% off your<br />first order
+            {t("news.title")}
           </h2>
           <p className="text-[#5E5450] text-sm leading-relaxed">
-            Join thousands of happy parents. Get exclusive deals,<br />
-            parenting tips, and early access to new arrivals.
+            {t("news.body")}
           </p>
         </div>
 
@@ -99,38 +114,38 @@ export default function NewsletterPopup() {
                   className="w-full h-12 rounded-xl font-extrabold text-white text-sm hover:opacity-90 active:scale-95 transition-all shadow-sm"
                   style={{ backgroundColor: "#5E9E8C" }}
                 >
-                  Get My 10% Off →
+                  {t("news.cta")} →
                 </button>
               </form>
               <p className="text-center text-[10px] text-[#9A8E88] mt-3">
-                No spam. Unsubscribe anytime.
+                {t("news.noSpam")}
               </p>
               <button
                 onClick={close}
                 className="w-full text-center text-xs text-[#C8B8B0] hover:text-[#9A8E88] transition-colors mt-1.5 py-1"
               >
-                No thanks, I&apos;ll pay full price
+                {t("news.noThanks")}
               </button>
             </>
           ) : (
             <div className="text-center py-3">
               <div className="text-5xl mb-4">🎉</div>
-              <p className="font-extrabold text-[#2A2320] text-xl mb-1">Welcome to the family!</p>
-              <p className="text-sm text-[#5E5450] mb-4">Your exclusive discount code:</p>
+              <p className="font-extrabold text-[#2A2320] text-xl mb-1">{t("news.welcome")}</p>
+              <p className="text-sm text-[#5E5450] mb-4">{t("news.yourCode")}</p>
               <button
                 className="bg-[#EAF2F0] border-2 border-dashed border-[#5E9E8C] rounded-2xl py-4 px-6 font-mono font-extrabold text-[#5E9E8C] text-2xl tracking-[0.2em] mb-1 w-full hover:bg-[#D8EDE9] transition-colors"
                 onClick={() => navigator.clipboard?.writeText(PROMO_CODE)}
-                title="Click to copy"
+                title={t("news.copyHint")}
               >
                 {PROMO_CODE}
               </button>
-              <p className="text-[10px] text-[#9A8E88] mb-5">Click to copy · Valid for 30 days</p>
+              <p className="text-[10px] text-[#9A8E88] mb-5">{t("news.copyHint")}</p>
               <button
                 onClick={close}
                 className="w-full h-11 rounded-xl font-extrabold text-white text-sm hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: "#5E9E8C" }}
               >
-                Start Shopping →
+                {t("news.startShopping")} →
               </button>
             </div>
           )}
@@ -140,8 +155,7 @@ export default function NewsletterPopup() {
         {!submitted && (
           <div className="bg-[#F5F0EB] px-7 py-2.5 text-center border-t border-[#DDD5CC]">
             <p className="text-[10px] text-[#9A8E88] font-semibold">
-              ⭐⭐⭐⭐⭐ Loved by{" "}
-              <strong className="text-[#5E5450]">1,200+ families</strong> across Georgia
+              ⭐⭐⭐⭐⭐ {t("news.socialProof")}
             </p>
           </div>
         )}
