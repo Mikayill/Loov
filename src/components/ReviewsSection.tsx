@@ -15,7 +15,12 @@ interface Review {
   adminReplyAt: string | null;
 }
 interface Stats { avg: number; count: number; breakdown: Record<number, number> }
-interface Eligibility { signedIn: boolean; canReview: boolean; alreadyReviewed: boolean }
+interface Eligibility {
+  signedIn: boolean;
+  canReview: boolean;
+  alreadyReviewed: boolean;
+  myReviewStatus?: "published" | "hidden" | null;
+}
 
 function Stars({ rating, size = "w-4 h-4" }: { rating: number; size?: string }) {
   return (
@@ -60,6 +65,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
   const [stats, setStats] = useState<Stats>({ avg: 0, count: 0, breakdown: {} });
   const [elig, setElig] = useState<Eligibility>({ signedIn: false, canReview: false, alreadyReviewed: false });
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
@@ -69,13 +75,20 @@ export default function ReviewsSection({ productId }: { productId: string }) {
   const [thanks, setThanks] = useState(false);
 
   const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
     try {
       const res = await fetch(`/api/reviews?productId=${encodeURIComponent(productId)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const d = await res.json();
       setReviews(d.reviews ?? []);
       setStats(d.stats ?? { avg: 0, count: 0, breakdown: {} });
       setElig(d.eligibility ?? { signedIn: false, canReview: false, alreadyReviewed: false });
-    } catch { /* keep empty */ }
+    } catch {
+      // A failed fetch must NOT masquerade as "you can't review" — surface a
+      // retry instead of quietly falling back to the signed-out defaults.
+      setLoadFailed(true);
+    }
     finally { setLoading(false); }
   }, [productId]);
 
@@ -137,12 +150,32 @@ export default function ReviewsSection({ productId }: { productId: string }) {
 
       {/* Write-a-review area (purchase-gated) */}
       <div className="mb-8">
-        {thanks ? (
+        {loading ? (
+          /* Don't flash "sign in" / "only buyers" while eligibility is still loading */
+          <div className="h-11 w-56 rounded-full bg-[#EDE5D8] animate-pulse" />
+        ) : loadFailed ? (
+          <div className="flex items-center gap-3 text-sm text-[#9A8E88] font-medium">
+            <span>{t("rev.loadFailed")}</span>
+            <button
+              onClick={load}
+              className="font-bold text-[#5E9E8C] border-2 border-[#5E9E8C] px-4 py-1.5 rounded-full hover:bg-[#EAF2F0] transition-colors"
+            >
+              {t("rev.retry")}
+            </button>
+          </div>
+        ) : thanks ? (
           <div className="rounded-2xl bg-[#EAF2F0] border border-[#B9D9CF] p-4 text-sm font-semibold text-[#3A6B5E]">✓ {t("rev.thanks")}</div>
         ) : !elig.signedIn ? (
           <Link href="/login" className="inline-block text-sm font-bold text-[#5E9E8C] border-2 border-[#5E9E8C] px-5 py-2.5 rounded-full hover:bg-[#EAF2F0] transition-colors">
             {t("rev.signInToReview")} →
           </Link>
+        ) : elig.myReviewStatus === "hidden" ? (
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 max-w-xl">
+            <p className="text-sm font-semibold text-amber-700 mb-1">{t("rev.hiddenNotice")}</p>
+            <Link href="/account/reviews" className="text-sm font-bold text-[#5E9E8C] hover:underline">
+              {t("rev.hiddenManage")} →
+            </Link>
+          </div>
         ) : elig.alreadyReviewed ? (
           <p className="text-sm text-[#9A8E88] font-medium">{t("rev.alreadyReviewed")}</p>
         ) : elig.canReview ? (
@@ -159,6 +192,15 @@ export default function ReviewsSection({ productId }: { productId: string }) {
               placeholder={t("rev.reviewPlaceholder")}
               className="w-full px-3 py-2 rounded-xl border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
             />
+            {/* Live length hint — the 10-char minimum otherwise looks like a bug */}
+            <div className="flex items-center justify-between mt-1">
+              <p className={`text-[11px] font-semibold ${text.trim().length > 0 && text.trim().length < 10 ? "text-amber-600" : "text-[#9A8E88]"}`}>
+                {text.trim().length < 10
+                  ? t("rev.minChars").replace("{n}", String(Math.max(0, 10 - text.trim().length)))
+                  : "✓"}
+              </p>
+              <p className="text-[11px] text-[#9A8E88]">{text.length}/2000</p>
+            </div>
             <label className="flex items-center gap-2 mt-3 text-sm text-[#5E5450] cursor-pointer">
               <input type="checkbox" checked={showName} onChange={(e) => setShowName(e.target.checked)} className="w-4 h-4 accent-[#5E9E8C]" />
               {t("rev.showName")}

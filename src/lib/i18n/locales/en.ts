@@ -182,6 +182,11 @@ export const en = {
   "rev.onlyBuyers": "Only customers who have received this product can review it.",
   "rev.signInToReview": "Sign in to write a review",
   "rev.alreadyReviewed": "You've already reviewed this product — thank you!",
+  "rev.minChars": "Minimum 10 characters — {n} more to go",
+  "rev.loadFailed": "Couldn't load reviews.",
+  "rev.retry": "Try again",
+  "rev.hiddenNotice": "Your review of this product was hidden by our team, so it isn't visible on this page.",
+  "rev.hiddenManage": "View it in My Reviews",
   "rev.verified": "Verified purchase",
   "rev.anon": "Anonymous",
 

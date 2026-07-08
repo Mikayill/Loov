@@ -129,12 +129,32 @@ export async function GET(req: NextRequest) {
 
   // Caller eligibility — independent of whether the reviews table exists
   // (delivery check runs against the orders table).
-  let eligibility = { signedIn: false, canReview: false, alreadyReviewed: false };
+  let eligibility: {
+    signedIn: boolean;
+    canReview: boolean;
+    alreadyReviewed: boolean;
+    myReviewStatus: "published" | "hidden" | null;
+  } = { signedIn: false, canReview: false, alreadyReviewed: false, myReviewStatus: null };
   if (user) {
-    const alreadyReviewed = rows.some((r) => r.user_id === user.id);
     const admin = createSupabaseAdminClient();
+    // Look up the caller's own row directly (any status) — a review the admin
+    // hid must still count as "already reviewed", otherwise the form reappears
+    // and the submit dies on the unique constraint with a confusing 409.
+    let myReviewStatus: "published" | "hidden" | null = null;
+    if (admin) {
+      const { data: mine } = await admin
+        .from("reviews")
+        .select("status")
+        .eq("product_id", productId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (mine) myReviewStatus = mine.status === "hidden" ? "hidden" : "published";
+    } else if (rows.some((r) => r.user_id === user.id)) {
+      myReviewStatus = "published";
+    }
+    const alreadyReviewed = myReviewStatus !== null;
     const delivered = admin ? await hasDelivered(admin, user.id, productId) : false;
-    eligibility = { signedIn: true, canReview: delivered && !alreadyReviewed, alreadyReviewed };
+    eligibility = { signedIn: true, canReview: delivered && !alreadyReviewed, alreadyReviewed, myReviewStatus };
   }
 
   // Table not created yet → behave as "no reviews" so the page still renders.

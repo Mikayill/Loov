@@ -174,6 +174,11 @@ export const tr: Dictionary = {
   "rev.onlyBuyers": "Sadece bu ürünü teslim almış müşteriler yorum yapabilir.",
   "rev.signInToReview": "Yorum yazmak için giriş yap",
   "rev.alreadyReviewed": "Bu ürünü zaten yorumladın — teşekkürler!",
+  "rev.minChars": "En az 10 karakter — {n} karakter daha",
+  "rev.loadFailed": "Yorumlar yüklenemedi.",
+  "rev.retry": "Tekrar dene",
+  "rev.hiddenNotice": "Bu ürüne yazdığın yorum ekibimiz tarafından gizlendi, bu sayfada görünmüyor.",
+  "rev.hiddenManage": "Yorumlarım'da gör",
   "rev.verified": "Doğrulanmış alışveriş",
   "rev.anon": "Anonim",
 
