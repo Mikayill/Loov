@@ -1030,7 +1030,7 @@ export const en = {
   "about.storyEyebrow": "Our Story",
   "about.storyTitleA": "A Parent's Love,",
   "about.storyTitleB": "A Brand's Mission",
-  "about.storyP1": "It started with a question every new parent asks: \"Is this really safe for my baby?\" When our founder Nino welcomed her first child in 2021, she couldn't find baby clothing that was both genuinely organic and beautifully designed — so she decided to create it herself.",
+  "about.storyP1": "It started with a question every new parent asks: \"Is this really safe for my baby?\" When we became parents ourselves, we couldn't find baby clothing that was both genuinely organic and beautifully designed — so we decided to create it.",
   "about.storyP2": "What began as a small passion project in Tbilisi quickly grew into Georgia's most loved baby clothing brand. Today, Loov dresses hundreds of little ones across the country — from hospital homecomings to first birthdays.",
   "about.storyP3": "Every stitch, every snap, every colour choice is made with one goal in mind: giving your baby the comfort they deserve, and giving you the peace of mind you need.",
   "about.visualNewbornReady": "Newborn Ready",

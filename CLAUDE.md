@@ -17,7 +17,26 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Supabase Auth:** Site URL `https://loov.ge`, Redirect URLs'e `https://loov.ge/auth/callback` + `https://www.loov.ge/auth/callback` eklendi (www'lı olan Google girişi için ŞARTTI). localhost'lar duruyor
 - **Resend:** `loov.ge` domaini eklendi, 4 DNS kaydı (DKIM/SPF-MX/SPF-TXT/DMARC) Vercel DNS'e girildi — doğrulama bekliyor/bekliyordu; doğrulanınca `onboarding@resend.dev` → `orders@loov.ge` geçişi yapılacak (route'larda TODO var)
 - **PERFORMANS SORUNU (kısmen çözüldü):** site yavaştı. (1) 5 vitrin sayfası `force-dynamic`'ti → `revalidate = 60` yapıldı (commit 61eb743). (2) Vercel Functions bölgesi Frankfurt (fra1) seçildi — AMA YENİ DEPLOY GEREKİYOR (henüz tetiklenmedi, site duraklatıldığı için). (3) **ASIL DARBOĞAZ: Supabase projesi Sydney'de (`ap-southeast-2`)** — her DB sorgusu Avustralya'ya gidiyor. Kalıcı çözüm = Supabase'i Frankfurt'a taşımak (yeni proje + veri göçü, dikkatli planlanmalı, henüz yapılmadı)
-- **Sıradaki oturum:** kök dizindeki `buglar.md` — kullanıcının canlıyı test ederken tuttuğu ayrıntılı bug/istek listesi (HOME/PRODUCTS/PDP/BUNDLES/ABOUT/CONTACT/ACCOUNT başlıklı). Oradan çalışılacak
+- ~~**Sıradaki oturum:** buglar.md~~ → ✅ **8 Tem 2026'da TAMAMI işlendi** (bkz. aşağıdaki "🐛 BUGLAR.MD ONARIM TURU" bölümü). buglar.md dosyası cevaplarla işaretli duruyor
+
+### 🐛 BUGLAR.MD ONARIM TURU (8 Tem 2026) — TAMAMLANDI (12 batch, batch başına commit)
+- **Vitrin:** ana sayfa featured = tüm katalog, sezon sıralı (`sortBySeason` NİHAYET bağlandı) + recently-viewed kategorileri öne alan hafif kişiselleştirme; pill sayaçları kaldırıldı/kompakt; /products Load More 16'şar; "Explore All Products"; why-us şeridi silindi; bundles "Up to {n}% off" dinamik; **fabric backfill yapıldı** (DB'de script ile + statik fallback'te `fabricBySlug`) → fabric filtresi artık cotton/muslin/bamboo/terry/other
+- **PDP:** share = belirgin buton + mobilde `navigator.share`; FOMO stok metinleri (pdp.thatsAll/onlyLeft); drawer Total text-2xl
+- **Yorumlar:** min 10 karakter canlı sayaç; eligibility yüklenirken skeleton + hata→Retry (sahte "önce satın al" bitti); admin-hidden yorumda form yerine bilgi kutusu (API `eligibility.myReviewStatus` döner — 409 sürprizi bitti)
+- **Wishlist:** düşük stok rozetleri + `WishlistContext.hasUrgency/lowStock/lowStockCount` → navbar kalp noktası (fiyat düşüşü VEYA düşük stok, pulse); "Add all to cart"
+- **Dürüst içerik:** About ekip+stats kaldırıldı, hikâyedeki uydurma "kurucu Nino 2021" genelleştirildi; **GOTS/OEKO iddiaları yumuşatıldı** (footer rozetleri, announce, pdp.trustOrganic, sg.certNote, about values, contact.a3, faq.prod.a1, bundles, blog ürün iddiası — 4 dilde). PDP Certification kutusu sadece admin'de ürün-başına doluysa görünür. 📋 Gerçek ekip bilgisi + kuruluş yılı + gerçek belgeler gelince geri eklenecek
+- **Contact GERÇEK:** `/api/contact` (origin+honeypot+in-memory rate limit 3/dk) → Resend ile owner'a, reply_to=müşteri. `CONTACT_INBOX` env ile değiştirilebilir. Canlı test edildi
+- **WhatsApp tek kaynak:** `settings.whatsappNumber` (admin Settings kartı, sadece rakam) — WhatsAppButton/contact/FAQ/footer (`FooterPhone` client bileşeni) hepsi buradan; BOŞKEN HİÇBİRİ GÖRÜNMEZ (placeholder +995 000... tamamen silindi). Kullanıcı business numara alınca admin'den girecek
+- **İade↔puan:** refund'da ledger düzeltmesi (kazanılan geri alınır + harcanan iade edilir, refund/total oranında, `reason:"return"`, sipariş başına idempotent). Points History'de "↩️ Return adjustment". "return" satırları lifetime'a SAYILMAZ (client+server) → tier düşmez
+- **Tier ayarları:** `loyalty_silver/gold_threshold` + `loyalty_silver/gold_multiplier` settings'te; `tiersFor/tiersFromSettings/tierForAt` (loyalty.ts); RewardsClient + LoyaltyContext + /api/orders ayarı kullanır; perk metni çarpandan üretilir, `label.perk.bonusN` deseniyle çevrilir; admin Settings "Membership tiers" kartı
+- **Timeline gerçek:** OrderDetail + track-order — created_at/status/delivered_at'ten; uydurma tarihler + "Payment Confirmed" silindi
+- **Bildirim tercihi etkisi:** NewsletterPopup NİHAYET mount edildi (layout, StoreChromeGate içinde) + i18n'lendi (`news.*` ×4) + girişli kullanıcıda `promo=false` ise gösterilmiyor
+- **Hesap silme koruması:** aktif sipariş (pending/processing/shipped) veya aktif iade varken 409 + lokalize mesaj
+- **Adres defteri:** `supabase/addresses.sql` (RLS own-row, tek default partial unique) + `src/lib/db/addresses.ts` + AddressesClient DB CRUD (mock silindi) + **checkout'ta kayıtlı adres kartları** (default otomatik seçili, "farklı adres" + "defterime kaydet" checkbox). ⚠️ **addresses.sql HENÜZ ÇALIŞTIRILMADI — kullanıcı panelde çalıştıracak** (çalıştırılana dek zarif düşer, sayfada uyarı çıkar)
+- **2FA CANLI:** Supabase TOTP — Security'de enroll (QR+secret→6 haneli kod), girişte AAL2 kod adımı (LoginClient), kapatma kod ister. AuthContext: `listTotpFactors/enrollTotp/verifyTotp/unenrollTotp/mfaRequired`. 💡 Supabase panelde Auth→MFA/TOTP açık olmalı (varsayılan açık)
+- **Dil URL kararı:** /en /tr path-routing ERTELENDİ (çerez kalıyor) — ~40 sayfalık göç, ayrı oturumda değerlendirilecek (SEO için launch öncesi mantıklı)
+- **Doğrulama:** `tsc` + `next build` temiz · 15 sayfa 200 · API guard'lar (contact origin 403, admin 404, delete 401) · 12 sayfa × 4 dil ham-anahtar sızıntısı SIFIR · contact maili canlı gitti
+- **KALAN (bu turdan):** kullanıcı `supabase/addresses.sql` çalıştıracak · business WhatsApp numarası admin'den girilecek · gerçek ekip/kuruluş bilgisi eklenecek · yeni ka metinleri abla incelemesine dahil edilmeli (rev/news/sec.mfa/checkout.saved anahtarları)
 
 ---
 
@@ -264,9 +283,10 @@ Site genelinde ~35 dosya + tüm sayfalar (ana sayfa/navbar/footer/PDP'den başla
 ## 🔧 YAPILMASI GEREKENLER
 
 ### 🔴 Kritik (İçerik / Gerçek Bilgi — Faz 2'de Tamamlanacak)
-- [ ] **WhatsApp numarası** — her yerde `+995 000 000 000` placeholder
+- [ ] **WhatsApp numarası** — altyapı HAZIR (admin → Settings → WhatsApp number); business numara alınınca girilecek, o zamana dek WhatsApp öğeleri gizli
 - [ ] **Gerçek ürün görselleri** — şu an emoji; gerçek fotoğraf (CDN/Supabase Storage)
 - [ ] **E-posta adresi** — `hello@loov.ge` placeholder
+- [ ] **Gerçek ekip bilgisi + kuruluş yılı** — About'tan sahte ekip/stats kaldırıldı; gerçekleri gelince geri eklenecek
 
 ### 🟡 Önemli (UI / İşlevsellik)
 - [ ] **Checkout ↔ Sepet seçimi entegrasyonu** — seçili ürünler checkout'a geçmeli

@@ -1001,7 +1001,7 @@ export const tr: Dictionary = {
   "about.storyEyebrow": "Hikayemiz",
   "about.storyTitleA": "Bir Ebeveynin Sevgisi,",
   "about.storyTitleB": "Bir Markanın Misyonu",
-  "about.storyP1": "Her yeni ebeveynin sorduğu bir soruyla başladı: \"Bu gerçekten bebeğim için güvenli mi?\" Kurucumuz Nino 2021'de ilk çocuğuna kavuştuğunda, hem gerçekten organik hem de güzel tasarlanmış bebek kıyafeti bulamadı — bu yüzden kendisi yaratmaya karar verdi.",
+  "about.storyP1": "Her yeni ebeveynin sorduğu bir soruyla başladı: \"Bu gerçekten bebeğim için güvenli mi?\" Biz de ebeveyn olduğumuzda hem gerçekten organik hem de güzel tasarlanmış bebek kıyafeti bulamadık — bu yüzden kendimiz yaratmaya karar verdik.",
   "about.storyP2": "Tiflis'te küçük bir tutku projesi olarak başlayan bu girişim, kısa sürede Gürcistan'ın en sevilen bebek giyim markasına dönüştü. Bugün Loov, hastaneden eve dönüşten ilk yaş gününe kadar ülke genelinde yüzlerce minik bebeği giydiriyor.",
   "about.storyP3": "Her dikiş, her çıt çıt, her renk seçimi tek bir amaçla yapılıyor: bebeğinize hak ettiği konforu, size de ihtiyacınız olan gönül rahatlığını vermek.",
   "about.visualNewbornReady": "Yenidoğana Hazır",
