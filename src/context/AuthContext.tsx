@@ -49,6 +49,17 @@ interface AuthContextType {
    *  activeOrders/activeReturns counts while anything is still in flight. */
   deleteAccount: () => Promise<AuthResult & { activeOrders?: number; activeReturns?: number }>;
   signOut: () => void;
+  /* ── Two-factor authentication (TOTP authenticator app) ── */
+  /** The user's verified TOTP factors (empty = 2FA off). */
+  listTotpFactors: () => Promise<{ factors: { id: string }[]; error?: string }>;
+  /** Start enrolment: returns the QR (SVG data URI) + secret to scan/type. */
+  enrollTotp: () => Promise<{ factorId?: string; qr?: string; secret?: string; error?: string }>;
+  /** Confirm a 6-digit code (used to finish enrolment AND at sign-in). */
+  verifyTotp: (factorId: string, code: string) => Promise<AuthResult>;
+  /** Turn 2FA off — requires a current code (verifies, then unenrolls). */
+  unenrollTotp: (factorId: string, code: string) => Promise<AuthResult>;
+  /** After a password sign-in: does this session still need a TOTP code? */
+  mfaRequired: () => Promise<{ required: boolean; factorId?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -232,10 +243,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [supabase]);
 
+  /* ── Two-factor authentication (TOTP) ── */
+
+  const listTotpFactors = useCallback(async () => {
+    if (!supabase) return { factors: [], error: "Auth is not configured." };
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (error) return { factors: [], error: friendly(error.message) };
+    return { factors: (data?.totp ?? []).filter((f) => f.status === "verified").map((f) => ({ id: f.id })) };
+  }, [supabase]);
+
+  const enrollTotp = useCallback(async () => {
+    if (!supabase) return { error: "Auth is not configured." };
+    // Clear leftovers from abandoned enrolments — a dangling unverified factor
+    // makes the next enroll fail with a duplicate-name error.
+    const { data: existing } = await supabase.auth.mfa.listFactors();
+    for (const f of existing?.all ?? []) {
+      if (f.factor_type === "totp" && f.status === "unverified") {
+        await supabase.auth.mfa.unenroll({ factorId: f.id });
+      }
+    }
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: "Authenticator app" });
+    if (error) return { error: friendly(error.message) };
+    return { factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
+  }, [supabase]);
+
+  const verifyTotp = useCallback(async (factorId: string, code: string): Promise<AuthResult> => {
+    if (!supabase) return { error: "Auth is not configured." };
+    if (!/^\d{6}$/.test(code.trim())) return { error: "Enter the 6-digit code from your authenticator app." };
+    const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId });
+    if (chErr) return { error: friendly(chErr.message) };
+    const { error } = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.id, code: code.trim() });
+    return error ? { error: friendly(error.message) } : {};
+  }, [supabase]);
+
+  const unenrollTotp = useCallback(async (factorId: string, code: string): Promise<AuthResult> => {
+    if (!supabase) return { error: "Auth is not configured." };
+    // Removing a verified factor needs an aal2 session — verify a code first.
+    const verified = await verifyTotp(factorId, code);
+    if (verified.error) return verified;
+    const { error } = await supabase.auth.mfa.unenroll({ factorId });
+    return error ? { error: friendly(error.message) } : {};
+  }, [supabase, verifyTotp]);
+
+  const mfaRequired = useCallback(async () => {
+    if (!supabase) return { required: false };
+    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (!data || data.nextLevel !== "aal2" || data.nextLevel === data.currentLevel) {
+      return { required: false };
+    }
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const totp = (factors?.totp ?? []).find((f) => f.status === "verified");
+    return totp ? { required: true, factorId: totp.id } : { required: false };
+  }, [supabase]);
+
   return (
     <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail,
       signInWithGoogle, sendPhoneOtp, signInWithPhone, updateProfile,
-      sendPasswordReset, updatePassword, deleteAccount, signOut }}>
+      sendPasswordReset, updatePassword, deleteAccount, signOut,
+      listTotpFactors, enrollTotp, verifyTotp, unenrollTotp, mfaRequired }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,7 +9,8 @@ import { useLocale } from "@/context/LocaleContext";
 export default function SecurityClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { user, loading, updatePassword, deleteAccount } = useAuth();
+  const { user, loading, updatePassword, deleteAccount,
+    listTotpFactors, enrollTotp, verifyTotp, unenrollTotp } = useAuth();
 
   const [currentPw,  setCurrentPw]  = useState("");
   const [newPw,      setNewPw]      = useState("");
@@ -24,9 +25,29 @@ export default function SecurityClient() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  /* ── 2FA state ── */
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null); // verified factor = 2FA on
+  const [mfaLoaded, setMfaLoaded]     = useState(false);
+  const [enrolling, setEnrolling]     = useState<{ factorId: string; qr: string; secret: string } | null>(null);
+  const [mfaCode, setMfaCode]         = useState("");
+  const [mfaBusy, setMfaBusy]         = useState(false);
+  const [mfaError, setMfaError]       = useState("");
+  const [showDisable, setShowDisable] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    listTotpFactors().then(({ factors }) => {
+      if (cancelled) return;
+      setMfaFactorId(factors[0]?.id ?? null);
+      setMfaLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, listTotpFactors]);
 
   if (loading || !user) {
     return (
@@ -78,6 +99,38 @@ export default function SecurityClient() {
       return;
     }
     router.push("/");
+  }
+
+  async function handleStartEnroll() {
+    setMfaError(""); setMfaBusy(true); setMfaCode("");
+    const res = await enrollTotp();
+    setMfaBusy(false);
+    if (res.error || !res.factorId) { setMfaError(res.error || "Could not start 2FA setup."); return; }
+    setEnrolling({ factorId: res.factorId, qr: res.qr ?? "", secret: res.secret ?? "" });
+  }
+
+  async function handleConfirmEnroll(e: React.FormEvent) {
+    e.preventDefault();
+    if (!enrolling) return;
+    setMfaError(""); setMfaBusy(true);
+    const res = await verifyTotp(enrolling.factorId, mfaCode);
+    setMfaBusy(false);
+    if (res.error) { setMfaError(res.error); return; }
+    setMfaFactorId(enrolling.factorId);
+    setEnrolling(null);
+    setMfaCode("");
+  }
+
+  async function handleDisableMfa(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mfaFactorId) return;
+    setMfaError(""); setMfaBusy(true);
+    const res = await unenrollTotp(mfaFactorId, mfaCode);
+    setMfaBusy(false);
+    if (res.error) { setMfaError(res.error); return; }
+    setMfaFactorId(null);
+    setShowDisable(false);
+    setMfaCode("");
   }
 
   const { score, label: pwLabel, color: pwColor } = pwStrength(newPw);
@@ -232,17 +285,121 @@ export default function SecurityClient() {
           </div>
         )}
 
-        {/* Two-factor auth */}
+        {/* Two-factor auth (TOTP authenticator app) */}
         <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-extrabold text-[#2A2320] flex items-center gap-2">
               <span>🛡️</span> {t("sec.twoFactor")}
             </h2>
-            <span className="text-[10px] font-bold bg-[#F5F0EB] text-[#9A8E88] px-2.5 py-1 rounded-full">{t("sec.comingSoon")}</span>
+            {mfaLoaded && (
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                mfaFactorId ? "bg-[#EAF2F0] text-[#5E9E8C]" : "bg-[#F5F0EB] text-[#9A8E88]"
+              }`}>
+                {mfaFactorId ? t("sec.mfaOn") : t("sec.mfaOff")}
+              </span>
+            )}
           </div>
-          <p className="text-sm text-[#5E5450]">
-            {t("sec.twoFactorBody")}
-          </p>
+          <p className="text-sm text-[#5E5450] mb-4">{t("sec.twoFactorBody")}</p>
+
+          {!mfaLoaded ? null : enrolling ? (
+            /* Step 2: scan the QR + confirm a code */
+            <form onSubmit={handleConfirmEnroll} className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                {enrolling.qr && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={enrolling.qr} alt="2FA QR code" className="w-40 h-40 rounded-xl border border-[#DDD5CC] bg-white p-2" />
+                )}
+                <div className="flex-1 space-y-2 text-sm text-[#5E5450]">
+                  <p className="font-semibold text-[#2A2320]">{t("sec.mfaScanQr")}</p>
+                  <p className="text-xs">{t("sec.mfaManualKey")}</p>
+                  <code className="block bg-[#F5F0EB] border border-[#DDD5CC] rounded-lg px-3 py-2 text-[11px] font-mono break-all select-all">
+                    {enrolling.secret}
+                  </code>
+                </div>
+              </div>
+              <div className="flex items-end gap-3 flex-wrap">
+                <div>
+                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("sec.mfaEnterCode")}</label>
+                  <input
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    inputMode="numeric"
+                    placeholder="123456"
+                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={mfaBusy || mfaCode.length !== 6}
+                  className="h-11 px-6 rounded-xl font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: "#5E9E8C" }}
+                >
+                  {mfaBusy ? "…" : t("sec.mfaActivate")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEnrolling(null); setMfaCode(""); setMfaError(""); }}
+                  className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450]"
+                >
+                  {t("addr.cancel")}
+                </button>
+              </div>
+              {mfaError && <p className="text-red-500 text-xs font-semibold">{mfaError}</p>}
+            </form>
+          ) : mfaFactorId ? (
+            showDisable ? (
+              /* Disable: confirm with a current code */
+              <form onSubmit={handleDisableMfa} className="space-y-3">
+                <p className="text-sm font-semibold text-[#2A2320]">{t("sec.mfaDisableConfirm")}</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    inputMode="numeric"
+                    placeholder="123456"
+                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={mfaBusy || mfaCode.length !== 6}
+                    className="h-11 px-5 rounded-xl font-bold text-white text-sm bg-red-500 disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  >
+                    {mfaBusy ? "…" : t("sec.mfaDisable")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowDisable(false); setMfaCode(""); setMfaError(""); }}
+                    className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450]"
+                  >
+                    {t("addr.cancel")}
+                  </button>
+                </div>
+                {mfaError && <p className="text-red-500 text-xs font-semibold">{mfaError}</p>}
+              </form>
+            ) : (
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-sm font-semibold text-[#5E9E8C]">✓ {t("sec.mfaEnabledNote")}</p>
+                <button
+                  onClick={() => { setShowDisable(true); setMfaError(""); }}
+                  className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
+                >
+                  {t("sec.mfaDisable")}
+                </button>
+              </div>
+            )
+          ) : (
+            <div>
+              <button
+                onClick={handleStartEnroll}
+                disabled={mfaBusy}
+                className="font-bold px-5 py-2.5 rounded-xl text-white text-sm disabled:opacity-60 hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: "#5E9E8C" }}
+              >
+                {mfaBusy ? "…" : `${t("sec.mfaEnable")} →`}
+              </button>
+              {mfaError && <p className="text-red-500 text-xs font-semibold mt-2">{mfaError}</p>}
+            </div>
+          )}
         </div>
 
         {/* Danger zone */}

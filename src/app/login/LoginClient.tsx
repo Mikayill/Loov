@@ -29,7 +29,8 @@ const GoogleIcon = () => (
 export default function LoginClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { signInWithEmail, signInWithGoogle, sendPhoneOtp, signInWithPhone } = useAuth();
+  const { signInWithEmail, signInWithGoogle, sendPhoneOtp, signInWithPhone,
+    mfaRequired, verifyTotp, signOut } = useAuth();
 
   const [tab,        setTab]        = useState<Tab>("email");
   const [email,      setEmail]      = useState("");
@@ -41,6 +42,9 @@ export default function LoginClient() {
   const [loading,    setLoading]    = useState(false);
   const [socialLoad, setSocialLoad] = useState<"google" | null>(null);
   const [error,      setError]      = useState("");
+  /* 2FA challenge — set when the password was right but a TOTP code is needed. */
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode,     setMfaCode]     = useState("");
 
   /* Surface errors passed back from /auth/callback (?error=...) */
   useEffect(() => {
@@ -52,9 +56,32 @@ export default function LoginClient() {
     e.preventDefault();
     setError(""); setLoading(true);
     const res = await signInWithEmail(email, password);
+    if (res.error) { setLoading(false); setError(res.error); return; }
+    /* Password OK — but accounts with 2FA still owe a TOTP code (aal2). */
+    const mfa = await mfaRequired();
+    setLoading(false);
+    if (mfa.required && mfa.factorId) {
+      setMfaFactorId(mfa.factorId);
+      return;
+    }
+    router.push("/account");
+  }
+
+  async function handleMfaVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mfaFactorId) return;
+    setError(""); setLoading(true);
+    const res = await verifyTotp(mfaFactorId, mfaCode);
     setLoading(false);
     if (res.error) { setError(res.error); return; }
     router.push("/account");
+  }
+
+  function cancelMfa() {
+    signOut();
+    setMfaFactorId(null);
+    setMfaCode("");
+    setError("");
   }
 
   async function handleSendOtp(e: React.FormEvent) {
@@ -98,6 +125,40 @@ export default function LoginClient() {
 
         <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
 
+          {/* ── 2FA step: password accepted, waiting for the authenticator code ── */}
+          {mfaFactorId ? (
+            <form onSubmit={handleMfaVerify} className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🛡️</div>
+                <p className="font-extrabold text-[#2A2320]">{t("auth.mfaTitle")}</p>
+                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.mfaBody")}</p>
+              </div>
+              <input
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                placeholder="123456"
+                autoFocus
+                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+              />
+              {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
+              <button
+                type="submit" disabled={loading || mfaCode.length !== 6}
+                className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#5E9E8C" }}
+              >
+                {loading ? <><Spinner /> {t("auth.verifying")}</> : `${t("auth.verifyAndSignIn")} →`}
+              </button>
+              <button
+                type="button"
+                onClick={cancelMfa}
+                className="w-full text-center text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors"
+              >
+                {t("auth.mfaCancel")}
+              </button>
+            </form>
+          ) : (
+          <>
           {/* Social buttons */}
           <div>
             <button
@@ -212,6 +273,8 @@ export default function LoginClient() {
                 {loading ? <><Spinner /> {otpSent ? t("auth.verifying") : t("auth.sending")}</> : otpSent ? `${t("auth.verifyAndSignIn")} →` : `${t("auth.sendCode")} →`}
               </button>
             </form>
+          )}
+          </>
           )}
         </div>
 
