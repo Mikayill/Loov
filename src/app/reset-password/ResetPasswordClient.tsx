@@ -31,9 +31,9 @@ export default function ResetPasswordClient() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <span className="text-3xl">🌿</span>
-            <span className="text-2xl font-extrabold text-[#2A2320]">Loov</span>
+          <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
           <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.setNewPassword")}</h1>
         </div>

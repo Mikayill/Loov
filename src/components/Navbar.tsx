@@ -110,10 +110,10 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-3 gap-3">
 
-              {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-2xl">🌿</span>
-                <span className="text-xl font-extrabold text-[#2A2320] tracking-tight">Loov</span>
+              {/* Logo — the LOOV wordmark (warm-white variant, ink extracted) */}
+              <Link href="/" className="flex items-center flex-shrink-0" aria-label="Loov — home">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
               </Link>
 
               {/* Desktop nav links */}

@@ -34,6 +34,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     title: "Loov — Soft & Safe Baby Clothing",
     description: "Premium organic baby clothing. Delivering across Georgia.",
+    images: ["/logo-square.png"],
   },
   twitter: { card: "summary_large_image" },
   metadataBase: new URL("https://loov.ge"),
@@ -109,9 +110,9 @@ export default async function RootLayout({
 
               {/* Brand + social */}
               <div className="sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">🌿</span>
-                  <span className="font-extrabold text-[#2A2320] text-lg">Loov</span>
+                <div className="flex items-center mb-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
                 </div>
                 <p className="text-xs text-[#9A8E88] leading-relaxed mb-4">
                   {t("footer.tagline")}

@@ -95,12 +95,10 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
     <div className="min-h-screen flex flex-col sm:flex-row bg-[#F5F0EB]">
       {/* Sidebar (desktop) */}
       <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-white border-r border-[#DDD5CC] p-4 sticky top-0 h-screen">
-        <div className="flex items-center gap-2 px-2 mb-6">
-          <span className="text-2xl">🌿</span>
-          <div>
-            <p className="font-extrabold text-[#2A2320] leading-none">Loov</p>
-            <p className="text-[10px] font-bold text-[#5E9E8C] uppercase tracking-widest">Admin</p>
-          </div>
+        <div className="flex items-center gap-2.5 px-2 mb-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
+          <p className="text-[10px] font-bold text-[#5E9E8C] uppercase tracking-widest mt-0.5">Admin</p>
         </div>
         {nav}
         <div className="mt-auto pt-4 border-t border-[#F5F0EB]">
@@ -122,8 +120,9 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       {/* Top bar (mobile) */}
       <header className="sm:hidden flex items-center justify-between bg-white border-b border-[#DDD5CC] px-4 py-3 sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🌿</span>
-          <span className="font-extrabold text-[#2A2320]">Loov <span className="text-[#5E9E8C]">Admin</span></span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
+          <span className="font-extrabold text-[#5E9E8C] text-sm">Admin</span>
         </div>
         <button onClick={() => setMobileOpen((v) => !v)} className="text-2xl leading-none px-2" aria-label="Menu">
           {mobileOpen ? "✕" : "☰"}

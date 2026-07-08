@@ -115,9 +115,9 @@ export default function LoginClient() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <span className="text-3xl">🌿</span>
-            <span className="text-2xl font-extrabold text-[#2A2320]">Loov</span>
+          <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
           <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.welcomeBack")}</h1>
           <p className="text-[#9A8E88] text-sm mt-1">{t("auth.signInSubtitle")}</p>
