@@ -22,7 +22,7 @@ export const content: Record<string, ArticleContent> = {
       "Organik pamuk, uzun bir geçmişe sahip gerçek bir doğal liftir. Dayanıklıdır, makinede yıkanabilir, her yıkamada yumuşar ve GOTS sertifikalı olduğunda tüm üretim zinciri boyunca zararlı kimyasallardan arındırılmıştır. İyi nefes alır ve sıcaklık düzenlemesi için mükemmeldir.",
       "Bambu kumaş doğal bir bitki olarak başlar, ancak bambuyu yumuşak kumaşa dönüştürme süreci önemli kimyasal işlemler içerir. Sonuç inanılmaz derecede ipeksi ve yumuşaktır — genellikle pamuktan daha yumuşaktır — doğal nem emici özelliklerle birlikte. Ancak etikette 'bambu' yazması otomatik olarak organik pamuktan daha güvenli veya sürdürülebilir anlamına gelmez.",
       "Önerimiz: günlük body, tulum ve pijamalar için sertifikalı organik pamuk altın standarttır. Havlular, bornozlar ve yumuşaklık ile emiciliğin en önemli olduğu ürünler için bambu-pamuk karışımı her ikisinin de en iyisini sunar.",
-      "Loov'da, bambu kapüşonlu havlularımız maksimum yumuşaklık ve emicilik için özel seçilmiş %70/30 bambu-pamuk karışımı kullanırken, body ve tulumlarımız %100 GOTS sertifikalı organik pamuktur.",
+      "Loov'da, bambu kapüşonlu havlularımız maksimum yumuşaklık ve emicilik için özel seçilmiş %70/30 bambu-pamuk karışımı kullanırken, body ve tulumlarımız sertifikalı tedarikçilerden alınan %100 organik pamuktur.",
     ],
   },
   "building-baby-wardrobe": {

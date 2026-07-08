@@ -26,7 +26,7 @@ export const content: Record<string, ArticleContent> = {
       "Organic cotton is a true natural fibre with a long track record. It's durable, machine washable, gets softer with each wash, and when GOTS-certified, is free from harmful chemicals throughout the entire production chain. It breathes well and is excellent for temperature regulation.",
       "Bamboo fabric starts as a natural plant, but the process of turning bamboo into soft fabric involves significant chemical processing. The result is incredibly silky and soft — often softer than cotton — with natural moisture-wicking properties. However, 'bamboo' on a label doesn't automatically mean safer or more sustainable than organic cotton.",
       "Our recommendation: for everyday bodysuits, rompers, and sleepwear, certified organic cotton is the gold standard. For towels, bath robes, and items where softness and absorbency are paramount, a bamboo-cotton blend offers the best of both worlds.",
-      "At Loov, our bamboo hooded towels use a 70/30 bamboo-cotton blend specifically chosen for maximum softness and absorbency, while our bodysuits and rompers are 100% GOTS-certified organic cotton.",
+      "At Loov, our bamboo hooded towels use a 70/30 bamboo-cotton blend specifically chosen for maximum softness and absorbency, while our bodysuits and rompers are 100% organic cotton sourced from certified suppliers.",
     ],
   },
   "building-baby-wardrobe": {

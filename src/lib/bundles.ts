@@ -42,7 +42,7 @@ export const bundles: Bundle[] = [
     description:
       "A carefully curated starter set for your newborn's first weeks. Two ultra-soft organic bodysuits, a bamboo hooded towel for gentle bath times, and a cloud-print blanket for cozy naps — bundled together at a special price.",
     features: [
-      "OEKO-TEX certified organic materials",
+      "Soft, tested organic materials",
       "Perfect first-time parent gift",
       "Save 35₾ vs buying separately",
       "Beautiful gift-ready packaging",

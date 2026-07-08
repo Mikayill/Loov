@@ -7,12 +7,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("meta.about.title"), description: t("meta.about.description") };
 }
 
-const team = [
-  { name: "Nino Beridze",  emoji: "👩‍🎨", color: "#C8DDD8" },
-  { name: "Giorgi Kobaia", emoji: "👨‍💼", color: "#C4D4E4" },
-  { name: "Tamar Lomia",   emoji: "👩‍💻", color: "#D4CAE4" },
-];
-
 export default async function AboutPage() {
   const { t } = await getT();
 
@@ -22,15 +16,6 @@ export default async function AboutPage() {
     { emoji: "💝", title: t("about.value3Title"), desc: t("about.value3Desc"), bg: "#EDE8F2" },
     { emoji: "🌍", title: t("about.value4Title"), desc: t("about.value4Desc"), bg: "#F2EDE8" },
   ];
-
-  const stats = [
-    { value: "2021",  label: t("about.statYearFounded") },
-    { value: "500+",  label: t("about.statHappyFamilies") },
-    { value: "100%",  label: t("about.statOrganicMaterials") },
-    { value: "4.9★",  label: t("about.statCustomerRating") },
-  ];
-
-  const teamRoles = [t("about.teamRole1"), t("about.teamRole2"), t("about.teamRole3")];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-12">
@@ -88,23 +73,6 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* ── Stats ── */}
-      <section className="mb-8 sm:mb-16">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="bg-white rounded-2xl border border-[#DDD5CC] p-4 sm:p-6 text-center shadow-sm"
-            >
-              <p className="text-2xl sm:text-3xl font-extrabold mb-1" style={{ color: "#5E9E8C" }}>
-                {s.value}
-              </p>
-              <p className="text-xs text-[#9A8E88] font-semibold">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── Values ── */}
       <section className="mb-8 sm:mb-16">
         <div className="text-center mb-5 sm:mb-10">
@@ -123,31 +91,6 @@ export default async function AboutPage() {
                 <h3 className="font-bold text-[#2A2320] mb-1.5">{v.title}</h3>
                 <p className="text-sm text-[#5E5450] leading-relaxed">{v.desc}</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Team ── */}
-      <section className="mb-8 sm:mb-16">
-        <div className="text-center mb-5 sm:mb-10">
-          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.teamEyebrow")}</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2">{t("about.teamTitle")}</h2>
-        </div>
-        <div className="grid grid-cols-3 gap-3 sm:gap-6">
-          {team.map((member, i) => (
-            <div
-              key={member.name}
-              className="bg-white rounded-2xl border border-[#DDD5CC] p-4 sm:p-7 text-center shadow-sm"
-            >
-              <div
-                className="w-14 h-14 sm:w-20 sm:h-20 rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center text-2xl sm:text-4xl"
-                style={{ backgroundColor: member.color }}
-              >
-                {member.emoji}
-              </div>
-              <h3 className="font-extrabold text-[#2A2320] mb-1">{member.name}</h3>
-              <p className="text-sm text-[#9A8E88] font-medium">{teamRoles[i]}</p>
             </div>
           ))}
         </div>

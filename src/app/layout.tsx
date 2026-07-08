@@ -129,7 +129,7 @@ export default async function RootLayout({
                 </div>
                 {/* Certifications */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  {["🌿 GOTS", "✅ OEKO-TEX", "🔒 Secure"].map((cert) => (
+                  {["🌿 Organic cotton", "✅ Baby-safe", "🔒 Secure"].map((cert) => (
                     <span key={cert} className="text-[10px] font-bold bg-[#F5F0EB] text-[#5E5450] px-2 py-1 rounded-full">
                       {cert}
                     </span>

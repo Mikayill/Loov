@@ -77,7 +77,7 @@ const sizeGuideRows = [
 ];
 
 const DEFAULT_FEATURES = [
-  "OEKO-TEX certified — free of harmful substances",
+  "Tested, baby-safe fabrics — free of harmful substances",
   "Gentle on sensitive and newborn skin",
   "Machine washable at 30°C",
   "Keeps shape and softness after multiple washes",
@@ -570,9 +570,11 @@ export default function ProductDetailClient({
                 {[
                   { label: "Material",       value: product.material || "100% Organic Cotton" },
                   { label: "Weight",         value: product.weight || "180 GSM" },
-                  { label: "Certification",  value: product.certification || "GOTS & OEKO-TEX" },
+                  // Certification only shows when set per-product in admin —
+                  // no blanket claim we can't back with supplier documents.
+                  { label: "Certification",  value: product.certification || "" },
                   { label: "Origin",         value: product.origin || "Made in Georgia" },
-                ].map((item) => (
+                ].filter((item) => item.value).map((item) => (
                   <div key={item.label} className="bg-[#F5F0EB] rounded-2xl p-4 border border-[#DDD5CC]">
                     <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">{item.label}</p>
                     <p className="font-bold text-[#2A2320] text-sm">{item.value}</p>
