@@ -19,8 +19,12 @@ export interface AdminUser {
   name: string;
 }
 
+/** "mfa-required" = the admin HAS 2FA enrolled but this session hasn't
+ *  entered a code yet (aal1) — the panel shows a verify screen, APIs 404. */
+export type AdminGate = AdminUser | "mfa-required" | null;
+
 /** Returns the admin user, or null if the caller isn't a signed-in admin. */
-export async function requireAdmin(): Promise<AdminUser | null> {
+export async function requireAdmin(): Promise<AdminGate> {
   const supabase = await createSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
@@ -35,6 +39,19 @@ export async function requireAdmin(): Promise<AdminUser | null> {
     .eq("user_id", user.id)
     .maybeSingle();
   if (error || !data) return null;
+
+  // 2FA enforcement: once the admin account has a verified TOTP factor, the
+  // panel demands an aal2 session. This closes the OAuth side door — a Google
+  // sign-in lands at aal1 without ever being asked for the code.
+  try {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      return "mfa-required";
+    }
+  } catch (e) {
+    console.warn("[admin] AAL check failed:", (e as Error).message);
+    return null; // can't verify the assurance level → deny by default
+  }
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   return {
