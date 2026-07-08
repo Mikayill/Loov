@@ -60,7 +60,7 @@ export const ru: Dictionary = {
   "cart.total": "Итого",
   "cart.free": "Бесплатно",
   "cart.orderSummary": "Итоги заказа",
-  "cart.promoPlaceholder": "Промокод (напр. LOOV10)",
+  "cart.promoPlaceholder": "Промокод",
   "cart.checkout": "Оформить",
 
   "checkout.title": "Оформление",
@@ -393,9 +393,13 @@ export const ru: Dictionary = {
   "cart.trustSecure": "Безопасно",
   "cart.trustReturns": "Возврат за 14 дней",
   "cart.trustOrganic": "Органика",
-  "cart.promo10": "Скидка 10% применена 🎉",
-  "cart.promo15": "Скидка 15% для новорождённых применена 🍼",
   "cart.promoFreeShip": "Бесплатная доставка применена 🚀",
+  "cart.promoPercentOff": "Скидка {n}% применена 🎉",
+  "cart.promoExpired": "Срок действия этого промокода истёк.",
+  "cart.promoLimitReached": "Этот промокод достиг лимита использования.",
+  "cart.promoAlreadyUsed": "Вы уже использовали этот промокод.",
+  "cart.promoMembersOnly": "Промокоды доступны только участникам.",
+  "cart.promoSignIn": "Войти",
   "cart.emptyCta": "За покупками",
 
   // ── Checkout page ──

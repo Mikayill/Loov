@@ -24,7 +24,8 @@ import {
 } from "@/lib/loyalty";
 import { getSettings } from "@/lib/db/settings";
 import { effectivePrice } from "@/lib/pricing";
-import { resolvePromo, promoDiscountAmount } from "@/lib/promo";
+import { promoDiscountAmount } from "@/lib/promo";
+import { validatePromoServer, recordPromoUse } from "@/lib/promoValidation";
 import { priceCartWithBundles, type BundleGroupLine, type BundleDef } from "@/lib/bundlePricing";
 
 /** Fire the confirmation email via Resend. Failures never block the order. */
@@ -130,8 +131,8 @@ export async function POST(req: NextRequest) {
       return bad("Invalid order item");
     }
   }
-  const resolvedPromo = body.promoCode ? resolvePromo(body.promoCode) : null;
-  if (body.promoCode && !resolvedPromo) return bad("Invalid promo code");
+  // Promo codes are validated further down (needs the signed-in user + the
+  // service client — codes live in the promo_codes table, members only).
 
   const supabase = await createSupabaseServerClient();
 
@@ -221,6 +222,25 @@ export async function POST(req: NextRequest) {
 
   const subtotal = priced.subtotal;
 
+  // ── Attach the user if they're logged in (guests stay null) ──
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData?.user?.id ?? null;
+  // `admin` bypasses RLS — needed for promo lookup, loyalty and stock below.
+  const admin = createSupabaseAdminClient();
+
+  // ── Promo code (DB-backed, members only, expiry + usage limits) ──
+  let resolvedPromo: { code: string; type: "percent" | "shipping"; value: number; rowId: string } | null = null;
+  if (body.promoCode) {
+    if (!admin) return bad("Promo codes are temporarily unavailable", 500);
+    const check = await validatePromoServer(admin, body.promoCode, userId);
+    if (check.error === "signin") return bad("Promo codes require an account — please sign in");
+    if (check.error === "expired") return bad("This promo code has expired");
+    if (check.error === "limit") return bad("This promo code has reached its usage limit");
+    if (check.error === "used") return bad("You've already used this promo code");
+    if (check.error || !check.promo) return bad("Invalid promo code");
+    resolvedPromo = check.promo;
+  }
+
   // ── Promo discount (percent off subtotal, or free shipping) ──
   const promoDiscount = promoDiscountAmount(resolvedPromo, subtotal);
   const promoShippingFree = resolvedPromo?.type === "shipping";
@@ -237,10 +257,6 @@ export async function POST(req: NextRequest) {
       : promoShippingFree || postPromoSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingPrice;
   const giftWrapCost = body.giftWrap ? 5 : 0;
 
-  // ── Attach the user if they're logged in (guests stay null) ──
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData?.user?.id ?? null;
-
   // ── Loov Rewards redemption (server-side rules, never trust the client) ──
   let redeemPoints = Number(body.redeemPoints) || 0;
   if (redeemPoints < 0 || !Number.isInteger(redeemPoints) || redeemPoints % REDEEM_BLOCK !== 0) {
@@ -254,8 +270,6 @@ export async function POST(req: NextRequest) {
   // Guests have no server-verifiable balance (their "points" are cosmetic,
   // localStorage-only), so redemption is refused for them — otherwise anyone
   // could send `redeemPoints` and get up to MAX_DISCOUNT_RATIO off for free.
-  // `admin` bypasses RLS; loyalty writes are blocked for everyone else.
-  const admin = createSupabaseAdminClient();
   let ledger: "db" | "local" = "local";
   let lifetimeEarned = 0;
   if (userId && admin) {
@@ -414,6 +428,9 @@ export async function POST(req: NextRequest) {
     if (stockReserved && admin) await admin.rpc("release_stock", { p_items: stockItems });
     return bad("Could not save order items — please try again", 500);
   }
+
+  // ── Count the promo redemption now that the order really exists ──
+  if (resolvedPromo && admin) await recordPromoUse(admin, resolvedPromo.rowId);
 
   // ── Loov Rewards: write the ledger for signed-in users (server-side) ──
   let pointsEarned = 0;

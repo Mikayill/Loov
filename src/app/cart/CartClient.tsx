@@ -12,7 +12,8 @@ import { effectivePrice, discountPercent } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
-import { PROMO_CODES, resolvePromo } from "@/lib/promo";
+import type { PromoDef, PromoError } from "@/lib/promo";
+import { validatePromo } from "@/lib/db/promo";
 import { priceCartWithBundles, type BundleGroupLine } from "@/lib/bundlePricing";
 import type { Bundle } from "@/lib/bundles";
 
@@ -265,7 +266,9 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
   const [promoCode,    setPromoCode]    = useState("");
   const [promoMsg,     setPromoMsg]     = useState("");
   const [promoSuccess, setPromoSuccess] = useState(false);
-  const [appliedPromo, setAppliedPromo] = useState<(typeof PROMO_CODES)[string] | null>(null);
+  const [promoBusy,    setPromoBusy]    = useState(false);
+  const [promoSignin,  setPromoSignin]  = useState(false); // show a sign-in link with the error
+  const [appliedPromo, setAppliedPromo] = useState<PromoDef | null>(null);
   const [appliedPromoCode, setAppliedPromoCode] = useState("");
 
   /* Derived totals — only from selected items, bundle-aware (same rule the
@@ -339,20 +342,40 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
     }
   }
 
-  function handlePromo() {
+  /* Which message a refused code shows (server decides the reason). */
+  const promoErrorKey: Record<Exclude<PromoError, "signin">, TranslationKey> = {
+    invalid: "cart.promoInvalid",
+    expired: "cart.promoExpired",
+    limit: "cart.promoLimitReached",
+    used: "cart.promoAlreadyUsed",
+    network: "cart.promoInvalid",
+  };
+
+  async function handlePromo() {
     const code = promoCode.trim().toUpperCase();
-    if (!code) return;
-    const promo = resolvePromo(code);
-    if (promo) {
-      setAppliedPromo(promo);
-      setAppliedPromoCode(code);
+    if (!code || promoBusy) return;
+    setPromoBusy(true);
+    setPromoSignin(false);
+    const res = await validatePromo(code);
+    setPromoBusy(false);
+    if (res.promo) {
+      setAppliedPromo(res.promo);
+      setAppliedPromoCode(res.promo.code);
       setPromoSuccess(true);
-      setPromoMsg(t(promo.labelKey));
+      setPromoMsg(
+        res.promo.type === "shipping"
+          ? t("cart.promoFreeShip")
+          : t("cart.promoPercentOff").replace("{n}", String(res.promo.value))
+      );
       setPromoCode("");
+    } else if (res.error === "signin") {
+      setPromoSuccess(false);
+      setPromoSignin(true);
+      setPromoMsg(t("cart.promoMembersOnly"));
     } else {
       setPromoSuccess(false);
-      setPromoMsg(t("cart.promoInvalid"));
-      setTimeout(() => setPromoMsg(""), 3000);
+      setPromoMsg(t(promoErrorKey[res.error ?? "invalid"]));
+      setTimeout(() => { setPromoMsg(""); }, 4000);
     }
   }
 
@@ -362,6 +385,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
     setPromoSuccess(false);
     setPromoMsg("");
     setPromoCode("");
+    setPromoSignin(false);
   }
 
   if (items.length === 0) return <EmptyCart t={t} />;
@@ -564,13 +588,24 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                     />
                     <button
                       onClick={handlePromo}
-                      className="px-4 py-2.5 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors"
+                      disabled={promoBusy}
+                      className="px-4 py-2.5 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors disabled:opacity-50"
                     >
-                      {t("common.apply")}
+                      {promoBusy ? "…" : t("common.apply")}
                     </button>
                   </div>
                   {promoMsg && !promoSuccess && (
-                    <p className="text-xs text-red-400 font-semibold mt-1.5">{promoMsg}</p>
+                    <p className="text-xs text-red-400 font-semibold mt-1.5">
+                      {promoMsg}
+                      {promoSignin && (
+                        <>
+                          {" "}
+                          <Link href="/login" className="text-[#5E9E8C] underline font-bold">
+                            {t("cart.promoSignIn")}
+                          </Link>
+                        </>
+                      )}
+                    </p>
                   )}
                 </div>
               )}

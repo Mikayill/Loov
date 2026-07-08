@@ -62,7 +62,7 @@ export const ka: Dictionary = {
   "cart.total": "სულ",
   "cart.free": "უფასო",
   "cart.orderSummary": "შეკვეთის შეჯამება",
-  "cart.promoPlaceholder": "პრომო კოდი (მაგ. LOOV10)",
+  "cart.promoPlaceholder": "პრომო კოდი",
   "cart.checkout": "გადახდა",
 
   "checkout.title": "გადახდა",
@@ -395,9 +395,13 @@ export const ka: Dictionary = {
   "cart.trustSecure": "უსაფრთხო",
   "cart.trustReturns": "14-დღიანი დაბრუნება",
   "cart.trustOrganic": "ორგანული",
-  "cart.promo10": "10% ფასდაკლება გააქტიურდა 🎉",
-  "cart.promo15": "15% ფასდაკლება ახალშობილებზე 🍼",
   "cart.promoFreeShip": "უფასო მიწოდება გააქტიურდა 🚀",
+  "cart.promoPercentOff": "{n}% ფასდაკლება გააქტიურდა 🎉",
+  "cart.promoExpired": "ამ პრომო კოდს ვადა გაუვიდა.",
+  "cart.promoLimitReached": "ამ პრომო კოდმა გამოყენების ლიმიტს მიაღწია.",
+  "cart.promoAlreadyUsed": "ეს პრომო კოდი უკვე გამოიყენე.",
+  "cart.promoMembersOnly": "პრომო კოდები მხოლოდ წევრებისთვისაა.",
+  "cart.promoSignIn": "შესვლა",
   "cart.emptyCta": "დაიწყე შოპინგი",
 
   // ── Checkout page (DRAFT — needs native review) ──

@@ -60,7 +60,7 @@ export const tr: Dictionary = {
   "cart.total": "Toplam",
   "cart.free": "Ücretsiz",
   "cart.orderSummary": "Sipariş Özeti",
-  "cart.promoPlaceholder": "Promosyon kodu (örn. LOOV10)",
+  "cart.promoPlaceholder": "Promosyon kodu",
   "cart.checkout": "Ödemeye Geç",
 
   "checkout.title": "Ödeme",
@@ -393,9 +393,13 @@ export const tr: Dictionary = {
   "cart.trustSecure": "Güvenli",
   "cart.trustReturns": "14 Gün İade",
   "cart.trustOrganic": "Organik",
-  "cart.promo10": "%10 indirim uygulandı 🎉",
-  "cart.promo15": "Yenidoğan %15 indirimi uygulandı 🍼",
   "cart.promoFreeShip": "Ücretsiz kargo uygulandı 🚀",
+  "cart.promoPercentOff": "%{n} indirim uygulandı 🎉",
+  "cart.promoExpired": "Bu promosyon kodunun süresi dolmuş.",
+  "cart.promoLimitReached": "Bu promosyon kodu kullanım limitine ulaşmış.",
+  "cart.promoAlreadyUsed": "Bu promosyon kodunu zaten kullandın.",
+  "cart.promoMembersOnly": "Promosyon kodları üyelere özeldir.",
+  "cart.promoSignIn": "Giriş yap",
   "cart.emptyCta": "Alışverişe Başla",
 
   // ── Checkout page ──

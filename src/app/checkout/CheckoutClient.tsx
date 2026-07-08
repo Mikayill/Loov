@@ -17,7 +17,8 @@ import { listAddresses, addAddress, type SavedAddress } from "@/lib/db/addresses
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import { buildOrderMessage } from "@/lib/i18n/orderMessages";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
-import { resolvePromo, promoDiscountAmount, type PromoDef } from "@/lib/promo";
+import { promoDiscountAmount, type PromoDef } from "@/lib/promo";
+import { validatePromo } from "@/lib/db/promo";
 import { priceCartWithBundles, type BundleGroupLine } from "@/lib/bundlePricing";
 import type { Bundle } from "@/lib/bundles";
 import {
@@ -170,9 +171,12 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     } catch {/* ignore parse errors */}
     try {
       const code = localStorage.getItem("loov_checkout_promo");
-      if (code) {
-        const promo = resolvePromo(code);
-        if (promo) { setAppliedPromo(promo); setAppliedPromoCode(code.trim().toUpperCase()); }
+      if (code && code.trim()) {
+        // Re-validate against the server (codes live in the DB and can expire
+        // or hit their limit between cart and checkout). Invalid → silently drop.
+        validatePromo(code).then((res) => {
+          if (res.promo) { setAppliedPromo(res.promo); setAppliedPromoCode(res.promo.code); }
+        });
       }
       localStorage.removeItem("loov_checkout_promo");
     } catch {/* ignore */}

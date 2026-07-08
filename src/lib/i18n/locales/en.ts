@@ -66,7 +66,7 @@ export const en = {
   "cart.total": "Total",
   "cart.free": "Free",
   "cart.orderSummary": "Order Summary",
-  "cart.promoPlaceholder": "Promo code (e.g. LOOV10)",
+  "cart.promoPlaceholder": "Promo code",
   "cart.checkout": "Checkout",
 
   // ── Checkout ──
@@ -422,9 +422,13 @@ export const en = {
   "cart.trustSecure": "Secure",
   "cart.trustReturns": "14-day Returns",
   "cart.trustOrganic": "Organic",
-  "cart.promo10": "10% discount applied 🎉",
-  "cart.promo15": "15% newborn discount applied 🍼",
   "cart.promoFreeShip": "Free shipping applied 🚀",
+  "cart.promoPercentOff": "{n}% discount applied 🎉",
+  "cart.promoExpired": "This promo code has expired.",
+  "cart.promoLimitReached": "This promo code has reached its usage limit.",
+  "cart.promoAlreadyUsed": "You've already used this promo code.",
+  "cart.promoMembersOnly": "Promo codes are for members only.",
+  "cart.promoSignIn": "Sign in",
   "cart.emptyCta": "Start Shopping",
 
   // ── Checkout page ──
