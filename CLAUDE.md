@@ -51,6 +51,13 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Doğrulama:** tsc + build temiz · guard'lar canlı test (no-origin 403, misafir 401 signin, admin API yetkisiz 404) · tablo yokken zarif düşüş (kod invalid, popup gizli, admin uyarı banner'ı) · sızıntı taraması temiz
 - ⚠️ NOT: Bu oturumda dev sunucuda Turbopack `.next` cache bozulması yaşandı (0xc0000142 panic, tüm sayfalar 500) — `rm -rf .next` + yeniden başlatma çözdü. Kod hatası değildi
 
+### 🖼️ SIRADAKİ BÜYÜK İŞ: EMOJİLERDEN KURTULMA (plan hazır, görseller bekleniyor)
+- **Plan dosyası: kök dizinde `GORSEL-PLANI.md`** — tema kuralları (sıcak krem + pastel, palet kodları), kullanıcının hazırlayacağı ~24-26 dosyanın TAM listesi (birebir dosya adları + boyutlar), klasör konvansiyonu: kök `gorseller/{kategori,hero,bos-durum,blog,about,sosyal}/`
+- Kullanıcı görselleri o klasöre koyup **"gorseller klasörünü işle"** diyecek → yapılacaklar GORSEL-PLANI.md'nin "CLAUDE'UN YAPACAKLARI" bölümünde (optimize→public/img, kategori/hero/boş-durum/blog/about/OG bağlama, kalan ~150 müşteri-yüzü emojiyi **Lucide** (ISC) inline SVG ikonlarla değiştirme, favicon üretimi). Kısmi teslim OK — klasörde ne varsa işlenir
+- Ürün + bundle fotoğrafları BU KAPSAMDA DEĞİL (admin'den yüklenince emoji kendiliğinden gidiyor)
+- Varsayılan dil artık **ka (Gürcüce)** — ilk ziyaret Gürcüce, çerez seçimi baskın (DEFAULT_LOCALE, config.ts)
+- Font telif: Nunito OFL ✅, logo raster olduğu için sorunsuz ✅; logodaki serif fontu metin fontu yapmak istenirse lisansına bakılmalı (veya Playfair/Lora gibi OFL alternatif)
+
 ### 🛡️🖼️ ADMIN 2FA + LOGO (8 Tem 2026, gece) — TAMAMLANDI
 - ✅ `promos.sql` + `addresses.sql` KULLANICI TARAFINDAN ÇALIŞTIRILDI (doğrulandı: promo_codes'ta LOOV10 seed'li + `/api/promo?code=LOOV10` → available:true; addresses tablosu canlı). Popup ve adres defteri artık tam çalışır durumda
 - **Admin 2FA zorunluluğu:** `requireAdmin()` artık AAL kontrol eder — admin hesabında doğrulanmış TOTP varsa ve oturum aal1 ise (örn. Google OAuth girişi kod sormaz) `"mfa-required"` döner → panel yerine `AdminMfaGate` (6 haneli kod ekranı, doğrulayınca panele girer), TÜM admin API'leri kod girilene dek 404. AAL kontrolü başarısızsa varsayılan RET
