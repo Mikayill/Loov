@@ -51,6 +51,11 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Doğrulama:** tsc + build temiz · guard'lar canlı test (no-origin 403, misafir 401 signin, admin API yetkisiz 404) · tablo yokken zarif düşüş (kod invalid, popup gizli, admin uyarı banner'ı) · sızıntı taraması temiz
 - ⚠️ NOT: Bu oturumda dev sunucuda Turbopack `.next` cache bozulması yaşandı (0xc0000142 panic, tüm sayfalar 500) — `rm -rf .next` + yeniden başlatma çözdü. Kod hatası değildi
 
+### 🛡️🖼️ ADMIN 2FA + LOGO (8 Tem 2026, gece) — TAMAMLANDI
+- ✅ `promos.sql` + `addresses.sql` KULLANICI TARAFINDAN ÇALIŞTIRILDI (doğrulandı: promo_codes'ta LOOV10 seed'li + `/api/promo?code=LOOV10` → available:true; addresses tablosu canlı). Popup ve adres defteri artık tam çalışır durumda
+- **Admin 2FA zorunluluğu:** `requireAdmin()` artık AAL kontrol eder — admin hesabında doğrulanmış TOTP varsa ve oturum aal1 ise (örn. Google OAuth girişi kod sormaz) `"mfa-required"` döner → panel yerine `AdminMfaGate` (6 haneli kod ekranı, doğrulayınca panele girer), TÜM admin API'leri kod girilene dek 404. AAL kontrolü başarısızsa varsayılan RET
+- **Logo:** kullanıcının `logolardan birini sec` klasöründen **sıcak-beyaz** varyantı seçildi (site kremiyle uyum). Zemin "ink extraction" ile şeffaflaştırıldı → `public/logo.png` (antrasit #26221E wordmark, 640×134); kare orijinal `public/logo-square.png` + OG image. Kullanım: Navbar, footer, 4 auth sayfası, admin sidebar/mobil bar (🌿+yazı lockup'larının yerine). Seçim klasörü gitignore'landı
+
 ---
 
 ## ✅ TAMAMLANAN ÖZELLİKLER
