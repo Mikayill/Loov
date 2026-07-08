@@ -13,30 +13,33 @@ import { orderStatusLabel, colorLabel, sizeLabel } from "@/lib/i18n/labels";
 
 type TrackStep = { label: string; date: string; done: boolean; active: boolean };
 
+/**
+ * Timeline from REAL signals only: created_at, current status and (when
+ * present) delivered_at. Intermediate steps carry no date — inventing
+ * estimates here misled customers.
+ */
 function getTimeline(order: MockOrder, locale: Locale, t: (key: TranslationKey) => string): TrackStep[] {
-  const base = new Date(order.date);
-  const d = (days: number) => {
-    const dt = new Date(base);
-    dt.setDate(dt.getDate() + days);
-    return fmtDate(dt, locale, "short");
-  };
-
-  const steps = [
-    { label: t("track.stepPlaced"),            date: d(0),  done: true,  active: false },
-    { label: t("track.stepPaymentConfirmed"),  date: d(0), done: true,  active: false },
-    { label: t("track.stepProcessing"),        date: d(1),  done: order.status !== "Processing", active: order.status === "Processing" },
-    { label: t("track.stepShipped"),           date: d(2),  done: order.status === "Delivered", active: order.status === "Shipped" },
-    { label: t("track.stepDelivered"),         date: d(order.shipping === "express" ? 3 : 5), done: order.status === "Delivered", active: false },
-  ];
+  const placed = fmtDate(new Date(order.date), locale, "short");
 
   if (order.status === "Cancelled") {
     return [
-      { label: t("track.stepPlaced"),    date: d(0), done: true, active: false },
-      { label: t("track.stepCancelled"), date: d(1), done: true, active: true  },
+      { label: t("track.stepPlaced"),    date: placed, done: true, active: false },
+      { label: t("track.stepCancelled"), date: "", done: true, active: true  },
     ];
   }
 
-  return steps;
+  const rank = order.status === "Delivered" ? 3 : order.status === "Shipped" ? 2 : 1;
+  return [
+    { label: t("track.stepPlaced"),     date: placed, done: true, active: false },
+    { label: t("track.stepProcessing"), date: "", done: rank >= 1, active: order.status === "Processing" },
+    { label: t("track.stepShipped"),    date: "", done: rank >= 2, active: order.status === "Shipped" },
+    {
+      label: t("track.stepDelivered"),
+      date: order.deliveredAt ? fmtDate(new Date(order.deliveredAt), locale, "short") : "",
+      done: rank >= 3,
+      active: false,
+    },
+  ];
 }
 
 export default function TrackOrderClient() {
@@ -208,7 +211,7 @@ export default function TrackOrderClient() {
                           <p className={`text-sm font-bold leading-snug ${step.done || step.active ? "text-[#2A2320]" : "text-[#9A8E88]"}`}>
                             {step.label}
                           </p>
-                          <p className="text-[11px] text-[#9A8E88] mt-0.5">{step.date}</p>
+                          {step.date && <p className="text-[11px] text-[#9A8E88] mt-0.5">{step.date}</p>}
                         </div>
                       </div>
                     );
