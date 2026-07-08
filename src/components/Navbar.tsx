@@ -30,7 +30,7 @@ const navLinks: { href: string; key: TranslationKey }[] = [
 export default function Navbar() {
   const { t } = useLocale();
   const { totalItems }   = useCart();
-  const { count: wCount, hasPriceDrop } = useWishlist();
+  const { count: wCount, hasUrgency } = useWishlist();
   const pathname         = usePathname();
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [searchOpen,  setSearchOpen]  = useState(false);
@@ -169,9 +169,9 @@ export default function Navbar() {
                   <svg className="w-[18px] h-[18px]" fill={wCount > 0 ? "#E8789A" : "none"} viewBox="0 0 24 24" stroke={wCount > 0 ? "#E8789A" : "currentColor"} strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
-                  {/* Price-drop notification — a dot, no number */}
-                  {hasPriceDrop && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white" aria-label="A wishlist item dropped in price" />
+                  {/* Attention dot — price drop or a saved item running low on stock */}
+                  {hasUrgency && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse" aria-label="A wishlist item needs attention" />
                   )}
                 </Link>
 

@@ -500,6 +500,8 @@ export const en = {
   "wl.copied": "Copied!",
   "wl.share": "Share",
   "wl.priceDrop": "Price drop",
+  "wl.lowStockNote": "{n} of your saved items are almost sold out — don't wait!",
+  "wl.addAll": "Add all to cart",
 
   // ── Bundles list + detail ──
   "bundle.eyebrow": "Bundle Deals",

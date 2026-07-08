@@ -50,9 +50,11 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
 export default function WishlistClient() {
   const { t } = useLocale();
   const products = useProducts();
-  const { ids, toggle, priceDrop } = useWishlist();
+  const { ids, toggle, priceDrop, lowStock, lowStockCount } = useWishlist();
+  const { addItem } = useCart();
   const saved = products.filter((p) => ids.includes(p.id));
   const [copied, setCopied] = useState(false);
+  const [addedAll, setAddedAll] = useState(false);
 
   const handleShare = useCallback(() => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -61,6 +63,14 @@ export default function WishlistClient() {
       setTimeout(() => setCopied(false), 2200);
     });
   }, []);
+
+  const inStockSaved = saved.filter((p) => p.stock === undefined || p.stock > 0);
+  function handleAddAll() {
+    if (inStockSaved.length === 0) return;
+    for (const p of inStockSaved) addItem(p, p.colors[0], p.sizes[0]);
+    setAddedAll(true);
+    setTimeout(() => setAddedAll(false), 2500);
+  }
 
   if (saved.length === 0) {
     return (
@@ -94,8 +104,25 @@ export default function WishlistClient() {
           <p className="text-[#9A8E88] text-sm mt-1">
             {saved.length === 1 ? t("wl.saved1") : t("wl.saved").replace("{n}", String(saved.length))}
           </p>
+          {lowStockCount > 0 && (
+            <p className="text-xs font-bold text-orange-600 mt-1 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse inline-block" />
+              {t("wl.lowStockNote").replace("{n}", String(lowStockCount))}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-3">
+          {inStockSaved.length > 1 && (
+            <button
+              onClick={handleAddAll}
+              className={`text-sm font-bold px-4 py-1.5 rounded-full transition-all ${
+                addedAll ? "bg-green-500 text-white" : "text-white hover:opacity-90"
+              }`}
+              style={!addedAll ? { backgroundColor: "#5E9E8C" } : {}}
+            >
+              {addedAll ? `✓ ${t("quick.added")}` : t("wl.addAll")}
+            </button>
+          )}
           <button
             onClick={handleShare}
             className="flex items-center gap-1.5 text-sm font-bold text-[#9A8E88] hover:text-[#5E9E8C] border border-[#DDD5CC] hover:border-[#5E9E8C] px-3 py-1.5 rounded-full transition-all"
@@ -169,6 +196,14 @@ export default function WishlistClient() {
                   {product.name}
                 </h3>
               </Link>
+              {(() => {
+                const left = lowStock(product.id);
+                return left !== null ? (
+                  <p className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 rounded-full px-2 py-0.5 inline-block mb-1.5">
+                    🔥 {t("pdp.onlyLeft").replace("{n}", String(left))}
+                  </p>
+                ) : null;
+              })()}
               {(() => {
                 const oldPrice = priceDrop(product.id);
                 return (

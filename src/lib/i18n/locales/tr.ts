@@ -471,6 +471,8 @@ export const tr: Dictionary = {
   "wl.copied": "Kopyalandı!",
   "wl.share": "Paylaş",
   "wl.priceDrop": "Fiyat düştü",
+  "wl.lowStockNote": "Kaydettiğin {n} ürün tükenmek üzere — bekleme!",
+  "wl.addAll": "Hepsini sepete ekle",
 
   // ── Bundles list + detail ──
   "bundle.eyebrow": "Set Fırsatları",

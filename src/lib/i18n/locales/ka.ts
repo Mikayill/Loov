@@ -473,6 +473,8 @@ export const ka: Dictionary = {
   "wl.copied": "დაკოპირდა!",
   "wl.share": "გაზიარება",
   "wl.priceDrop": "ფასდაკლება",
+  "wl.lowStockNote": "შენახული {n} პროდუქტი თითქმის ამოიწურა — ნუ დაიცდი!",
+  "wl.addAll": "ყველას კალათაში დამატება",
 
   // ── Bundles list + detail (DRAFT — needs native review) ──
   "bundle.eyebrow": "ნაკრების შეთავაზებები",

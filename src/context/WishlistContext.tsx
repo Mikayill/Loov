@@ -19,6 +19,12 @@ interface WishlistContextType {
   priceDrop: (id: string) => number | null;
   /** True if ANY saved item is currently cheaper than when it was added. */
   hasPriceDrop: boolean;
+  /** Remaining stock if this saved item is running low (1–5 left), else null. */
+  lowStock: (id: string) => number | null;
+  /** How many saved items are running low right now. */
+  lowStockCount: number;
+  /** True when anything saved deserves attention (price drop OR low stock). */
+  hasUrgency: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | null>(null);
@@ -93,6 +99,18 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     return now !== undefined && now < i.priceWhenAdded;
   });
 
+  const lowStock = useCallback(
+    (id: string): number | null => {
+      if (!items.some((i) => i.id === id)) return null;
+      const stock = products.find((p) => p.id === id)?.stock;
+      return stock !== undefined && stock > 0 && stock <= 5 ? stock : null;
+    },
+    [items, products]
+  );
+
+  const lowStockCount = items.filter((i) => lowStock(i.id) !== null).length;
+  const hasUrgency = hasPriceDrop || lowStockCount > 0;
+
   return (
     <WishlistContext.Provider
       value={{
@@ -102,6 +120,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         count: items.length,
         priceDrop,
         hasPriceDrop,
+        lowStock,
+        lowStockCount,
+        hasUrgency,
       }}
     >
       {children}

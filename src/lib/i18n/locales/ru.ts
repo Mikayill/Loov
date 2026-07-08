@@ -471,6 +471,8 @@ export const ru: Dictionary = {
   "wl.copied": "Скопировано!",
   "wl.share": "Поделиться",
   "wl.priceDrop": "Цена снижена",
+  "wl.lowStockNote": "{n} из сохранённых товаров почти распроданы — не ждите!",
+  "wl.addAll": "Добавить всё в корзину",
 
   // ── Bundles list + detail ──
   "bundle.eyebrow": "Выгодные наборы",
