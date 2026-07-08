@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useLoyalty } from "@/context/LoyaltyContext";
 import {
-  TIERS,
+  tiersFromSettings,
   REDEEM_BLOCK,
   GEL_PER_BLOCK,
-  POINTS_PER_GEL,
   discountForPoints,
 } from "@/lib/loyalty";
+import { useSettings } from "@/lib/db/useSettings";
 import { formatPrice } from "@/lib/format";
 import { useLocale } from "@/context/LocaleContext";
 import { fmtDate } from "@/lib/i18n/format";
@@ -16,6 +16,7 @@ import { tierName, perkLabel } from "@/lib/i18n/labels";
 
 export default function RewardsClient() {
   const { locale, t } = useLocale();
+  const settings = useSettings();
   const {
     balance,
     lifetimeEarned,
@@ -122,7 +123,7 @@ export default function RewardsClient() {
           {
             icon: "🛍️",
             title: t("acct.rewards.shopEarnTitle"),
-            text: t("acct.rewards.shopEarnBody").replace("{n}", String(POINTS_PER_GEL)),
+            text: t("acct.rewards.shopEarnBody").replace("{n}", String(settings.pointsPerGel)),
           },
           {
             icon: "💸",
@@ -147,7 +148,7 @@ export default function RewardsClient() {
       <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6 mb-6">
         <h2 className="font-extrabold text-[#2A2320] mb-5">{t("acct.rewards.membershipTiers")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {TIERS.map((tr) => {
+          {tiersFromSettings(settings).map((tr) => {
             const active = tr.id === tier.id;
             return (
               <div
@@ -208,14 +209,16 @@ export default function RewardsClient() {
               <div key={tx.id} className="flex items-center gap-3 py-3">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${
-                    tx.delta > 0 ? "bg-[#EAF2F0]" : "bg-[#FFF4E8]"
+                    tx.reason === "return" ? "bg-[#FDEDE8]" : tx.delta > 0 ? "bg-[#EAF2F0]" : "bg-[#FFF4E8]"
                   }`}
                 >
-                  {tx.delta > 0 ? "⭐" : "💸"}
+                  {tx.reason === "return" ? "↩️" : tx.delta > 0 ? "⭐" : "💸"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-[#2A2320]">
-                    {tx.delta > 0 ? t("acct.rewards.pointsEarned") : t("acct.rewards.pointsRedeemed")}
+                    {tx.reason === "return"
+                      ? t("acct.rewards.returnAdjustment")
+                      : tx.delta > 0 ? t("acct.rewards.pointsEarned") : t("acct.rewards.pointsRedeemed")}
                     {tx.orderNumber && (
                       <span className="text-[#9A8E88] font-semibold"> · {tx.orderNumber}</span>
                     )}

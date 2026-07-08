@@ -138,5 +138,10 @@ const PERK_KEYS: Record<string, TranslationKey> = {
 
 export function perkLabel(perk: string, t: T): string {
   const key = PERK_KEYS[perk];
-  return key ? t(key) : perk;
+  if (key) return t(key);
+  // Bonus perks are generated from the admin-set multiplier ("+30% bonus
+  // points"), so translate the pattern rather than each exact string.
+  const bonus = /^\+(\d+)% bonus points$/.exec(perk);
+  if (bonus) return t("label.perk.bonusN").replace("{n}", bonus[1]);
+  return perk;
 }

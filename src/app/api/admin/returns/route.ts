@@ -45,6 +45,57 @@ async function sendReturnEmail(
   }
 }
 
+/**
+ * Refund → fix the customer's points, pro-rata by refunded amount:
+ *  - claw back the points EARNED on this order (negative "return" row)
+ *  - give back the points REDEEMED on this order (positive "return" row)
+ * Idempotent per order (skips if a "return" row already exists) and
+ * best-effort: a ledger hiccup never blocks the refund itself.
+ * "return" rows are excluded from lifetime-earned, so tiers don't move.
+ */
+async function adjustLoyaltyForRefund(
+  admin: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  ret: { order_id: string; user_id: string | null; refund_amount: number }
+) {
+  if (!ret.user_id) return; // guest order — no account ledger to fix
+  try {
+    const { data: txs, error } = await admin
+      .from("loyalty_transactions")
+      .select("delta, reason")
+      .eq("order_id", ret.order_id);
+    if (error || !txs || txs.length === 0) return;
+    if (txs.some((t) => t.reason === "return")) return; // already adjusted
+
+    const earned = txs
+      .filter((t) => t.reason === "order" && Number(t.delta) > 0)
+      .reduce((s, t) => s + Number(t.delta), 0);
+    const redeemed = -txs
+      .filter((t) => t.reason === "redeem" && Number(t.delta) < 0)
+      .reduce((s, t) => s + Number(t.delta), 0);
+    if (earned <= 0 && redeemed <= 0) return;
+
+    const { data: order } = await admin
+      .from("orders")
+      .select("total")
+      .eq("id", ret.order_id)
+      .maybeSingle();
+    const orderTotal = Number(order?.total ?? 0);
+    const ratio = orderTotal > 0 ? Math.min(1, Number(ret.refund_amount) / orderTotal) : 1;
+
+    const clawback = Math.min(earned, Math.round(earned * ratio));
+    const restore = Math.min(redeemed, Math.round(redeemed * ratio));
+    const rows = [
+      ...(clawback > 0 ? [{ user_id: ret.user_id, order_id: ret.order_id, delta: -clawback, reason: "return" }] : []),
+      ...(restore > 0 ? [{ user_id: ret.user_id, order_id: ret.order_id, delta: restore, reason: "return" }] : []),
+    ];
+    if (rows.length === 0) return;
+    const { error: insErr } = await admin.from("loyalty_transactions").insert(rows);
+    if (insErr) console.warn("[admin/returns] loyalty adjustment failed:", insErr.message);
+  } catch (e) {
+    console.warn("[admin/returns] loyalty adjustment failed:", (e as Error).message);
+  }
+}
+
 export async function GET(req: NextRequest) {
   const guard = await adminApiGuard();
   if (guard instanceof NextResponse) return guard;
@@ -117,7 +168,7 @@ export async function PATCH(req: NextRequest) {
 
   const { data: current, error: readErr } = await admin
     .from("returns")
-    .select("id, return_number, order_number, status, email, locale, refund_amount, orders(first_name)")
+    .select("id, return_number, order_id, order_number, user_id, status, email, locale, refund_amount, orders(first_name)")
     .eq("id", id)
     .maybeSingle();
   if (readErr) {
@@ -151,6 +202,15 @@ export async function PATCH(req: NextRequest) {
 
   const { error: updErr } = await admin.from("returns").update(patch).eq("id", id);
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+  // Money went back → points go back too (earned clawed back, redeemed restored).
+  if (status === "refunded") {
+    await adjustLoyaltyForRefund(admin, {
+      order_id: current.order_id as string,
+      user_id: (current.user_id as string | null) ?? null,
+      refund_amount: Number(current.refund_amount ?? 0),
+    });
+  }
 
   await writeAudit({
     actorEmail: guard.email,

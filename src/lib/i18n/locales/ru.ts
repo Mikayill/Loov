@@ -809,6 +809,7 @@ export const ru: Dictionary = {
   "label.perk.bonus25": "+25% бонусных баллов",
   "label.perk.earlyAccess": "Ранний доступ к новинкам",
   "label.perk.bonus50": "+50% бонусных баллов",
+  "label.perk.bonusN": "+{n}% бонусных баллов",
   "label.perk.freeExpress": "Бесплатная экспресс-доставка",
 
   // ── Rewards page ──
@@ -838,6 +839,7 @@ export const ru: Dictionary = {
   "acct.rewards.startShopping": "За покупками",
   "acct.rewards.pointsEarned": "Баллы начислены",
   "acct.rewards.pointsRedeemed": "Баллы использованы",
+  "acct.rewards.returnAdjustment": "Корректировка за возврат",
   "acct.rewards.pts": "баллов",
 
   // ── Addresses ──

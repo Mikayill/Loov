@@ -57,6 +57,50 @@ const FIELDS: Field[] = [
   },
 ];
 
+/** Membership tier knobs — rendered as their own card below the main fields. */
+const TIER_FIELDS: Field[] = [
+  {
+    key: "loyaltySilverThreshold",
+    label: "Silver from",
+    hint: "Lifetime points a customer must earn to reach Silver.",
+    icon: "🌿",
+    suffix: "points",
+    step: 100,
+    min: 0,
+    max: 1000000,
+  },
+  {
+    key: "loyaltySilverMultiplier",
+    label: "Silver earn rate",
+    hint: "Earning multiplier at Silver — 1.25 means +25% bonus points on every order.",
+    icon: "✨",
+    suffix: "× points",
+    step: 0.05,
+    min: 1,
+    max: 10,
+  },
+  {
+    key: "loyaltyGoldThreshold",
+    label: "Gold from",
+    hint: "Lifetime points a customer must earn to reach Gold.",
+    icon: "🌳",
+    suffix: "points",
+    step: 100,
+    min: 0,
+    max: 1000000,
+  },
+  {
+    key: "loyaltyGoldMultiplier",
+    label: "Gold earn rate",
+    hint: "Earning multiplier at Gold — 1.5 means +50% bonus points on every order.",
+    icon: "🏆",
+    suffix: "× points",
+    step: 0.05,
+    min: 1,
+    max: 10,
+  },
+];
+
 export default function SettingsClient() {
   const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -212,6 +256,48 @@ export default function SettingsClient() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Membership tiers (Loov Rewards) ── */}
+      <div className="mt-4 bg-white rounded-2xl border border-[#DDD5CC] p-5">
+        <label className="flex items-center gap-2 font-bold text-[#2A2320]">
+          <span className="text-lg">🏅</span>
+          Membership tiers
+        </label>
+        <p className="text-xs text-[#9A8E88] mt-1.5 leading-relaxed mb-4">
+          Bronze is the start (no threshold, normal earn rate). Set when customers reach Silver
+          and Gold and how much extra they earn there. The Rewards page and checkout preview
+          update automatically. Tiers never go down — they follow lifetime earned points.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {TIER_FIELDS.map((f) => (
+            <div key={f.key} className="flex items-center justify-between gap-3 bg-[#F5F0EB] rounded-xl px-4 py-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-[#2A2320]">
+                  <span>{f.icon}</span>{f.label}
+                </p>
+                <p className="text-[11px] text-[#9A8E88] mt-0.5 leading-snug">{f.hint}</p>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <input
+                  type="number"
+                  value={settings[f.key]}
+                  min={f.min}
+                  max={f.max}
+                  step={f.step}
+                  onChange={(e) => setSettings((s) => ({ ...s, [f.key]: Number(e.target.value) }))}
+                  className="w-24 h-10 px-2 rounded-xl border border-[#DDD5CC] font-extrabold text-[#2A2320] outline-none focus:border-[#5E9E8C] text-right bg-white"
+                />
+                <span className="text-[10px] font-semibold text-[#9A8E88] w-12">{f.suffix}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        {settings.loyaltyGoldThreshold < settings.loyaltySilverThreshold && (
+          <p className="mt-3 text-xs font-semibold text-red-500">
+            ⚠️ Gold threshold is below Silver — Gold will start at the Silver threshold instead.
+          </p>
+        )}
       </div>
 
       {/* ── WhatsApp business number ── */}

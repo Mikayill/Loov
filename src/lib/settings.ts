@@ -23,6 +23,14 @@ export interface StoreSettings {
   /** Business WhatsApp number, digits only (e.g. "995599123456").
    *  Empty = WhatsApp buttons/links are hidden across the site. */
   whatsappNumber: string;
+  /** Lifetime points needed to reach Silver. */
+  loyaltySilverThreshold: number;
+  /** Lifetime points needed to reach Gold. */
+  loyaltyGoldThreshold: number;
+  /** Earning multiplier at Silver (1.25 = +25% bonus points). */
+  loyaltySilverMultiplier: number;
+  /** Earning multiplier at Gold (1.5 = +50% bonus points). */
+  loyaltyGoldMultiplier: number;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -33,6 +41,10 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   expressEnabled: true,
   expressPrice: 25,
   whatsappNumber: "",
+  loyaltySilverThreshold: 1000,
+  loyaltyGoldThreshold: 3000,
+  loyaltySilverMultiplier: 1.25,
+  loyaltyGoldMultiplier: 1.5,
 };
 
 /** Map DB key → settings field. */
@@ -44,6 +56,10 @@ export const SETTING_KEYS: Record<string, keyof StoreSettings> = {
   express_enabled: "expressEnabled",
   express_price: "expressPrice",
   whatsapp_number: "whatsappNumber",
+  loyalty_silver_threshold: "loyaltySilverThreshold",
+  loyalty_gold_threshold: "loyaltyGoldThreshold",
+  loyalty_silver_multiplier: "loyaltySilverMultiplier",
+  loyalty_gold_multiplier: "loyaltyGoldMultiplier",
 };
 
 /** Reverse map: settings field → DB key. */
@@ -55,6 +71,10 @@ export const FIELD_TO_KEY: Record<keyof StoreSettings, string> = {
   expressEnabled: "express_enabled",
   expressPrice: "express_price",
   whatsappNumber: "whatsapp_number",
+  loyaltySilverThreshold: "loyalty_silver_threshold",
+  loyaltyGoldThreshold: "loyalty_gold_threshold",
+  loyaltySilverMultiplier: "loyalty_silver_multiplier",
+  loyaltyGoldMultiplier: "loyalty_gold_multiplier",
 };
 
 /** Build a StoreSettings from raw {key: value} DB rows, filling gaps with defaults. */

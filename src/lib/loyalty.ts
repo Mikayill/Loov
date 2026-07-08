@@ -56,16 +56,77 @@ export const TIERS: LoyaltyTier[] = [
   },
 ];
 
-/** The tier for a given lifetime-earned points total. */
-export function tierFor(lifetimeEarned: number): LoyaltyTier {
-  let tier = TIERS[0];
-  for (const t of TIERS) if (lifetimeEarned >= t.threshold) tier = t;
+/** Admin-tunable tier knobs (thresholds + multipliers) — from store settings. */
+export interface TierConfig {
+  silverThreshold: number;
+  goldThreshold: number;
+  silverMultiplier: number;
+  goldMultiplier: number;
+}
+
+/**
+ * Build the tier ladder from admin settings. Perk lines that describe the
+ * bonus are generated from the actual multiplier so they never go stale
+ * ("+25% bonus points" follows the setting).
+ */
+export function tiersFor(cfg?: Partial<TierConfig>): LoyaltyTier[] {
+  const silverThreshold = cfg?.silverThreshold ?? 1000;
+  const goldThreshold = Math.max(cfg?.goldThreshold ?? 3000, silverThreshold);
+  const silverMult = cfg?.silverMultiplier ?? 1.25;
+  const goldMult = cfg?.goldMultiplier ?? 1.5;
+  const bonus = (m: number) => `+${Math.round((m - 1) * 100)}% bonus points`;
+  return [
+    { ...TIERS[0] },
+    {
+      ...TIERS[1],
+      threshold: silverThreshold,
+      multiplier: silverMult,
+      perks: [bonus(silverMult), "Early access to new arrivals", "Birthday surprise"],
+    },
+    {
+      ...TIERS[2],
+      threshold: goldThreshold,
+      multiplier: goldMult,
+      perks: [bonus(goldMult), "Free express shipping", "Early access to new arrivals", "Birthday surprise"],
+    },
+  ];
+}
+
+/** Convenience: build the ladder straight from store settings. */
+export function tiersFromSettings(s: {
+  loyaltySilverThreshold: number;
+  loyaltyGoldThreshold: number;
+  loyaltySilverMultiplier: number;
+  loyaltyGoldMultiplier: number;
+}): LoyaltyTier[] {
+  return tiersFor({
+    silverThreshold: s.loyaltySilverThreshold,
+    goldThreshold: s.loyaltyGoldThreshold,
+    silverMultiplier: s.loyaltySilverMultiplier,
+    goldMultiplier: s.loyaltyGoldMultiplier,
+  });
+}
+
+/** The tier for a lifetime-earned total within a given ladder. */
+export function tierForAt(lifetimeEarned: number, tiers: LoyaltyTier[]): LoyaltyTier {
+  let tier = tiers[0];
+  for (const t of tiers) if (lifetimeEarned >= t.threshold) tier = t;
   return tier;
 }
 
-/** The next tier above, or null when already Gold. */
+/** The next tier above within a given ladder, or null when already at the top. */
+export function nextTierAfterAt(lifetimeEarned: number, tiers: LoyaltyTier[]): LoyaltyTier | null {
+  return tiers.find((t) => t.threshold > lifetimeEarned) ?? null;
+}
+
+/** The tier for a given lifetime-earned points total (default ladder). */
+export function tierFor(lifetimeEarned: number): LoyaltyTier {
+  return tierForAt(lifetimeEarned, TIERS);
+}
+
+/** The next tier above, or null when already Gold (default ladder). */
 export function nextTierAfter(lifetimeEarned: number): LoyaltyTier | null {
-  return TIERS.find((t) => t.threshold > lifetimeEarned) ?? null;
+  return nextTierAfterAt(lifetimeEarned, TIERS);
 }
 
 /** Points earned for an amount in ₾ at a given tier (defaults to base rate). */

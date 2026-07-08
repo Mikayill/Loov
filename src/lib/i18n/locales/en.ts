@@ -838,6 +838,7 @@ export const en = {
   "label.perk.bonus25": "+25% bonus points",
   "label.perk.earlyAccess": "Early access to new arrivals",
   "label.perk.bonus50": "+50% bonus points",
+  "label.perk.bonusN": "+{n}% bonus points",
   "label.perk.freeExpress": "Free express shipping",
 
   // ── Rewards page ──
@@ -867,6 +868,7 @@ export const en = {
   "acct.rewards.startShopping": "Start Shopping",
   "acct.rewards.pointsEarned": "Points earned",
   "acct.rewards.pointsRedeemed": "Points redeemed",
+  "acct.rewards.returnAdjustment": "Return adjustment",
   "acct.rewards.pts": "pts",
 
   // ── Addresses ──

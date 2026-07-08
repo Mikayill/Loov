@@ -19,6 +19,10 @@ const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNu
   newBadgeDays: { min: 0, max: 365, int: true },
   standardShippingPrice: { min: 0, max: 1000 },
   expressPrice: { min: 0, max: 1000 },
+  loyaltySilverThreshold: { min: 0, max: 1000000, int: true },
+  loyaltyGoldThreshold: { min: 0, max: 1000000, int: true },
+  loyaltySilverMultiplier: { min: 1, max: 10 },
+  loyaltyGoldMultiplier: { min: 1, max: 10 },
 };
 
 export async function GET() {

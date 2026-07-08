@@ -811,6 +811,7 @@ export const ka: Dictionary = {
   "label.perk.bonus25": "+25% ბონუს ქულა",
   "label.perk.earlyAccess": "ადრეული წვდომა ახალ კოლექციაზე",
   "label.perk.bonus50": "+50% ბონუს ქულა",
+  "label.perk.bonusN": "+{n}% ბონუს ქულა",
   "label.perk.freeExpress": "უფასო სწრაფი მიწოდება",
 
   // ── Rewards page ──
@@ -840,6 +841,7 @@ export const ka: Dictionary = {
   "acct.rewards.startShopping": "დაიწყე შოპინგი",
   "acct.rewards.pointsEarned": "ქულები დაგროვდა",
   "acct.rewards.pointsRedeemed": "ქულები გამოყენებულია",
+  "acct.rewards.returnAdjustment": "დაბრუნების კორექტირება",
   "acct.rewards.pts": "ქულა",
 
   // ── Addresses (DRAFT) ──

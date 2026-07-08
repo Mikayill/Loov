@@ -18,7 +18,8 @@ import {
   REDEEM_BLOCK,
   GEL_PER_BLOCK,
   MAX_DISCOUNT_RATIO,
-  tierFor,
+  tierForAt,
+  tiersFromSettings,
   pointsForAmountAt,
 } from "@/lib/loyalty";
 import { getSettings } from "@/lib/db/settings";
@@ -260,13 +261,17 @@ export async function POST(req: NextRequest) {
   if (userId && admin) {
     const { data: txRows, error: txErr } = await admin
       .from("loyalty_transactions")
-      .select("delta")
+      .select("delta, reason")
       .eq("user_id", userId);
     if (!txErr) {
       ledger = "db";
-      const deltas = (txRows ?? []).map((r) => Number(r.delta));
-      lifetimeEarned = deltas.filter((d) => d > 0).reduce((s, d) => s + d, 0);
-      const balance = deltas.reduce((s, d) => s + d, 0);
+      const rows = (txRows ?? []).map((r) => ({ delta: Number(r.delta), reason: String(r.reason ?? "order") }));
+      // Return adjustments never count toward the tier: a restored redemption
+      // (positive "return" row) isn't newly earned points.
+      lifetimeEarned = rows
+        .filter((r) => r.delta > 0 && r.reason !== "return")
+        .reduce((s, r) => s + r.delta, 0);
+      const balance = rows.reduce((s, r) => s + r.delta, 0);
       if (redeemPoints > balance) return bad("Not enough points for this redemption");
     } else {
       if (!/loyalty_transactions/.test(txErr.message)) {
@@ -413,7 +418,11 @@ export async function POST(req: NextRequest) {
   // ── Loov Rewards: write the ledger for signed-in users (server-side) ──
   let pointsEarned = 0;
   if (userId && admin && ledger === "db") {
-    pointsEarned = pointsForAmountAt(total, settings.pointsPerGel, tierFor(lifetimeEarned));
+    pointsEarned = pointsForAmountAt(
+      total,
+      settings.pointsPerGel,
+      tierForAt(lifetimeEarned, tiersFromSettings(settings))
+    );
     const rows = [
       ...(redeemPoints > 0
         ? [{ user_id: userId, order_id: orderId, delta: -redeemPoints, reason: "redeem" }]

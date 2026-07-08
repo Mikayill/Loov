@@ -16,10 +16,12 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSettings } from "@/lib/db/useSettings";
 import {
-  tierFor,
-  nextTierAfter,
-  pointsForAmount,
+  tierForAt,
+  nextTierAfterAt,
+  tiersFromSettings,
+  pointsForAmountAt,
   type LoyaltyTier,
 } from "@/lib/loyalty";
 
@@ -27,7 +29,7 @@ export interface LoyaltyTransaction {
   id: string;
   /** Positive = earned, negative = redeemed. */
   delta: number;
-  reason: "order" | "redeem" | "bonus";
+  reason: "order" | "redeem" | "bonus" | "return";
   orderNumber?: string;
   date: string; // ISO
 }
@@ -66,6 +68,7 @@ interface DbTxRow {
 
 export function LoyaltyProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const settings = useSettings();
   const [localTx, setLocalTx] = useState<LoyaltyTransaction[]>([]);
   const [dbTx, setDbTx] = useState<LoyaltyTransaction[] | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -102,7 +105,7 @@ export function LoyaltyProvider({ children }: { children: React.ReactNode }) {
         ((data ?? []) as unknown as DbTxRow[]).map((r) => ({
           id: r.id,
           delta: Number(r.delta),
-          reason: (["order", "redeem", "bonus"].includes(r.reason) ? r.reason : "order") as LoyaltyTransaction["reason"],
+          reason: (["order", "redeem", "bonus", "return"].includes(r.reason) ? r.reason : "order") as LoyaltyTransaction["reason"],
           orderNumber: r.orders?.order_number,
           date: r.created_at,
         }))
@@ -119,19 +122,23 @@ export function LoyaltyProvider({ children }: { children: React.ReactNode }) {
   const source: "db" | "local" = dbTx !== null ? "db" : "local";
   const transactions = dbTx ?? localTx;
 
+  // Return adjustments never count toward the tier (a restored redemption
+  // isn't newly earned points), matching the server-side tier computation.
   const lifetimeEarned = transactions.reduce(
-    (sum, t) => (t.delta > 0 ? sum + t.delta : sum),
+    (sum, t) => (t.delta > 0 && t.reason !== "return" ? sum + t.delta : sum),
     0
   );
   const balance = transactions.reduce((sum, t) => sum + t.delta, 0);
-  const tier = tierFor(lifetimeEarned);
-  const nextTier = nextTierAfter(lifetimeEarned);
+  const tiers = tiersFromSettings(settings);
+  const tier = tierForAt(lifetimeEarned, tiers);
+  const nextTier = nextTierAfterAt(lifetimeEarned, tiers);
   const pointsToNextTier = nextTier ? nextTier.threshold - lifetimeEarned : 0;
 
   const earnFromOrder = useCallback(
     (totalGel: number, orderNumber: string): number => {
       if (dbTx !== null) return 0; // account ledger is written server-side
-      const pts = pointsForAmount(totalGel, tierFor(lifetimeEarned));
+      const tierNow = tierForAt(lifetimeEarned, tiersFromSettings(settings));
+      const pts = pointsForAmountAt(totalGel, settings.pointsPerGel, tierNow);
       if (pts <= 0) return 0;
       setLocalTx((prev) => [
         { id: crypto.randomUUID(), delta: pts, reason: "order" as const, orderNumber, date: new Date().toISOString() },
@@ -139,7 +146,7 @@ export function LoyaltyProvider({ children }: { children: React.ReactNode }) {
       ]);
       return pts;
     },
-    [dbTx, lifetimeEarned]
+    [dbTx, lifetimeEarned, settings]
   );
 
   const redeemPoints = useCallback((points: number, orderNumber: string) => {

@@ -809,6 +809,7 @@ export const tr: Dictionary = {
   "label.perk.bonus25": "+%25 bonus puan",
   "label.perk.earlyAccess": "Yeni gelenlere erken erişim",
   "label.perk.bonus50": "+%50 bonus puan",
+  "label.perk.bonusN": "+%{n} bonus puan",
   "label.perk.freeExpress": "Ücretsiz hızlı kargo",
 
   // ── Rewards page ──
@@ -838,6 +839,7 @@ export const tr: Dictionary = {
   "acct.rewards.startShopping": "Alışverişe Başla",
   "acct.rewards.pointsEarned": "Puan kazanıldı",
   "acct.rewards.pointsRedeemed": "Puan kullanıldı",
+  "acct.rewards.returnAdjustment": "İade düzeltmesi",
   "acct.rewards.pts": "puan",
 
   // ── Addresses ──
