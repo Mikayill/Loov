@@ -7,6 +7,7 @@ import { getAllBundles } from "@/lib/db/bundles";
 import { formatPrice } from "@/lib/format";
 import BundleQuickView from "@/components/BundleQuickView";
 import { getT } from "@/lib/i18n/server";
+import { sortBySeason } from "@/lib/season";
 
 // Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
 export const revalidate = 60;
@@ -16,11 +17,13 @@ export default async function HomePage() {
   const [products, bundles] = await Promise.all([getAllProducts(), getAllBundles()]);
   const productBySlug = new Map(products.map((p) => [p.slug, p]));
 
-  /* Show new arrivals first on homepage, max 8 products */
+  /* Full catalog, season-appropriate items first, new arrivals leading each
+     group. CategoryFilter shows 8 at a time with Load More. */
+  const seasonSorted = sortBySeason(products);
   const featuredProducts = [
-    ...products.filter((p) => p.isNew),
-    ...products.filter((p) => !p.isNew),
-  ].slice(0, 8);
+    ...seasonSorted.filter((p) => p.isNew),
+    ...seasonSorted.filter((p) => !p.isNew),
+  ];
   return (
     <>
       {/* ── Hero ── */}
@@ -132,7 +135,7 @@ export default async function HomePage() {
             href="/products"
             className="text-sm font-bold text-[#5E9E8C] hover:underline flex items-center gap-1"
           >
-            {t("home.featured.viewAll").replace("{count}", String(products.length))} →
+            {t("home.featured.viewAll")} →
           </Link>
         </div>
         <CategoryFilter products={featuredProducts} />
@@ -207,23 +210,6 @@ export default async function HomePage() {
 
       {/* ── Recently Viewed (client-side, renders only if history exists) ── */}
       <RecentlyViewedSection />
-
-      {/* ── Why us strip ── */}
-      <div className="bg-white border-t border-[#DDD5CC] py-5 px-4">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-          {[
-            { emoji: "🌿", text: t("home.why.organic") },
-            { emoji: "💝", text: t("home.why.love") },
-            { emoji: "✅", text: t("home.why.quality") },
-            { emoji: "🔒", text: t("home.why.secure") },
-          ].map((f) => (
-            <div key={f.text} className="flex items-center gap-2 text-sm font-semibold text-[#5E5450]">
-              <span>{f.emoji}</span>
-              <span>{f.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── What Parents Say (at the bottom) ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">

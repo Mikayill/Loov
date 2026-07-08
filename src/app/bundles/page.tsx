@@ -19,6 +19,11 @@ export default async function BundlesPage() {
   const [bundles, products] = await Promise.all([getAllBundles(), getAllProducts()]);
   /* Product lookup so each card can show WHAT's inside (mini photo thumbs). */
   const bySlug = new Map(products.map((p) => [p.slug, p]));
+  /* Best discount across active bundles — drives the "Up to {n}% off" trust line. */
+  const maxSavingsPct = bundles.reduce((max, b) => {
+    const pct = b.originalPrice > 0 ? Math.round(((b.originalPrice - b.bundlePrice) / b.originalPrice) * 100) : 0;
+    return Math.max(max, pct);
+  }, 0);
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-12">
       {/* Header */}
@@ -38,7 +43,7 @@ export default async function BundlesPage() {
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-6 mb-6 sm:mb-10 text-[11px] sm:text-xs font-semibold text-[#5E5450]">
         {[
           { icon: "🎁", label: t("bundle.trustGiftReady") },
-          { icon: "💰", label: t("bundle.trustSavings").replace("{n}", "37") },
+          { icon: "💰", label: t("bundle.trustSavings").replace("{n}", String(maxSavingsPct)) },
           { icon: "🌿", label: t("bundle.trustOrganic") },
           { icon: "🔄", label: t("bundle.trustReturns") },
         ].map((item) => (

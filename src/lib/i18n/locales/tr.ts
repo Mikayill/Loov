@@ -111,17 +111,12 @@ export const tr: Dictionary = {
 
   "home.featured.title": "Yeni & Öne Çıkanlar",
   "home.featured.subtitle": "Koleksiyonumuzdan özenle seçilmiş favoriler",
-  "home.featured.viewAll": "Tüm {count} Ürünü Gör",
+  "home.featured.viewAll": "Tüm Ürünleri Keşfet",
 
   "home.bundles.eyebrow": "Set Fırsatları",
   "home.bundles.title": "Birlikte Daha Çok Kazan",
   "home.bundles.viewAll": "Tüm Setleri Gör",
   "home.bundles.save": "{amount} Tasarruf",
-
-  "home.why.organic": "%100 Organik Malzeme",
-  "home.why.love": "Sevgiyle Üretildi",
-  "home.why.quality": "Kalite Garantili",
-  "home.why.secure": "Güvenli Ödeme",
 
   "home.reviews.eyebrow": "Ebeveynler Ne Diyor",
   "home.reviews.title": "Gürcü Ailelerin Favorisi",
@@ -477,7 +472,7 @@ export const tr: Dictionary = {
   "bundle.heroTitle": "Birlikte Daha Çok",
   "bundle.heroSubtitle": "En sevilen ürünlerimizden özenle hazırlanmış setler — güzel paketlenmiş ve ayrı ayrı almaktan daha ucuz.",
   "bundle.trustGiftReady": "Hediyeye hazır paketleme",
-  "bundle.trustSavings": "{n}₾'ye varan tasarruf",
+  "bundle.trustSavings": "%{n}'e varan indirim",
   "bundle.trustOrganic": "Organik sertifikalı",
   "bundle.trustReturns": "14 gün iade",
   "bundle.save": "{amount} Tasarruf",

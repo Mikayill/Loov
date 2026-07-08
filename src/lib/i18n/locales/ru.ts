@@ -111,17 +111,12 @@ export const ru: Dictionary = {
 
   "home.featured.title": "Новинки и хиты",
   "home.featured.subtitle": "Тщательно отобранные фавориты из нашей коллекции",
-  "home.featured.viewAll": "Смотреть все {count} товаров",
+  "home.featured.viewAll": "Смотреть все товары",
 
   "home.bundles.eyebrow": "Выгодные наборы",
   "home.bundles.title": "Экономьте вместе",
   "home.bundles.viewAll": "Все наборы",
   "home.bundles.save": "Скидка {amount}",
-
-  "home.why.organic": "100% органические материалы",
-  "home.why.love": "Сделано с любовью",
-  "home.why.quality": "Гарантия качества",
-  "home.why.secure": "Безопасная оплата",
 
   "home.reviews.eyebrow": "Что говорят родители",
   "home.reviews.title": "Любимы грузинскими семьями",
@@ -477,7 +472,7 @@ export const ru: Dictionary = {
   "bundle.heroTitle": "Больше вместе",
   "bundle.heroSubtitle": "Кураторские наборы наших любимых товаров — красиво упакованные и дешевле, чем по отдельности.",
   "bundle.trustGiftReady": "Готово к подарку",
-  "bundle.trustSavings": "Экономия до {n}₾",
+  "bundle.trustSavings": "Скидка до {n}%",
   "bundle.trustOrganic": "Органическая сертификация",
   "bundle.trustReturns": "Возврат за 14 дней",
   "bundle.save": "Скидка {amount}",

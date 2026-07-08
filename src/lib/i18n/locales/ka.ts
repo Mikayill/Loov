@@ -113,17 +113,12 @@ export const ka: Dictionary = {
 
   "home.featured.title": "ახალი და რჩეული",
   "home.featured.subtitle": "ხელით შერჩეული ფავორიტები ჩვენი კოლექციიდან",
-  "home.featured.viewAll": "ყველა {count} პროდუქტის ნახვა",
+  "home.featured.viewAll": "ყველა პროდუქტის ნახვა",
 
   "home.bundles.eyebrow": "ნაკრების შეთავაზებები",
   "home.bundles.title": "დაზოგეთ მეტი ერთად",
   "home.bundles.viewAll": "ყველა ნაკრების ნახვა",
   "home.bundles.save": "დაზოგე {amount}",
-
-  "home.why.organic": "100% ორგანული მასალები",
-  "home.why.love": "სიყვარულით შექმნილი",
-  "home.why.quality": "ხარისხი გარანტირებულია",
-  "home.why.secure": "უსაფრთხო გადახდა",
 
   "home.reviews.eyebrow": "რას ამბობენ მშობლები",
   "home.reviews.title": "საქართველოს ოჯახების საყვარელი",
@@ -479,7 +474,7 @@ export const ka: Dictionary = {
   "bundle.heroTitle": "ერთად მეტი",
   "bundle.heroSubtitle": "ჩვენი საყვარელი პროდუქტების კურირებული ნაკრებები — ლამაზად შეფუთული და ცალ-ცალკე ყიდვაზე იაფი.",
   "bundle.trustGiftReady": "საჩუქრისთვის მზა შეფუთვა",
-  "bundle.trustSavings": "დაზოგე {n}₾-მდე",
+  "bundle.trustSavings": "{n}%-მდე ფასდაკლება",
   "bundle.trustOrganic": "ორგანულად სერტიფიცირებული",
   "bundle.trustReturns": "14-დღიანი დაბრუნება",
   "bundle.save": "დაზოგე {amount}",

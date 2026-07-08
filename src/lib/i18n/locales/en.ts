@@ -119,17 +119,12 @@ export const en = {
 
   "home.featured.title": "New & Featured",
   "home.featured.subtitle": "Hand-picked favourites from our collection",
-  "home.featured.viewAll": "View All {count} Products",
+  "home.featured.viewAll": "Explore All Products",
 
   "home.bundles.eyebrow": "Bundle Deals",
   "home.bundles.title": "Save More Together",
   "home.bundles.viewAll": "View All Bundles",
   "home.bundles.save": "Save {amount}",
-
-  "home.why.organic": "100% Organic Materials",
-  "home.why.love": "Made with Love",
-  "home.why.quality": "Quality Guaranteed",
-  "home.why.secure": "Secure Checkout",
 
   "home.reviews.eyebrow": "What Parents Say",
   "home.reviews.title": "Loved by Georgian Families",
@@ -506,7 +501,7 @@ export const en = {
   "bundle.heroTitle": "More Together",
   "bundle.heroSubtitle": "Curated bundles of our best-loved products — beautifully packaged, and priced lower than buying separately.",
   "bundle.trustGiftReady": "Gift-ready packaging",
-  "bundle.trustSavings": "Up to {n}₾ savings",
+  "bundle.trustSavings": "Up to {n}% off",
   "bundle.trustOrganic": "Organic certified",
   "bundle.trustReturns": "14-day returns",
   "bundle.save": "Save {amount}",

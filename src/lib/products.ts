@@ -1,6 +1,6 @@
 import { Product } from "@/types";
 
-export const products: Product[] = [
+const baseProducts: Product[] = [
   {
     id: "1",
     slug: "organic-cotton-bodysuit",
@@ -270,6 +270,36 @@ export const products: Product[] = [
     cardColor: "#D8D8E8",
   },
 ];
+
+/* Fabric per product (drives the fabric filter). Mirrors the DB backfill —
+   kept here so the static fallback filters the same way as the live catalog. */
+const fabricBySlug: Record<string, string> = {
+  "organic-cotton-bodysuit": "cotton",
+  "cloud-print-blanket": "cotton",
+  "hospital-exit-set": "cotton",
+  "bamboo-hooded-towel": "bamboo",
+  "bear-ear-romper": "cotton",
+  "mini-bunny-backpack": "other",
+  "muslin-swaddle-blanket": "muslin",
+  "long-sleeve-bodysuit-set": "cotton",
+  "duck-hooded-towel": "terry",
+  "panda-zip-romper": "cotton",
+  "gift-set-newborn": "cotton",
+  "diaper-bag-tote": "other",
+  "knotted-gown-set": "cotton",
+  "mini-explorer-backpack": "other",
+  "lion-hooded-romper": "cotton",
+  "bamboo-pajama-set": "bamboo",
+  "organic-sleep-sack": "cotton",
+  "rainbow-gift-set": "cotton",
+  "terry-poncho-towel": "terry",
+  "elephant-mini-bag": "other",
+};
+
+export const products: Product[] = baseProducts.map((p) => ({
+  ...p,
+  fabric: p.fabric ?? fabricBySlug[p.slug],
+}));
 
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);

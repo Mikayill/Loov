@@ -89,6 +89,7 @@ export default function CategoryFilter({
   advanced?: boolean;
 }) {
   const { t } = useLocale();
+  const pageSize = advanced ? 16 : 8;
   const [active,         setActive]         = useState<Cat>((initialCategory as Cat) || "All");
   const [sort,           setSort]           = useState<SortKey>("default");
   const [priceRange,     setPriceRange]     = useState<PriceRange>("all");
@@ -96,8 +97,25 @@ export default function CategoryFilter({
   const [selectedFabrics, setSelectedFabrics] = useState<string[]>([]);
   const [ageFilter,      setAgeFilter]      = useState<AgeFilter>("all");
   const [viewMode,       setViewMode]       = useState<ViewMode>("grid");
-  const [visibleCount,   setVisibleCount]   = useState(8);
+  const [visibleCount,   setVisibleCount]   = useState(pageSize);
   const [filtersOpen,    setFiltersOpen]    = useState(false);
+  /* Categories the shopper browsed recently — boosts the default sort after
+     mount only (server render stays plain, so no hydration mismatch). */
+  const [preferredCats,  setPreferredCats]  = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const ids: string[] = JSON.parse(localStorage.getItem("loov_recently_viewed") ?? "[]");
+      if (!Array.isArray(ids) || ids.length === 0) return;
+      const byId = new Map(products.map((p) => [String(p.id), p.category]));
+      const cats: string[] = [];
+      for (const id of ids) {
+        const cat = byId.get(String(id));
+        if (cat && !cats.includes(cat)) cats.push(cat);
+      }
+      if (cats.length > 0) setPreferredCats(cats);
+    } catch { /* ignore malformed history */ }
+  }, [products]);
 
   const categories = useMemo<Cat[]>(() => {
     const found = Array.from(new Set(products.map((p) => p.category)));
@@ -137,11 +155,24 @@ export default function CategoryFilter({
     if (sort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
 
+    /* Default sort: gently surface the categories the shopper viewed recently
+       (stable within groups, so the incoming season/new order is preserved). */
+    if (sort === "default" && active === "All" && preferredCats.length > 0) {
+      const rank = (c: string) => {
+        const i = preferredCats.indexOf(c);
+        return i === -1 ? preferredCats.length : i;
+      };
+      list = list
+        .map((p, i) => ({ p, i }))
+        .sort((a, b) => rank(a.p.category) - rank(b.p.category) || a.i - b.i)
+        .map(({ p }) => p);
+    }
+
     return list;
-  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, products]);
+  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, products, preferredCats]);
 
   /* Reset pagination when filters change */
-  useEffect(() => { setVisibleCount(8); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter]);
+  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, pageSize]);
 
   const activeFilterCount =
     (priceRange !== "all" ? 1 : 0) +
@@ -169,7 +200,7 @@ export default function CategoryFilter({
     setSelectedColors([]);
     setSelectedFabrics([]);
     setAgeFilter("all");
-    setVisibleCount(8);
+    setVisibleCount(pageSize);
   }
 
   const visibleProducts = filtered.slice(0, visibleCount);
@@ -180,26 +211,20 @@ export default function CategoryFilter({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 flex-1">
           {categories.map((cat) => {
-            const count = cat === "All" ? products.length : products.filter((p) => p.category === cat).length;
             const label = cat === "All" ? t("filter.allProducts") : categoryPlural(cat as Product["category"], t);
             const isActive = active === cat;
             return (
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border-2 transition-all duration-200 ${
+                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold border-2 transition-all duration-200 ${
                   isActive
                     ? "border-[#5E9E8C] bg-[#5E9E8C] text-white shadow-sm scale-105"
                     : "border-[#DDD5CC] bg-white text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
                 }`}
               >
-                <span className="text-base leading-none">{catIcons[cat]}</span>
+                <span className="text-sm sm:text-base leading-none">{catIcons[cat]}</span>
                 <span>{label}</span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  isActive ? "bg-white/25 text-white" : "bg-[#EDE5D8] text-[#9A8E88]"
-                }`}>
-                  {count}
-                </span>
               </button>
             );
           })}
@@ -435,7 +460,7 @@ export default function CategoryFilter({
           {visibleCount < filtered.length && (
             <div className="mt-8 text-center">
               <button
-                onClick={() => setVisibleCount((n) => n + 8)}
+                onClick={() => setVisibleCount((n) => n + pageSize)}
                 className="font-bold px-8 py-3 rounded-full border-2 border-[#5E9E8C] text-[#5E9E8C] text-sm hover:bg-[#5E9E8C] hover:text-white transition-all"
               >
                 {t("filter.loadMore")}
