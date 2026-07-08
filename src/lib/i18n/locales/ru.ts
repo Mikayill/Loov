@@ -904,6 +904,8 @@ export const ru: Dictionary = {
   "sec.dangerZone": "Опасная зона",
   "sec.deleteAccount": "Удалить аккаунт",
   "sec.deleteAccountBody": "Безвозвратно удалить ваш аккаунт и все данные",
+  "sec.activeOrdersBlock": "У вас ещё есть активные заказы ({n}). Удалить аккаунт можно после их доставки или отмены.",
+  "sec.activeReturnBlock": "У вас есть возврат в обработке. Удалить аккаунт можно после его завершения.",
   "sec.typeDeleteConfirm": "Введите {word} для подтверждения удаления аккаунта:",
   "sec.typeDeletePlaceholder": "Введите DELETE",
   "sec.deleting": "Удаление…",

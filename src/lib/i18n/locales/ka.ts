@@ -906,6 +906,8 @@ export const ka: Dictionary = {
   "sec.dangerZone": "საშიში ზონა",
   "sec.deleteAccount": "ანგარიშის წაშლა",
   "sec.deleteAccountBody": "სამუდამოდ წაშალეთ თქვენი ანგარიში და ყველა მონაცემი",
+  "sec.activeOrdersBlock": "ჯერ კიდევ გაქვთ {n} აქტიური შეკვეთა. ანგარიშის წაშლა შეძლებთ, როცა ისინი მიწოდებული ან გაუქმებული იქნება.",
+  "sec.activeReturnBlock": "გაქვთ მიმდინარე დაბრუნება. ანგარიშის წაშლა შეძლებთ, როცა ის დასრულდება.",
   "sec.typeDeleteConfirm": "დაწერეთ {word} ანგარიშის წაშლის დასადასტურებლად:",
   "sec.typeDeletePlaceholder": "დაწერეთ DELETE",
   "sec.deleting": "იშლება…",

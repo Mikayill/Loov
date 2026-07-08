@@ -45,8 +45,9 @@ interface AuthContextType {
   sendPasswordReset: (email: string) => Promise<AuthResult>;
   /** Set a new password for the current (recovery or signed-in) session. */
   updatePassword: (newPassword: string) => Promise<AuthResult>;
-  /** Permanently delete the signed-in user's account and data. */
-  deleteAccount: () => Promise<AuthResult>;
+  /** Permanently delete the signed-in user's account and data. Refused with
+   *  activeOrders/activeReturns counts while anything is still in flight. */
+  deleteAccount: () => Promise<AuthResult & { activeOrders?: number; activeReturns?: number }>;
   signOut: () => void;
 }
 
@@ -208,14 +209,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error ? { error: friendly(error.message) } : {};
   }, [supabase]);
 
-  const deleteAccount = useCallback(async (): Promise<AuthResult> => {
+  const deleteAccount = useCallback(async (): Promise<AuthResult & { activeOrders?: number; activeReturns?: number }> => {
     if (!supabase) return { error: "Auth is not configured." };
     /* Deletion needs the service role (server-side) — the browser can't delete
        its own auth user. The route authenticates via the session cookie. */
     const res = await fetch("/api/account/delete", { method: "POST" });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      return { error: d.error || "Could not delete account — please contact support." };
+      return {
+        error: d.error || "Could not delete account — please contact support.",
+        activeOrders: typeof d.activeOrders === "number" ? d.activeOrders : undefined,
+        activeReturns: typeof d.activeReturns === "number" ? d.activeReturns : undefined,
+      };
     }
     await supabase.auth.signOut();
     setUser(null);

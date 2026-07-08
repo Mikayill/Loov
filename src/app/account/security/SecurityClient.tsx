@@ -66,7 +66,17 @@ export default function SecurityClient() {
     setDeleteError(""); setDeleting(true);
     const res = await deleteAccount();
     setDeleting(false);
-    if (res.error) { setDeleteError(res.error); return; }
+    if (res.error) {
+      // Localized messages for the "still have active orders/returns" blocks.
+      if (res.activeOrders !== undefined) {
+        setDeleteError(t("sec.activeOrdersBlock").replace("{n}", String(res.activeOrders)));
+      } else if (res.activeReturns !== undefined) {
+        setDeleteError(t("sec.activeReturnBlock"));
+      } else {
+        setDeleteError(res.error);
+      }
+      return;
+    }
     router.push("/");
   }
 

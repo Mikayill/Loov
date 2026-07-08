@@ -933,6 +933,8 @@ export const en = {
   "sec.dangerZone": "Danger Zone",
   "sec.deleteAccount": "Delete Account",
   "sec.deleteAccountBody": "Permanently delete your account and all data",
+  "sec.activeOrdersBlock": "You still have {n} active order(s). You can delete your account once they are delivered or cancelled.",
+  "sec.activeReturnBlock": "You have a return in progress. You can delete your account once it's resolved.",
   "sec.typeDeleteConfirm": "Type {word} to confirm account deletion:",
   "sec.typeDeletePlaceholder": "Type DELETE",
   "sec.deleting": "Deleting…",

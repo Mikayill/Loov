@@ -904,6 +904,8 @@ export const tr: Dictionary = {
   "sec.dangerZone": "Tehlikeli Bölge",
   "sec.deleteAccount": "Hesabı Sil",
   "sec.deleteAccountBody": "Hesabınızı ve tüm verilerinizi kalıcı olarak silin",
+  "sec.activeOrdersBlock": "Hâlâ {n} aktif siparişin var. Siparişlerin teslim edilince veya iptal olunca hesabını silebilirsin.",
+  "sec.activeReturnBlock": "Devam eden bir iaden var. İade sonuçlanınca hesabını silebilirsin.",
   "sec.typeDeleteConfirm": "Hesap silmeyi onaylamak için {word} yazın:",
   "sec.typeDeletePlaceholder": "DELETE yazın",
   "sec.deleting": "Siliniyor…",
