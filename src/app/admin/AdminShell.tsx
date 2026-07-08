@@ -12,6 +12,7 @@ const NAV: { href: string; label: string; icon: string; exact?: boolean; section
   { href: "/admin", label: "Dashboard", icon: "📊", exact: true },
   { href: "/admin/products", label: "Products", icon: "🏷️" },
   { href: "/admin/bundles", label: "Bundles", icon: "🎀" },
+  { href: "/admin/promos", label: "Promos", icon: "🎟️" },
   { href: "/admin/orders", label: "Orders", icon: "📦", section: "orders" },
   { href: "/admin/returns", label: "Returns", icon: "↩️", section: "returns" },
   { href: "/admin/reviews", label: "Reviews", icon: "⭐", section: "reviews" },
