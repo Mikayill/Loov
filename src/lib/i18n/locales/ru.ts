@@ -1061,6 +1061,7 @@ export const ru: Dictionary = {
   "contact.form.messageMin10": "Сообщение должно содержать минимум 10 символов",
   "contact.form.messagePlaceholder": "Напишите ваше сообщение здесь…",
   "contact.form.sending": "Отправка…",
+  "contact.form.sendFailed": "Не удалось отправить сообщение — попробуйте ещё раз чуть позже.",
   "contact.form.sendMessage": "Отправить сообщение",
   "contact.form.sentTitle": "Сообщение отправлено!",
   "contact.form.sentBody": "Спасибо, что написали, {name}. Мы свяжемся с вами по {email} в течение 24 часов.",

@@ -10,12 +10,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const { t } = await getT();
-  const { expressEnabled } = await getSettings();
+  const { expressEnabled, whatsappNumber } = await getSettings();
 
   const infoItems = [
     { icon: "📍", label: t("contact.address"), value: "Tbilisi, Georgia" },
     { icon: "📧", label: t("contact.email"),    value: "hello@loov.ge" },
-    { icon: "📞", label: t("contact.phone"),    value: "+995 000 000 000" },
+    // Phone only shows once the business number exists (admin → Settings).
+    ...(whatsappNumber ? [{ icon: "📞", label: t("contact.phone"), value: `+${whatsappNumber}` }] : []),
     { icon: "🕐", label: t("contact.hours"),    value: t("contact.hoursValue") },
   ];
 
@@ -66,9 +67,10 @@ export default async function ContactPage() {
             </ul>
           </div>
 
-          {/* WhatsApp CTA */}
+          {/* WhatsApp CTA — hidden until the business number is set in admin */}
+          {whatsappNumber && (
           <a
-            href="https://wa.me/995000000000"
+            href={`https://wa.me/${whatsappNumber}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 bg-[#25D366] text-white rounded-2xl p-4 sm:p-5 font-bold hover:opacity-90 transition-opacity shadow-sm"
@@ -81,6 +83,7 @@ export default async function ContactPage() {
               <p className="text-xs opacity-80 font-medium mt-0.5">{t("contact.fastestResponse")}</p>
             </div>
           </a>
+          )}
 
           {/* Response time badge */}
           <div

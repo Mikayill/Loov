@@ -20,6 +20,9 @@ export interface StoreSettings {
   /** Price of express delivery (₾). Express is always charged — the
    *  free-shipping threshold only applies to standard delivery. */
   expressPrice: number;
+  /** Business WhatsApp number, digits only (e.g. "995599123456").
+   *  Empty = WhatsApp buttons/links are hidden across the site. */
+  whatsappNumber: string;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -29,6 +32,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   standardShippingPrice: 15,
   expressEnabled: true,
   expressPrice: 25,
+  whatsappNumber: "",
 };
 
 /** Map DB key → settings field. */
@@ -39,6 +43,7 @@ export const SETTING_KEYS: Record<string, keyof StoreSettings> = {
   standard_shipping_price: "standardShippingPrice",
   express_enabled: "expressEnabled",
   express_price: "expressPrice",
+  whatsapp_number: "whatsappNumber",
 };
 
 /** Reverse map: settings field → DB key. */
@@ -49,6 +54,7 @@ export const FIELD_TO_KEY: Record<keyof StoreSettings, string> = {
   standardShippingPrice: "standard_shipping_price",
   expressEnabled: "express_enabled",
   expressPrice: "express_price",
+  whatsappNumber: "whatsapp_number",
 };
 
 /** Build a StoreSettings from raw {key: value} DB rows, filling gaps with defaults. */
@@ -61,6 +67,11 @@ export function settingsFromRows(rows: { key: string; value: unknown }[]): Store
       // Boolean setting — accept true/false, 1/0 and their string forms.
       out.expressEnabled =
         value === true || value === 1 || value === "true" || value === "1";
+      continue;
+    }
+    if (field === "whatsappNumber") {
+      // String setting — keep digits only so wa.me links always work.
+      out.whatsappNumber = String(value ?? "").replace(/\D/g, "");
       continue;
     }
     const n = Number(value);

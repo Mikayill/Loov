@@ -14,6 +14,7 @@ import BackToTop from "@/components/BackToTop";
 import CartDrawer from "@/components/CartDrawer";
 import CookieConsent from "@/components/CookieConsent";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import FooterPhone from "@/components/FooterPhone";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -193,10 +194,8 @@ export default async function RootLayout({
                   <div className="min-w-0">
                     <a href="mailto:hello@loov.ge" className="flex items-start gap-1.5 hover:text-[#5E9E8C] transition-colors break-all"><span className="flex-shrink-0">📧</span> hello@loov.ge</a>
                   </div>
-                  {/* Phone */}
-                  <div className="min-w-0">
-                    <a href="tel:+995000000000" className="flex items-start gap-1.5 hover:text-[#5E9E8C] transition-colors"><span className="flex-shrink-0">📞</span> +995 000 000 000</a>
-                  </div>
+                  {/* Phone — appears once the business number is set in admin settings */}
+                  <FooterPhone />
                 </div>
                 {/* Payment icons */}
                 <div>

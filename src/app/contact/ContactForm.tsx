@@ -13,6 +13,8 @@ export default function ContactForm() {
   const [errors, setErrors]   = useState<Partial<Field>>({});
   const [loading, setLoading] = useState(false);
   const [sent, setSent]       = useState(false);
+  const [sendError, setSendError] = useState("");
+  const [honeypot, setHoneypot]   = useState("");
 
   const subjects = [
     t("contact.form.subjectOrderInquiry"),
@@ -48,10 +50,22 @@ export default function ContactForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    setSendError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1600)); // simulate API
-    setLoading(false);
-    setSent(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, website: honeypot }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok && d.ok) setSent(true);
+      else setSendError(d.error || t("contact.form.sendFailed"));
+    } catch {
+      setSendError(t("contact.form.sendFailed"));
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (sent) {
@@ -165,6 +179,24 @@ export default function ContactForm() {
 
       {/* CSRF placeholder — server validation in Phase 2 */}
       <CsrfField />
+
+      {/* Honeypot — invisible to humans, bots fill it and get silently dropped */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] top-auto h-0 w-0 opacity-0"
+      />
+
+      {sendError && (
+        <p className="text-sm text-red-500 font-semibold bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          {sendError}
+        </p>
+      )}
 
       {/* Submit */}
       <button

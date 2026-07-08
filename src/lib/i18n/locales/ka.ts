@@ -1063,6 +1063,7 @@ export const ka: Dictionary = {
   "contact.form.messageMin10": "შეტყობინება უნდა შეიცავდეს მინიმუმ 10 სიმბოლოს",
   "contact.form.messagePlaceholder": "დაწერეთ თქვენი შეტყობინება აქ…",
   "contact.form.sending": "იგზავნება…",
+  "contact.form.sendFailed": "შეტყობინება ვერ გაიგზავნა — გთხოვთ, ცოტა ხანში სცადოთ თავიდან.",
   "contact.form.sendMessage": "შეტყობინების გაგზავნა",
   "contact.form.sentTitle": "შეტყობინება გაიგზავნა!",
   "contact.form.sentBody": "მადლობა მოწერისთვის, {name}. დაგიკავშირდებით {email}-ზე 24 საათის განმავლობაში.",

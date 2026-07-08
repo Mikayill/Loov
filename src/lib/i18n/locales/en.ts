@@ -1090,6 +1090,7 @@ export const en = {
   "contact.form.messageMin10": "Message must be at least 10 characters",
   "contact.form.messagePlaceholder": "Write your message here…",
   "contact.form.sending": "Sending…",
+  "contact.form.sendFailed": "Your message couldn't be sent — please try again in a moment.",
   "contact.form.sendMessage": "Send Message",
   "contact.form.sentTitle": "Message Sent!",
   "contact.form.sentBody": "Thank you for reaching out, {name}. We'll get back to you at {email} within 24 hours.",

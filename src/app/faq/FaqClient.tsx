@@ -144,8 +144,9 @@ export default function FaqClient() {
           >
             {t("faq.contactUsBtn")} →
           </Link>
+          {settings.whatsappNumber && (
           <a
-            href="https://wa.me/995000000000"
+            href={`https://wa.me/${settings.whatsappNumber}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-full border-2 border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors"
@@ -155,6 +156,7 @@ export default function FaqClient() {
             </svg>
             {t("faq.whatsapp")}
           </a>
+          )}
         </div>
       </div>
     </div>

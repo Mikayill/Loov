@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DEFAULT_SETTINGS, type StoreSettings } from "@/lib/settings";
 
 interface Field {
-  key: Exclude<keyof StoreSettings, "expressEnabled">;
+  key: Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber">;
   label: string;
   hint: string;
   icon: string;
@@ -211,6 +211,31 @@ export default function SettingsClient() {
               <span className="text-xs font-semibold text-[#9A8E88]">₾</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ── WhatsApp business number ── */}
+      <div className="mt-4 bg-white rounded-2xl border border-[#DDD5CC] p-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex-1 min-w-[220px]">
+            <label className="flex items-center gap-2 font-bold text-[#2A2320]">
+              <span className="text-lg">💬</span>
+              WhatsApp number
+            </label>
+            <p className="text-xs text-[#9A8E88] mt-1.5 leading-relaxed">
+              Business WhatsApp number, digits only with country code (e.g. <code className="font-mono">995599123456</code>).
+              Used by the floating WhatsApp button, the contact page and the FAQ.
+              Leave <strong>empty</strong> to hide all WhatsApp buttons until you have a number.
+            </p>
+          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="995…"
+            value={settings.whatsappNumber}
+            onChange={(e) => setSettings((s) => ({ ...s, whatsappNumber: e.target.value.replace(/[^\d]/g, "") }))}
+            className="w-44 h-11 px-3 rounded-xl border border-[#DDD5CC] text-lg font-extrabold text-[#2A2320] outline-none focus:border-[#5E9E8C]"
+          />
         </div>
       </div>
 

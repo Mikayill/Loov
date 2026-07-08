@@ -13,7 +13,7 @@ import {
 export const dynamic = "force-dynamic";
 
 /** Bounds so an admin can't set nonsense that breaks the storefront. */
-const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled">, { min: number; max: number; int?: boolean }> = {
+const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber">, { min: number; max: number; int?: boolean }> = {
   pointsPerGel: { min: 0, max: 100 },
   freeShippingThreshold: { min: 0, max: 100000 },
   newBadgeDays: { min: 0, max: 365, int: true },
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: "unavailable" }, { status: 500 });
 
   const body = await req.json().catch(() => ({}));
-  const updates: { key: string; value: number | boolean }[] = [];
+  const updates: { key: string; value: number | boolean | string }[] = [];
 
   for (const field of Object.keys(LIMITS) as (keyof typeof LIMITS)[]) {
     if (body[field] === undefined) continue;
@@ -56,6 +56,14 @@ export async function PATCH(req: NextRequest) {
   // Boolean toggle (Express Delivery on/off).
   if (body.expressEnabled !== undefined) {
     updates.push({ key: FIELD_TO_KEY.expressEnabled, value: !!body.expressEnabled });
+  }
+  // WhatsApp number — digits only, empty allowed (hides WhatsApp sitewide).
+  if (body.whatsappNumber !== undefined) {
+    const digits = String(body.whatsappNumber ?? "").replace(/\D/g, "");
+    if (digits.length > 0 && (digits.length < 8 || digits.length > 15)) {
+      return NextResponse.json({ error: "WhatsApp number must be 8–15 digits (or empty to hide)" }, { status: 400 });
+    }
+    updates.push({ key: FIELD_TO_KEY.whatsappNumber, value: digits });
   }
   if (updates.length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 

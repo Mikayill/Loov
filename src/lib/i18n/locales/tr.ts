@@ -1061,6 +1061,7 @@ export const tr: Dictionary = {
   "contact.form.messageMin10": "Mesaj en az 10 karakter olmalıdır",
   "contact.form.messagePlaceholder": "Mesajınızı buraya yazın…",
   "contact.form.sending": "Gönderiliyor…",
+  "contact.form.sendFailed": "Mesajın gönderilemedi — lütfen birazdan tekrar dene.",
   "contact.form.sendMessage": "Mesaj Gönder",
   "contact.form.sentTitle": "Mesaj Gönderildi!",
   "contact.form.sentBody": "Bize ulaştığınız için teşekkürler, {name}. {email} adresinden 24 saat içinde size dönüş yapacağız.",

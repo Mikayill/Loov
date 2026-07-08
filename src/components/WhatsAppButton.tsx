@@ -3,19 +3,20 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale } from "@/context/LocaleContext";
+import { useSettings } from "@/lib/db/useSettings";
 
-const WA_NUMBER = "995000000000"; // placeholder — update with real number
 const WA_MESSAGE = "Hello! I'm interested in your baby clothing collection 🌿";
 
 export default function WhatsAppButton() {
   const { t } = useLocale();
+  const { whatsappNumber } = useSettings();
   const [hovered, setHovered] = useState(false);
   const pathname = usePathname();
 
-  /* Only shown on the home page */
-  if (pathname !== "/") return null;
+  /* Only shown on the home page, and only once a real number is configured */
+  if (pathname !== "/" || !whatsappNumber) return null;
 
-  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(WA_MESSAGE)}`;
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(WA_MESSAGE)}`;
 
   return (
     <a
