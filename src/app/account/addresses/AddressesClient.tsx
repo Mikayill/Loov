@@ -13,36 +13,13 @@ import {
   PHONE_PLACEHOLDER,
   POSTAL_CODE_PLACEHOLDER,
 } from "@/lib/georgia";
-
-interface Address {
-  id: string;
-  label: string;
-  firstName: string;
-  lastName: string;
-  street: string;
-  region: string;
-  district: string;
-  city: string;
-  zip: string;
-  phone: string;
-  isDefault: boolean;
-}
-
-const initialAddresses: Address[] = [
-  {
-    id: "addr-1",
-    label: "Home",
-    firstName: "Ana",
-    lastName: "Beridze",
-    street: "123 Rustaveli Avenue",
-    region: "Tbilisi",
-    district: "Vake",
-    city: "Tbilisi",
-    zip: "0102",
-    phone: "+995 555 123 456",
-    isDefault: true,
-  },
-];
+import {
+  listAddresses,
+  addAddress,
+  removeAddress,
+  setDefaultAddress,
+  type SavedAddress,
+} from "@/lib/db/addresses";
 
 const EMPTY_FORM = {
   label: "Home",
@@ -61,16 +38,33 @@ export default function AddressesClient() {
   const { user, loading } = useAuth();
   const { t } = useLocale();
 
-  const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
+  const [fetching, setFetching]   = useState(true);
+  const [ready, setReady]         = useState(true);
   const [showForm, setShowForm]   = useState(false);
   const [form, setForm]           = useState(EMPTY_FORM);
   const [saved, setSaved]         = useState(false);
+  const [error, setError]         = useState("");
+  const [busy, setBusy]           = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  /* Load the address book from Supabase (RLS: own rows only). */
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    listAddresses().then(({ addresses, ready }) => {
+      if (cancelled) return;
+      setAddresses(addresses);
+      setReady(ready);
+      setFetching(false);
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  if (loading || !user || fetching) {
     return (
       <div className="flex items-center justify-center py-32">
         <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
@@ -82,25 +76,31 @@ export default function AddressesClient() {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
-  function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    const newAddr: Address = {
-      id: "addr-" + Date.now(),
-      ...form,
-      isDefault: addresses.length === 0,
-    };
-    setAddresses((prev) => [...prev, newAddr]);
+    setError("");
+    setBusy(true);
+    const res = await addAddress({ ...form, isDefault: addresses.length === 0 });
+    setBusy(false);
+    if (res.error || !res.address) { setError(res.error || "Could not save"); return; }
+    setAddresses((prev) => [...prev, res.address!]);
     setForm(EMPTY_FORM);
     setShowForm(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
 
-  function handleRemove(id: string) {
+  async function handleRemove(id: string) {
+    setError("");
+    const res = await removeAddress(id);
+    if (res.error) { setError(res.error); return; }
     setAddresses((prev) => prev.filter((a) => a.id !== id));
   }
 
-  function handleSetDefault(id: string) {
+  async function handleSetDefault(id: string) {
+    setError("");
+    const res = await setDefaultAddress(id);
+    if (res.error) { setError(res.error); return; }
     setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
   }
 
@@ -133,6 +133,16 @@ export default function AddressesClient() {
         <div className="mb-5 p-3 bg-[#EAF2F0] border border-[#C8DDD8] rounded-xl flex items-center gap-2 text-sm font-semibold text-[#3A7A68]">
           <span>✓</span>
           <span>{t("addr.savedSuccess")}</span>
+        </div>
+      )}
+      {!ready && (
+        <div className="mb-5 p-3 bg-[#FFF4E5] border border-[#F0C85A] rounded-xl text-sm font-semibold text-[#8B6914]">
+          {t("addr.notReady")}
+        </div>
+      )}
+      {error && (
+        <div className="mb-5 p-3 bg-[#FBF0F0] border border-[#E8C4C4] rounded-xl text-sm font-semibold text-[#B03A3A]">
+          {error}
         </div>
       )}
 
@@ -346,10 +356,11 @@ export default function AddressesClient() {
             </button>
             <button
               type="submit"
-              className="flex-1 h-10 rounded-xl text-sm font-extrabold text-white hover:opacity-90 transition-opacity"
+              disabled={busy}
+              className="flex-1 h-10 rounded-xl text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
               style={{ backgroundColor: "#5E9E8C" }}
             >
-              {t("addr.saveAddress")} →
+              {busy ? "…" : `${t("addr.saveAddress")} →`}
             </button>
           </div>
         </form>

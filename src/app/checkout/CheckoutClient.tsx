@@ -13,6 +13,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { useLoyalty } from "@/context/LoyaltyContext";
 import { maxRedeemablePoints, discountForPoints, pointsForAmount, REDEEM_BLOCK } from "@/lib/loyalty";
 import { fetchMyProfile } from "@/lib/db/profile";
+import { listAddresses, addAddress, type SavedAddress } from "@/lib/db/addresses";
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import { buildOrderMessage } from "@/lib/i18n/orderMessages";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
@@ -195,6 +196,57 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     return () => { cancelled = true; };
   }, [user]);
 
+  /* ── Saved addresses (address book) — signed-in shoppers pick instead of retyping ── */
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddrId, setSelectedAddrId] = useState<string>("new");
+  const [saveNewAddress, setSaveNewAddress] = useState(false);
+  const [addrBookReady, setAddrBookReady] = useState(false);
+
+  function applyAddress(a: SavedAddress) {
+    setForm((f) => ({
+      ...f,
+      firstName: a.firstName || f.firstName,
+      lastName: a.lastName || f.lastName,
+      phone: a.phone || f.phone,
+      address: a.street,
+      region: a.region,
+      district: a.district,
+      city: a.city,
+      zip: a.zip,
+    }));
+    setErrors({});
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    listAddresses().then(({ addresses, ready }) => {
+      if (cancelled) return;
+      setSavedAddresses(addresses);
+      setAddrBookReady(ready);
+      /* Auto-pick the default address if the shopper hasn't typed one yet. */
+      const def = addresses.find((a) => a.isDefault) ?? addresses[0];
+      if (def) {
+        setSelectedAddrId(def.id);
+        setForm((f) => {
+          if (f.address) return f; // don't clobber what they typed
+          return {
+            ...f,
+            firstName: f.firstName || def.firstName,
+            lastName: f.lastName || def.lastName,
+            phone: f.phone || def.phone,
+            address: def.street,
+            region: def.region,
+            district: def.district,
+            city: def.city,
+            zip: def.zip,
+          };
+        });
+      }
+    });
+    return () => { cancelled = true; };
+  }, [user]);
+
   const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice } = useSettings();
 
   /* Bundle-aware subtotal — same rule the server uses for the real charge
@@ -250,6 +302,31 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   function set(key: keyof FormData, val: string) {
     setForm((f) => ({ ...f, [key]: val }));
     setErrors((e) => ({ ...e, [key]: "" }));
+  }
+
+  /* Manual address fields show when there's nothing saved or "different address" is picked. */
+  const showManualFields = !user || savedAddresses.length === 0 || selectedAddrId === "new";
+
+  async function handleContinueToReview() {
+    if (!validateAddress()) return;
+    // Optionally file the freshly typed address into the address book.
+    if (user && addrBookReady && showManualFields && saveNewAddress) {
+      const res = await addAddress({
+        label: "Home",
+        firstName: form.firstName,
+        lastName: form.lastName,
+        street: form.address,
+        region: form.region,
+        district: form.district,
+        city: form.city,
+        zip: form.zip,
+        phone: form.phone,
+        isDefault: savedAddresses.length === 0,
+      });
+      if (res.address) setSavedAddresses((prev) => [...prev, res.address!]);
+      setSaveNewAddress(false);
+    }
+    setStep("review");
   }
 
   function validateAddress(): boolean {
@@ -382,8 +459,67 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 <span className="w-6 h-6 rounded-full bg-[#5E9E8C] text-white text-xs flex items-center justify-center font-bold">2</span>
                 {t("checkout.shippingAddress")}
               </h2>
+
+              {/* Saved addresses — pick one instead of retyping */}
+              {user && savedAddresses.length > 0 && (
+                <div className="mb-5 space-y-2">
+                  <p className="text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("checkout.savedAddresses")}</p>
+                  {savedAddresses.map((a) => (
+                    <label
+                      key={a.id}
+                      className={`flex items-start gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedAddrId === a.id ? "border-[#5E9E8C] bg-[#EAF2F0]" : "border-[#DDD5CC] hover:border-[#9A8E88]"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="savedAddress"
+                        checked={selectedAddrId === a.id}
+                        onChange={() => { setSelectedAddrId(a.id); applyAddress(a); }}
+                        className="accent-[#5E9E8C] mt-1"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-[#2A2320] flex items-center gap-2">
+                          {a.label === "Home" ? t("addr.labelHome") : a.label === "Work" ? t("addr.labelWork") : t("addr.labelOther")}
+                          {a.isDefault && (
+                            <span className="text-[9px] font-bold bg-white text-[#5E9E8C] border border-[#5E9E8C] px-1.5 py-0.5 rounded-full uppercase">
+                              {t("addr.default")}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-[#5E5450] mt-0.5">
+                          {a.firstName} {a.lastName} · {a.street}{a.district ? `, ${a.district}` : ""}{a.city ? `, ${a.city}` : ""}{a.zip ? `, ${a.zip}` : ""}
+                        </p>
+                        {a.phone && <p className="text-xs text-[#9A8E88]">{a.phone}</p>}
+                      </div>
+                    </label>
+                  ))}
+                  <label
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedAddrId === "new" ? "border-[#5E9E8C] bg-[#EAF2F0]" : "border-dashed border-[#DDD5CC] hover:border-[#9A8E88]"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="savedAddress"
+                      checked={selectedAddrId === "new"}
+                      onChange={() => {
+                        setSelectedAddrId("new");
+                        setForm((f) => ({ ...f, address: "", region: "", district: "", city: "", zip: "" }));
+                      }}
+                      className="accent-[#5E9E8C]"
+                    />
+                    <span className="text-sm font-bold text-[#5E9E8C]">＋ {t("checkout.useDifferent")}</span>
+                  </label>
+                </div>
+              )}
+
               <div className="space-y-4">
+                {showManualFields && (
                 <Field label={t("checkout.streetAddress")} id="address" value={form.address} onChange={(v) => set("address", v)} required placeholder="123 Rustaveli Avenue" autoComplete="address-line1" error={errors.address} />
+                )}
+                {showManualFields && (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Region (mkhare) */}
                   <div>
@@ -441,6 +577,19 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   )}
                   <Field label={t("checkout.postalCode")} id="zip" value={form.zip} onChange={(v) => set("zip", v)} placeholder={POSTAL_CODE_PLACEHOLDER} inputMode="numeric" error={errors.zip} />
                 </div>
+                </>
+                )}
+                {showManualFields && user && addrBookReady && (
+                  <label className="flex items-center gap-2 text-sm text-[#5E5450] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveNewAddress}
+                      onChange={(e) => setSaveNewAddress(e.target.checked)}
+                      className="w-4 h-4 accent-[#5E9E8C]"
+                    />
+                    {t("checkout.saveAddress")}
+                  </label>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("checkout.orderNotes")} <span className="font-normal text-[#9A8E88]">{t("checkout.optional")}</span></label>
                   <textarea
@@ -543,7 +692,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             <CsrfField />
 
             <button
-              onClick={() => { if (validateAddress()) setStep("review"); }}
+              onClick={handleContinueToReview}
               className="w-full py-4 rounded-2xl font-extrabold text-white text-base hover:opacity-90 active:scale-95 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
               style={{ backgroundColor: "#5E9E8C" }}
             >
