@@ -9,6 +9,16 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 **Tasarım:** Unisex pastel — primary `#5E9E8C` (sage teal), bg `#F5F0EB` (warm cream)
 **Auth:** Mock (localStorage) — Supabase'e geçiş Faz 2'de
 
+## 🌍 DEPLOY DURUMU (7-8 Tem 2026) — SİTE CANLIYA ÇIKTI, ŞİMDİLİK DURAKLATILDI
+- **GitHub:** `https://github.com/Mikayill/Loov` (main branch, push → Vercel otomatik deploy). Git identity repo-local: Mike / mikayilismayilovgeo@gmail.com
+- **Vercel:** proje adı `loov` (Pro trial). Env değişkenleri girildi (5 adet, tüm ortamlar). ⚠️ Dikkat: env değeri yapıştırırken çift yapıştırma kazası yaşandı (anon key ikiye katlanmıştı → tarayıcıda 401'ler; silip tek sefer yapıştırarak çözüldü)
+- **Domain:** `loov.ge` (domenebi.ge'den alındı, 08.07.2027'ye kadar). Nameserver'lar Vercel'e taşındı (`ns1/ns2.vercel-dns.com`) → DNS artık VERCEL panelinden yönetiliyor (domenebi.ge'den DEĞİL). `loov.ge` → `www.loov.ge`'ye 308 redirect
+- **⏸️ SİTE ŞU AN DURAKLATILDI:** kullanıcı domainleri Vercel projesinden Remove etti (loov.ge + www.loov.ge → 404). GERİ AÇMAK: Vercel → Settings → Domains → Add Domain → `loov.ge` (NS zaten Vercel'de, saniyeler içinde açılır). Standard Protection açık (vercel.app URL'i login istiyor)
+- **Supabase Auth:** Site URL `https://loov.ge`, Redirect URLs'e `https://loov.ge/auth/callback` + `https://www.loov.ge/auth/callback` eklendi (www'lı olan Google girişi için ŞARTTI). localhost'lar duruyor
+- **Resend:** `loov.ge` domaini eklendi, 4 DNS kaydı (DKIM/SPF-MX/SPF-TXT/DMARC) Vercel DNS'e girildi — doğrulama bekliyor/bekliyordu; doğrulanınca `onboarding@resend.dev` → `orders@loov.ge` geçişi yapılacak (route'larda TODO var)
+- **PERFORMANS SORUNU (kısmen çözüldü):** site yavaştı. (1) 5 vitrin sayfası `force-dynamic`'ti → `revalidate = 60` yapıldı (commit 61eb743). (2) Vercel Functions bölgesi Frankfurt (fra1) seçildi — AMA YENİ DEPLOY GEREKİYOR (henüz tetiklenmedi, site duraklatıldığı için). (3) **ASIL DARBOĞAZ: Supabase projesi Sydney'de (`ap-southeast-2`)** — her DB sorgusu Avustralya'ya gidiyor. Kalıcı çözüm = Supabase'i Frankfurt'a taşımak (yeni proje + veri göçü, dikkatli planlanmalı, henüz yapılmadı)
+- **Sıradaki oturum:** kök dizindeki `buglar.md` — kullanıcının canlıyı test ederken tuttuğu ayrıntılı bug/istek listesi (HOME/PRODUCTS/PDP/BUNDLES/ABOUT/CONTACT/ACCOUNT başlıklı). Oradan çalışılacak
+
 ---
 
 ## ✅ TAMAMLANAN ÖZELLİKLER
