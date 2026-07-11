@@ -159,6 +159,7 @@ export const en = {
   "pdp.outOfStockBtn": "Out of Stock",
   "pdp.notifyPrompt": "Sold out — get an email the moment it’s back:",
   "pdp.notifyBtn": "Notify me",
+  "pdp.notifyAccount": "We’ll email {email} when it’s back.",
   "pdp.notifyDone": "Done! We’ll email you when it’s back in stock.",
   "pdp.saveWishlist": "Save to Wishlist",
   "pdp.savedWishlist": "Saved to Wishlist ✓",

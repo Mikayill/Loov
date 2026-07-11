@@ -153,6 +153,7 @@ export const ka: Dictionary = {
   "pdp.outOfStockBtn": "არ არის მარაგში",
   "pdp.notifyPrompt": "მარაგში აღარ არის — მიიღეთ ელფოსტა, როგორც კი დაბრუნდება:",
   "pdp.notifyBtn": "შემატყობინეთ",
+  "pdp.notifyAccount": "დაბრუნებისას მოგწერთ {email}-ზე.",
   "pdp.notifyDone": "მზადაა! მოგწერთ, როცა ისევ მარაგში იქნება.",
   "pdp.saveWishlist": "სურვილებში დამატება",
   "pdp.savedWishlist": "შენახულია სურვილებში ✓",

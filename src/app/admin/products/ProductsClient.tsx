@@ -343,9 +343,9 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
 
   return (
     <>
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="grid md:grid-cols-2 gap-6 min-w-0">
       {/* LEFT: photos + season + discount */}
-          <div className="space-y-5">
+          <div className="space-y-5 min-w-0">
             {/* Gallery */}
             <div>
               <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-2">Photos ({gallery.length})</label>
@@ -452,7 +452,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
           </div>
 
           {/* RIGHT: size×color stock matrix + description + features */}
-          <div className="space-y-5">
+          <div className="space-y-5 min-w-0">
             {/* Per-(size,color) stock */}
             {(draft.sizes ?? []).length > 0 && (draft.colors ?? []).length > 0 && (
               <div>
@@ -513,7 +513,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
             <div>
               <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Materials &amp; Care tab</label>
               <p className="text-[10px] text-[#9A8E88] mb-2">Not every product is cotton — set the real fabric here. Empty fields show the default copy.</p>
-              <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                 {([
                   { key: "material" as const, ph: "Material — e.g. 100% Muslin" },
                   { key: "weight" as const, ph: "Weight — e.g. 180 GSM" },
@@ -897,8 +897,8 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
         </button>
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       </div>
-      <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} className="px-3 h-10 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]" placeholder="Product name" /></div>
+      <div className="flex-1 min-w-[140px]"><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 h-10 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]" placeholder="Product name" /></div>
       <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Category</label>
         <select value={category} onChange={(e) => pickCategory(e.target.value)} className="h-10 px-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] bg-white">
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select></div>

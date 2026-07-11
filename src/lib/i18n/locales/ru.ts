@@ -151,6 +151,7 @@ export const ru: Dictionary = {
   "pdp.outOfStockBtn": "Нет в наличии",
   "pdp.notifyPrompt": "Нет в наличии — получите письмо, как только появится:",
   "pdp.notifyBtn": "Сообщить мне",
+  "pdp.notifyAccount": "Мы напишем на {email}, когда товар появится.",
   "pdp.notifyDone": "Готово! Мы напишем, когда товар снова появится.",
   "pdp.saveWishlist": "В избранное",
   "pdp.savedWishlist": "В избранном ✓",

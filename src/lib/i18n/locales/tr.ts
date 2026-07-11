@@ -151,6 +151,7 @@ export const tr: Dictionary = {
   "pdp.outOfStockBtn": "Tükendi",
   "pdp.notifyPrompt": "Tükendi — geri gelince e-posta al:",
   "pdp.notifyBtn": "Haber ver",
+  "pdp.notifyAccount": "Geri gelince {email} adresine e-posta göndereceğiz.",
   "pdp.notifyDone": "Tamam! Stoğa girince e-posta göndereceğiz.",
   "pdp.saveWishlist": "Favorilere Ekle",
   "pdp.savedWishlist": "Favorilere Eklendi ✓",

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
 import { Product } from "@/types";
 import { categoryLabel, colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import { formatPrice, formatAmount } from "@/lib/format";
@@ -90,6 +91,7 @@ export default function ProductDetailClient({
   reviewStats?: { avg: number; count: number };
 }) {
   const { addItem } = useCart();
+  const { user } = useAuth();
   const { has, toggle } = useWishlist();
   const { tier } = useLoyalty();
   const { t, locale } = useLocale();
@@ -120,16 +122,13 @@ export default function ProductDetailClient({
   const [notifyStatus,  setNotifyStatus]  = useState<"idle" | "sending" | "done">("idle");
   const [notifyError,   setNotifyError]   = useState("");
 
-  async function handleNotify(e: React.FormEvent) {
-    e.preventDefault();
-    setNotifyError("");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notifyEmail.trim())) { setNotifyError(t("auth.validEmail")); return; }
+  async function subscribeStock(email: string) {
     setNotifyStatus("sending");
     try {
       const res = await fetch("/api/stock-notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id, email: notifyEmail.trim(), locale }),
+        body: JSON.stringify({ productId: product.id, email, locale }),
       });
       if (!res.ok) throw new Error();
       setNotifyStatus("done");
@@ -137,6 +136,20 @@ export default function ProductDetailClient({
       setNotifyStatus("idle");
       setNotifyError(t("checkout.errGeneric"));
     }
+  }
+
+  // Signed-in shoppers: one tap, we already know their email.
+  function handleNotifyAccount() {
+    setNotifyError("");
+    if (user?.email) subscribeStock(user.email);
+  }
+
+  // Guests: collect an email.
+  async function handleNotifyGuest(e: React.FormEvent) {
+    e.preventDefault();
+    setNotifyError("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notifyEmail.trim())) { setNotifyError(t("auth.validEmail")); return; }
+    subscribeStock(notifyEmail.trim());
   }
 
   /* Photo gallery */
@@ -148,6 +161,15 @@ export default function ProductDetailClient({
      first→last never "jumps" — it's the same fade transition either way. */
   function prevImg() { setActiveImg((i) => (i - 1 + images.length) % images.length); }
   function nextImg() { setActiveImg((i) => (i + 1) % images.length); }
+  /* Touch swipe (mobile) — swipe left = next photo, right = previous. */
+  const touchStartX = useRef<number | null>(null);
+  function onTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || images.length < 2) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) { dx < 0 ? nextImg() : prevImg(); }
+    touchStartX.current = null;
+  }
 
   const off = discountPercent(product);
   /* Price follows the selected size (per-size pricing). */
@@ -246,8 +268,10 @@ export default function ProductDetailClient({
         <div className="space-y-4">
           {/* Main image — colour selection does NOT change the photo */}
           <div
-            className="relative w-full aspect-square rounded-3xl flex items-center justify-center overflow-hidden border border-[#DDD5CC]"
+            className="relative w-full aspect-square rounded-3xl flex items-center justify-center overflow-hidden border border-[#DDD5CC] touch-pan-y select-none"
             style={{ backgroundColor: product.cardColor }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
           >
             {images.length > 0 ? (
               images.map((src, i) => (
@@ -387,8 +411,23 @@ export default function ProductDetailClient({
               {/* Back-in-stock waitlist */}
               {notifyStatus === "done" ? (
                 <p className="mt-2 text-xs font-semibold text-[#5E9E8C]">✓ {t("pdp.notifyDone")}</p>
+              ) : user?.email ? (
+                /* Signed in → we already have the email, one tap is enough. */
+                <div className="mt-2.5">
+                  <button
+                    onClick={handleNotifyAccount}
+                    disabled={notifyStatus === "sending"}
+                    className="h-10 px-4 rounded-xl font-bold text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
+                    style={{ backgroundColor: "#5E9E8C" }}
+                  >
+                    {notifyStatus === "sending" ? "…" : `🔔 ${t("pdp.notifyBtn")}`}
+                  </button>
+                  <p className="text-[11px] text-[#9A8E88] mt-1.5">{t("pdp.notifyAccount").replace("{email}", user.email)}</p>
+                  {notifyError && <p className="text-xs text-red-400 font-semibold mt-1">{notifyError}</p>}
+                </div>
               ) : (
-                <form onSubmit={handleNotify} className="mt-2.5">
+                /* Guest → collect an email. */
+                <form onSubmit={handleNotifyGuest} className="mt-2.5">
                   <p className="text-xs text-[#5E5450] mb-1.5">{t("pdp.notifyPrompt")}</p>
                   <div className="flex items-stretch gap-2 max-w-sm">
                     <input
