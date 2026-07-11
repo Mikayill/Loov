@@ -12,6 +12,21 @@ import { CartItem, CartContextType, CartAddResult, MaxReachedNotice, Product } f
 import { effectivePrice } from "@/lib/pricing";
 import { variantStock } from "@/lib/stock";
 import { useAuth } from "@/context/AuthContext";
+import { loadRemote, saveRemote } from "@/lib/db/cartSync";
+
+/** Unique key for one cart line (product + variant + bundle). */
+function lineKey(i: CartItem): string {
+  return `${i.product.id}::${i.selectedColor}::${i.selectedSize}::${i.bundleSlug ?? ""}`;
+}
+
+/** Merge two carts (used when a guest with an active cart signs into an
+ *  account that already has one on another device): keep the account's lines,
+ *  append the guest's lines that aren't already there. Avoids losing the cart
+ *  the shopper is actively building without double-counting. */
+function mergeCarts(remote: CartItem[], local: CartItem[]): CartItem[] {
+  const seen = new Set(remote.map(lineKey));
+  return [...remote, ...local.filter((i) => !seen.has(lineKey(i)))];
+}
 
 const CartContext = createContext<CartContextType | null>(null);
 
@@ -36,12 +51,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [maxReachedNotice, setMaxReachedNotice] = useState<MaxReachedNotice | null>(null);
   const activeKeyRef = useRef(GUEST_KEY);
   const prevUserId = useRef<string | null | undefined>(undefined);
+  const dbTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Reload whenever the active account changes (sign-in, sign-out, or
-     switching accounts). On a guest's FIRST sign-in on this browser (empty
-     account bucket), their guest cart is adopted into the account instead
-     of being discarded — but two different accounts never see each other's
-     items, which is the bug this fixes. */
+     switching accounts). Local storage gives an instant render; for signed-in
+     users we then reconcile with the account's DB cart so it follows them
+     across devices (supabase/cart-wishlist.sql). Guest cart is adopted on the
+     first sign-in; two different accounts never see each other's items. */
   useEffect(() => {
     const currentUserId = user?.id ?? null;
     if (prevUserId.current === currentUserId) return;
@@ -51,6 +67,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const targetKey = keyFor(currentUserId);
     activeKeyRef.current = targetKey;
     let targetItems: CartItem[] = [];
+    let adoptedGuest = false;
     try {
       const targetRaw = localStorage.getItem(targetKey);
       if (targetRaw) {
@@ -63,6 +80,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const guestParsed = JSON.parse(guestRaw);
           if (Array.isArray(guestParsed) && guestParsed.length > 0) {
             targetItems = guestParsed;
+            adoptedGuest = true;
             localStorage.removeItem(GUEST_KEY);
           }
         }
@@ -72,13 +90,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setItems(targetItems);
     setHydrated(true);
+
+    /* Cross-device reconcile (signed-in only, best-effort). */
+    if (currentUserId) {
+      let cancelled = false;
+      (async () => {
+        const remote = await loadRemote<CartItem>("user_carts");
+        if (cancelled) return;
+        if (remote && remote.length > 0) {
+          // Merge the just-adopted guest cart in; otherwise trust the account's.
+          setItems(adoptedGuest ? mergeCarts(remote, targetItems) : remote);
+        } else if (targetItems.length > 0) {
+          saveRemote("user_carts", currentUserId, targetItems);
+        }
+      })();
+      return () => { cancelled = true; };
+    }
   }, [user?.id]);
 
   useEffect(() => {
-    if (hydrated) {
-      localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
+    if (!hydrated) return;
+    localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
+    const uid = user?.id;
+    if (uid) {
+      // Debounced push to the account's DB cart (rapid +/- clicks coalesce).
+      if (dbTimer.current) clearTimeout(dbTimer.current);
+      dbTimer.current = setTimeout(() => saveRemote("user_carts", uid, items), 700);
     }
-  }, [items, hydrated]);
+  }, [items, hydrated, user?.id]);
 
   const addItem = useCallback(
     (product: Product, color: string, size: string, qty: number = 1, bundleSlug?: string): CartAddResult => {

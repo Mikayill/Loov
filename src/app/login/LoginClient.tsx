@@ -24,7 +24,8 @@ export default function LoginClient() {
   const router = useRouter();
   const { t } = useLocale();
   const { signInWithEmail, signInWithGoogle, sendPhoneOtp, signInWithPhone,
-    sendEmailOtp, verifyEmailOtp, checkTrustedDevice, trustThisDevice, signOut } = useAuth();
+    sendEmailOtp, verifyEmailOtp, checkTrustedDevice, trustThisDevice, signOut,
+    mfaRequired, verifyTotp, sendPhoneFactorCode, verifyPhoneFactor } = useAuth();
 
   const [tab,        setTab]        = useState<Tab>("email");
   const [email,      setEmail]      = useState("");
@@ -42,6 +43,12 @@ export default function LoginClient() {
   const [emailOtpStep, setEmailOtpStep] = useState(false);
   const [emailOtpCode, setEmailOtpCode] = useState("");
   const [rememberDevice, setRememberDevice] = useState(true);
+  /* Authenticator-app / SMS 2FA challenge — takes precedence over email-OTP
+     when the account has a verified factor (it's the stronger check). */
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaMethod, setMfaMethod] = useState<"totp" | "phone">("totp");
+  const [mfaChallengeId, setMfaChallengeId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
   /* 60s matches Supabase's SMTP "minimum interval per user" — a shorter
      cooldown here would let the shopper hit a rate-limit error on resend. */
   const [resendCooldown, setResendCooldown] = useState(60);
@@ -76,16 +83,52 @@ export default function LoginClient() {
     setError(""); setLoading(true);
     const res = await signInWithEmail(email, password);
     if (res.error) { setLoading(false); setError(res.error); return; }
-    /* Password OK — skip the OTP step entirely on a device we already trust. */
+    /* If the account has a verified authenticator-app (or SMS) factor, that
+       stronger check wins over the automatic email code. */
+    const mfa = await mfaRequired();
+    if (mfa.required && mfa.factorId) {
+      setMfaFactorId(mfa.factorId);
+      if (mfa.type === "phone") {
+        setMfaMethod("phone");
+        const ch = await sendPhoneFactorCode(mfa.factorId);
+        setLoading(false);
+        if (ch.error) { setError(ch.error); return; }
+        setMfaChallengeId(ch.challengeId ?? null);
+        return;
+      }
+      setMfaMethod("totp");
+      setLoading(false);
+      return;
+    }
+    /* No authenticator factor → automatic email-OTP, skipped on trusted devices. */
     const trusted = await checkTrustedDevice();
     if (trusted) { setLoading(false); router.push("/account"); return; }
-    /* Not trusted → lock the protected pages until the code is verified. */
     await setOtpGate("open");
     const sendRes = await sendEmailOtp(email);
     setLoading(false);
     if (sendRes.error) { setError(sendRes.error); return; }
     setEmailOtpStep(true);
     setResendCooldown(60);
+  }
+
+  async function handleMfaVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mfaFactorId) return;
+    setError(""); setLoading(true);
+    const res = mfaMethod === "phone" && mfaChallengeId
+      ? await verifyPhoneFactor(mfaFactorId, mfaChallengeId, mfaCode)
+      : await verifyTotp(mfaFactorId, mfaCode);
+    setLoading(false);
+    if (res.error) { setError(res.error); return; }
+    router.push("/account"); // AAL2 elevation — no email-OTP gate needed
+  }
+
+  function cancelMfa() {
+    signOut();
+    setMfaFactorId(null);
+    setMfaChallengeId(null);
+    setMfaCode("");
+    setError("");
   }
 
   async function handleEmailOtpVerify(e: React.FormEvent) {
@@ -157,8 +200,32 @@ export default function LoginClient() {
 
         <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
 
-          {/* ── Mandatory email-OTP step: password accepted, new/unremembered device ── */}
-          {emailOtpStep ? (
+          {/* ── Authenticator-app / SMS 2FA step (takes precedence over email-OTP) ── */}
+          {mfaFactorId ? (
+            <form onSubmit={handleMfaVerify} className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🛡️</div>
+                <p className="font-extrabold text-[#2A2320]">{t("auth.mfaTitle")}</p>
+                <p className="text-sm text-[#9A8E88] mt-1">{mfaMethod === "phone" ? t("auth.mfaBodyPhone") : t("auth.mfaBody")}</p>
+              </div>
+              <input
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                placeholder="123456"
+                autoFocus
+                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+              />
+              {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
+              <Button type="submit" disabled={mfaCode.length !== 6} loading={loading} loadingText={t("auth.verifying")} fullWidth>
+                {t("auth.verifyAndSignIn")} →
+              </Button>
+              <button type="button" onClick={cancelMfa} className="w-full text-center text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors">
+                {t("auth.mfaCancel")}
+              </button>
+            </form>
+          ) : /* ── Mandatory email-OTP step: password accepted, new/unremembered device ── */
+          emailOtpStep ? (
             <form onSubmit={handleEmailOtpVerify} className="space-y-4">
               <div className="text-center">
                 <div className="text-4xl mb-2">📧</div>

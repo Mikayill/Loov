@@ -11,7 +11,8 @@ import { PHONE_COUNTRY_CODE, PHONE_LOCAL_PLACEHOLDER, phoneLocalPart, withCountr
 export default function SecurityClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { user, loading, updatePassword, updateProfile, linkPhone, deleteAccount } = useAuth();
+  const { user, loading, updatePassword, updateProfile, linkPhone, deleteAccount,
+    listTotpFactors, enrollTotp, verifyTotp, unenrollTotp } = useAuth();
 
   const [currentPw,  setCurrentPw]  = useState("");
   const [newPw,      setNewPw]      = useState("");
@@ -41,6 +42,16 @@ export default function SecurityClient() {
   const [deviceTrusted, setDeviceTrusted] = useState(false);
   const [forgettingDevice, setForgettingDevice] = useState(false);
 
+  /* ── Authenticator-app 2FA (optional, stronger than the automatic email code) ── */
+  const [totpOn, setTotpOn]           = useState(false);   // verified factor exists
+  const [totpFactorId, setTotpFactorId] = useState<string | null>(null);
+  const [totpLoaded, setTotpLoaded]   = useState(false);
+  const [enrolling, setEnrolling]     = useState<{ factorId: string; qr: string; secret: string } | null>(null);
+  const [totpCode, setTotpCode]       = useState("");
+  const [totpBusy, setTotpBusy]       = useState(false);
+  const [totpError, setTotpError]     = useState("");
+  const [showDisableTotp, setShowDisableTotp] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
@@ -54,6 +65,52 @@ export default function SecurityClient() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    listTotpFactors().then(({ factors }) => {
+      if (cancelled) return;
+      setTotpOn(factors.length > 0);
+      setTotpFactorId(factors[0]?.id ?? null);
+      setTotpLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, listTotpFactors]);
+
+  async function startEnrollTotp() {
+    setTotpError(""); setTotpBusy(true); setTotpCode("");
+    const res = await enrollTotp();
+    setTotpBusy(false);
+    if (res.error || !res.factorId) { setTotpError(res.error || t("auth.notConfigured")); return; }
+    setEnrolling({ factorId: res.factorId, qr: res.qr ?? "", secret: res.secret ?? "" });
+  }
+
+  async function confirmEnrollTotp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!enrolling) return;
+    setTotpError(""); setTotpBusy(true);
+    const res = await verifyTotp(enrolling.factorId, totpCode);
+    setTotpBusy(false);
+    if (res.error) { setTotpError(res.error); return; }
+    setTotpOn(true);
+    setTotpFactorId(enrolling.factorId);
+    setEnrolling(null);
+    setTotpCode("");
+  }
+
+  async function disableTotp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!totpFactorId) return;
+    setTotpError(""); setTotpBusy(true);
+    const res = await unenrollTotp(totpFactorId, totpCode);
+    setTotpBusy(false);
+    if (res.error) { setTotpError(res.error); return; }
+    setTotpOn(false);
+    setTotpFactorId(null);
+    setShowDisableTotp(false);
+    setTotpCode("");
+  }
 
   async function forgetDevice() {
     setForgettingDevice(true);
@@ -355,6 +412,83 @@ export default function SecurityClient() {
               >
                 {forgettingDevice ? t("sec.updating") : t("sec.forgetDevice")}
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Authenticator-app 2FA (optional, stronger than the email code) */}
+        <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-extrabold text-[#2A2320] flex items-center gap-2">
+              <span>🔐</span> {t("sec.twoFactor")}
+            </h2>
+            {totpLoaded && (
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${totpOn ? "bg-[#EAF2F0] text-[#5E9E8C]" : "bg-[#F5F0EB] text-[#9A8E88]"}`}>
+                {totpOn ? t("sec.mfaOn") : t("sec.mfaOff")}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-[#5E5450] mb-4">{t("sec.twoFactorBody")}</p>
+
+          {!totpLoaded ? null : enrolling ? (
+            /* Step 2: scan QR + confirm a code */
+            <form onSubmit={confirmEnrollTotp} className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+                {enrolling.qr && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={enrolling.qr} alt="2FA QR code" className="w-40 h-40 rounded-xl border border-[#DDD5CC] bg-white p-2" />
+                )}
+                <div className="flex-1 space-y-2 text-sm text-[#5E5450]">
+                  <p className="font-semibold text-[#2A2320]">{t("sec.mfaScanQr")}</p>
+                  <p className="text-xs">{t("sec.mfaManualKey")}</p>
+                  <code className="block bg-[#F5F0EB] border border-[#DDD5CC] rounded-lg px-3 py-2 text-[11px] font-mono break-all select-all">{enrolling.secret}</code>
+                </div>
+              </div>
+              <div className="flex items-end gap-3 flex-wrap">
+                <div>
+                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("sec.mfaEnterCode")}</label>
+                  <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
+                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]" />
+                </div>
+                <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-6 rounded-xl font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#5E9E8C" }}>
+                  {totpBusy ? "…" : t("sec.mfaActivate")}
+                </button>
+                <button type="button" onClick={() => { setEnrolling(null); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] transition-all active:scale-95">
+                  {t("addr.cancel")}
+                </button>
+              </div>
+              {totpError && <p className="text-red-500 text-xs font-semibold">{totpError}</p>}
+            </form>
+          ) : totpOn ? (
+            showDisableTotp ? (
+              <form onSubmit={disableTotp} className="space-y-3">
+                <p className="text-sm font-semibold text-[#2A2320]">{t("sec.mfaDisableConfirm")}</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
+                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]" />
+                  <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-5 rounded-xl font-bold text-white text-sm bg-red-500 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all">
+                    {totpBusy ? "…" : t("sec.mfaDisable")}
+                  </button>
+                  <button type="button" onClick={() => { setShowDisableTotp(false); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] transition-all active:scale-95">
+                    {t("addr.cancel")}
+                  </button>
+                </div>
+                {totpError && <p className="text-red-500 text-xs font-semibold">{totpError}</p>}
+              </form>
+            ) : (
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-sm font-semibold text-[#5E9E8C]">✓ {t("sec.mfaEnabledNote")}</p>
+                <button onClick={() => { setShowDisableTotp(true); setTotpError(""); }} className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-all active:scale-95">
+                  {t("sec.mfaDisable")}
+                </button>
+              </div>
+            )
+          ) : (
+            <div>
+              <button onClick={startEnrollTotp} disabled={totpBusy} className="font-bold px-5 py-2.5 rounded-xl text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#5E9E8C" }}>
+                {totpBusy ? "…" : `${t("sec.mfaEnable")} →`}
+              </button>
+              {totpError && <p className="text-red-500 text-xs font-semibold mt-2">{totpError}</p>}
             </div>
           )}
         </div>

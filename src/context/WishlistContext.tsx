@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useProducts } from "@/lib/db/useProducts";
 import { useAuth } from "@/context/AuthContext";
+import { loadRemote, saveRemote } from "@/lib/db/cartSync";
 
 /** Each saved item remembers the price at the moment it was added, so we can
  *  surface a price-drop later (old price struck-through + a notification dot). */
@@ -47,6 +48,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const activeKeyRef = useRef(GUEST_KEY);
   const prevUserId = useRef<string | null | undefined>(undefined);
+  const dbTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentPrice = useCallback(
     (id: string): number | undefined => products.find((p) => p.id === id)?.price,
@@ -85,12 +87,14 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     const targetKey = keyFor(currentUserId);
     activeKeyRef.current = targetKey;
     let targetItems: WishlistItem[] = [];
+    let adoptedGuest = false;
     try {
       targetItems = parseItems(localStorage.getItem(targetKey));
       if (currentUserId && wasGuest && targetItems.length === 0) {
         const guestItems = parseItems(localStorage.getItem(GUEST_KEY));
         if (guestItems.length > 0) {
           targetItems = guestItems;
+          adoptedGuest = true;
           localStorage.removeItem(GUEST_KEY);
         }
       }
@@ -99,12 +103,39 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
     setItems(targetItems);
     setHydrated(true);
+
+    /* Cross-device reconcile (signed-in only, best-effort) — union by id so
+       saved items from another device aren't lost. */
+    if (currentUserId) {
+      let cancelled = false;
+      (async () => {
+        const remote = await loadRemote<WishlistItem>("user_wishlists");
+        if (cancelled) return;
+        if (remote && remote.length > 0) {
+          if (adoptedGuest && targetItems.length > 0) {
+            const seen = new Set(remote.map((i) => i.id));
+            setItems([...remote, ...targetItems.filter((i) => !seen.has(i.id))]);
+          } else {
+            setItems(remote);
+          }
+        } else if (targetItems.length > 0) {
+          saveRemote("user_wishlists", currentUserId, targetItems);
+        }
+      })();
+      return () => { cancelled = true; };
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- currentPrice/parseItems are stable enough for this one-time-per-account load
   }, [user?.id]);
 
   useEffect(() => {
-    if (hydrated) localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
-  }, [items, hydrated]);
+    if (!hydrated) return;
+    localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
+    const uid = user?.id;
+    if (uid) {
+      if (dbTimer.current) clearTimeout(dbTimer.current);
+      dbTimer.current = setTimeout(() => saveRemote("user_wishlists", uid, items), 700);
+    }
+  }, [items, hydrated, user?.id]);
 
   const toggle = useCallback((id: string) => {
     setItems((prev) =>

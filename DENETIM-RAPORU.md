@@ -245,7 +245,10 @@ Açık kalanlar (öncelik sıralı):
 20. ✅ Misafir puan göçü GÜVENLİ yolla: localStorage kopyalama YOK (fabrike edilebilir → istismar); yerine `POST /api/account/link-guest-orders` — doğrulanmış e-postayla verilmiş misafir siparişlerini hesaba bağlar, puanı **gerçek sipariş tutarından** yeniden hesaplar (idempotent). LoyaltyContext girişte 1 kez tetikler
 21. ✅ Sipariş durum geçiş kuralları: admin PATCH'te `TRANSITIONS` matrisi (delivered→pending gibi geçişler 400)
 22. ✅ Trusted-device yönetim UI: Security "Giriş doğrulaması" kartında "bu cihazı unut" (mevcut DELETE endpoint'e bağlandı)
-- ⏳ 16. Sepet/favori DB senkronu · 17. Back-in-stock · 18. Testler · 19. Sentry — bkz. aşağı (kalanlar)
+- ✅ **16. Sepet/favori DB senkronu (11 Tem):** `supabase/cart-wishlist.sql` (user_carts/user_wishlists jsonb + own-row RLS); Cart/WishlistContext girişte DB ile uzlaşır (union-merge guest adopt), 700ms debounce yazar; tablo yoksa localStorage'a zarif düşer (`src/lib/db/cartSync.ts`)
+- ✅ **17. Back-in-stock (11 Tem):** `supabase/stock-notifications.sql` + `POST /api/stock-notify` (origin+rate-limit+email) + PDP "gelince haber ver" kutusu (tükendi durumunda); admin ürün stoğunu 0→>0 yapınca `notifyBackInStock` bekleyenlere 4 dilde mail atar (`src/lib/email/backInStock.ts`)
+- ✅ **18. Testler + CI (11 Tem):** Vitest — pricing/loyalty/stock birim testleri (23 test), `npm test`/`typecheck` script'leri, `.github/workflows/ci.yml` (typecheck+test+build). Checkout E2E Playwright MCP ile elle sürülüyor (CI'da flaky olmasın diye)
+- ⏳ 19. Sentry — bkz. aşağı (kalanlar)
 
 **⛔ KALANLAR — dış bağımlılık / karar / büyük çaba (kod olarak tamamlanamaz):**
 - 16. Sepet/favori cihazlar-arası DB senkronu — yeni `carts`/`wishlists` tabloları + RLS + senkron mantığı (orta çaba, kullanıcı SQL çalıştırır); LoyaltyContext deseni birebir uygulanabilir

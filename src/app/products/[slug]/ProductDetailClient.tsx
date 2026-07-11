@@ -115,6 +115,29 @@ export default function ProductDetailClient({
   const [noSize,        setNoSize]        = useState(false);
   const [copied,        setCopied]        = useState(false);
   const [deliveryRange, setDeliveryRange] = useState<string>("");
+  /* Back-in-stock waitlist (shown when the selected variant is sold out). */
+  const [notifyEmail,   setNotifyEmail]   = useState("");
+  const [notifyStatus,  setNotifyStatus]  = useState<"idle" | "sending" | "done">("idle");
+  const [notifyError,   setNotifyError]   = useState("");
+
+  async function handleNotify(e: React.FormEvent) {
+    e.preventDefault();
+    setNotifyError("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notifyEmail.trim())) { setNotifyError(t("auth.validEmail")); return; }
+    setNotifyStatus("sending");
+    try {
+      const res = await fetch("/api/stock-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, email: notifyEmail.trim(), locale }),
+      });
+      if (!res.ok) throw new Error();
+      setNotifyStatus("done");
+    } catch {
+      setNotifyStatus("idle");
+      setNotifyError(t("checkout.errGeneric"));
+    }
+  }
 
   /* Photo gallery */
   const images = product.imageUrls && product.imageUrls.length
@@ -356,9 +379,34 @@ export default function ProductDetailClient({
 
           {/* Stock indicator */}
           {outOfStock ? (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-              <span className="text-sm font-bold text-red-500">{t("product.outOfStock")}</span>
+            <div className="mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                <span className="text-sm font-bold text-red-500">{t("product.outOfStock")}</span>
+              </div>
+              {/* Back-in-stock waitlist */}
+              {notifyStatus === "done" ? (
+                <p className="mt-2 text-xs font-semibold text-[#5E9E8C]">✓ {t("pdp.notifyDone")}</p>
+              ) : (
+                <form onSubmit={handleNotify} className="mt-2.5">
+                  <p className="text-xs text-[#5E5450] mb-1.5">{t("pdp.notifyPrompt")}</p>
+                  <div className="flex items-stretch gap-2 max-w-sm">
+                    <input
+                      type="email" value={notifyEmail} onChange={(e) => setNotifyEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="flex-1 min-w-0 h-10 px-3 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium outline-none focus:border-[#5E9E8C]"
+                    />
+                    <button
+                      type="submit" disabled={notifyStatus === "sending"}
+                      className="h-10 px-4 rounded-xl font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
+                      style={{ backgroundColor: "#5E9E8C" }}
+                    >
+                      {notifyStatus === "sending" ? "…" : t("pdp.notifyBtn")}
+                    </button>
+                  </div>
+                  {notifyError && <p className="text-xs text-red-400 font-semibold mt-1">{notifyError}</p>}
+                </form>
+              )}
             </div>
           ) : stock !== null && stock <= 5 ? (
             <div className="flex items-center gap-2 mb-3">

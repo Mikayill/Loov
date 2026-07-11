@@ -4,6 +4,7 @@ import { adminApiGuard } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { CATEGORY_TEMPLATES } from "@/lib/catalogTags";
+import { notifyBackInStock, rowHasAnyStock } from "@/lib/email/backInStock";
 
 export const dynamic = "force-dynamic";
 
@@ -208,6 +209,19 @@ export async function PATCH(req: NextRequest) {
   if (typeof clean === "string") return NextResponse.json({ error: clean }, { status: 400 });
   if (Object.keys(clean).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 
+  // Snapshot stock BEFORE the edit so we can fire the back-in-stock waitlist
+  // only on a real out-of-stock → in-stock transition.
+  let wasOutOfStock = false;
+  const touchesStock = clean.stock !== undefined || clean.stock_by_variant !== undefined;
+  if (touchesStock) {
+    const { data: before } = await admin
+      .from("products")
+      .select("stock, stock_by_variant, colors, sizes")
+      .eq("id", String(id))
+      .maybeSingle();
+    if (before) wasOutOfStock = !rowHasAnyStock(before);
+  }
+
   let { error } = await admin.from("products").update(clean).eq("id", String(id));
   // If supabase/product-i18n.sql hasn't been run yet, retry without those
   // columns so unrelated edits (price, stock, colors…) never fail because of it.
@@ -226,6 +240,19 @@ export async function PATCH(req: NextRequest) {
   if (Object.keys(clean).length === 0) return NextResponse.json({ error: "Required migration hasn't been run yet — nothing else to update" }, { status: 400 });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await writeAudit({ actorEmail: guard.email, action: "product.update", entity: "product", entityId: String(id), detail: clean });
+
+  // Restock just happened → email the back-in-stock waitlist (non-blocking).
+  if (touchesStock && wasOutOfStock) {
+    const { data: after } = await admin
+      .from("products")
+      .select("stock, stock_by_variant, colors, sizes")
+      .eq("id", String(id))
+      .maybeSingle();
+    if (after && rowHasAnyStock(after)) {
+      await notifyBackInStock(admin, String(id));
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
 

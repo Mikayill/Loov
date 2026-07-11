@@ -55,11 +55,19 @@ interface AuthContextType {
    *  activeOrders/activeReturns counts while anything is still in flight. */
   deleteAccount: () => Promise<AuthResult & { activeOrders?: number; activeReturns?: number }>;
   signOut: () => void;
-  /* ── Admin AAL2 gate only (AdminMfaGate.tsx) — customer-facing enrollment
-     UI was removed in favor of the mandatory email-OTP flow below, but an
-     admin who has already enrolled TOTP/SMS via Supabase still needs these
-     to sign in. Do not remove without checking AdminMfaGate.tsx. ── */
+  /* ── Two-factor authentication (TOTP authenticator app) — OPTIONAL, opt-in
+     from the Security page. When a user has a verified TOTP factor it's used
+     at sign-in instead of the automatic email-OTP (it's the stronger factor).
+     Also used by the admin AAL2 gate. ── */
+  /** The user's verified TOTP factors (empty = authenticator-app 2FA off). */
+  listTotpFactors: () => Promise<{ factors: { id: string }[]; error?: string }>;
+  /** Start enrolment: returns the QR (SVG data URI) + secret to scan/type. */
+  enrollTotp: () => Promise<{ factorId?: string; qr?: string; secret?: string; error?: string }>;
+  /** Confirm a 6-digit code (finishes enrolment AND challenges at sign-in). */
   verifyTotp: (factorId: string, code: string) => Promise<AuthResult>;
+  /** Turn authenticator-app 2FA off — requires a current code first. */
+  unenrollTotp: (factorId: string, code: string) => Promise<AuthResult>;
+  /** Admin AAL2 gate (phone factor) — kept for admins who enrolled SMS MFA. */
   sendPhoneFactorCode: (factorId: string) => Promise<{ challengeId?: string; error?: string }>;
   verifyPhoneFactor: (factorId: string, challengeId: string, code: string) => Promise<AuthResult>;
   mfaRequired: () => Promise<{ required: boolean; factorId?: string; type?: "totp" | "phone"; phone?: string }>;
@@ -284,10 +292,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [supabase]);
 
-  /* ── Admin AAL2 gate only — see the interface comment above. The
-     enrollment UI that used to call listTotpFactors/enrollTotp/etc. from
-     the customer Security page was removed; admins who already enrolled
-     keep working through these. ── */
+  /* ── Authenticator-app (TOTP) 2FA — opt-in from Security, and the admin gate ── */
+
+  const listTotpFactors = useCallback(async () => {
+    if (!supabase) return { factors: [], error: t("auth.notConfigured") };
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (error) return { factors: [], error: friendly(error.message, t) };
+    return { factors: (data?.totp ?? []).filter((f) => f.status === "verified").map((f) => ({ id: f.id })) };
+  }, [supabase, t]);
+
+  const enrollTotp = useCallback(async () => {
+    if (!supabase) return { error: t("auth.notConfigured") };
+    // Clear a dangling unverified factor from an abandoned attempt (else the
+    // next enroll fails with a duplicate-name error).
+    const { data: existing } = await supabase.auth.mfa.listFactors();
+    for (const f of existing?.all ?? []) {
+      if (f.factor_type === "totp" && f.status === "unverified") {
+        await supabase.auth.mfa.unenroll({ factorId: f.id });
+      }
+    }
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: "Authenticator app" });
+    if (error) return { error: friendly(error.message, t) };
+    return { factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
+  }, [supabase, t]);
 
   const verifyTotp = useCallback(async (factorId: string, code: string): Promise<AuthResult> => {
     if (!supabase) return { error: t("auth.notConfigured") };
@@ -297,6 +324,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.id, code: code.trim() });
     return error ? { error: friendly(error.message, t) } : {};
   }, [supabase, t]);
+
+  const unenrollTotp = useCallback(async (factorId: string, code: string): Promise<AuthResult> => {
+    if (!supabase) return { error: t("auth.notConfigured") };
+    // Removing a verified factor needs an aal2 session — verify a code first.
+    const verified = await verifyTotp(factorId, code);
+    if (verified.error) return verified;
+    const { error } = await supabase.auth.mfa.unenroll({ factorId });
+    return error ? { error: friendly(error.message, t) } : {};
+  }, [supabase, t, verifyTotp]);
 
   const sendPhoneFactorCode = useCallback(async (factorId: string) => {
     if (!supabase) return { error: t("auth.notConfigured") };
@@ -390,7 +426,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail,
       signInWithGoogle, sendPhoneOtp, signInWithPhone, updateProfile,
       sendPasswordReset, updatePassword, deleteAccount, signOut,
-      verifyTotp, sendPhoneFactorCode, verifyPhoneFactor, mfaRequired,
+      listTotpFactors, enrollTotp, verifyTotp, unenrollTotp,
+      sendPhoneFactorCode, verifyPhoneFactor, mfaRequired,
       sendEmailOtp, verifyEmailOtp, checkTrustedDevice, trustThisDevice, linkPhone, verifySignupCode, resendSignupCode }}>
       {children}
     </AuthContext.Provider>
