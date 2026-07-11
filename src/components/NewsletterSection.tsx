@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/ui/Button";
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -53,13 +54,9 @@ export default function NewsletterSection() {
               placeholder="your@email.com"
               className="flex-1 h-12 px-4 rounded-xl border-2 border-[#DDD5CC] bg-white text-[#2A2320] text-sm font-medium outline-none focus:border-[#5E9E8C] transition-colors placeholder:text-[#9A8E88]"
             />
-            <button
-              type="submit"
-              className="h-12 px-6 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 whitespace-nowrap shadow-sm"
-              style={{ backgroundColor: "#5E9E8C" }}
-            >
+            <Button type="submit" size="lg" className="whitespace-nowrap">
               Subscribe 🌿
-            </button>
+            </Button>
           </form>
         )}
 

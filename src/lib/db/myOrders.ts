@@ -68,6 +68,7 @@ function mapOrder(row: OrderRow): MockOrder {
     date: row.created_at,
     deliveredAt: row.delivered_at ?? undefined,
     status: mapStatus(row.status),
+    cancellable: row.status === "pending",
     items: (row.order_items ?? []).map(mapItem),
     total: Number(row.total),
     address: [row.street, row.district].filter(Boolean).join(", "),

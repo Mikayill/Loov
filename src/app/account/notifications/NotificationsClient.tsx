@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import { fetchMyProfile, updateMyProfile } from "@/lib/db/profile";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
+import Button from "@/components/ui/Button";
 
 interface PrefMeta {
   id: string;
@@ -201,14 +202,15 @@ export default function NotificationsClient() {
         </div>
       </div>
 
-      <button
+      <Button
         onClick={handleSave}
-        disabled={saving}
-        className="w-full py-3.5 rounded-2xl font-extrabold text-white text-sm hover:opacity-90 active:scale-95 transition-all shadow-sm disabled:opacity-60"
-        style={{ backgroundColor: "#5E9E8C" }}
+        loading={saving}
+        loadingText={t("auth.saving")}
+        fullWidth
+        className="!rounded-2xl !h-auto py-3.5"
       >
-        {saving ? t("auth.saving") : `${t("notif.savePreferences")} →`}
-      </button>
+        {t("notif.savePreferences")} →
+      </Button>
 
       <p className="text-center text-xs text-[#9A8E88] mt-3">
         {t("notif.privacyNote")}

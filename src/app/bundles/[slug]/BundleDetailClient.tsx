@@ -43,7 +43,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
     )
   );
 
-  const [added, setAdded] = useState(false);
+  const [status, setStatus] = useState<"idle" | "added" | "blocked">("idle");
 
   function setColor(slug: string, color: string) {
     setSelections((prev) => ({ ...prev, [slug]: { ...prev[slug], color } }));
@@ -53,13 +53,20 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
   }
 
   function handleAddAll() {
+    let anyAdded = false;
     bundleProducts.forEach(({ product, config }) => {
       const sel = selections[product.slug];
       const qty = config.quantity ?? 1;
-      addItem(product, sel.color, sel.size, qty, bundle.slug);
+      const result = addItem(product, sel.color, sel.size, qty, bundle.slug);
+      if (result.added > 0) anyAdded = true;
     });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 3000);
+    if (!anyAdded) {
+      setStatus("blocked");
+      setTimeout(() => setStatus("idle"), 1800);
+      return;
+    }
+    setStatus("added");
+    setTimeout(() => setStatus("idle"), 3000);
   }
 
   /* "Bought separately" total — LIVE from the catalog + selected sizes, so
@@ -266,23 +273,27 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
             <button
               onClick={handleAddAll}
               className={`w-full py-3.5 rounded-2xl font-extrabold text-white text-base transition-all duration-300 flex items-center justify-center gap-2 shadow-sm ${
-                added ? "bg-green-500 scale-[0.98]" : "hover:opacity-90 active:scale-[0.98]"
+                status === "added" ? "bg-green-500 scale-[0.98]" :
+                status === "blocked" ? "bg-red-500" :
+                "hover:opacity-90 active:scale-[0.98]"
               }`}
-              style={!added ? { backgroundColor: "#5E9E8C" } : {}}
+              style={status === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
             >
-              {added ? (
+              {status === "added" ? (
                 <>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   {t("bundle.allAdded")}
                 </>
+              ) : status === "blocked" ? (
+                t("cart.cantAddMore")
               ) : (
                 `🛒 ${t("bundle.addToCart")} · ${formatPrice(bundle.bundlePrice)}`
               )}
             </button>
 
-            {added && (
+            {status === "added" && (
               <div className="flex gap-2 mt-2">
                 <Link
                   href="/cart"

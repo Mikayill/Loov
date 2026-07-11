@@ -31,6 +31,13 @@ export interface StoreSettings {
   loyaltySilverMultiplier: number;
   /** Earning multiplier at Gold (1.5 = +50% bonus points). */
   loyaltyGoldMultiplier: number;
+  /** Minimum estimated delivery days shown on product pages (standard delivery). */
+  deliveryMinDays: number;
+  /** Maximum estimated delivery days shown on product pages (standard delivery). */
+  deliveryMaxDays: number;
+  /** Highest share (%) of an order's subtotal a customer can pay for with
+   *  Loov points, in whole 100-point/5₾ blocks. */
+  loyaltyMaxRedeemPercent: number;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -45,6 +52,9 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   loyaltyGoldThreshold: 3000,
   loyaltySilverMultiplier: 1.25,
   loyaltyGoldMultiplier: 1.5,
+  deliveryMinDays: 2,
+  deliveryMaxDays: 4,
+  loyaltyMaxRedeemPercent: 20,
 };
 
 /** Map DB key → settings field. */
@@ -60,6 +70,9 @@ export const SETTING_KEYS: Record<string, keyof StoreSettings> = {
   loyalty_gold_threshold: "loyaltyGoldThreshold",
   loyalty_silver_multiplier: "loyaltySilverMultiplier",
   loyalty_gold_multiplier: "loyaltyGoldMultiplier",
+  delivery_min_days: "deliveryMinDays",
+  delivery_max_days: "deliveryMaxDays",
+  loyalty_max_redeem_percent: "loyaltyMaxRedeemPercent",
 };
 
 /** Reverse map: settings field → DB key. */
@@ -75,6 +88,9 @@ export const FIELD_TO_KEY: Record<keyof StoreSettings, string> = {
   loyaltyGoldThreshold: "loyalty_gold_threshold",
   loyaltySilverMultiplier: "loyalty_silver_multiplier",
   loyaltyGoldMultiplier: "loyalty_gold_multiplier",
+  deliveryMinDays: "delivery_min_days",
+  deliveryMaxDays: "delivery_max_days",
+  loyaltyMaxRedeemPercent: "loyalty_max_redeem_percent",
 };
 
 /** Build a StoreSettings from raw {key: value} DB rows, filling gaps with defaults. */

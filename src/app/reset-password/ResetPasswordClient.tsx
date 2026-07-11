@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import Button from "@/components/ui/Button";
 
 export default function ResetPasswordClient() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function ResetPasswordClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password.length < 8 || !/\d/.test(password)) { setError(t("auth.passwordMin8Digit")); return; }
     if (password !== confirm) { setError(t("auth.passwordsNoMatch")); return; }
     setError(""); setBusy(true);
     const res = await updatePassword(password);
@@ -56,7 +58,7 @@ export default function ResetPasswordClient() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.newPassword")}</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
                   placeholder={t("auth.atLeast6")}
                   className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] focus:border-[#5E9E8C] outline-none transition-colors" />
               </div>
@@ -66,11 +68,9 @@ export default function ResetPasswordClient() {
                   className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] focus:border-[#5E9E8C] outline-none transition-colors" />
               </div>
               {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
-              <button type="submit" disabled={busy}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm hover:opacity-90 active:scale-95 disabled:opacity-60 transition-all"
-                style={{ backgroundColor: "#5E9E8C" }}>
-                {busy ? t("auth.saving") : t("auth.updatePasswordBtn")}
-              </button>
+              <Button type="submit" loading={busy} loadingText={t("auth.saving")} fullWidth>
+                {t("auth.updatePasswordBtn")}
+              </Button>
             </form>
           )}
         </div>

@@ -19,6 +19,7 @@ import {
 } from "@/lib/products";
 import { getSettings } from "@/lib/db/settings";
 import { isNewArrival } from "@/lib/pricing";
+import { getServerLocale } from "@/lib/i18n/server";
 
 /** Re-derive each product's "New" badge from the admin-set new-badge window. */
 function withNewBadge(list: Product[], newBadgeDays: number): Product[] {
@@ -39,7 +40,7 @@ export async function getAllProductsStatic(): Promise<Product[]> {
     if (error) throw error;
     if (!data || data.length === 0) return fallbackProducts;
     return (data as ProductRow[])
-      .map(mapRow)
+      .map((row) => mapRow(row))
       .sort((a, b) => Number(a.id) - Number(b.id));
   } catch (e) {
     console.warn(
@@ -57,8 +58,9 @@ export async function getAllProducts(): Promise<Product[]> {
     const { data, error } = await supabase.from("products").select("*");
     if (error) throw error;
     if (!data || data.length === 0) return fallbackProducts;
+    const locale = await getServerLocale();
     const list = (data as ProductRow[])
-      .map(mapRow)
+      .map((row) => mapRow(row, locale))
       .sort((a, b) => Number(a.id) - Number(b.id));
     const { newBadgeDays } = await getSettings();
     return withNewBadge(list, newBadgeDays);
@@ -84,7 +86,8 @@ export async function getProductBySlug(
       .maybeSingle();
     if (error) throw error;
     if (!data) return getFallbackBySlug(slug);
-    const product = mapRow(data as ProductRow);
+    const locale = await getServerLocale();
+    const product = mapRow(data as ProductRow, locale);
     const { newBadgeDays } = await getSettings();
     return { ...product, isNew: isNewArrival(product, newBadgeDays) };
   } catch (e) {

@@ -14,12 +14,7 @@ import { fmtDateNoYear } from "@/lib/i18n/format";
 import { useSettings } from "@/lib/db/useSettings";
 import { effectivePrice, discountPercent, basePriceForSize } from "@/lib/pricing";
 import { trackProductView } from "@/components/RecentlyViewedSection";
-
-function productStock(id: string) {
-  const seed = parseInt(id, 10) || 1;
-  const stocks = [15, 8, 22, 3, 12, 7, 18, 2, 25, 11, 6, 19, 4, 14, 9, 21, 5, 16, 13, 20];
-  return stocks[(seed - 1) % stocks.length];
-}
+import { variantStock } from "@/lib/stock";
 
 /* ── colour map ── */
 const colorHexMap: Record<string, string> = {
@@ -98,12 +93,15 @@ export default function ProductDetailClient({
   const { has, toggle } = useWishlist();
   const { tier } = useLoyalty();
   const { t, locale } = useLocale();
-  const { freeShippingThreshold, pointsPerGel, standardShippingPrice, expressEnabled, expressPrice } = useSettings();
+  const { freeShippingThreshold, pointsPerGel, standardShippingPrice, expressEnabled, expressPrice, deliveryMinDays, deliveryMaxDays } = useSettings();
 
-  /** Colors available for a given size (falls back to all colors). */
+  /** Colors available for a given size — a color is excluded only if the
+   *  admin explicitly set its stock to 0 for that size in the stock matrix
+   *  (no entry at all = available at the flat fallback stock). */
   const colorsForSize = (size: string) => {
-    const list = product.sizeColors?.[size];
-    return list && list.length ? product.colors.filter((c) => list.includes(c)) : product.colors;
+    const perSize = product.stockByVariant?.[size];
+    if (!perSize) return product.colors;
+    return product.colors.filter((c) => (perSize[c] ?? 1) > 0);
   };
 
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
@@ -112,7 +110,7 @@ export default function ProductDetailClient({
   );
   const [quantity,      setQuantity]      = useState(1);
   const [activeTab,     setActiveTab]     = useState<"description" | "materials" | "delivery">("description");
-  const [addedToCart,   setAddedToCart]   = useState(false);
+  const [cartStatus,    setCartStatus]    = useState<"idle" | "added" | "blocked">("idle");
   const [sizeGuide,     setSizeGuide]     = useState(false);
   const [noSize,        setNoSize]        = useState(false);
   const [copied,        setCopied]        = useState(false);
@@ -123,6 +121,10 @@ export default function ProductDetailClient({
     ? product.imageUrls
     : product.imageUrl ? [product.imageUrl] : [];
   const [activeImg, setActiveImg] = useState(0);
+  /* Crossfade (not a sliding carousel) means wrapping last→first or
+     first→last never "jumps" — it's the same fade transition either way. */
+  function prevImg() { setActiveImg((i) => (i - 1 + images.length) % images.length); }
+  function nextImg() { setActiveImg((i) => (i + 1) % images.length); }
 
   const off = discountPercent(product);
   /* Price follows the selected size (per-size pricing). */
@@ -140,7 +142,7 @@ export default function ProductDetailClient({
     if (!avail.includes(selectedColor)) setSelectedColor(avail[0] ?? "");
   }
 
-  /* Delivery estimate: 2–4 business days */
+  /* Delivery estimate — admin-configurable business-day range (Settings → Delivery estimate) */
   useEffect(() => {
     function addBizDays(d: Date, n: number) {
       const r = new Date(d);
@@ -153,8 +155,8 @@ export default function ProductDetailClient({
     }
     const fmt = (d: Date) => fmtDateNoYear(d, locale);
     const now = new Date();
-    setDeliveryRange(`${fmt(addBizDays(now, 2))} – ${fmt(addBizDays(now, 4))}`);
-  }, [locale]);
+    setDeliveryRange(`${fmt(addBizDays(now, deliveryMinDays))} – ${fmt(addBizDays(now, deliveryMaxDays))}`);
+  }, [locale, deliveryMinDays, deliveryMaxDays]);
 
   /* Share — native share sheet where available (mobile), else copy link */
   function handleShare() {
@@ -180,18 +182,34 @@ export default function ProductDetailClient({
     return () => obs.disconnect();
   }, []);
 
-  const stock = product.stock ?? productStock(product.id);
-  const outOfStock = stock <= 0;
-  const atMax = quantity >= stock;
+  /* Real stock for the exact selected color+size (falls back to the flat
+     product.stock if the admin hasn't set a per-variant count yet). */
+  const stock = variantStock(product, selectedSize, selectedColor);
+  const outOfStock = stock !== null && stock <= 0;
+  const atMax = stock !== null && quantity >= stock;
   const availableColors = colorsForSize(selectedSize);
+
+  /* Switching color/size can lower the available stock below the current
+     quantity — clamp instead of letting the stepper silently disagree with
+     what addItem will actually accept. */
+  useEffect(() => {
+    if (stock !== null) setQuantity((q) => Math.max(1, Math.min(q, stock)));
+  }, [stock]);
 
   function handleAddToCart() {
     if (outOfStock) return;
     if (!selectedSize) { setNoSize(true); return; }
     setNoSize(false);
-    addItem(product, selectedColor, selectedSize, Math.min(quantity, stock));
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2200);
+    const result = addItem(product, selectedColor, selectedSize, quantity);
+    // Already-maxed cart → nothing was actually added — flash the button
+    // red instead of silently doing nothing (or claiming false success).
+    if (result.added <= 0) {
+      setCartStatus("blocked");
+      setTimeout(() => setCartStatus("idle"), 1800);
+      return;
+    }
+    setCartStatus("added");
+    setTimeout(() => setCartStatus("idle"), 2200);
   }
 
   const features = product.features && product.features.length ? product.features : DEFAULT_FEATURES;
@@ -234,6 +252,28 @@ export default function ProductDetailClient({
               <span className="absolute top-5 right-5 bg-[#D9534F] text-white text-sm font-extrabold px-3 py-1.5 rounded-full shadow">
                 {t("pdp.save").replace("{n}", String(off))}
               </span>
+            )}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImg}
+                  aria-label="Previous photo"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-[#DDD5CC] flex items-center justify-center text-[#2A2320] shadow-md hover:bg-[#5E9E8C] hover:text-white hover:border-[#5E9E8C] active:scale-90 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextImg}
+                  aria-label="Next photo"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-[#DDD5CC] flex items-center justify-center text-[#2A2320] shadow-md hover:bg-[#5E9E8C] hover:text-white hover:border-[#5E9E8C] active:scale-90 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
             )}
           </div>
 
@@ -315,22 +355,22 @@ export default function ProductDetailClient({
           </div>
 
           {/* Stock indicator */}
-          {stock <= 0 ? (
+          {outOfStock ? (
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
               <span className="text-sm font-bold text-red-500">{t("product.outOfStock")}</span>
             </div>
-          ) : stock <= 5 ? (
+          ) : stock !== null && stock <= 5 ? (
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse flex-shrink-0" />
               <span className="text-sm font-bold text-orange-500">{t("pdp.onlyLeft").replace("{n}", String(stock))}</span>
             </div>
-          ) : (
+          ) : stock !== null ? (
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-[#5E9E8C] flex-shrink-0" />
               <span className="text-sm font-semibold text-[#5E9E8C]">{t("pdp.inStock").replace("{n}", String(stock))}</span>
             </div>
-          )}
+          ) : null}
 
           {/* Delivery estimate */}
           {deliveryRange && (
@@ -446,15 +486,15 @@ export default function ProductDetailClient({
             <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-colors"
+                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-all active:scale-90"
               >
                 −
               </button>
               <span className="w-10 text-center font-extrabold text-[#2A2320] text-base">{quantity}</span>
               <button
-                onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
+                onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))}
                 disabled={atMax || outOfStock}
-                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
               >
                 +
               </button>
@@ -464,23 +504,25 @@ export default function ProductDetailClient({
               onClick={handleAddToCart}
               disabled={outOfStock}
               className={`flex-1 h-12 rounded-xl font-extrabold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-sm text-sm ${
-                addedToCart
+                cartStatus === "added"
                   ? "scale-95 bg-green-500"
-                  : outOfStock
-                  ? "bg-[#C8B8B0] cursor-not-allowed"
+                  : cartStatus === "blocked" || outOfStock
+                  ? "bg-red-500"
                   : "hover:opacity-90 active:scale-95"
-              }`}
-              style={!addedToCart && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
+              } ${outOfStock ? "cursor-not-allowed" : ""}`}
+              style={cartStatus === "idle" && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
             >
               {outOfStock ? (
                 t("pdp.outOfStockBtn")
-              ) : addedToCart ? (
+              ) : cartStatus === "added" ? (
                 <>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   {t("pdp.added")}
                 </>
+              ) : cartStatus === "blocked" ? (
+                t("cart.cantAddMore")
               ) : (
                 <>🛒 {t("common.addToCart")} &nbsp;·&nbsp; {formatPrice(unitPrice * quantity)}</>
               )}
@@ -527,7 +569,7 @@ export default function ProductDetailClient({
 
       {/* ══ TABS ══ */}
       <div className="mt-16">
-        <div className="flex border-b-2 border-[#DDD5CC] mb-8 overflow-x-auto">
+        <div className="flex border-b-2 border-[#DDD5CC] mb-8 overflow-x-auto overflow-y-hidden">
           {(
             [
               { id: "description", label: t("pdp.tabDescription") },
@@ -607,7 +649,7 @@ export default function ProductDetailClient({
           {activeTab === "delivery" && (
             <div className="space-y-4 transition-opacity">
               {[
-                { icon: "🚀", title: "Standard Delivery", desc: `2–4 business days · Free on orders over ${freeShippingThreshold} ₾ (${standardShippingPrice} ₾ otherwise)`, bg: "#EAF2F0" },
+                { icon: "🚀", title: "Standard Delivery", desc: `${deliveryMinDays}–${deliveryMaxDays} business days · Free on orders over ${freeShippingThreshold} ₾ (${standardShippingPrice} ₾ otherwise)`, bg: "#EAF2F0" },
                 ...(expressEnabled
                   ? [{ icon: "⚡", title: "Express Delivery", desc: `Next business day — order before 14:00 · ${expressPrice} ₾`, bg: "#F0EDE8" }]
                   : []),
@@ -668,17 +710,21 @@ export default function ProductDetailClient({
       <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-[#DDD5CC] px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden">
-            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-colors">−</button>
+            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-all active:scale-90">−</button>
             <span className="w-8 text-center font-extrabold text-[#2A2320]">{quantity}</span>
-            <button onClick={() => setQuantity((q) => Math.min(stock, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">+</button>
+            <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
           </div>
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`flex-1 h-11 rounded-xl font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${addedToCart ? "bg-green-500 scale-95" : outOfStock ? "bg-[#C8B8B0] cursor-not-allowed" : "hover:opacity-90 active:scale-95"}`}
-            style={!addedToCart && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
+            className={`flex-1 h-11 rounded-xl font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
+              cartStatus === "added" ? "bg-green-500 scale-95" :
+              cartStatus === "blocked" || outOfStock ? "bg-red-500" :
+              "hover:opacity-90 active:scale-95"
+            } ${outOfStock ? "cursor-not-allowed" : ""}`}
+            style={cartStatus === "idle" && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
           >
-            {outOfStock ? t("pdp.outOfStockBtn") : addedToCart ? `✓ ${t("pdp.added")}` : `🛒 ${t("common.addToCart")} · ${formatPrice(unitPrice * quantity)}`}
+            {outOfStock ? t("pdp.outOfStockBtn") : cartStatus === "added" ? `✓ ${t("pdp.added")}` : cartStatus === "blocked" ? t("cart.cantAddMore") : `🛒 ${t("common.addToCart")} · ${formatPrice(unitPrice * quantity)}`}
           </button>
         </div>
       </div>

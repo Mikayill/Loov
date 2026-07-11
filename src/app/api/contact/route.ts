@@ -10,6 +10,7 @@
  * resets on redeploy, which is fine for a contact form).
  */
 import { NextRequest, NextResponse } from "next/server";
+import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
 
 export const dynamic = "force-dynamic";
 
@@ -74,12 +75,12 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        // TODO: switch to contact@loov.ge once the domain is verified in Resend.
-        from: "Loov Contact <onboarding@resend.dev>",
+        from: EMAIL_FROM,
         to: [inbox],
         reply_to: email,
         subject: `[Contact] ${subject} — ${name}`,
         text: `From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
+        html: renderEmailHtml(`From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`),
       }),
     });
     if (!res.ok) {

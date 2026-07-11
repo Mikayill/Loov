@@ -5,6 +5,7 @@
  */
 
 import type { Product, Season } from "@/types";
+import type { Locale } from "@/lib/i18n/config";
 
 /** Shape of a row in the Supabase `products` table (snake_case). */
 export interface ProductRow {
@@ -12,6 +13,12 @@ export interface ProductRow {
   slug: string;
   name: string;
   description: string | null;
+  name_ka?: string | null;
+  name_ru?: string | null;
+  name_tr?: string | null;
+  description_ka?: string | null;
+  description_ru?: string | null;
+  description_tr?: string | null;
   price: number;
   category: Product["category"];
   colors: string[] | null;
@@ -26,6 +33,7 @@ export interface ProductRow {
   season?: string | null;
   size_colors?: Record<string, string[]> | null;
   size_prices?: Record<string, number> | null;
+  stock_by_variant?: Record<string, Record<string, number>> | null;
   fabric?: string | null;
   features?: string[] | null;
   material?: string | null;
@@ -38,8 +46,17 @@ export interface ProductRow {
 
 const SEASONS: Season[] = ["all", "spring", "summer", "autumn", "winter"];
 
+/** DISPLAY ONLY — a blank locale-specific field falls back to the canonical
+ *  (English) column, same rule as size_prices' base-price fallback. Never
+ *  feed the resolved value back into cart/order/search logic; those always
+ *  use `row.name`/`row.description` (the canonical columns). */
+function resolveLocaleField(canonical: string, ka: string | null | undefined, ru: string | null | undefined, tr: string | null | undefined, locale: Locale): string {
+  const localized = locale === "ka" ? ka : locale === "ru" ? ru : locale === "tr" ? tr : undefined;
+  return localized && localized.trim() ? localized : canonical;
+}
+
 /** Convert a DB row (snake_case) into the app's Product type (camelCase). */
-export function mapProductRow(row: ProductRow): Product {
+export function mapProductRow(row: ProductRow, locale: Locale = "en"): Product {
   // Prefer the gallery's first photo; fall back to the legacy single image_url.
   const gallery = (row.image_urls ?? []).filter(Boolean);
   const primary = gallery[0] ?? row.image_url ?? undefined;
@@ -48,8 +65,8 @@ export function mapProductRow(row: ProductRow): Product {
   return {
     id: row.id,
     slug: row.slug,
-    name: row.name,
-    description: row.description ?? "",
+    name: resolveLocaleField(row.name, row.name_ka, row.name_ru, row.name_tr, locale),
+    description: resolveLocaleField(row.description ?? "", row.description_ka, row.description_ru, row.description_tr, locale),
     price: Number(row.price),
     category: row.category,
     // Safety net: a product must ALWAYS be sellable. Admin-created products
@@ -67,6 +84,7 @@ export function mapProductRow(row: ProductRow): Product {
     season,
     sizeColors: row.size_colors ?? {},
     sizePrices: row.size_prices ?? undefined,
+    stockByVariant: row.stock_by_variant ?? undefined,
     fabric: row.fabric ?? undefined,
     features: row.features ?? [],
     material: row.material ?? undefined,

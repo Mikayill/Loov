@@ -57,6 +57,30 @@ const FIELDS: Field[] = [
   },
 ];
 
+/** Delivery estimate range shown on product pages — its own small card (min/max pair). */
+const DELIVERY_FIELDS: Field[] = [
+  {
+    key: "deliveryMinDays",
+    label: "Fastest estimate",
+    hint: "Earliest business days shown for standard delivery on product pages.",
+    icon: "📅",
+    suffix: "days",
+    step: 1,
+    min: 0,
+    max: 30,
+  },
+  {
+    key: "deliveryMaxDays",
+    label: "Slowest estimate",
+    hint: "Latest business days shown for standard delivery on product pages.",
+    icon: "📅",
+    suffix: "days",
+    step: 1,
+    min: 0,
+    max: 30,
+  },
+];
+
 /** Membership tier knobs — rendered as their own card below the main fields. */
 const TIER_FIELDS: Field[] = [
   {
@@ -98,6 +122,16 @@ const TIER_FIELDS: Field[] = [
     step: 0.05,
     min: 1,
     max: 10,
+  },
+  {
+    key: "loyaltyMaxRedeemPercent",
+    label: "Max redeemable",
+    hint: "Highest share of an order's subtotal a customer can pay with points, in whole blocks of 100 points = 5₾.",
+    icon: "🎯",
+    suffix: "% of order",
+    step: 1,
+    min: 1,
+    max: 100,
   },
 ];
 
@@ -256,6 +290,46 @@ export default function SettingsClient() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Delivery estimate range ── */}
+      <div className="mt-4 bg-white rounded-2xl border border-[#DDD5CC] p-5">
+        <label className="flex items-center gap-2 font-bold text-[#2A2320]">
+          <span className="text-lg">🚚</span>
+          Delivery estimate
+        </label>
+        <p className="text-xs text-[#9A8E88] mt-1.5 leading-relaxed mb-4">
+          The "Arrives between" range shown on every product page for standard delivery.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {DELIVERY_FIELDS.map((f) => (
+            <div key={f.key} className="flex items-center justify-between gap-3 bg-[#F5F0EB] rounded-xl px-4 py-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-[#2A2320]">
+                  <span>{f.icon}</span>{f.label}
+                </p>
+                <p className="text-[11px] text-[#9A8E88] mt-0.5 leading-snug">{f.hint}</p>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <input
+                  type="number"
+                  value={settings[f.key]}
+                  min={f.min}
+                  max={f.max}
+                  step={f.step}
+                  onChange={(e) => setSettings((s) => ({ ...s, [f.key]: Number(e.target.value) }))}
+                  className="w-20 h-10 px-2 rounded-xl border border-[#DDD5CC] font-extrabold text-[#2A2320] outline-none focus:border-[#5E9E8C] text-right bg-white"
+                />
+                <span className="text-[10px] font-semibold text-[#9A8E88] w-10">{f.suffix}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        {settings.deliveryMinDays > settings.deliveryMaxDays && (
+          <p className="mt-3 text-xs font-semibold text-red-500">
+            ⚠️ Fastest estimate is greater than slowest — saving will be rejected until fixed.
+          </p>
+        )}
       </div>
 
       {/* ── Membership tiers (Loov Rewards) ── */}

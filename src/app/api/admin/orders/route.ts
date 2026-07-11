@@ -4,9 +4,25 @@ import { adminApiGuard } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { buildStatusMessage, type OrderStatusKey } from "@/lib/i18n/orderMessages";
+import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
+import { getSettings } from "@/lib/db/settings";
 import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Allowed status moves — stops nonsensical jumps (e.g. delivered → pending)
+ * that would desync the delivered_at stamp / return window. Forward progress,
+ * sensible corrections back one step, cancel from any live state, and
+ * reactivating a cancelled order are all permitted.
+ */
+const TRANSITIONS: Record<string, string[]> = {
+  pending:    ["processing", "shipped", "delivered", "cancelled"],
+  processing: ["pending", "shipped", "delivered", "cancelled"],
+  shipped:    ["processing", "delivered", "cancelled"],
+  delivered:  ["shipped", "cancelled"],
+  cancelled:  ["pending", "processing"],
+};
 
 const STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
@@ -16,21 +32,22 @@ async function sendStatusEmail(
   locale: string,
   name: string,
   orderNum: string,
-  status: OrderStatusKey
+  status: OrderStatusKey,
+  deliveryDays: string
 ) {
   const key = process.env.RESEND_API_KEY;
   if (!key || !to) return;
   try {
-    const msg = buildStatusMessage(locale as Locale, status, { name, orderNum });
+    const msg = buildStatusMessage(locale as Locale, status, { name, orderNum, deliveryDays });
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        // TODO: switch to orders@loov.ge once the domain is verified in Resend.
-        from: "Loov <onboarding@resend.dev>",
+        from: EMAIL_FROM,
         to: [to],
         subject: msg.subject,
         text: msg.body,
+        html: renderEmailHtml(msg.body),
       }),
     });
     if (!res.ok) {
@@ -121,6 +138,16 @@ export async function PATCH(req: NextRequest) {
   if (readErr || !current) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
   const oldStatus = current.status as string;
+
+  // No-op (same status) → nothing to do. Otherwise enforce the transition map.
+  if (status === oldStatus) return NextResponse.json({ ok: true });
+  if (!(TRANSITIONS[oldStatus] ?? []).includes(status)) {
+    return NextResponse.json(
+      { error: `Can't move an order from "${oldStatus}" to "${status}".` },
+      { status: 400 }
+    );
+  }
+
   const items = (current.order_items ?? []).map((it: { product_id: string; quantity: number }) => ({
     id: it.product_id, qty: it.quantity,
   }));
@@ -164,12 +191,14 @@ export async function PATCH(req: NextRequest) {
   // Item 13: tell the customer what happened (only on a REAL change; pending
   // has its own confirmation email from checkout).
   if (status !== oldStatus && status !== "pending") {
+    const settings = await getSettings();
     await sendStatusEmail(
       (current.email as string) ?? "",
       (current.locale as string) || "en",
       (current.first_name as string) || "there",
       data?.order_number ?? "",
-      status as OrderStatusKey
+      status as OrderStatusKey,
+      `${settings.deliveryMinDays}–${settings.deliveryMaxDays}`
     );
   }
 

@@ -11,7 +11,10 @@
 export const POINTS_PER_GEL = 2;
 export const REDEEM_BLOCK = 100;      // points per redemption block
 export const GEL_PER_BLOCK = 5;       // ₾ discount per block
-export const MAX_DISCOUNT_RATIO = 0.3; // max share of subtotal payable with points
+/** Fallback max share of subtotal payable with points, used only when store
+ *  settings are unavailable — normally overridden by the admin-tunable
+ *  `loyaltyMaxRedeemPercent` setting (see src/lib/settings.ts). */
+export const MAX_DISCOUNT_RATIO = 0.2;
 
 export interface LoyaltyTier {
   id: "bronze" | "silver" | "gold";
@@ -156,10 +159,12 @@ export function discountForPoints(points: number): number {
 
 /**
  * The most points a shopper can redeem on an order:
- * limited by their balance (whole blocks) and by MAX_DISCOUNT_RATIO of subtotal.
+ * limited by their balance (whole blocks) and by maxRatio of subtotal
+ * (defaults to MAX_DISCOUNT_RATIO — pass the admin-set
+ * `loyaltyMaxRedeemPercent / 100` from store settings instead).
  */
-export function maxRedeemablePoints(balance: number, subtotalGel: number): number {
+export function maxRedeemablePoints(balance: number, subtotalGel: number, maxRatio: number = MAX_DISCOUNT_RATIO): number {
   const byBalance = Math.floor(balance / REDEEM_BLOCK);
-  const byOrder = Math.floor((subtotalGel * MAX_DISCOUNT_RATIO) / GEL_PER_BLOCK);
+  const byOrder = Math.floor((subtotalGel * maxRatio) / GEL_PER_BLOCK);
   return Math.max(0, Math.min(byBalance, byOrder)) * REDEEM_BLOCK;
 }

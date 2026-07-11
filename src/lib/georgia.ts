@@ -8,8 +8,23 @@
 
 export const PHONE_COUNTRY_CODE = "+995";
 export const PHONE_PLACEHOLDER = "+995 5XX XXX XXX";
+/** Local-part placeholder shown next to a fixed "+995" prefix. */
+export const PHONE_LOCAL_PLACEHOLDER = "5XX XXX XXX";
 /** Basic Georgian mobile pattern: +995 followed by 9 digits (spaces allowed). */
 export const PHONE_PATTERN = "\\+?995[\\s-]?5?[0-9\\s-]{7,12}";
+
+/** Strips a leading Georgian country code (in any stored/typed format) so a
+ *  phone field can show just the local digits beside a fixed "+995" prefix.
+ *  Shared by checkout, login and the Security "add phone" field. */
+export function phoneLocalPart(full: string): string {
+  return full.replace(/^\+?\s*995[\s-]?/, "").trimStart();
+}
+
+/** Re-attach the +995 prefix to a local part (empty stays empty). */
+export function withCountryCode(local: string): string {
+  const trimmed = local.trim();
+  return trimmed ? `${PHONE_COUNTRY_CODE} ${trimmed}` : "";
+}
 
 /** Georgian postal codes are 4 digits (e.g. Tbilisi center 0102). */
 export const POSTAL_CODE_PATTERN = "[0-9]{4}";

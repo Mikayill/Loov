@@ -16,6 +16,15 @@ import type { Product } from "@/types";
 import { formatPrice } from "@/lib/format";
 import { effectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
+import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
+import { variantStock } from "@/lib/stock";
+
+/** Stock for a bundle item's fixed default variant (colors[0]/sizes[0] — this
+ *  component doesn't offer a picker, see quickAddNote). */
+function isDefaultVariantOOS(product: Product): boolean {
+  const s = variantStock(product, product.sizes[0], product.colors[0]);
+  return s !== null && s <= 0;
+}
 
 export interface BundleQuickViewItem {
   config: BundleProductConfig;
@@ -34,11 +43,12 @@ export default function BundleQuickView({
   const { addItem } = useCart();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [added, setAdded] = useState(false);
+  const [status, setStatus] = useState<"idle" | "added" | "blocked">("idle");
+  const shouldRenderModal = useDelayedUnmount(open, 160);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const close = useCallback(() => { setOpen(false); setAdded(false); }, []);
+  const close = useCallback(() => { setOpen(false); setStatus("idle"); }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -60,12 +70,12 @@ export default function BundleQuickView({
   );
   const savings = Math.max(0, separately - bundle.bundlePrice);
   const savingsPct = separately > 0 ? Math.round((savings / separately) * 100) : 0;
-  const outOfStock = resolved.some(({ product }) => product.stock !== undefined && product.stock <= 0);
+  const outOfStock = resolved.some(({ product }) => isDefaultVariantOOS(product));
 
   function handleOpen(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    setAdded(false);
+    setStatus("idle");
     setOpen(true);
   }
 
@@ -73,10 +83,17 @@ export default function BundleQuickView({
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock || resolved.length === 0) return;
+    let anyAdded = false;
     resolved.forEach(({ product, config }) => {
-      addItem(product, product.colors[0], product.sizes[0], config.quantity ?? 1, bundle.slug);
+      const result = addItem(product, product.colors[0], product.sizes[0], config.quantity ?? 1, bundle.slug);
+      if (result.added > 0) anyAdded = true;
     });
-    setAdded(true);
+    if (!anyAdded) {
+      setStatus("blocked");
+      setTimeout(() => setStatus("idle"), 1800);
+      return;
+    }
+    setStatus("added");
     setTimeout(() => close(), 1400);
   }
 
@@ -91,14 +108,14 @@ export default function BundleQuickView({
         👁 {t("quick.view")}
       </button>
 
-      {mounted && open && createPortal(
+      {mounted && shouldRenderModal && createPortal(
         <div
-          className="fixed inset-0 z-[500] flex items-center justify-center p-4"
+          className={`fixed inset-0 z-[500] flex items-center justify-center p-4 ${open ? "animate-fade-in" : "animate-fade-out"}`}
           style={{ backgroundColor: "rgba(42,35,32,0.55)", backdropFilter: "blur(4px)" }}
           onClick={close}
         >
           <div
-            className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            className={`bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] flex flex-col ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -106,7 +123,7 @@ export default function BundleQuickView({
               <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("quick.view")}</span>
               <button
                 onClick={close}
-                className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors text-xs font-bold"
+                className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 text-xs font-bold"
               >
                 ✕
               </button>
@@ -156,7 +173,7 @@ export default function BundleQuickView({
                     <p className="flex-1 min-w-0 text-xs font-semibold text-[#2A2320] truncate">
                       {config.quantity && config.quantity > 1 && <span className="text-[#5E9E8C] font-extrabold">{config.quantity}× </span>}
                       {config.label}
-                      {product?.stock !== undefined && product.stock <= 0 && (
+                      {product && isDefaultVariantOOS(product) && (
                         <span className="ml-1.5 text-[9px] font-bold text-red-500 uppercase">{t("product.outOfStock")}</span>
                       )}
                     </p>
@@ -192,17 +209,21 @@ export default function BundleQuickView({
                 onClick={handleAdd}
                 disabled={outOfStock || resolved.length === 0}
                 className={`w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 mb-2 ${
-                  added ? "bg-green-500" : outOfStock ? "bg-[#C8B8B0] cursor-not-allowed" : "hover:opacity-90 active:scale-95"
-                }`}
-                style={!added && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
+                  status === "added" ? "bg-green-500" :
+                  status === "blocked" || outOfStock ? "bg-red-500" :
+                  "hover:opacity-90 active:scale-95"
+                } ${outOfStock ? "cursor-not-allowed" : ""}`}
+                style={status === "idle" && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
               >
-                {added ? (
+                {status === "added" ? (
                   <>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     {t("bundleq.addedBundle")}
                   </>
+                ) : status === "blocked" ? (
+                  t("cart.cantAddMore")
                 ) : outOfStock ? (
                   t("bundleq.itemOOS")
                 ) : (

@@ -10,6 +10,8 @@ import { formatAmount } from "@/lib/format";
 import { effectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
+import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
+import { variantStock } from "@/lib/stock";
 
 const colorHexMap: Record<string, string> = {
   White: "#F5F2ED", Sage: "#9BBFB8", Sand: "#D4B896", "Sky Blue": "#87BEDC",
@@ -31,11 +33,12 @@ export default function QuickViewButton({ product }: { product: Product }) {
   const [selectedColor, setColor] = useState(product.colors[0]);
   const [selectedSize, setSize]   = useState(product.sizes[0]);
   const [qty, setQty]             = useState(1);
-  const [added, setAdded]         = useState(false);
+  const [status, setStatus]       = useState<"idle" | "added" | "blocked">("idle");
+  const shouldRenderModal = useDelayedUnmount(open, 160);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const close = useCallback(() => { setOpen(false); setAdded(false); setQty(1); }, []);
+  const close = useCallback(() => { setOpen(false); setStatus("idle"); setQty(1); }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -48,15 +51,28 @@ export default function QuickViewButton({ product }: { product: Product }) {
     };
   }, [open, close]);
 
-  const soldOut = product.stock !== undefined && product.stock <= 0;
-  const qtyMax = product.stock ?? Infinity;
+  const stock = variantStock(product, selectedSize, selectedColor);
+  const soldOut = stock !== null && stock <= 0;
+  const qtyMax = stock ?? Infinity;
+
+  /* Switching color/size can lower the available stock below the current qty. */
+  useEffect(() => {
+    if (stock !== null) setQty((q) => Math.max(1, Math.min(q, stock)));
+  }, [stock]);
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (soldOut) return;
-    addItem(product, selectedColor, selectedSize, Math.min(qty, qtyMax));
-    setAdded(true);
+    const result = addItem(product, selectedColor, selectedSize, Math.min(qty, qtyMax));
+    // Stock may have already been maxed out by what's in the cart — flash
+    // the button red instead of silently doing nothing (or claiming "Added").
+    if (result.added <= 0) {
+      setStatus("blocked");
+      setTimeout(() => setStatus("idle"), 1800);
+      return;
+    }
+    setStatus("added");
     setTimeout(() => { close(); }, 1400);
   }
 
@@ -66,7 +82,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
     setColor(product.colors[0]);
     setSize(product.sizes[0]);
     setQty(1);
-    setAdded(false);
+    setStatus("idle");
     setOpen(true);
   }
 
@@ -82,14 +98,14 @@ export default function QuickViewButton({ product }: { product: Product }) {
       </button>
 
       {/* Modal via portal — mounted at document.body, NOT inside the Link wrapper */}
-      {mounted && open && createPortal(
+      {mounted && shouldRenderModal && createPortal(
         <div
-          className="fixed inset-0 z-[500] flex items-center justify-center p-4"
+          className={`fixed inset-0 z-[500] flex items-center justify-center p-4 ${open ? "animate-fade-in" : "animate-fade-out"}`}
           style={{ backgroundColor: "rgba(42,35,32,0.55)", backdropFilter: "blur(4px)" }}
           onClick={close}
         >
           <div
-            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
+            className={`bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -97,7 +113,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
               <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("quick.view")}</span>
               <button
                 onClick={close}
-                className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors text-xs font-bold"
+                className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 text-xs font-bold"
               >
                 ✕
               </button>
@@ -202,18 +218,20 @@ export default function QuickViewButton({ product }: { product: Product }) {
                   onClick={handleAdd}
                   disabled={soldOut}
                   className={`flex-1 h-10 rounded-xl font-bold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                    added ? "bg-green-500" : soldOut ? "bg-[#C8B8B0] cursor-not-allowed" : "hover:opacity-90 active:scale-95"
-                  }`}
-                  style={!added && !soldOut ? { backgroundColor: "#5E9E8C" } : {}}
+                    status === "added" ? "bg-green-500" :
+                    status === "blocked" || soldOut ? "bg-red-500" :
+                    "hover:opacity-90 active:scale-95"
+                  } ${soldOut ? "cursor-not-allowed" : ""}`}
+                  style={status === "idle" && !soldOut ? { backgroundColor: "#5E9E8C" } : {}}
                 >
-                  {added ? (
+                  {status === "added" ? (
                     <>
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       {t("quick.added")}
                     </>
-                  ) : soldOut ? t("pdp.outOfStockBtn") : `🛒 ${t("common.addToCart")}`}
+                  ) : status === "blocked" ? t("cart.cantAddMore") : soldOut ? t("pdp.outOfStockBtn") : `🛒 ${t("common.addToCart")}`}
                 </button>
               </div>
 

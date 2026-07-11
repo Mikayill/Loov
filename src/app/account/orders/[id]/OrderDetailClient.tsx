@@ -56,6 +56,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
   const [fetching, setFetching] = useState(true);
   const [returns, setReturns] = useState<ReturnRecord[]>([]);
   const [cancelling, setCancelling] = useState(false);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -91,6 +92,25 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
       alert((e as Error).message);
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const cancelOrder = async () => {
+    if (!order || !window.confirm(t("acct.orders.cancelConfirm"))) return;
+    setCancellingOrder(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel", orderNumber: order.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed");
+      setOrder((prev) => (prev ? { ...prev, status: "Cancelled", cancellable: false } : prev));
+    } catch (e) {
+      alert((e as Error).message);
+    } finally {
+      setCancellingOrder(false);
     }
   };
 
@@ -358,6 +378,18 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
           )}
 
           {/* Actions */}
+          {order.cancellable && (
+            <div>
+              <button
+                onClick={cancelOrder}
+                disabled={cancellingOrder}
+                className="w-full py-3 rounded-2xl font-bold text-sm border-2 border-[#DDD5CC] text-[#5E5450] flex items-center justify-center gap-2 hover:border-[#DC4A4A] hover:text-[#B03A3A] transition-colors disabled:opacity-50"
+              >
+                {cancellingOrder ? t("acct.orders.cancelling") : `✕ ${t("acct.orders.cancelOrder")}`}
+              </button>
+              <p className="text-[11px] text-[#9A8E88] text-center mt-1.5">{t("acct.orders.cancelHint")}</p>
+            </div>
+          )}
           {canRequestReturn && (
             <div>
               <Link

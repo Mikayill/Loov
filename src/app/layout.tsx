@@ -12,6 +12,7 @@ import FooterGate from "@/components/FooterGate";
 import StoreChromeGate from "@/components/StoreChromeGate";
 import BackToTop from "@/components/BackToTop";
 import CartDrawer from "@/components/CartDrawer";
+import CartToast from "@/components/CartToast";
 import CookieConsent from "@/components/CookieConsent";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import FooterPhone from "@/components/FooterPhone";
@@ -199,17 +200,13 @@ export default async function RootLayout({
                   {/* Phone — appears once the business number is set in admin settings */}
                   <FooterPhone />
                 </div>
-                {/* Payment icons */}
+                {/* Payment method — cash on delivery is the only one offered today;
+                    card badges return when online payments (Faz 3) go live. */}
                 <div>
                   <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-2">{t("footer.weAccept")}</p>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {["Visa", "MC", "Cash"].map((pay) => (
-                      <span key={pay} className="text-[10px] font-bold bg-[#F5F0EB] border border-[#DDD5CC] text-[#5E5450] px-2 py-1 rounded">
-                        {pay}
-                      </span>
-                    ))}
                     <span className="text-[10px] font-bold bg-[#EAF2F0] border border-[#C8DDD8] text-[#5E9E8C] px-2 py-1 rounded">
-                      Bank of Georgia
+                      💵 {t("checkout.paymentOnDelivery")}
                     </span>
                   </div>
                 </div>
@@ -234,6 +231,7 @@ export default async function RootLayout({
           <StoreChromeGate>
           <BackToTop />
           <CartDrawer />
+          <CartToast />
           <WhatsAppButton />
           <CookieConsent />
           <NewsletterPopup />

@@ -4,6 +4,7 @@ import { adminApiGuard } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { buildReturnMessage, type ReturnStatusKey } from "@/lib/i18n/orderMessages";
+import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
 import type { Locale } from "@/lib/i18n/config";
 import { RETURN_TRANSITIONS, type ReturnStatus } from "@/lib/returns";
 
@@ -30,11 +31,11 @@ async function sendReturnEmail(
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        // TODO: switch to orders@loov.ge once the domain is verified in Resend.
-        from: "Loov <onboarding@resend.dev>",
+        from: EMAIL_FROM,
         to: [to],
         subject: msg.subject,
         text: msg.body,
+        html: renderEmailHtml(msg.body),
       }),
     });
     if (!res.ok) {

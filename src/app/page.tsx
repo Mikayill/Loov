@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import BundleQuickView from "@/components/BundleQuickView";
 import { getT } from "@/lib/i18n/server";
 import { sortBySeason } from "@/lib/season";
+import Reveal from "@/components/ui/Reveal";
 
 // Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
 export const revalidate = 60;
@@ -95,7 +96,7 @@ export default async function HomePage() {
           <h2 className="text-base sm:text-xl font-extrabold text-[#2A2320]">{t("home.category.title")}</h2>
           <span className="hidden sm:block text-[#9A8E88] text-xs">{t("home.category.subtitle")}</span>
         </div>
-        <div className="grid grid-cols-6 sm:grid-cols-6 gap-2 sm:gap-4">
+        <Reveal className="grid grid-cols-6 sm:grid-cols-6 gap-2 sm:gap-4">
           {[
             { cat: "body",    emoji: "👶", label: t("category.body"),    bg: "#C8DDD8", href: "/products?cat=body" },
             { cat: "blanket", emoji: "☁️", label: t("category.blanket"), bg: "#C4D4E4", href: "/products?cat=blanket" },
@@ -118,7 +119,7 @@ export default async function HomePage() {
               </span>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* ── Picked for your baby (client-side, renders only for signed-in parents with a saved birthdate) ── */}
@@ -138,7 +139,9 @@ export default async function HomePage() {
             {t("home.featured.viewAll")} →
           </Link>
         </div>
-        <CategoryFilter products={featuredProducts} />
+        <Reveal>
+          <CategoryFilter products={featuredProducts} />
+        </Reveal>
       </section>
 
       {/* ── Bundle Deals Banner ── */}
@@ -155,7 +158,7 @@ export default async function HomePage() {
             {t("home.bundles.viewAll")} →
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Reveal className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {bundles.slice(0, 4).map((bundle) => {
             const savings = bundle.originalPrice - bundle.bundlePrice;
             return (
@@ -200,7 +203,7 @@ export default async function HomePage() {
               </Link>
             );
           })}
-        </div>
+        </Reveal>
         <div className="mt-4 text-center sm:hidden">
           <Link href="/bundles" className="text-sm font-bold text-[#5E9E8C] hover:underline">
             {t("home.bundles.viewAll")} →
@@ -237,7 +240,7 @@ export default async function HomePage() {
         </div>
 
         {/* Review cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
               name: "Nino T.",
@@ -284,7 +287,7 @@ export default async function HomePage() {
               </div>
             </div>
           ))}
-        </div>
+        </Reveal>
       </section>
     </>
   );

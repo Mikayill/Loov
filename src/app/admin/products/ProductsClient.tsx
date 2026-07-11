@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  CATEGORY_TEMPLATES as CATEGORY_TEMPLATES_SHARED,
+  CANONICAL_COLORS,
+  SIZE_GROUPS,
+  isValidColorTag,
+  isValidSizeTag,
+} from "@/lib/catalogTags";
 
 interface Row {
   id: string;
   slug: string;
   name: string;
+  name_ka: string | null;
+  name_ru: string | null;
+  name_tr: string | null;
   price: number;
   category: string;
   stock: number | null;
@@ -20,8 +30,12 @@ interface Row {
   sizes: string[] | null;
   size_colors: Record<string, string[]> | null;
   size_prices: Record<string, number> | null;
+  stock_by_variant: Record<string, Record<string, number>> | null;
   fabric: string | null;
   description: string | null;
+  description_ka: string | null;
+  description_ru: string | null;
+  description_tr: string | null;
   features: string[] | null;
   material: string | null;
   weight: string | null;
@@ -53,26 +67,15 @@ const FABRICS = [
   { v: "other", label: "📦 Other" },
 ];
 
-/** Category → sensible starter sizes/colors/fabric for the add form. */
-const CATEGORY_TEMPLATES: Record<string, { sizes: string; colors: string; fabric: string }> = {
-  body:    { sizes: "0-3 Months, 3-6 Months, 6-9 Months, 9-12 Months",                colors: "White, Beige, Sage",       fabric: "cotton" },
-  romper:  { sizes: "0-3 Months, 3-6 Months, 6-9 Months, 9-12 Months, 12-18 Months",  colors: "Beige, Sage, Blue",        fabric: "cotton" },
-  towel:   { sizes: "70×70 cm, 90×90 cm",                                             colors: "White, Cream, Sand",       fabric: "terry" },
-  blanket: { sizes: "120×120 cm",                                                     colors: "White & Sage, White & Sand", fabric: "muslin" },
-  set:     { sizes: "0-1 Month, 1-3 Months",                                          colors: "White, Sage, Sand",        fabric: "cotton" },
-  bag:     { sizes: "One Size",                                                       colors: "Sand, Cream",              fabric: "other" },
-  bathrobe:{ sizes: "0-1 Year, 1-2 Years, 2-3 Years",                                 colors: "White, Cream, Sage",       fabric: "terry" },
-  pajama:  { sizes: "6-12 Months, 12-18 Months, 18-24 Months",                        colors: "Sage, Cream, Lavender",    fabric: "cotton" },
-  dress:   { sizes: "3-6 Months, 6-12 Months, 12-18 Months",                          colors: "White, Lavender, Sand",    fabric: "cotton" },
-  pants:   { sizes: "0-3 Months, 3-6 Months, 6-12 Months, 12-18 Months",              colors: "Beige, Sage, Blue",        fabric: "cotton" },
-  outerwear:{ sizes: "6-12 Months, 12-18 Months, 18-24 Months",                       colors: "Sand, Sage, Blue",         fabric: "fleece" },
-  shoes:   { sizes: "16, 17, 18, 19, 20",                                             colors: "White, Sand, Blue",        fabric: "other" },
-  socks:   { sizes: "0-6 Months, 6-12 Months, 1-2 Years",                             colors: "White, Sage, Beige",       fabric: "cotton" },
-  hat:     { sizes: "0-6 Months, 6-12 Months, 1-2 Years",                             colors: "White, Sage, Sand",        fabric: "cotton" },
-  bib:     { sizes: "One Size",                                                       colors: "White, Cream, Mint",       fabric: "muslin" },
-  toy:     { sizes: "One Size",                                                       colors: "Cream, Sage, Sand",        fabric: "other" },
-  accessory:{ sizes: "One Size",                                                      colors: "White, Sand",              fabric: "other" },
-};
+/** Category → sensible starter sizes/colors/fabric for the add form
+ *  (comma-joined for the text inputs; canonical array data lives in
+ *  src/lib/catalogTags.ts, the single source of truth). */
+const CATEGORY_TEMPLATES: Record<string, { sizes: string; colors: string; fabric: string }> = Object.fromEntries(
+  Object.entries(CATEGORY_TEMPLATES_SHARED).map(([cat, tpl]) => [
+    cat,
+    { sizes: tpl.sizes.join(", "), colors: tpl.colors.join(", "), fabric: tpl.fabric },
+  ])
+);
 
 const splitList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
@@ -86,35 +89,218 @@ async function api(method: string, body?: unknown) {
 }
 
 /* ── tag editor (colors / sizes) ── */
-function TagInput({ label, tags, onChange, placeholder }: { label: string; tags: string[]; onChange: (t: string[]) => void; placeholder: string }) {
-  const [input, setInput] = useState("");
-  function add() {
-    const v = input.trim();
-    if (v && !tags.includes(v)) onChange([...tags, v]);
-    setInput("");
+/* ── canonical color chip picker — replaces free-text so colorLabel() can
+   always translate + stock_by_variant has a stable key space. Legacy
+   non-canonical entries (pre-dating this system) stay editable/removable
+   as amber tags so nothing an admin already typed silently vanishes. ── */
+function ColorPicker({ colors, onChange }: { colors: string[]; onChange: (next: string[]) => void }) {
+  const [combo, setCombo] = useState("");
+  const [error, setError] = useState("");
+  const legacy = colors.filter((c) => !isValidColorTag(c));
+
+  function toggle(c: string) {
+    onChange(colors.includes(c) ? colors.filter((x) => x !== c) : [...colors, c]);
+  }
+  function addCombo() {
+    const v = combo.trim();
+    if (!v) return;
+    if (!isValidColorTag(v)) { setError("Each part must be a canonical color, e.g. White & Sage"); return; }
+    if (!colors.includes(v)) onChange([...colors, v]);
+    setCombo(""); setError("");
   }
   return (
     <div>
-      <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">{label}</label>
+      <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Colors</label>
       <div className="flex flex-wrap gap-1.5 mb-2">
-        {tags.map((t) => (
-          <span key={t} className="inline-flex items-center gap-1 bg-[#EAF2F0] text-[#3A6B5E] text-xs font-semibold px-2 py-1 rounded-full">
-            {t}
-            <button onClick={() => onChange(tags.filter((x) => x !== t))} className="text-[#5E9E8C] hover:text-red-500 font-bold">×</button>
-          </span>
+        {CANONICAL_COLORS.map((c) => (
+          <button
+            key={c} type="button" onClick={() => toggle(c)}
+            className={`text-xs font-semibold px-2 py-1 rounded-full border-2 transition-colors ${
+              colors.includes(c) ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#3A6B5E]" : "border-[#DDD5CC] text-[#9A8E88] hover:border-[#5E9E8C]"
+            }`}
+          >
+            {c}
+          </button>
         ))}
-        {tags.length === 0 && <span className="text-xs text-[#9A8E88]">None yet</span>}
       </div>
+      {legacy.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {legacy.map((c) => (
+            <span key={c} className="inline-flex items-center gap-1 bg-[#FFF4E5] text-[#8B6914] text-xs font-semibold px-2 py-1 rounded-full">
+              {c}
+              <button onClick={() => onChange(colors.filter((x) => x !== c))} className="hover:text-red-500 font-bold">×</button>
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex gap-2">
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-          placeholder={placeholder}
+          value={combo}
+          onChange={(e) => { setCombo(e.target.value); setError(""); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCombo(); } }}
+          placeholder="Combo, e.g. White & Sage"
           className="flex-1 h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
         />
-        <button onClick={add} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
+        <button type="button" onClick={addCombo} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
       </div>
+      {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+const SIZE_GROUP_LABELS: Record<string, string> = {
+  babyMonths: "Age (months)",
+  babyYears: "Age (years)",
+  ageless: "Standard",
+  shoes: "Shoe size",
+};
+
+/* ── canonical size chip picker, grouped, + a free "custom dimension" entry
+   for towels/blankets (70×140cm etc. can't be enumerated). ── */
+function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: string[]) => void }) {
+  const [dim, setDim] = useState("");
+  const [error, setError] = useState("");
+  const legacy = sizes.filter((s) => !isValidSizeTag(s));
+
+  function toggle(s: string) {
+    onChange(sizes.includes(s) ? sizes.filter((x) => x !== s) : [...sizes, s]);
+  }
+  function addDimension() {
+    const v = dim.trim();
+    if (!v) return;
+    if (!isValidSizeTag(v)) { setError("Use a dimension like 70x140cm"); return; }
+    if (!sizes.includes(v)) onChange([...sizes, v]);
+    setDim(""); setError("");
+  }
+  return (
+    <div>
+      <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Sizes</label>
+      {Object.entries(SIZE_GROUPS).map(([group, opts]) => (
+        <div key={group} className="mb-1.5">
+          <p className="text-[9px] font-bold text-[#B0A89E] uppercase mb-1">{SIZE_GROUP_LABELS[group] ?? group}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {opts.map((s) => (
+              <button
+                key={s} type="button" onClick={() => toggle(s)}
+                className={`text-xs font-semibold px-2 py-1 rounded-full border-2 transition-colors ${
+                  sizes.includes(s) ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#3A6B5E]" : "border-[#DDD5CC] text-[#9A8E88] hover:border-[#5E9E8C]"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {legacy.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2 mt-1">
+          {legacy.map((s) => (
+            <span key={s} className="inline-flex items-center gap-1 bg-[#FFF4E5] text-[#8B6914] text-xs font-semibold px-2 py-1 rounded-full">
+              {s}
+              <button onClick={() => onChange(sizes.filter((x) => x !== s))} className="hover:text-red-500 font-bold">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-2 mt-1.5">
+        <input
+          value={dim}
+          onChange={(e) => { setDim(e.target.value); setError(""); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addDimension(); } }}
+          placeholder="Custom dimension, e.g. 70x140cm"
+          className="flex-1 h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
+        />
+        <button type="button" onClick={addDimension} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
+      </div>
+      {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+/* ── name/description, per language (blank = falls back to English) ── */
+const LANGS = [
+  { code: "en" as const, label: "EN", flag: "🇬🇧" },
+  { code: "ka" as const, label: "KA", flag: "🇬🇪" },
+  { code: "ru" as const, label: "RU", flag: "🇷🇺" },
+  { code: "tr" as const, label: "TR", flag: "🇹🇷" },
+];
+type LangCode = (typeof LANGS)[number]["code"];
+
+function NameDescriptionEditor({ draft, setDraft, save }: {
+  draft: Row;
+  setDraft: (r: Row) => void;
+  save: (patch: Partial<Row>) => void;
+}) {
+  const [lang, setLang] = useState<LangCode>("en");
+
+  const nameVal =
+    lang === "en" ? draft.name : lang === "ka" ? draft.name_ka ?? "" : lang === "ru" ? draft.name_ru ?? "" : draft.name_tr ?? "";
+  const descVal =
+    lang === "en" ? draft.description ?? "" : lang === "ka" ? draft.description_ka ?? "" : lang === "ru" ? draft.description_ru ?? "" : draft.description_tr ?? "";
+
+  function setName(v: string) {
+    if (lang === "en") setDraft({ ...draft, name: v });
+    else if (lang === "ka") setDraft({ ...draft, name_ka: v });
+    else if (lang === "ru") setDraft({ ...draft, name_ru: v });
+    else setDraft({ ...draft, name_tr: v });
+  }
+  function saveName() {
+    if (lang === "en") { if (draft.name.trim()) save({ name: draft.name }); }
+    else if (lang === "ka") save({ name_ka: draft.name_ka ?? "" });
+    else if (lang === "ru") save({ name_ru: draft.name_ru ?? "" });
+    else save({ name_tr: draft.name_tr ?? "" });
+  }
+  function setDescription(v: string) {
+    if (lang === "en") setDraft({ ...draft, description: v });
+    else if (lang === "ka") setDraft({ ...draft, description_ka: v });
+    else if (lang === "ru") setDraft({ ...draft, description_ru: v });
+    else setDraft({ ...draft, description_tr: v });
+  }
+  function saveDescription() {
+    if (lang === "en") save({ description: draft.description ?? "" });
+    else if (lang === "ka") save({ description_ka: draft.description_ka ?? "" });
+    else if (lang === "ru") save({ description_ru: draft.description_ru ?? "" });
+    else save({ description_tr: draft.description_tr ?? "" });
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+        <label className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">Name &amp; Description</label>
+        <div className="flex gap-1">
+          {LANGS.map((l) => (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => setLang(l.code)}
+              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                lang === l.code ? "text-white" : "bg-[#F5F0EB] text-[#9A8E88] hover:text-[#5E9E8C]"
+              }`}
+              style={lang === l.code ? { backgroundColor: "#5E9E8C" } : undefined}
+            >
+              {l.flag} {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {lang !== "en" && (
+        <p className="text-[10px] text-[#9A8E88] mb-1.5">Leave blank to show the English text instead.</p>
+      )}
+      <input
+        value={nameVal}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={saveName}
+        placeholder={lang === "en" ? "Product name" : draft.name}
+        className="w-full mb-2 px-3 h-9 rounded-lg border border-[#DDD5CC] text-sm font-semibold outline-none focus:border-[#5E9E8C]"
+      />
+      <textarea
+        value={descVal}
+        onChange={(e) => setDescription(e.target.value)}
+        onBlur={saveDescription}
+        rows={3}
+        className="w-full px-3 py-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+        placeholder={lang === "en" ? "Product description shown on the detail page…" : (draft.description ?? "")}
+      />
     </div>
   );
 }
@@ -140,14 +326,19 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
     setDraft({ ...draft, image_urls: next, image_url: next[0] });
     save({ image_urls: next });
   }
-  function toggleSizeColor(size: string, color: string) {
-    const cur = draft.size_colors?.[size] ?? draft.colors ?? [];
-    const has = cur.includes(color);
-    const nextList = has ? cur.filter((c) => c !== color) : [...cur, color];
-    const ordered = (draft.colors ?? []).filter((c) => nextList.includes(c));
-    const nextSC = { ...(draft.size_colors ?? {}), [size]: ordered };
-    setDraft({ ...draft, size_colors: nextSC });
-    save({ size_colors: nextSC });
+  /** Per-(size,color) stock — blank cell = not tracked yet, falls back to the
+   *  flat Stock field above. 0 means sold out / not offered for that combo
+   *  (this also replaces the old size-availability checkbox: a combo with no
+   *  entry is simply available at the fallback count). */
+  function setVariantStock(size: string, color: string, raw: string) {
+    const n = raw === "" ? null : Math.max(0, Math.round(Number(raw)));
+    const nextForSize = { ...(draft.stock_by_variant?.[size] ?? {}) };
+    if (n === null || Number.isNaN(n)) delete nextForSize[color];
+    else nextForSize[color] = n;
+    const nextSBV = { ...(draft.stock_by_variant ?? {}) };
+    if (Object.keys(nextForSize).length === 0) delete nextSBV[size];
+    else nextSBV[size] = nextForSize;
+    setDraft({ ...draft, stock_by_variant: nextSBV });
   }
 
   return (
@@ -254,18 +445,21 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
               </div>
             )}
 
-            {/* Colors + Sizes */}
-            <TagInput label="Colors" tags={draft.colors ?? []} placeholder="e.g. White, Sage…" onChange={(t) => { setDraft({ ...draft, colors: t }); save({ colors: t }); }} />
-            <TagInput label="Sizes" tags={draft.sizes ?? []} placeholder="e.g. 0-3 Months…" onChange={(t) => { setDraft({ ...draft, sizes: t }); save({ sizes: t }); }} />
+            {/* Colors + Sizes — canonical pickers so colorLabel/sizeLabel can
+                always translate them and stock_by_variant has stable keys */}
+            <ColorPicker colors={draft.colors ?? []} onChange={(next) => { setDraft({ ...draft, colors: next }); save({ colors: next }); }} />
+            <SizePicker sizes={draft.sizes ?? []} onChange={(next) => { setDraft({ ...draft, sizes: next }); save({ sizes: next }); }} />
           </div>
 
-          {/* RIGHT: size×color matrix + description + features */}
+          {/* RIGHT: size×color stock matrix + description + features */}
           <div className="space-y-5">
-            {/* Per-size color availability */}
+            {/* Per-(size,color) stock */}
             {(draft.sizes ?? []).length > 0 && (draft.colors ?? []).length > 0 && (
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Which colors exist per size</label>
-                <p className="text-[10px] text-[#9A8E88] mb-2">Untick a color if that size doesn&apos;t come in it (e.g. 0-3 Months has no Red).</p>
+                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Stock per size × color</label>
+                <p className="text-[10px] text-[#9A8E88] mb-2">
+                  Blank = use the flat Stock number above for that combo. 0 = sold out / not offered in that size.
+                </p>
                 <div className="overflow-x-auto rounded-lg border border-[#DDD5CC]">
                   <table className="text-xs">
                     <thead>
@@ -275,37 +469,31 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                       </tr>
                     </thead>
                     <tbody>
-                      {(draft.sizes ?? []).map((size) => {
-                        const avail = draft.size_colors?.[size] ?? draft.colors ?? [];
-                        return (
-                          <tr key={size} className="border-t border-[#DDD5CC]">
-                            <td className="p-2 font-semibold text-[#2A2320] whitespace-nowrap">{size}</td>
-                            {(draft.colors ?? []).map((c) => (
-                              <td key={c} className="p-2 text-center">
-                                <input type="checkbox" checked={avail.includes(c)} onChange={() => toggleSizeColor(size, c)} className="w-4 h-4 accent-[#5E9E8C] cursor-pointer" />
-                              </td>
-                            ))}
-                          </tr>
-                        );
-                      })}
+                      {(draft.sizes ?? []).map((size) => (
+                        <tr key={size} className="border-t border-[#DDD5CC]">
+                          <td className="p-2 font-semibold text-[#2A2320] whitespace-nowrap">{size}</td>
+                          {(draft.colors ?? []).map((c) => (
+                            <td key={c} className="p-1 text-center">
+                              <input
+                                type="number" min={0} step={1}
+                                value={draft.stock_by_variant?.[size]?.[c] ?? ""}
+                                placeholder="—"
+                                onChange={(e) => setVariantStock(size, c, e.target.value)}
+                                onBlur={() => save({ stock_by_variant: draft.stock_by_variant ?? {} })}
+                                className="w-16 h-8 px-1 rounded-lg border border-[#DDD5CC] text-xs font-bold text-center outline-none focus:border-[#5E9E8C]"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
               </div>
             )}
 
-            {/* Description */}
-            <div>
-              <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Description</label>
-              <textarea
-                value={draft.description ?? ""}
-                onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                onBlur={() => save({ description: draft.description ?? "" })}
-                rows={3}
-                className="w-full px-3 py-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
-                placeholder="Product description shown on the detail page…"
-              />
-            </div>
+            {/* Name & Description — per language (blank = falls back to English) */}
+            <NameDescriptionEditor draft={draft} setDraft={setDraft} save={save} />
 
             {/* Features / highlights */}
             <div>
@@ -384,6 +572,12 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     setDraft(next);
     const payload: Record<string, unknown> = { id: row.id };
     if ("name" in patch) payload.name = next.name;
+    if ("name_ka" in patch) payload.nameKa = next.name_ka ?? "";
+    if ("name_ru" in patch) payload.nameRu = next.name_ru ?? "";
+    if ("name_tr" in patch) payload.nameTr = next.name_tr ?? "";
+    if ("description_ka" in patch) payload.descriptionKa = next.description_ka ?? "";
+    if ("description_ru" in patch) payload.descriptionRu = next.description_ru ?? "";
+    if ("description_tr" in patch) payload.descriptionTr = next.description_tr ?? "";
     if ("price" in patch) payload.price = next.price;
     if ("category" in patch) payload.category = next.category;
     if ("stock" in patch) payload.stock = next.stock;
@@ -393,6 +587,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     if ("colors" in patch) payload.colors = next.colors;
     if ("sizes" in patch) payload.sizes = next.sizes;
     if ("size_colors" in patch) payload.sizeColors = next.size_colors;
+    if ("stock_by_variant" in patch) payload.stockByVariant = next.stock_by_variant ?? {};
     if ("size_prices" in patch) payload.sizePrices = next.size_prices ?? {};
     if ("fabric" in patch) payload.fabric = next.fabric ?? "";
     if ("description" in patch) payload.description = next.description;

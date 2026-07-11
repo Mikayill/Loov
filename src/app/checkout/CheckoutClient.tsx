@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { CartItem } from "@/types";
@@ -11,7 +11,7 @@ import CsrfField from "@/components/CsrfField";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import { useLoyalty } from "@/context/LoyaltyContext";
-import { maxRedeemablePoints, discountForPoints, pointsForAmount, REDEEM_BLOCK } from "@/lib/loyalty";
+import { maxRedeemablePoints, discountForPoints, pointsForAmountAt, REDEEM_BLOCK } from "@/lib/loyalty";
 import { fetchMyProfile } from "@/lib/db/profile";
 import { listAddresses, addAddress, type SavedAddress } from "@/lib/db/addresses";
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
@@ -21,13 +21,16 @@ import { promoDiscountAmount, type PromoDef } from "@/lib/promo";
 import { validatePromo } from "@/lib/db/promo";
 import { priceCartWithBundles, type BundleGroupLine } from "@/lib/bundlePricing";
 import type { Bundle } from "@/lib/bundles";
+import Button from "@/components/ui/Button";
 import {
   GEORGIA_REGIONS,
   TBILISI_DISTRICTS,
-  PHONE_PLACEHOLDER,
+  PHONE_COUNTRY_CODE,
   PHONE_PATTERN,
   POSTAL_CODE_PATTERN,
   POSTAL_CODE_PLACEHOLDER,
+  phoneLocalPart,
+  withCountryCode,
 } from "@/lib/georgia";
 
 function checkoutItemKey(i: CartItem) {
@@ -97,13 +100,16 @@ function StepIndicator({ step, t }: { step: Step; t: (key: TranslationKey) => st
 }
 
 function Field({
-  label, id, type = "text", value, onChange, required, placeholder, error, inputMode, pattern, autoComplete,
+  label, id, type = "text", value, onChange, required, placeholder, error, inputMode, pattern, autoComplete, prefix,
 }: {
   label: string; id: string; type?: string;
   value: string; onChange: (v: string) => void;
   required?: boolean; placeholder?: string; error?: string;
   inputMode?: "text" | "tel" | "email" | "numeric";
   pattern?: string; autoComplete?: string;
+  /** Fixed, non-editable text shown before the input (e.g. "+995") — kept out
+   *  of the editable value so the customer never has to type or delete it. */
+  prefix?: string;
 }) {
   const invalid = !!error;
   return (
@@ -111,22 +117,31 @@ function Field({
       <label htmlFor={id} className="block text-xs font-bold text-[#2A2320] mb-1.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        inputMode={inputMode}
-        pattern={pattern}
-        autoComplete={autoComplete}
-        aria-invalid={invalid}
-        aria-describedby={invalid ? `${id}-error` : undefined}
-        className={`w-full h-11 px-4 rounded-xl border-2 bg-white text-[#2A2320] text-sm font-medium outline-none transition-colors placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] ${
-          invalid ? "border-red-400 focus:border-red-400" : "border-[#DDD5CC]"
+      <div
+        className={`flex items-stretch h-11 rounded-xl border-2 bg-white overflow-hidden transition-colors focus-within:border-[#5E9E8C] ${
+          invalid ? "border-red-400 focus-within:border-red-400" : "border-[#DDD5CC]"
         }`}
-      />
+      >
+        {prefix && (
+          <span className="flex items-center pl-4 pr-2 text-sm font-bold text-[#5E5450] bg-[#F5F0EB] border-r-2 border-[#DDD5CC] select-none">
+            {prefix}
+          </span>
+        )}
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          inputMode={inputMode}
+          pattern={pattern}
+          autoComplete={autoComplete}
+          aria-invalid={invalid}
+          aria-describedby={invalid ? `${id}-error` : undefined}
+          className="flex-1 min-w-0 h-full px-4 bg-transparent text-[#2A2320] text-sm font-medium outline-none placeholder:text-[#C8B8B0]"
+        />
+      </div>
       {invalid && (
         <p id={`${id}-error`} className="text-red-500 text-[11px] font-semibold mt-1">{error}</p>
       )}
@@ -142,9 +157,18 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   const [step, setStep]   = useState<Step>("address");
   const [form, setForm]   = useState<FormData>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [addressToast, setAddressToast] = useState<{ visible: boolean; text: string }>({ visible: false, text: "" });
+  const addressToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showAddressToast(text: string) {
+    setAddressToast({ visible: true, text });
+    if (addressToastTimer.current) clearTimeout(addressToastTimer.current);
+    addressToastTimer.current = setTimeout(() => setAddressToast((s) => ({ ...s, visible: false })), 4500);
+  }
   const [orderNum, setOrderNum] = useState("");
   const [placing, setPlacing] = useState(false);
   const [placeError, setPlaceError] = useState("");
+  const [agreedTerms, setAgreedTerms] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
 
@@ -251,7 +275,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     return () => { cancelled = true; };
   }, [user]);
 
-  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice } = useSettings();
+  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice, loyaltyMaxRedeemPercent, pointsPerGel, deliveryMinDays, deliveryMaxDays } = useSettings();
 
   /* Bundle-aware subtotal — same rule the server uses for the real charge
      (src/lib/bundlePricing.ts): a bundle-tagged group only gets the flat
@@ -297,7 +321,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   const giftWrapCost = giftWrap ? 5 : 0;
 
   /* ── Loov Rewards ── */
-  const redeemablePoints = maxRedeemablePoints(loyalty.balance, postPromoSubtotal);
+  const redeemablePoints = maxRedeemablePoints(loyalty.balance, postPromoSubtotal, loyaltyMaxRedeemPercent / 100);
   const redeemPts = usePoints ? redeemablePoints : 0;
   const pointsDiscount = discountForPoints(redeemPts);
 
@@ -311,8 +335,32 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   /* Manual address fields show when there's nothing saved or "different address" is picked. */
   const showManualFields = !user || savedAddresses.length === 0 || selectedAddrId === "new";
 
+  /** Human label for a field, for the "one field missing" toast. */
+  function fieldLabel(key: keyof FormData): string {
+    switch (key) {
+      case "firstName": return t("checkout.firstName");
+      case "lastName": return t("checkout.lastName");
+      case "email": return t("checkout.email");
+      case "phone": return t("checkout.phone");
+      case "address": return t("checkout.streetAddress");
+      case "region": return t("checkout.region");
+      case "city": return form.region === "Tbilisi" ? t("checkout.city") : t("checkout.cityTown");
+      case "zip": return t("checkout.postalCode");
+      default: return key;
+    }
+  }
+
   async function handleContinueToReview() {
-    if (!validateAddress()) return;
+    const validationErrors = validateAddress();
+    const missing = Object.keys(validationErrors) as (keyof FormData)[];
+    if (missing.length === 1) {
+      showAddressToast(t("checkout.toastOneMissing").replace("{field}", fieldLabel(missing[0])));
+      return;
+    }
+    if (missing.length > 1) {
+      showAddressToast(t("checkout.toastManyMissing"));
+      return;
+    }
     // Optionally file the freshly typed address into the address book.
     if (user && addrBookReady && showManualFields && saveNewAddress) {
       const res = await addAddress({
@@ -333,7 +381,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     setStep("review");
   }
 
-  function validateAddress(): boolean {
+  function validateAddress(): Partial<Record<keyof FormData, string>> {
     const e: Partial<Record<keyof FormData, string>> = {};
     if (!form.firstName.trim()) e.firstName = t("checkout.errRequired");
     if (!form.lastName.trim())  e.lastName  = t("checkout.errRequired");
@@ -348,10 +396,11 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     if (form.zip.trim() && !postalRe.test(form.zip.trim()))
       e.zip = t("checkout.errZip");
     setErrors(e);
-    return Object.keys(e).length === 0;
+    return e;
   }
 
   async function handlePlaceOrder() {
+    if (!agreedTerms) { setPlaceError(t("checkout.agreeTermsFirst")); return; }
     setPlacing(true);
     setPlaceError("");
     try {
@@ -386,6 +435,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
+        if (res.status === 429) throw new Error(t("auth.errRateLimit"));
         throw new Error(data.error || t("checkout.errGeneric"));
       }
       setOrderNum(data.orderNumber);
@@ -427,6 +477,27 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Address validation toast — mirrors CartToast's dark/warn card but sits
+          at the TOP so it doesn't collide with CartToast's bottom position. */}
+      <div
+        className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[700] w-[calc(100%-2rem)] max-w-sm transition-all duration-300 ${
+          addressToast.visible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="rounded-2xl shadow-2xl px-4 py-3.5 flex items-center gap-3 bg-[#B03A3A] text-white">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold leading-snug">{addressToast.text}</p>
+          </div>
+          <button
+            onClick={() => setAddressToast((s) => ({ ...s, visible: false }))}
+            className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors bg-white/15 hover:bg-white/25"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
         <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
@@ -453,7 +524,10 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 <Field label={t("checkout.firstName")} id="firstName" value={form.firstName} onChange={(v) => set("firstName", v)} required placeholder="Ana" autoComplete="given-name" error={errors.firstName} />
                 <Field label={t("checkout.lastName")}  id="lastName"  value={form.lastName}  onChange={(v) => set("lastName", v)}  required placeholder="Beridze" autoComplete="family-name" error={errors.lastName} />
                 <Field label={t("checkout.email")}     id="email"     type="email" inputMode="email" value={form.email}  onChange={(v) => set("email", v)}  required placeholder="ana@email.com" autoComplete="email" error={errors.email} />
-                <Field label={t("checkout.phone")}     id="phone"     type="tel"   inputMode="tel" value={form.phone}  onChange={(v) => set("phone", v)}  required placeholder={PHONE_PLACEHOLDER} autoComplete="tel" error={errors.phone} />
+                <Field label={t("checkout.phone")}     id="phone"     type="tel"   inputMode="tel"
+                  value={phoneLocalPart(form.phone)}
+                  onChange={(v) => set("phone", withCountryCode(phoneLocalPart(v)))}
+                  required placeholder="5XX XXX XXX" prefix={PHONE_COUNTRY_CODE} autoComplete="tel" error={errors.phone} />
               </div>
             </div>
 
@@ -615,7 +689,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               </h2>
               <div className="space-y-3">
                 {[
-                  { id: "standard", label: t("checkout.standardDelivery"), sub: t("checkout.standardSub"), price: promoShippingFree || postPromoSubtotal >= freeShippingThreshold ? `${t("cart.free")} 🎉` : formatPrice(standardShippingPrice) },
+                  { id: "standard", label: t("checkout.standardDelivery"), sub: t("checkout.standardSubDays").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)), price: promoShippingFree || postPromoSubtotal >= freeShippingThreshold ? `${t("cart.free")} 🎉` : formatPrice(standardShippingPrice) },
                   ...(expressEnabled
                     ? [{ id: "express", label: t("checkout.expressDelivery"), sub: t("checkout.expressSub"), price: formatPrice(expressPrice) }]
                     : []),
@@ -695,13 +769,14 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             {/* CSRF placeholder — real validation lands with the backend (Phase 2) */}
             <CsrfField />
 
-            <button
+            <Button
               onClick={handleContinueToReview}
-              className="w-full py-4 rounded-2xl font-extrabold text-white text-base hover:opacity-90 active:scale-95 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
-              style={{ backgroundColor: "#5E9E8C" }}
+              size="lg"
+              fullWidth
+              className="!rounded-2xl !h-auto py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
             >
               {t("checkout.continueReview")} →
-            </button>
+            </Button>
           </div>
 
           {/* Order mini-summary */}
@@ -888,22 +963,42 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               </div>
             )}
 
+            {/* Terms agreement — required before placing the order (guest + member) */}
+            <label className="flex items-start gap-2.5 mb-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreedTerms}
+                onChange={(e) => { setAgreedTerms(e.target.checked); if (e.target.checked) setPlaceError(""); }}
+                className="mt-0.5 w-4 h-4 rounded accent-[#5E9E8C] flex-shrink-0"
+              />
+              <span className="text-xs text-[#5E5450] leading-relaxed">
+                {t("checkout.agreeTerms.pre")}
+                <Link href="/terms" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.terms")}</Link>
+                {t("checkout.agreeTerms.mid")}
+                <Link href="/privacy" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.privacy")}</Link>
+                {t("checkout.agreeTerms.post")}
+              </span>
+            </label>
+
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => setStep("address")}
                 disabled={placing}
-                className="flex-1 py-3.5 rounded-2xl font-bold text-[#5E5450] border-2 border-[#DDD5CC] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-all text-sm disabled:opacity-50"
+                variant="secondary"
+                size="lg"
+                className="flex-1 !rounded-2xl !h-auto py-3.5 !text-sm"
               >
                 ← {t("common.back")}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handlePlaceOrder}
-                disabled={placing}
-                className="flex-1 py-3.5 rounded-2xl font-extrabold text-white text-base hover:opacity-90 active:scale-95 transition-all shadow-sm disabled:opacity-60 disabled:active:scale-100"
-                style={{ backgroundColor: "#5E9E8C" }}
+                loading={placing}
+                loadingText={t("checkout.placingOrder")}
+                size="lg"
+                className="flex-1 !rounded-2xl !h-auto py-3.5"
               >
-                {placing ? t("checkout.placingOrder") : `${t("checkout.placeOrderBtn")} →`}
-              </button>
+                {t("checkout.placeOrderBtn")} →
+              </Button>
             </div>
           </div>
 
@@ -948,7 +1043,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-xl px-3 py-2">
                 <span className="text-sm">⭐</span>
                 <span className="text-[11px] font-bold text-[#8B6914]">
-                  {t("checkout.willEarn").replace("{n}", String(pointsForAmount(total, loyalty.tier)))}
+                  {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(total, pointsPerGel, loyalty.tier)))}
                 </span>
               </div>
               <div className="flex items-center justify-around pt-2">

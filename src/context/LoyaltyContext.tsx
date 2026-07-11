@@ -13,7 +13,7 @@
  * it can never drift out of sync.
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSettings } from "@/lib/db/useSettings";
@@ -118,6 +118,28 @@ export function LoyaltyProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  /* On a guest's first sign-in, claim any orders they placed as a guest with
+     this (confirmed) email and credit the points those orders earned — server
+     recomputes points from the real totals, so nothing is trusted from the
+     browser. Then drop the cosmetic guest ledger. Runs once per sign-in. */
+  const linkedForUser = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user) { linkedForUser.current = null; return; }
+    if (linkedForUser.current === user.id) return;
+    linkedForUser.current = user.id;
+    (async () => {
+      try {
+        const res = await fetch("/api/account/link-guest-orders", { method: "POST" });
+        const d = await res.json().catch(() => ({}));
+        if (d.linked > 0) {
+          await refresh();
+          setLocalTx([]);
+          try { localStorage.removeItem(STORAGE_KEY); } catch { /* */ }
+        }
+      } catch { /* best-effort — points can be reconciled on a later sign-in */ }
+    })();
+  }, [user, refresh]);
 
   const source: "db" | "local" = dbTx !== null ? "db" : "local";
   const transactions = dbTx ?? localTx;

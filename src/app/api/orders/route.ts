@@ -13,11 +13,12 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PHONE_PATTERN, POSTAL_CODE_PATTERN } from "@/lib/georgia";
 import { buildOrderMessage } from "@/lib/i18n/orderMessages";
+import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
+import { rateLimited } from "@/lib/rateLimit";
 import type { Locale } from "@/lib/i18n/config";
 import {
   REDEEM_BLOCK,
   GEL_PER_BLOCK,
-  MAX_DISCOUNT_RATIO,
   tierForAt,
   tiersFromSettings,
   pointsForAmountAt,
@@ -38,11 +39,11 @@ async function sendOrderEmail(to: string, locale: string, name: string, orderNum
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        // TODO: switch to orders@loov.ge once the domain is verified in Resend.
-        from: "Loov <onboarding@resend.dev>",
+        from: EMAIL_FROM,
         to: [to],
         subject: msg.subject,
         text: msg.email,
+        html: renderEmailHtml(msg.email),
       }),
     });
     if (!res.ok) {
@@ -98,6 +99,13 @@ export async function POST(req: NextRequest) {
   const host = req.headers.get("host");
   if (!origin || !host || new URL(origin).host !== host) {
     return bad("Cross-origin request rejected", 403);
+  }
+
+  /* ── Flood guard: a real shopper never places 5 COD orders in 10 minutes;
+     a bot doing so would drain stock reservations + trigger email spam. ── */
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  if (rateLimited(`orders:${ip}`, 5, 10 * 60_000)) {
+    return bad("Too many orders from this connection — please wait a few minutes and try again.", 429);
   }
 
   let body: OrderInput;
@@ -263,13 +271,13 @@ export async function POST(req: NextRequest) {
     return bad("Invalid points amount");
   }
   const maxByOrder =
-    Math.floor((postPromoSubtotal * MAX_DISCOUNT_RATIO) / GEL_PER_BLOCK) * REDEEM_BLOCK;
+    Math.floor((postPromoSubtotal * (settings.loyaltyMaxRedeemPercent / 100)) / GEL_PER_BLOCK) * REDEEM_BLOCK;
   redeemPoints = Math.min(redeemPoints, maxByOrder);
 
   // Points can ONLY be redeemed by a signed-in user whose DB balance covers it.
   // Guests have no server-verifiable balance (their "points" are cosmetic,
   // localStorage-only), so redemption is refused for them — otherwise anyone
-  // could send `redeemPoints` and get up to MAX_DISCOUNT_RATIO off for free.
+  // could send `redeemPoints` and get up to loyaltyMaxRedeemPercent off for free.
   let ledger: "db" | "local" = "local";
   let lifetimeEarned = 0;
   if (userId && admin) {
@@ -310,14 +318,29 @@ export async function POST(req: NextRequest) {
   // stock functions can be revoked from anon — otherwise a user could call
   // release_stock to inflate stock or reserve_stock to grief inventory.
   // If the service key or migration is missing, we skip gracefully.
-  const stockItems = body.items.map((it) => ({ id: it.productId, qty: it.quantity }));
+  // color/size let reserve_stock use the per-variant count (stock_by_variant)
+  // when the admin has set one for this exact combo; see supabase/stock.sql.
+  const stockItems = body.items.map((it) => ({ id: it.productId, qty: it.quantity, color: it.color, size: it.size }));
+  const flatItems = body.items.map((it) => ({ id: it.productId, qty: it.quantity }));
   let stockReserved = false;
+  // Whichever item shape actually succeeded — release_stock must be called
+  // with the SAME shape, or the fallback-vs-variant path could mismatch.
+  let reservedItems: typeof stockItems | typeof flatItems = stockItems;
   if (admin) {
-    const { error: rErr } = await admin.rpc("reserve_stock", { p_items: stockItems });
+    let { error: rErr } = await admin.rpc("reserve_stock", { p_items: stockItems });
+    // supabase/variant-stock.sql hasn't been run yet (stock_by_variant column
+    // missing) — retry without color/size so checkout falls back to the flat
+    // stock column instead of failing outright.
+    if (rErr && /stock_by_variant/i.test(rErr.message || "")) {
+      console.warn("[orders] stock_by_variant column missing — run supabase/variant-stock.sql. Falling back to flat stock.");
+      reservedItems = flatItems;
+      ({ error: rErr } = await admin.rpc("reserve_stock", { p_items: flatItems }));
+    }
     if (rErr) {
       const m = rErr.message || "";
-      if (/INSUFFICIENT_STOCK:(\S+)/.test(m)) {
-        const badId = m.match(/INSUFFICIENT_STOCK:(\S+)/)![1];
+      const insufficient = /INSUFFICIENT_STOCK:([^:]+)(?::([^:]+):([^:]+))?/.exec(m);
+      if (insufficient) {
+        const badId = insufficient[1];
         const name = byId.get(badId)?.name ?? "An item";
         return NextResponse.json(
           { error: `Sorry — "${name}" just sold out or doesn't have enough stock left.` },
@@ -387,7 +410,7 @@ export async function POST(req: NextRequest) {
   }
   if (orderErr) {
     console.error("[orders] insert failed:", orderErr.message);
-    if (stockReserved && admin) await admin.rpc("release_stock", { p_items: stockItems });
+    if (stockReserved && admin) await admin.rpc("release_stock", { p_items: reservedItems });
     return bad("Could not save order — please try again", 500);
   }
 
@@ -425,7 +448,7 @@ export async function POST(req: NextRequest) {
     // the just-inserted order to avoid an empty ("orphan") order row. Guests
     // have no DELETE policy, so this needs the service-role client.
     await (admin ?? supabase).from("orders").delete().eq("id", orderId);
-    if (stockReserved && admin) await admin.rpc("release_stock", { p_items: stockItems });
+    if (stockReserved && admin) await admin.rpc("release_stock", { p_items: reservedItems });
     return bad("Could not save order items — please try again", 500);
   }
 
@@ -473,4 +496,80 @@ export async function POST(req: NextRequest) {
     ledger,
     total,
   });
+}
+
+/**
+ * PATCH /api/orders — the customer cancels their OWN order, but only while
+ * it's still "pending" (nothing has shipped). Identity comes from the session
+ * cookie, so a caller can only ever cancel an order they own. On cancel we
+ * give the reserved stock back and reverse the loyalty ledger (clawback the
+ * points earned + refund the points redeemed), mirroring the returns flow.
+ */
+export async function PATCH(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("host");
+  if (!origin || !host || new URL(origin).host !== host) {
+    return bad("Cross-origin request rejected", 403);
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const action = String(body?.action ?? "");
+  const orderNumber = String(body?.orderNumber ?? "").trim();
+  if (action !== "cancel" || !orderNumber) return bad("Invalid request");
+
+  const server = await createSupabaseServerClient();
+  const { data: userData } = await server.auth.getUser();
+  const userId = userData?.user?.id;
+  if (!userId) return bad("Not signed in", 401);
+
+  const admin = createSupabaseAdminClient();
+  if (!admin) return bad("Cancellation is unavailable right now.", 500);
+
+  const { data: order, error: readErr } = await admin
+    .from("orders")
+    .select("id, status, user_id, order_items(product_id, quantity, color, size)")
+    .eq("order_number", orderNumber)
+    .maybeSingle();
+  if (readErr || !order) return bad("Order not found", 404);
+  if (order.user_id !== userId) return bad("Order not found", 404); // don't leak others' orders
+  if (order.status !== "pending") {
+    return bad("This order can no longer be cancelled — it's already being prepared.", 409);
+  }
+
+  // Give the reserved stock back (variant-aware; falls back to flat stock).
+  const items = (order.order_items ?? []).map((it: { product_id: string; quantity: number; color: string | null; size: string | null }) => ({
+    id: it.product_id, qty: it.quantity, color: it.color ?? undefined, size: it.size ?? undefined,
+  }));
+  if (items.length > 0) {
+    const { error: relErr } = await admin.rpc("release_stock", { p_items: items });
+    if (relErr && /color|size|stock_by_variant/i.test(relErr.message)) {
+      // Pre-variant stock.sql — retry with flat items.
+      await admin.rpc("release_stock", { p_items: items.map((i) => ({ id: i.id, qty: i.qty })) });
+    }
+  }
+
+  // Reverse the loyalty ledger for this order (reason "return" so lifetime /
+  // tier math already excludes it, same as the refund path).
+  try {
+    const { data: txs } = await admin
+      .from("loyalty_transactions")
+      .select("delta, reason")
+      .eq("order_id", order.id);
+    if (txs && txs.length > 0 && !txs.some((t) => t.reason === "return")) {
+      const earned = txs.filter((t) => t.reason === "order" && Number(t.delta) > 0).reduce((s, t) => s + Number(t.delta), 0);
+      const redeemed = -txs.filter((t) => t.reason === "redeem" && Number(t.delta) < 0).reduce((s, t) => s + Number(t.delta), 0);
+      const rows = [
+        ...(earned > 0 ? [{ user_id: userId, order_id: order.id, delta: -earned, reason: "return" }] : []),
+        ...(redeemed > 0 ? [{ user_id: userId, order_id: order.id, delta: redeemed, reason: "return" }] : []),
+      ];
+      if (rows.length > 0) await admin.from("loyalty_transactions").insert(rows);
+    }
+  } catch (e) {
+    console.warn("[orders] cancel loyalty reversal failed:", (e as Error).message);
+  }
+
+  const { error: updErr } = await admin.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+  if (updErr) return bad(updErr.message, 500);
+
+  return NextResponse.json({ ok: true });
 }

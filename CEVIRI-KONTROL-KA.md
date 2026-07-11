@@ -463,6 +463,8 @@
 | Geçerli bir Gürcistan numarası girin (+995 …) | შეიყვანეთ სწორი ქართული ნომერი (+995 …) | |
 | Bir şeyler ters gitti | დაფიქსირდა შეცდომა | |
 | Sipariş verilemedi — lütfen bağlantınızı kontrol edip tekrar deneyin. | შეკვეთის განთავსება ვერ მოხერხდა — გთხოვთ შეამოწმოთ კავშირი და სცადოთ თავიდან. | |
+| (10 Tem 2026, YENİ) Devam etmek için lütfen "{field}" alanını doldurun. | გასაგრძელებლად გთხოვთ შეავსოთ „{field}“. | |
+| (10 Tem 2026, YENİ) Devam etmeden önce doldurmanız gereken birkaç zorunlu alan var. | რამდენიმე სავალდებულო ველი ჯერ არ არის შევსებული — გთხოვთ შეავსოთ გასაგრძელებლად. | |
 
 ---
 

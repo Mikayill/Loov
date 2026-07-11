@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminApiGuard } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { CATEGORY_TEMPLATES } from "@/lib/catalogTags";
 
 export const dynamic = "force-dynamic";
 
@@ -18,26 +19,9 @@ const FABRICS = ["cotton", "muslin", "bamboo", "terry", "fleece", "wool", "other
  * Category templates — a freshly created product is ALWAYS sellable.
  * (The old add-product flow created rows with colors=[] sizes=[], which
  * rendered an un-buyable product page — the "my product doesn't work" bug.)
+ * Templates themselves live in src/lib/catalogTags.ts (single source of
+ * truth, shared with the admin UI's canonical color/size pickers).
  */
-const CATEGORY_TEMPLATES: Record<string, { sizes: string[]; colors: string[]; fabric: string }> = {
-  body:    { sizes: ["0-3 Months", "3-6 Months", "6-9 Months", "9-12 Months"],                 colors: ["White", "Beige", "Sage"],        fabric: "cotton" },
-  romper:  { sizes: ["0-3 Months", "3-6 Months", "6-9 Months", "9-12 Months", "12-18 Months"], colors: ["Beige", "Sage", "Blue"],         fabric: "cotton" },
-  towel:   { sizes: ["70×70 cm", "90×90 cm"],                                                  colors: ["White", "Cream", "Sand"],        fabric: "terry" },
-  blanket: { sizes: ["120×120 cm"],                                                            colors: ["White & Sage", "White & Sand"],  fabric: "muslin" },
-  set:     { sizes: ["0-1 Month", "1-3 Months"],                                               colors: ["White", "Sage", "Sand"],         fabric: "cotton" },
-  bag:     { sizes: ["One Size"],                                                              colors: ["Sand", "Cream"],                 fabric: "other" },
-  bathrobe:{ sizes: ["0-1 Year", "1-2 Years", "2-3 Years"],                                    colors: ["White", "Cream", "Sage"],        fabric: "terry" },
-  pajama:  { sizes: ["6-12 Months", "12-18 Months", "18-24 Months"],                           colors: ["Sage", "Cream", "Lavender"],     fabric: "cotton" },
-  dress:   { sizes: ["3-6 Months", "6-12 Months", "12-18 Months"],                             colors: ["White", "Lavender", "Sand"],     fabric: "cotton" },
-  pants:   { sizes: ["0-3 Months", "3-6 Months", "6-12 Months", "12-18 Months"],               colors: ["Beige", "Sage", "Blue"],         fabric: "cotton" },
-  outerwear:{ sizes: ["6-12 Months", "12-18 Months", "18-24 Months"],                          colors: ["Sand", "Sage", "Blue"],          fabric: "fleece" },
-  shoes:   { sizes: ["16", "17", "18", "19", "20"],                                            colors: ["White", "Sand", "Blue"],         fabric: "other" },
-  socks:   { sizes: ["0-6 Months", "6-12 Months", "1-2 Years"],                                colors: ["White", "Sage", "Beige"],        fabric: "cotton" },
-  hat:     { sizes: ["0-6 Months", "6-12 Months", "1-2 Years"],                                colors: ["White", "Sage", "Sand"],         fabric: "cotton" },
-  bib:     { sizes: ["One Size"],                                                              colors: ["White", "Cream", "Mint"],        fabric: "muslin" },
-  toy:     { sizes: ["One Size"],                                                              colors: ["Cream", "Sage", "Sand"],         fabric: "other" },
-  accessory:{ sizes: ["One Size"],                                                             colors: ["White", "Sand"],                 fabric: "other" },
-};
 
 function slugify(s: string): string {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -70,6 +54,13 @@ function sanitize(body: Record<string, unknown>, partial: boolean): Record<strin
     set("stock", s);
   }
   if (body.description !== undefined) set("description", String(body.description));
+  // ── new: per-locale name/description (blank = falls back to English) ──
+  if (body.nameKa !== undefined) set("name_ka", String(body.nameKa).trim().slice(0, 200) || null);
+  if (body.nameRu !== undefined) set("name_ru", String(body.nameRu).trim().slice(0, 200) || null);
+  if (body.nameTr !== undefined) set("name_tr", String(body.nameTr).trim().slice(0, 200) || null);
+  if (body.descriptionKa !== undefined) set("description_ka", String(body.descriptionKa).trim() || null);
+  if (body.descriptionRu !== undefined) set("description_ru", String(body.descriptionRu).trim() || null);
+  if (body.descriptionTr !== undefined) set("description_tr", String(body.descriptionTr).trim() || null);
   if (body.emoji !== undefined) set("emoji", String(body.emoji).slice(0, 8));
   if (body.cardColor !== undefined) set("card_color", String(body.cardColor).slice(0, 32));
   if (body.imageUrl !== undefined) set("image_url", body.imageUrl ? String(body.imageUrl) : null);
@@ -124,6 +115,20 @@ function sanitize(body: Record<string, unknown>, partial: boolean): Record<strin
       if (Number.isFinite(n) && n > 0 && n <= 100000) clean[String(size)] = n;
     }
     set("size_prices", clean);
+  }
+  // ── new: per-(size,color) stock — blank/absent combo falls back to flat `stock` ──
+  if (body.stockByVariant !== undefined && body.stockByVariant && typeof body.stockByVariant === "object") {
+    const clean: Record<string, Record<string, number>> = {};
+    for (const [size, cols] of Object.entries(body.stockByVariant as Record<string, unknown>)) {
+      if (!cols || typeof cols !== "object") continue;
+      const inner: Record<string, number> = {};
+      for (const [color, val] of Object.entries(cols as Record<string, unknown>)) {
+        const n = Number(val);
+        if (Number.isInteger(n) && n >= 0 && n <= 100000) inner[String(color)] = n;
+      }
+      if (Object.keys(inner).length > 0) clean[String(size)] = inner;
+    }
+    set("stock_by_variant", clean);
   }
   // ── new: fabric (normalized slug for the storefront filter) ──
   if (body.fabric !== undefined) {
@@ -203,7 +208,22 @@ export async function PATCH(req: NextRequest) {
   if (typeof clean === "string") return NextResponse.json({ error: clean }, { status: 400 });
   if (Object.keys(clean).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 
-  const { error } = await admin.from("products").update(clean).eq("id", String(id));
+  let { error } = await admin.from("products").update(clean).eq("id", String(id));
+  // If supabase/product-i18n.sql hasn't been run yet, retry without those
+  // columns so unrelated edits (price, stock, colors…) never fail because of it.
+  if (error && /column|schema cache/i.test(error.message) && /name_ka|name_ru|name_tr|description_ka|description_ru|description_tr/i.test(error.message)) {
+    console.warn("[admin/products] name_*/description_* columns missing — run supabase/product-i18n.sql. Updating without them.");
+    const i18nKeys = ["name_ka", "name_ru", "name_tr", "description_ka", "description_ru", "description_tr"];
+    for (const k of i18nKeys) delete clean[k];
+    ({ error } = await admin.from("products").update(clean).eq("id", String(id)));
+  }
+  // Same for supabase/variant-stock.sql (stock_by_variant column).
+  if (error && /column|schema cache/i.test(error.message) && /stock_by_variant/i.test(error.message)) {
+    console.warn("[admin/products] stock_by_variant column missing — run supabase/variant-stock.sql. Updating without it.");
+    delete clean.stock_by_variant;
+    ({ error } = await admin.from("products").update(clean).eq("id", String(id)));
+  }
+  if (Object.keys(clean).length === 0) return NextResponse.json({ error: "Required migration hasn't been run yet — nothing else to update" }, { status: 400 });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await writeAudit({ actorEmail: guard.email, action: "product.update", entity: "product", entityId: String(id), detail: clean });
   return NextResponse.json({ ok: true });

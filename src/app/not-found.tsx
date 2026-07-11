@@ -1,13 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import SearchModal from "@/components/SearchModal";
+import SearchResultsPanel from "@/components/SearchResultsPanel";
 import { useLocale } from "@/context/LocaleContext";
+import { useProducts } from "@/lib/db/useProducts";
+import { tokenize, matchesQuery, loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 
 export default function NotFound() {
   const { t } = useLocale();
+  const products = useProducts();
+  const [query, setQuery] = useState("");
+  const [activeCat, setActiveCat] = useState<CatKey>("all");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
+
+  const tokens = useMemo(() => tokenize(query), [query]);
+  const results = useMemo(
+    () => products.filter((p) => (activeCat === "all" || p.category === activeCat) && matchesQuery(p, tokens, t)),
+    [products, tokens, activeCat, t]
+  );
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function handle(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [searchOpen]);
+
+  /* Same scroll-padding-top workaround as Navbar's search — see its comment. */
+  useEffect(() => {
+    document.documentElement.style.scrollPaddingTop = searchOpen ? "0px" : "";
+    return () => { document.documentElement.style.scrollPaddingTop = ""; };
+  }, [searchOpen]);
 
   return (
     <>
@@ -32,16 +63,40 @@ export default function NotFound() {
           {t("err.notFoundBody")}
         </p>
 
-        {/* Search bar */}
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-3 w-full max-w-sm mb-6 px-5 py-3 bg-white border-2 border-[#DDD5CC] rounded-2xl text-left hover:border-[#5E9E8C] transition-colors shadow-sm group"
-        >
-          <svg className="w-4 h-4 text-[#9A8E88] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span className="text-[#9A8E88] text-sm group-hover:text-[#5E5450] transition-colors">{t("err.searchPlaceholder")}</span>
-        </button>
+        {/* Search bar — real input, live dropdown, no popup */}
+        <div ref={searchRef} className="relative w-full max-w-sm mb-6">
+          <div className="flex items-center gap-3 px-5 py-3 bg-white border-2 border-[#DDD5CC] rounded-2xl shadow-sm">
+            <svg className="w-4 h-4 text-[#9A8E88] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }}
+              onFocus={() => setSearchOpen(true)}
+              placeholder={t("err.searchPlaceholder")}
+              aria-label="Search products"
+              className="flex-1 min-w-0 text-sm text-[#2A2320] placeholder-[#9A8E88] bg-transparent outline-none focus-visible:outline-none"
+            />
+            {query && (
+              <button type="button" onClick={() => { setQuery(""); inputRef.current?.focus(); }} aria-label="Clear search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0 text-xs">
+                ✕
+              </button>
+            )}
+          </div>
+          {searchOpen && (
+            <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-[#DDD5CC] shadow-2xl p-4 z-[200] animate-pop-in text-left">
+              <SearchResultsPanel
+                query={query} setQuery={setQuery}
+                activeCat={activeCat} setActiveCat={setActiveCat}
+                results={results} recentSearches={recentSearches}
+                onClearRecent={() => { clearRecentSearches(); setRecentSearches([]); }}
+                onNavigate={() => { setRecentSearches((prev) => saveRecentSearch(query, prev)); setSearchOpen(false); }}
+              />
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-10">
           <Link
@@ -78,8 +133,6 @@ export default function NotFound() {
           ))}
         </div>
       </div>
-
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

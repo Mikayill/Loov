@@ -16,6 +16,9 @@ export interface OrderMessageParams {
   orderNum: string;
   /** Optional public tracking URL, e.g. https://loov.ge/track-order?id=... */
   trackUrl?: string;
+  /** Delivery window like "2–4", from admin settings — keeps the "shipped"
+   *  email in sync with the estimate shown on product/checkout pages. */
+  deliveryDays?: string;
 }
 
 export interface OrderMessage {
@@ -93,8 +96,9 @@ interface StatusCopy {
 type StatusBuilder = (p: OrderMessageParams) => Record<OrderStatusKey, StatusCopy>;
 
 const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
-  en: ({ name, orderNum, trackUrl }) => {
+  en: ({ name, orderNum, trackUrl, deliveryDays }) => {
     const track = trackUrl ?? "https://loov.ge/track-order";
+    const days = deliveryDays ?? "1–3";
     const sign = `\n\nWith love,\nThe Loov Team`;
     return {
       processing: {
@@ -103,7 +107,7 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
       shipped: {
         subject: `Your Loov order ${orderNum} is on its way 🚀`,
-        body: `Hi ${name},\n\nYour order ${orderNum} has shipped and is on its way to you! Expected delivery: 1–3 business days.\n\nTrack your order: ${track}${sign}`,
+        body: `Hi ${name},\n\nYour order ${orderNum} has shipped and is on its way to you! Expected delivery: ${days} business days.\n\nTrack your order: ${track}${sign}`,
       },
       delivered: {
         subject: `Your Loov order ${orderNum} was delivered 🎉`,
@@ -115,8 +119,9 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
     };
   },
-  ka: ({ name, orderNum, trackUrl }) => {
+  ka: ({ name, orderNum, trackUrl, deliveryDays }) => {
     const track = trackUrl ?? "https://loov.ge/track-order";
+    const days = deliveryDays ?? "1–3";
     const sign = `\n\nსიყვარულით,\nLoov-ს გუნდი`;
     return {
       processing: {
@@ -125,7 +130,7 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
       shipped: {
         subject: `თქვენი Loov-ს შეკვეთა ${orderNum} გზაშია 🚀`,
-        body: `გამარჯობა ${name},\n\nთქვენი შეკვეთა ${orderNum} გაიგზავნა და გზაშია! სავარაუდო მიწოდება: 1–3 სამუშაო დღე.\n\nთვალი ადევნეთ შეკვეთას: ${track}${sign}`,
+        body: `გამარჯობა ${name},\n\nთქვენი შეკვეთა ${orderNum} გაიგზავნა და გზაშია! სავარაუდო მიწოდება: ${days} სამუშაო დღე.\n\nთვალი ადევნეთ შეკვეთას: ${track}${sign}`,
       },
       delivered: {
         subject: `თქვენი Loov-ს შეკვეთა ${orderNum} ჩაბარდა 🎉`,
@@ -137,8 +142,9 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
     };
   },
-  ru: ({ name, orderNum, trackUrl }) => {
+  ru: ({ name, orderNum, trackUrl, deliveryDays }) => {
     const track = trackUrl ?? "https://loov.ge/track-order";
+    const days = deliveryDays ?? "1–3";
     const sign = `\n\nС любовью,\nКоманда Loov`;
     return {
       processing: {
@@ -147,7 +153,7 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
       shipped: {
         subject: `Ваш заказ Loov ${orderNum} в пути 🚀`,
-        body: `Здравствуйте, ${name},\n\nВаш заказ ${orderNum} отправлен и уже в пути! Ожидаемая доставка: 1–3 рабочих дня.\n\nОтследить заказ: ${track}${sign}`,
+        body: `Здравствуйте, ${name},\n\nВаш заказ ${orderNum} отправлен и уже в пути! Ожидаемая доставка: ${days} рабочих дня.\n\nОтследить заказ: ${track}${sign}`,
       },
       delivered: {
         subject: `Ваш заказ Loov ${orderNum} доставлен 🎉`,
@@ -159,8 +165,9 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
     };
   },
-  tr: ({ name, orderNum, trackUrl }) => {
+  tr: ({ name, orderNum, trackUrl, deliveryDays }) => {
     const track = trackUrl ?? "https://loov.ge/track-order";
+    const days = deliveryDays ?? "1–3";
     const sign = `\n\nSevgiyle,\nLoov Ekibi`;
     return {
       processing: {
@@ -169,7 +176,7 @@ const statusBuilders: Partial<Record<Locale, StatusBuilder>> = {
       },
       shipped: {
         subject: `Loov siparişiniz ${orderNum} yolda 🚀`,
-        body: `Merhaba ${name},\n\n${orderNum} numaralı siparişiniz kargoya verildi ve size doğru yolda! Tahmini teslimat: 1–3 iş günü.\n\nSiparişinizi takip edin: ${track}${sign}`,
+        body: `Merhaba ${name},\n\n${orderNum} numaralı siparişiniz kargoya verildi ve size doğru yolda! Tahmini teslimat: ${days} iş günü.\n\nSiparişinizi takip edin: ${track}${sign}`,
       },
       delivered: {
         subject: `Loov siparişiniz ${orderNum} teslim edildi 🎉`,

@@ -18,6 +18,26 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Resend:** `loov.ge` domaini eklendi, 4 DNS kaydı (DKIM/SPF-MX/SPF-TXT/DMARC) Vercel DNS'e girildi — doğrulama bekliyor/bekliyordu; doğrulanınca `onboarding@resend.dev` → `orders@loov.ge` geçişi yapılacak (route'larda TODO var)
 - **PERFORMANS SORUNU (kısmen çözüldü):** site yavaştı. (1) 5 vitrin sayfası `force-dynamic`'ti → `revalidate = 60` yapıldı (commit 61eb743). (2) Vercel Functions bölgesi Frankfurt (fra1) seçildi — AMA YENİ DEPLOY GEREKİYOR (henüz tetiklenmedi, site duraklatıldığı için). (3) **ASIL DARBOĞAZ: Supabase projesi Sydney'de (`ap-southeast-2`)** — her DB sorgusu Avustralya'ya gidiyor. Kalıcı çözüm = Supabase'i Frankfurt'a taşımak (yeni proje + veri göçü, dikkatli planlanmalı, henüz yapılmadı)
 - ~~**Sıradaki oturum:** buglar.md~~ → ✅ **8 Tem 2026'da TAMAMI işlendi** (bkz. aşağıdaki "🐛 BUGLAR.MD ONARIM TURU" bölümü). buglar.md dosyası cevaplarla işaretli duruyor
+- ~~**Sıradaki oturum:** buglar.md #2 (yeni 8 madde)~~ → ✅ **9-10 Tem 2026'da TAMAMI işlendi** (bkz. aşağıdaki "🐛 BUGLAR.MD ONARIM TURU #2" bölümü). ✅ **10 Tem 2026: kullanıcı 3 SQL dosyasını Supabase'de çalıştırdı** (`variant-stock.sql`, `product-i18n.sql`, güncellenen `stock.sql`) — stok-per-varyant ve çok dilli ürün adı/açıklaması artık gerçek DB desteğiyle çalışıyor
+
+### 🔍 KAPSAMLI DENETİM RAPORU (11 Tem 2026) — kök dizinde `DENETIM-RAPORU.md`
+✅ **"Hemen" 5 + "Kısa vade" 9 + "Orta vade" saf-kod 4 = 18 madde aynı gün uygulandı** (bkz. raporun işaretli listesi). Öne çıkanlar: OTP kapısı server-side zorlandı (`/api/auth/otp-gate` + `proxy.ts` → `/account`+`/checkout` gate'li; ⚠️ oturum yine geçerli olduğundan doğrudan API çağrıları gate'siz — sayfa erişimini keser, tam 2. faktör değil, bilinçli kabul); müşteri sipariş iptali (`PATCH /api/orders {action:"cancel"}`, pending-only, stok+puan reversal); misafir puan göçü GÜVENLİ yolla (`/api/account/link-guest-orders` — localStorage değil, doğrulanmış e-postayla misafir siparişlerini bağlayıp puanı gerçek tutardan hesaplar); admin durum geçiş matrisi; teslimat süresi tek kaynak; sepet 99 kelepçesi; JSON-LD indirimli fiyat; telefon +995 önek 3 yerde tek kaynak (`georgia.ts`); kayıt "tekrar gönder"; checkout şartlar checkbox'ı; 27 ölü i18n anahtarı + ölü SocialProofToast silindi; trusted-device "bu cihazı unut" UI; e-postalar `orders@loov.ge` + HTML. **KALANLAR (dış bağımlılık/karar/büyük çaba):** sepet-favori DB senkronu · back-in-stock · testler+CI · Sentry · online ödeme · fatura/KDV · SMS · locale-URL/hreflang · kategori landing · GA4 · Supabase Frankfurt göçü · next/image. `tsc`+`next build` temiz, yeni guard'lar canlı test edildi (OTP gate 307/200, CSRF 403, cancel 401).
+Uçtan uca senaryo denetimi yapıldı: mantık hataları, çelişkiler, ölü kod, büyük sitelerle kıyas, öncelikli yol haritası. **En kritik bulgular:** (1) email-OTP giriş kapısı sadece client-side — `/account` yazan kodu atlayabiliyor, sunucu zorlaması yok; (2) Resend hâlâ sandbox gönderende (`onboarding@resend.dev`) — domain Verified olduğu hâlde geçilmedi, canlıda müşteriye mail GİTMEZ (launch-blocker); (3) OTP resend 30sn ama Supabase SMTP interval 60sn — ilk resend hep patlar; (4) checkout puan vaadi admin `pointsPerGel` ayarını yok sayıyor (CheckoutClient:1031); (5) teslimat süresi 3 yerde 3 farklı hardcoded değer; (6) footer'da Visa/MC rozetleri var ama tek ödeme COD. Tam liste + "Hemen/Kısa/Orta vade" planı raporda.
+
+### 🔐 OTOMATİK OTP GİRİŞİ + SEPET/FAVORİ BUG'I + E-POSTA (10 Tem 2026) — TAMAMLANDI
+Kullanıcının canlı testte bulduğu bug'lar + "OTP'yi otomatik/zorunlu yap" isteği, tek oturumda işlendi.
+
+- **KRİTİK BUG DÜZELTİLDİ — sepet/favori hesaba bağlı değildi:** `CartContext.tsx`/`WishlistContext.tsx` sabit localStorage anahtarı kullanıyordu (`"loov-cart"`/`"loov-wishlist"`), `useAuth()` hiç yoktu → aynı tarayıcıda hesap değiştirince önceki hesabın sepeti/favorileri sızıyordu. Fix: anahtar artık `loov-cart:${user.id}` (misafir eski anahtarı kullanmaya devam eder, veri kaybı yok); misafirken eklenenler ilk girişte hesaba otomatik taşınır (adopt), hesap A→B geçişinde asla karışmaz. `LoyaltyContext.tsx` zaten doğruydu (DB/local split), dokunulmadı.
+- **2FA sistemi BAŞTAN YAZILDI (iki kez):** Önce TOTP+SMS-factor opt-in sistem kuruldu (Supabase native `mfa.*`), sonra kullanıcı "otomatik olsun, ayrı kurulum istemiyorum" deyince **tamamen kaldırılıp yerine şu geldi**: email+şifre girişinde, tanınmayan tarayıcıda otomatik email'e kod gider (`signInWithOtp`/`verifyOtp type:"email"` — Supabase mfa API'sinde "email" faktör tipi YOK, o yüzden bu ayrı bir mekanizma), **"bu tarayıcıyı 30 gün hatırla"** seçeneği var (yeni `trusted_devices` tablosu + httpOnly cookie, `supabase/trusted-devices.sql` ✅ ÇALIŞTIRILDI). Google girişi ve telefon-OTP girişi bu adımdan muaf. Kod tekrar gönderme 30sn/60sn kilitli (client-side). **Admin panelin AAL2/TOTP zorunluluğu (`AdminMfaGate.tsx`) DOKUNULMADI** — hâlâ eski güçlü sistemde, `verifyTotp/sendPhoneFactorCode/verifyPhoneFactor/mfaRequired` `AuthContext.tsx`'te sadece admin için kaldı. `SecurityClient.tsx`'teki eski "Enable 2FA" enroll UI'ı tamamen silindi, yerine "eksik email/telefon ekle" + "telefon-only hesaba şifre ekle" alanları geldi.
+- **Kayıt-kodu doğrulama:** `RegisterClient.tsx`'e kod girme ekranı eklendi (`verifySignupCode`, `type:"signup"`). ⚠️ **Sadece Supabase'de custom SMTP kurulup "Confirm signup" şablonuna `{{ .Token }}` eklenirse gerçekten çalışır** — kullanıcı bu oturumda SMTP'yi Resend üzerinden kurdu (Authentication → Emails → Set up SMTP → smtp.resend.com, user `resend`, pass=`RESEND_API_KEY`). Şablona `{{ .Token }}` eklendi mi TEYİT EDİLMEDİ — sıradaki oturumda kontrol edilmeli.
+- **Şifre kuralı:** min 6 → **min 8 karakter + en az 1 rakam**, 5 yerin hepsinde (`AuthContext.signUpWithEmail/updatePassword`, `RegisterClient`, `ResetPasswordClient`, `SecurityClient.handleChangePw`), 4 dilde yeni mesajlar.
+- **NewsletterPopup:** `/login` ve `/register`'da artık hiç çıkmıyor (`usePathname` exclusion); tasarım küçültüldü (social-proof şeridi kaldırıldı, `max-w-md`→`max-w-sm`, daha hafif gölge/blur).
+- **forgot-password'da bulunan bug:** eski mock-auth döneminden kalma "Demo mode: No real email is sent" notu hâlâ duruyordu (artık gerçek mail gidiyor) — kaldırıldı.
+- **Giden e-postalar HTML'lendi:** 5 gönderim noktası (sipariş onayı, sipariş durum, iade talebi, iade durumu, iletişim formu) düz metin gönderiyordu → yeni paylaşılan `src/lib/email/render.ts` (sage-teal header + beyaz kart + krem footer) ile artık hem text hem markalı HTML gidiyor.
+- **Checkout telefon alanı:** `+995` artık sabit/silinemez önek (kullanıcı sadece kendi numarasını yazıyor), `PHONE_COUNTRY_CODE` + `phoneLocalPart()` ile.
+- **Diğer küçük düzeltmeler bu oturumda:** stok bug'ı (`hasAnyStock()` — bir varyant tükenince TÜM ürün yanlışlıkla "sold out" görünüyordu, `QuickAddButton`/`BabyPicksSection`/JSON-LD/`WishlistContext` düzeltildi), checkout'ta eksik-alan üst-bildirimi (toast, tek alan varsa ismen söylüyor), puan kullanım tavanı admin'den ayarlanabilir oldu (`loyaltyMaxRedeemPercent`, varsayılan %20, `SettingsClient.tsx`).
+- **Doğrulama:** `tsc` + `next build` her adımda temiz, Playwright ile login/register/checkout canlı test edildi (şifre kuralı reddi, checkout toast, telefon prefix hepsi doğrulandı).
+- **KALAN:** Supabase "Confirm signup" şablonuna `{{ .Token }}` eklendiği teyit edilmedi · gerçek email-OTP login akışı (kod gerçekten geliyor mu) kullanıcı kendi hesabıyla test etmeli · loov.ge domaininin Resend'de "Verified" olup olmadığı teyit edilmedi.
 
 ### 🐛 BUGLAR.MD ONARIM TURU (8 Tem 2026) — TAMAMLANDI (12 batch, batch başına commit)
 - **Vitrin:** ana sayfa featured = tüm katalog, sezon sıralı (`sortBySeason` NİHAYET bağlandı) + recently-viewed kategorileri öne alan hafif kişiselleştirme; pill sayaçları kaldırıldı/kompakt; /products Load More 16'şar; "Explore All Products"; why-us şeridi silindi; bundles "Up to {n}% off" dinamik; **fabric backfill yapıldı** (DB'de script ile + statik fallback'te `fabricBySlug`) → fabric filtresi artık cotton/muslin/bamboo/terry/other
@@ -63,6 +83,47 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Admin 2FA zorunluluğu:** `requireAdmin()` artık AAL kontrol eder — admin hesabında doğrulanmış TOTP varsa ve oturum aal1 ise (örn. Google OAuth girişi kod sormaz) `"mfa-required"` döner → panel yerine `AdminMfaGate` (6 haneli kod ekranı, doğrulayınca panele girer), TÜM admin API'leri kod girilene dek 404. AAL kontrolü başarısızsa varsayılan RET
 - **Logo:** kullanıcının `logolardan birini sec` klasöründen **sıcak-beyaz** varyantı seçildi (site kremiyle uyum). Zemin "ink extraction" ile şeffaflaştırıldı → `public/logo.png` (antrasit #26221E wordmark, 640×134); kare orijinal `public/logo-square.png` + OG image. Kullanım: Navbar, footer, 4 auth sayfası, admin sidebar/mobil bar (🌿+yazı lockup'larının yerine). Seçim klasörü gitignore'landı
 
+### 🎨 UI CİLA TURU (9 Tem 2026) — TAMAMLANDI
+Kullanıcı "daha güzel animasyonlar, buton basma hissi" istedi → **CSS/Tailwind-only, kapsamlı tek geçiş** (yeni bağımlılık yok).
+- `globals.css`: `--ease-snappy`/`--ease-smooth` token'ları + `loov-pop-in/out`, `loov-bump`, `loov-fade-up` keyframe'leri (hepsi `prefers-reduced-motion` guard'ında)
+- Ortak `src/components/ui/` kütüphanesi: `Button`/`LinkButton`/`Spinner` (variant/size/loading), `Reveal` (IntersectionObserver scroll-fade). `src/hooks/useDelayedUnmount.ts` — kütüphanesiz exit-animasyon için (modal kapanırken aniden kaybolmak yerine küçülüp soluyor)
+- Basma hissi: ProductCard, Navbar (ikonlar + sepet rozeti "zıplama"), CartDrawer geneline `active:scale-*` + `ease-snappy`
+- Modal giriş/çıkış: NewsletterPopup, QuickViewButton, BundleQuickView → pop-in/fade-out
+- 16 form sayfasında (Login/Register/Checkout/Security/Contact/…) ortak `Button`/`Spinner`'a geçiş
+- Ana sayfada `Reveal` ile scroll-fade (kategori/öne çıkanlar/bundle/yorumlar)
+- Doğrulama: tsc + build temiz, Playwright ile canlı test edildi
+
+### 🐛 BUGLAR.MD ONARIM TURU #2 (9-10 Tem 2026) — TAMAMLANDI
+Kullanıcının ikinci `buglar.md`'sindeki 8 madde, tek kapsamlı planla işlendi (madde 1/2/3/6 aynı kök soruna bağlı olduğu için birlikte).
+
+**Stok-per-varyant + kanonik etiket sistemi (madde 1, 2, 3, 6 — en büyük parça):**
+- **Şema:** `supabase/variant-stock.sql` (YENİ, ✅ ÇALIŞTIRILDI — 10 Tem 2026) → `products.stock_by_variant jsonb` ({size: {color: stock}}). Yeni tablo/trigger/RLS YOK — mevcut `size_prices`/`size_colors` ile aynı "jsonb-on-products" mimarisi (daha az yüzey, mevcut "migration çalışmamışsa zarif düş" konvansiyonuyla uyumlu). Bir (size,color) çifti haritada yoksa düz `stock` sütununa düşer — geriye dönük veri taşıma YOK, boş `{}` ile başlar
+- **`src/lib/catalogTags.ts`** (YENİ): `CANONICAL_COLORS` (labels.ts'teki `COLOR_KEYS`'ten), `SIZE_GROUPS` (yaş aralıkları + "One Size"/ayakkabı, + havlu gibi ürünler için serbest "özel ölçü" deseni), `CATEGORY_TEMPLATES` (önceden `ProductsClient.tsx` VE `api/admin/products/route.ts`'te kopya duruyordu, tek yere toplandı)
+- **`src/lib/stock.ts`** (YENİ): `variantStock(product, size, color)` — seçili varyantın gerçek stoğu (yoksa düz stock'a düşer, `null` = sınırsız)
+- **Sunucu:** `supabase/stock.sql` (GÜNCELLENDİ, ⚠️ TEKRAR ÇALIŞTIRILMALI) — `reserve_stock`/`release_stock` artık `color`/`size` alıp `stock_by_variant` yolunda atomik düşüyor/artıyor, o kombinasyon takipsizse düz stoğa düşüyor (aynı fonksiyon içinde fallback). `/api/orders` artık `color`/`size` gönderiyor + migration eksikse otomatik flat-only retry
+- **`CartContext`:** `addItem`/`updateQuantity` artık `{added, maxReached, available}` dönüyor — seçili varyantın gerçek stoğuna (sepette zaten olan miktar düşülerek) kelepçeleniyor. `maxReachedNotice` state'i → **`CartToast` bu turda NİHAYET layout'a bağlandı** (kod duruyordu ama hiç mount edilmemişti!) → "Stokta sadece N tane kaldı" uyarısı artık gerçekten görünüyor
+- **Ana sayfa hızlı-ekle düzeltmesi:** `QuickAddButton` artık ürünün >1 renk/beden'i varsa direkt eklemek yerine yeni `VariantPickerPopover`'ı açıyor (renk/beden/adet sorar) — tek varyantlı ürünlerde eskisi gibi anında ekliyor
+- **Admin:** `ProductsClient.tsx` — renk/beden artık serbest metin `TagInput` değil, `ColorPicker`/`SizePicker` (kanonik çipler + kombo/özel-ölçü escape hatch); eski beden×renk "hangi renk var" checkbox matrisi → **stok-sayısı matrisi** (boş=flat stoğa düş, 0=o kombinasyon yok/tükendi — availability kavramı artık stoktan türüyor, ayrı `size_colors` tutulmuyor)
+- Çağrı noktaları taraması: `ProductDetailClient` (sahte `productStock()` üretici SİLİNDİ), `QuickViewButton`, `BundleQuickView`, `CartDrawer`/`CartClient` (+ butonu artık gerçekten disabled oluyor), `WishlistClient`, `BundleDetailClient` — hepsi gerçek varyant stoğu kullanıyor
+
+**Diğer 4 madde:**
+- **Teslimat tahmini ayarı:** `deliveryMinDays`/`deliveryMaxDays` → `settings.ts` + admin Settings kartı (PDP'deki sabit "2-4 gün" kaldırıldı)
+- **PDP hayalet-scroll bug'ı ÇÖZÜLDÜ:** kök neden tab çubuğundaki `overflow-x-auto`'nun tarayıcı tarafından `overflow-y-auto`'ya da zorlanması (CSS spec quirk) — 2px'lik gerçek ama görünmez bir scroll alanı yaratıyordu. Fix: `overflow-y-hidden` eklendi
+- **Arama SIFIRDAN yeniden yazıldı:** eski `SearchModal.tsx` (popup) SİLİNDİ. Artık navbar'daki kutuya direkt yazılıyor, altında canlı dropdown açılıyor (popup yok). `src/lib/search.ts` — çok-kelimeli AND eşleştirme (isim+kategori+renk+beden, ham+çevrilmiş), `SearchResultsPanel.tsx` (paylaşılan sonuç paneli, hem masaüstü hem mobil hem 404 sayfası kullanıyor)
+- **Çok dilli ürün adı/açıklama:** `supabase/product-i18n.sql` (YENİ, ✅ ÇALIŞTIRILDI — 10 Tem 2026) → `products.name_ka/ru/tr` + `description_ka/ru/tr`. Boş dil → İngilizceye düşer (alan-bazlı fallback, blog modülüyle aynı desen). Admin'de isim/açıklamanın üstünde 4 dil sekmesi. `mapProductRow` artık locale parametresi alıyor (server: `getServerLocale()`, client: `useProducts` artık **locale'e göre cache'leniyor** — dil değişince yeniden çekiyor)
+
+**Doğrulama:** tsc + `next build` her adımda temiz · Playwright ile canlı test (stok kelepçesi + toast, CartDrawer disabled +, arama çok-kelimeli sorgu, admin gate 404, VariantPickerPopover akışı)
+
+### 🩹 KULLANICI GERİ BİLDİRİMİ İNCE AYARI (10 Tem 2026) — TAMAMLANDI
+Yukarıdaki turdan sonra kullanıcının canlı test ederken bulduğu küçük ama can sıkıcı sorunlar:
+- **Sold-out/engellenmiş butonlar artık kırmızı** (`bg-red-500`, siteyle tutarlı) — önceden soluk gri "Out of Stock" gösteriyordu. Stok kelepçesi bir eklemeyi tamamen bloke ettiğinde (sepette zaten max varsa) buton artık sessizce hiçbir şey yapmak yerine **kırmızıya dönüp "Daha fazla eklenemez" yazıyor** (yeni `cart.cantAddMore` anahtarı, 4 dilde) — QuickView, ana sayfa hızlı-ekle popup'ı, PDP, sepet setleri (bundle), favoriler dahil her yerde
+- **CartToast artık modalların ÜSTÜNDE** (`z-[700]`, önceden `z-[300]` — QuickView/popup'ların `z-[500]` blur'lu arka planının ALTINDA kalıp okunamıyordu)
+- **Arama kutusundaki çirkin yeşil çerçeve kaldırıldı** — kök sebep `globals.css`'teki site-geneli `:focus-visible` kuralının **katmansız (unlayered)** tanımlanmış olmasıydı, bu yüzden herhangi bir Tailwind `focus-visible:outline-none` utility'si onu asla ezemiyordu (CSS Cascade Layers kuralı: katmansız her zaman katmanlıyı yener, specificity'den bağımsız). Fix: kural `@layer base` içine alındı — artık spesifik elemanlarda override edilebiliyor
+- **"⌘K" yazısı kaldırıldı** (kısayol çalışmaya devam ediyor, sadece görünmüyor)
+- **Arama kutusuna yazarken sayfa yukarı kayması ÇÖZÜLDÜ** — kök sebep `html`'deki `scroll-padding-top: 88px` (çapa linkleri için, sticky navbar'ın altında kalmasın diye) + arama kutusunun sticky header içinde olması: her tuş vuruşunda React input değerini güncelleyince Chromium "input'u görünür tut" refleksiyle sayfayı o padding'e göre geri kaydırıyordu. Fix: arama aktifken `scroll-padding-top` geçici olarak 0'a çekiliyor, kapanınca geri geliyor (sayfanın başka yerindeki çapa linkleri bozulmadı)
+- **PDP foto galerisine minimal sol/sağ ok butonları eklendi** — crossfade ile sonsuz döngü (son fotodan ileri → başa, sıçramasız, çünkü zaten slide değil crossfade)
+- ~~**E-posta çözümü araştırıldı**~~ (Yandex 360 ücretsiz planı Aralık 2025'te kalktı, Zoho Mail bölgeye göre değişebiliyor) — kullanıcı bu konuyu ertelemeye karar verdi, `hello@loov.ge` hâlâ placeholder
+
 ---
 
 ## ✅ TAMAMLANAN ÖZELLİKLER
@@ -75,23 +136,25 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - Metadata: OpenGraph, Twitter Card, keywords
 
 ### Bileşenler (Components)
-- **Navbar** — sticky, dönüşümlü announcement bar (4 mesaj, 3.5s), arama ikonu, wishlist, dil seçici, user dropdown, mobil hamburger menü
-- **SearchModal** — ürün arama, anlık filtre, kategori quick-filter pill'leri, son aramalar (localStorage, 5 adet), NEW badge, Escape ile kapanır
+- **Navbar** — sticky, dönüşümlü announcement bar (4 mesaj, 3.5s), **arama artık gerçek bir input (popup değil)**, wishlist, dil seçici, user dropdown, mobil hamburger menü
+- **SearchResultsPanel** — arama sonuç paneli (paylaşılan: masaüstü dropdown + mobil satır + 404 sayfası), çok-kelimeli AND eşleştirme, kategori pill'leri, son aramalar (localStorage, 5 adet), NEW badge (bkz. `src/lib/search.ts`)
 - **LanguageSwitcher** — EN / KA / RU / TR (çerez tabanlı, i18n Faz 1 CANLI — bkz. 🌐 i18n bölümü)
 - **CategoryFilter** — kategori pill'leri + sort + fiyat filtresi + yaş filtresi (0-3m/3-6m/6-12m/1-2y/2y+) + renk filtresi + grid/liste görünümü toggle + Load More (8'er)
-- **ProductCard** — emoji+renk, New badge, wishlist toggle, yıldız rating, QuickViewButton (hover), QuickAddButton (sepete hızlı ekle)
-- **QuickAddButton** — ürün kartında, ilk renk/beden ile anında sepete ekler
+- **ProductCard** — foto/emoji+renk, New badge, wishlist toggle, yıldız rating, QuickViewButton (hover), QuickAddButton (sepete hızlı ekle)
+- **QuickAddButton** — tek renk/beden varsa anında ekler; birden fazlaysa `VariantPickerPopover` açıp sorar (renk/beden/adet)
 - **QuickViewButton** — ürün kartında hover'da görünür, tam modal (renk/beden/qty/wishlist)
-- **CartDrawer** — "Add to Cart" sonrası sağdan açılan mini sepet (custom DOM event ile tetiklenir)
+- **VariantPickerPopover** — hafif renk/beden/adet seçici popup (QuickAddButton'ın çok-varyantlı ürünlerde açtığı)
+- **CartDrawer** — "Add to Cart" sonrası sağdan açılan mini sepet (custom DOM event ile tetiklenir), + butonu gerçek stoğa göre disabled olur
+- **CartToast** — sepete eklendi bildirimi + stok-kelepçe uyarısı ("Stokta sadece N tane kaldı"), `z-[700]` (tüm modalların üstünde)
 - **WishlistButton** — server component içinde kullanılabilir client bileşen
 - **MobileBottomNav** — sm:hidden, 4 tab (Home/Shop/Wishlist/Cart), badge'lar
 - **SocialProofToast** — "Nino from Tbilisi just bought..." rotating toast, 9s gecikme, 28s interval, sol-alt köşe
-- **NewsletterPopup** — 45s gecikme, sessionStorage (1x/session), "10% off first order", LOOV10 kodu
+- **NewsletterPopup** — 45s gecikme, sessionStorage (1x/session), üye-ol popup'ı (bkz. 🎟️ Promo bölümü)
 - **BackToTop** — scroll sonrası görünür, mobil nav ile çakışmaz
 - **CookieConsent** — 1.5s gecikme, Accept/Decline, Privacy Policy linki
-- **ReviewsSection** — ürüne göre deterministik yorumlar, rating breakdown barlar
+- **ReviewsSection** — gerçek yorum sistemi (bkz. 🆕 Büyük özellik paketi)
 - **RecentlyViewedSection** — localStorage tabanlı, son 4 ürünü gösterir, "Clear history" butonu
-- **WhatsAppButton** — fixed sol-alt, WhatsApp green (#25D366), tooltip
+- **WhatsAppButton** — fixed sol-alt, WhatsApp green (#25D366), tooltip (numara boşsa gizli)
 
 ### Sayfalar
 | Sayfa | Durum |
@@ -120,7 +183,7 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 | `/contact` İletişim | ✅ Form + WhatsApp CTA + SSS |
 | `/privacy` Gizlilik | ✅ 7 bölüm, GDPR |
 | `/terms` Kullanım Şartları | ✅ 8 bölüm, Gürcistan hukuku |
-| `404` Not Found | ✅ 404 grafik + çalışan arama kutusu (SearchModal açar) + butonlar |
+| `404` Not Found | ✅ 404 grafik + çalışan arama kutusu (gerçek input + dropdown, popup yok) + butonlar |
 | `error.tsx` Global Hata | ✅ Hata sınırı, Try Again + Back to Home |
 
 ### Sayfalar
@@ -158,7 +221,7 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 ### Faz 2 Backend Durumu (Temmuz 2026 — DEVAM EDİYOR)
 - ✅ Supabase projesi bağlı (`.env.local`), schema + seed yüklü (20 ürün DB'de)
 - ✅ Katalog DB'den okunuyor: `/`, `/products`, `/products/[slug]` → `src/lib/db/products.ts` (hata olursa statik `lib/products.ts`'e düşer, site kırılmaz)
-- ✅ Ürün detay stok göstergesi gerçek DB stoğu kullanıyor (`product.stock`, 0 = Out of stock)
+- ✅ Ürün detay stok göstergesi gerçek DB stoğu kullanıyor — **9-10 Tem 2026'dan beri seçili beden×renk'e özel** (`stock_by_variant`, bkz. 🐛 BUGLAR.MD ONARIM TURU #2), takipsiz kombinasyon düz `product.stock`'a düşer
 - ✅ Sipariş oluşturma gerçek: `POST /api/orders` → `orders` + `order_items` tablolarına yazar. Fiyatlar sunucuda DB'den yeniden hesaplanır, origin (CSRF) kontrolü, alan doğrulama
 - ✅ **Loov Rewards** (sadakat programı): 1₾ = 2 puan, 100 puan = 5₾ indirim (sepet ara toplamının max %30'u), Bronze/Silver/Gold seviyeleri (1000/3000 lifetime puan, x1.25/x1.5 kazanım). Sayfa: `/account/rewards`. Checkout review adımında "Use points" toggle. `supabase/loyalty.sql` çalıştırılınca `orders.points_redeemed/points_discount` kolonları da dolar (çalıştırılmadıysa API zarif düşer)
 - ✅ **Supabase Auth CANLI**: AuthContext gerçek (signInWithPassword/signUp/signInWithOAuth/OTP/updateUser). `src/proxy.ts` (Next 16'da middleware'in yeni adı — named export `proxy`) session token'larını tazeler. `/auth/callback` route'u OAuth + e-posta onay dönüşünü karşılar (`exchangeCodeForSession`). Register'da "check your inbox" info akışı var. Profil düzenleme gerçek (user_metadata + profiles upsert). Girişli kullanıcının siparişine `user_id` otomatik bağlanır (`/api/orders` zaten cookie'den okuyor)
@@ -168,7 +231,7 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - ✅ **Track-order gerçek**: `supabase/track-order.sql`'deki SECURITY DEFINER `track_order(order_no, email)` fonksiyonu ile misafir sorgusu (service key GEREKMEDEN). Güvenlik: sipariş no + e-posta ikisi de eşleşmeli; adres/telefon dönmez. Fonksiyon DB'de yoksa site "temporarily unavailable" gösterir. Mock sipariş verisi tamamen silindi (`mockOrders.ts`'te sadece tipler + statusConfig kaldı)
 - 🐛 **AÇIK SORUN (track-order UI)**: Fonksiyon DB'de çalışıyor (Node'dan rpc testi ✅ BBK-3V570MU + p@t.com sonuç döndürüyor) ama kullanıcının TARAYICISINDA hâlâ "temporarily unavailable" görünüyor (3 Tem 2026). Muhtemel sebep: eski JS bundle önbelliği (Ctrl+Shift+R denenmedi) veya browser client rpc çağrısında farklı bir hata. DEBUG İPUCU: `trackOrder()` içindeki catch tüm hataları "unavailable" yapıyor — tarayıcı konsolundaki `[trackOrder]` warn mesajına bakılmalı
 - ⏳ SIRADAKİ: loyalty ledger'ı DB'ye taşıma, e-posta bildirimleri (Resend), checkout'ta girişli kullanıcının bilgilerini otomatik doldurma
-- ✅ **Katalog TAMAMEN DB'de**: client bileşenler de bağlandı — `src/lib/db/useProducts.ts` hook'u (statik listeyle anında render + arkada DB'den taze katalog, modül-seviyesi cache ile sayfa başına 1 istek). Bağlananlar: SearchModal, CartClient (öneriler), WishlistClient, WishlistContext (priceDrop), RecentlyViewed, SocialProofToast, bundles/[slug] (server), sitemap (`getAllProductsStatic` — çerezsiz varyant, build'de statik kalabilsin diye). Statik `lib/products.ts` artık SADECE yedek (DB erişilemezse) + `categoryLabels`
+- ✅ **Katalog TAMAMEN DB'de**: client bileşenler de bağlandı — `src/lib/db/useProducts.ts` hook'u (statik listeyle anında render + arkada DB'den taze katalog, modül-seviyesi cache ile sayfa başına 1 istek). Bağlananlar: arama (`src/lib/search.ts`), CartClient (öneriler), WishlistClient, WishlistContext (priceDrop), RecentlyViewed, SocialProofToast, bundles/[slug] (server), sitemap (`getAllProductsStatic` — çerezsiz varyant, build'de statik kalabilsin diye). Statik `lib/products.ts` artık SADECE yedek (DB erişilemezse) + `categoryLabels`
 - ✅ Checkout otomatik doldurma (girişli kullanıcının ad/e-postası), JSON-LD ürün şeması, sitemap DB'den
 - ✅ **Service key + Resend key eklendi** (3 Tem, `.env.local`). `src/lib/supabase/admin.ts` (service role client, RLS bypass — SERVER ONLY)
 - ✅ **Sipariş onay e-postası CANLI**: `/api/orders` → Resend API (fetch, SDK'sız) → `buildOrderMessage` (EN/KA/RU). Gönderen şimdilik `onboarding@resend.dev` (domain doğrulanınca `orders@...`e geçilecek — TODO route'ta). Domain doğrulanana dek Resend SADECE hesap sahibinin e-postasına teslim eder. E-posta hatası siparişi ASLA engellemez
@@ -186,8 +249,8 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **CSP düzeltildi** (next.config.ts): `connect-src`/`img-src`'e Supabase host eklendi — ÖNCEDEN `connect-src 'self'` tarayıcı Supabase client'ını sessizce blokluyordu (client bileşenler statik yedeğe düşüyordu), foto da yüklenemezdi. Artık düzgün
 
 ### 📦 STOK & ACİLİYET (3 Tem 2026)
-- **Atomik stok rezervasyonu** (oversell/race fix): `supabase/stock.sql` → `reserve_stock(jsonb)` + `release_stock(jsonb)` (SECURITY DEFINER). Sipariş verilince `/api/orders` atomik düşer; son ürünü 2 kişi aynı anda alırsa koşullu UPDATE (stock>=qty) ile SADECE biri başarılı, diğeri 409 "sold out". Sipariş kaydı sonradan patlarsa `release_stock` ile geri verilir (telafi). Fonksiyon yoksa zarif atlar (uyarı loglar). NULL stock = takipsiz/sınırsız. ✅ `supabase/stock.sql` ÇALIŞTIRILDI (5 Tem 2026 doğrulandı: reserve_stock/release_stock DB'de — stok artık gerçekten düşüyor)
-- **Client stok sınırı**: ürün detay miktar seçici + sepet "+" butonu `product.stock`'u aşamaz, tükendiyse "Out of Stock" (buton kapalı). "That's all we have" ipucu. Sunucu yine de gerçek guard
+- **Atomik stok rezervasyonu** (oversell/race fix): `supabase/stock.sql` → `reserve_stock(jsonb)` + `release_stock(jsonb)` (SECURITY DEFINER). Sipariş verilince `/api/orders` atomik düşer; son ürünü 2 kişi aynı anda alırsa koşullu UPDATE (stock>=qty) ile SADECE biri başarılı, diğeri 409 "sold out". Sipariş kaydı sonradan patlarsa `release_stock` ile geri verilir (telafi). Fonksiyon yoksa zarif atlar (uyarı loglar). NULL stock = takipsiz/sınırsız. ✅ `supabase/stock.sql` ÇALIŞTIRILDI (5 Tem 2026 doğrulandı: reserve_stock/release_stock DB'de — stok artık gerçekten düşüyor). ✅ **9-10 Tem 2026'da fonksiyonlar beden×renk-farkında hale getirildi (bkz. BUGLAR.MD ONARIM TURU #2) — dosya 10 Tem 2026'da TEKRAR çalıştırıldı**, artık stok_by_variant varsa onu kullanıyor
+- **Client stok sınırı**: ürün detay miktar seçici + sepet "+" butonu artık seçili beden×renk'in gerçek stoğunu aşamaz (`src/lib/stock.ts variantStock()`), tükendiyse "Out of Stock" (buton kapalı, kırmızı). Kelepçe aşılırsa `CartToast` uyarısı. Sunucu yine de gerçek guard
 - **Aciliyet rozeti**: ürün detayda "🔥 N people have this in their cart right now" — deterministik (product.id + saat), hydration-safe (SSR id-only, mount'ta saat eklenir). Sitedeki mevcut sahte-sosyal-kanıt desenine uygun (reviews/SocialProofToast gibi)
 
 ### 🆕 BÜYÜK ÖZELLİK PAKETİ (3 Tem 2026) — mağaza ayarları, indirim, çoklu foto, sezon, gerçek yorumlar
@@ -198,7 +261,7 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **"Yeni" rozeti tarihe göre**: `is_new` artık manuel PIN; rozet ayrıca `created_at + newBadgeDays` ile otomatik. Veri katmanında türetilir (`getAllProducts/getProductBySlug` + `useProducts` settings okuyup `isNewArrival` uygular). Ürün eskidikçe rozet kendiliğinden düşer
 - **Kargo eşiği + puan oranı ayardan**: `/api/orders` (server) + cart/checkout/drawer (client `useSettings`) hepsi ayarı kullanıyor; `pointsForAmountAt(amount, pointsPerGel, tier)` yeni helper
 - **Çoklu foto**: `products.image_urls text[]` (galeri; `image_url` = birincil/thumbnail, senkron tutulur). Admin: birden çok foto yükle/sil/birincil-yap. Upload route galeriye ekler. Ürün detay: **crossfade galeri** (opacity katmanları, pürüzsüz), thumbnail'ler. **Renk seçimi FOTOĞRAFI DEĞİŞTİRMEZ** (eski renk→bg-tint sistemi kaldırıldı) — renk seçilir, foto sabit kalır
-- **Bedene göre renk**: `products.size_colors jsonb` ({size: colors[]}). Admin'de beden×renk onay-kutusu matrisi. Ürün detayda seçili bedende olmayan renkler devre dışı/soluk; beden değişince uygun renge otomatik geçer. Boş = tüm renkler mevcut
+- **Bedene göre renk**: ~~`products.size_colors jsonb` + admin onay-kutusu matrisi~~ → **9-10 Tem 2026'da `stock_by_variant`'a taşındı** (bkz. BUGLAR.MD ONARIM TURU #2) — artık ayrı bir "hangi renk var" listesi tutulmuyor, stok matrisinde 0 = o kombinasyon yok. `size_colors` kolonu DB'de duruyor ama artık okunmuyor/yazılmıyor (vestigial)
 - **Sezon**: `products.season` ('all'|'summer'|'winter'). Admin dropdown. `src/lib/season.ts` (`currentSeason`/`matchesSeason`/`sortBySeason` — Nis-Eyl yaz). ⏳ NOT: sezon FİLTRESİ ve sezona-göre-vitrin sıralaması henüz CategoryFilter'a/ana sayfaya bağlanmadı (kolon+admin+helper hazır, sıradaki adım)
 - **Düzenlenebilir açıklama + özellikler**: `products.features text[]` (Description tab'ındaki madde listesi) + `description`. Admin'de textarea'lardan düzenlenir. Boş features → varsayılan liste. Ürün detay bunları gösterir
 - **Admin ürün editörü** (`ProductsClient.tsx` baştan yazıldı): satır içi hızlı alanlar + genişletilebilen **Edit ▾** panel (galeri, indirim, sezon, renkler/bedenler tag-editörü, beden×renk matrisi, açıklama, özellikler). Hepsi otomatik kaydeder. **Ekleme formunda emoji yerine foto yükleme** (oluştur→foto yükle)
@@ -206,7 +269,7 @@ Gürcistan pazarına yönelik bebek/çocuk giyim e-ticaret sitesi.
 - **Detaylı loglar** (`/admin/logs`): audit_log + **siparişler** + **yorumlar** birleşik aktivite akışı. `/api/admin/logs` üç akışı normalize edip birleştirir. Tür filtresi (Orders/Reviews/Admin) + özet çipleri
 - **Ana sayfa**: "Kategoriye Göre Alışveriş" bölümü compact yapıldı. i18n Faz 1 ana sayfa TAMAM (hero/kategori/öne çıkanlar/setler/neden-biz/yorumlar). Ürün detay + yorum sistemi de i18n'li (`pdp.*` + `rev.*` anahtarları 4 dilde; ka DRAFT). Çeviri kontrol dosyası `CEVIRI-KONTROL-KA.md` güncellendi (abla incelemesi için)
 - **DOĞRULAMA**: `tsc --noEmit` temiz · tüm ana sayfalar (/ /products /cart /checkout /wishlist /products/[slug]) + API'ler 200/beklenen kod · admin API'ler yetkisiz 404 · features.sql yokken zarif fallback (sadece "[settings] using defaults" uyarısı)
-- ⏳ **SIRADAKİ**: sezon filtresi+vitrin sıralaması bağlama · QuickAdd bedene-göre-renk farkındalığı (şu an ilk renk/beden ekler) · storage'da silinen foto orphan temizliği · materials/care/delivery tab içerikleri henüz i18n değil (ikincil)
+- ⏳ **SIRADAKİ**: ~~sezon filtresi+vitrin sıralaması bağlama~~ (ana sayfa `sortBySeason` 8 Tem'de bağlandı, filtre UI'ı hâlâ ayrı) · ~~QuickAdd bedene-göre-renk farkındalığı~~ (9-10 Tem'de `VariantPickerPopover` ile çözüldü) · storage'da silinen foto orphan temizliği · materials/care/delivery tab içerikleri henüz i18n değil (ikincil)
 
 ### ↩️ İADE SİSTEMİ (FAZ 6, 4 Tem 2026) — TAMAMLANDI
 > ✅ `supabase/returns.sql` ÇALIŞTIRILDI (5 Tem 2026 doğrulandı: returns tablosu + orders.delivered_at + return-photos bucket var; tek-aktif-iade kısıtı ve RLS canlı test edildi — anon okuyamaz/yazamaz, aynı siparişe 2. aktif iade 23505 ile reddediliyor).

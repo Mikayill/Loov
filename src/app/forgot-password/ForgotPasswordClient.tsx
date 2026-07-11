@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import Button from "@/components/ui/Button";
+import LinkButton from "@/components/ui/LinkButton";
 
 export default function ForgotPasswordClient() {
   const { t } = useLocale();
@@ -69,13 +71,9 @@ export default function ForgotPasswordClient() {
                     {t("auth.tryAgain")}
                   </button>
                 </p>
-                <Link
-                  href="/login"
-                  className="block w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 flex items-center justify-center"
-                  style={{ backgroundColor: "#5E9E8C" }}
-                >
+                <LinkButton href="/login" fullWidth>
                   {t("auth.backToSignIn")}
-                </Link>
+                </LinkButton>
               </div>
             </div>
           ) : (
@@ -97,31 +95,9 @@ export default function ForgotPasswordClient() {
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#5E9E8C" }}
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                    </svg>
-                    {t("auth.sending")}
-                  </>
-                ) : (
-                  `${t("auth.sendResetLink")} →`
-                )}
-              </button>
-
-              <div className="bg-[#F5F0EB] rounded-xl p-3 flex items-start gap-2">
-                <span className="text-sm flex-shrink-0">💡</span>
-                <p className="text-xs text-[#5E5450] leading-relaxed">
-                  {t("auth.demoModeNote")}
-                </p>
-              </div>
+              <Button type="submit" loading={loading} loadingText={t("auth.sending")} fullWidth>
+                {t("auth.sendResetLink")} →
+              </Button>
             </form>
           )}
         </div>

@@ -11,22 +11,29 @@ import { useState, useCallback } from "react";
 import { useLocale } from "@/context/LocaleContext";
 import { categoryLabel } from "@/lib/i18n/labels";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
+import { variantStock } from "@/lib/stock";
 
 function AddToCartInline({ product, t }: { product: Product; t: (key: TranslationKey) => string }) {
   const { addItem } = useCart();
-  const [done, setDone] = useState(false);
-  const soldOut = product.stock !== undefined && product.stock <= 0;
+  const [status, setStatus] = useState<"idle" | "added" | "blocked">("idle");
+  const defaultStock = variantStock(product, product.sizes[0], product.colors[0]);
+  const soldOut = defaultStock !== null && defaultStock <= 0;
 
   function handle() {
     if (soldOut) return;
-    addItem(product, product.colors[0], product.sizes[0]);
-    setDone(true);
-    setTimeout(() => setDone(false), 2000);
+    const result = addItem(product, product.colors[0], product.sizes[0]);
+    if (result.added <= 0) {
+      setStatus("blocked");
+      setTimeout(() => setStatus("idle"), 1800);
+      return;
+    }
+    setStatus("added");
+    setTimeout(() => setStatus("idle"), 2000);
   }
 
   if (soldOut) {
     return (
-      <button disabled className="w-full py-2.5 rounded-xl text-sm font-bold bg-[#EDE5D8] text-[#9A8E88] cursor-not-allowed">
+      <button disabled className="w-full py-2.5 rounded-xl text-sm font-bold bg-red-500 text-white cursor-not-allowed">
         {t("product.outOfStock")}
       </button>
     );
@@ -36,13 +43,13 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
     <button
       onClick={handle}
       className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-        done
-          ? "bg-green-500 text-white"
-          : "text-white hover:opacity-90 active:scale-95"
+        status === "added" ? "bg-green-500 text-white" :
+        status === "blocked" ? "bg-red-500 text-white" :
+        "text-white hover:opacity-90 active:scale-95"
       }`}
-      style={!done ? { backgroundColor: "#5E9E8C" } : {}}
+      style={status === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
     >
-      {done ? `✓ ${t("quick.added")}` : t("common.addToCart")}
+      {status === "added" ? `✓ ${t("quick.added")}` : status === "blocked" ? t("cart.cantAddMore") : t("common.addToCart")}
     </button>
   );
 }
@@ -54,7 +61,7 @@ export default function WishlistClient() {
   const { addItem } = useCart();
   const saved = products.filter((p) => ids.includes(p.id));
   const [copied, setCopied] = useState(false);
-  const [addedAll, setAddedAll] = useState(false);
+  const [addAllStatus, setAddAllStatus] = useState<"idle" | "added" | "blocked">("idle");
 
   const handleShare = useCallback(() => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -64,12 +71,24 @@ export default function WishlistClient() {
     });
   }, []);
 
-  const inStockSaved = saved.filter((p) => p.stock === undefined || p.stock > 0);
+  const inStockSaved = saved.filter((p) => {
+    const s = variantStock(p, p.sizes[0], p.colors[0]);
+    return s === null || s > 0;
+  });
   function handleAddAll() {
     if (inStockSaved.length === 0) return;
-    for (const p of inStockSaved) addItem(p, p.colors[0], p.sizes[0]);
-    setAddedAll(true);
-    setTimeout(() => setAddedAll(false), 2500);
+    let anyAdded = false;
+    for (const p of inStockSaved) {
+      const result = addItem(p, p.colors[0], p.sizes[0]);
+      if (result.added > 0) anyAdded = true;
+    }
+    if (!anyAdded) {
+      setAddAllStatus("blocked");
+      setTimeout(() => setAddAllStatus("idle"), 1800);
+      return;
+    }
+    setAddAllStatus("added");
+    setTimeout(() => setAddAllStatus("idle"), 2500);
   }
 
   if (saved.length === 0) {
@@ -86,7 +105,7 @@ export default function WishlistClient() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 shadow-sm transition-opacity"
+          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 active:scale-95 shadow-sm transition-all"
           style={{ backgroundColor: "#5E9E8C" }}
         >
           {t("wl.browseProducts")} →
@@ -115,17 +134,19 @@ export default function WishlistClient() {
           {inStockSaved.length > 1 && (
             <button
               onClick={handleAddAll}
-              className={`text-sm font-bold px-4 py-1.5 rounded-full transition-all ${
-                addedAll ? "bg-green-500 text-white" : "text-white hover:opacity-90"
+              className={`text-sm font-bold px-4 py-1.5 rounded-full transition-all active:scale-95 ${
+                addAllStatus === "added" ? "bg-green-500 text-white" :
+                addAllStatus === "blocked" ? "bg-red-500 text-white" :
+                "text-white hover:opacity-90"
               }`}
-              style={!addedAll ? { backgroundColor: "#5E9E8C" } : {}}
+              style={addAllStatus === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
             >
-              {addedAll ? `✓ ${t("quick.added")}` : t("wl.addAll")}
+              {addAllStatus === "added" ? `✓ ${t("quick.added")}` : addAllStatus === "blocked" ? t("cart.cantAddMore") : t("wl.addAll")}
             </button>
           )}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-sm font-bold text-[#9A8E88] hover:text-[#5E9E8C] border border-[#DDD5CC] hover:border-[#5E9E8C] px-3 py-1.5 rounded-full transition-all"
+            className="flex items-center gap-1.5 text-sm font-bold text-[#9A8E88] hover:text-[#5E9E8C] border border-[#DDD5CC] hover:border-[#5E9E8C] px-3 py-1.5 rounded-full transition-all active:scale-95"
           >
             {copied ? (
               <>
@@ -176,7 +197,7 @@ export default function WishlistClient() {
                 )}
                 <button
                   onClick={(e) => { e.preventDefault(); toggle(product.id); }}
-                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-red-400 text-white flex items-center justify-center shadow-sm hover:bg-red-500 transition-colors"
+                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-red-400 text-white flex items-center justify-center shadow-sm hover:bg-red-500 transition-all active:scale-90"
                   aria-label="Remove from wishlist"
                 >
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">

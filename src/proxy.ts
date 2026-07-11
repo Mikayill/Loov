@@ -8,10 +8,27 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const OTP_PENDING_COOKIE = "loov-otp-pending";
+/** Pages that require a fully verified sign-in (blocked while OTP is pending). */
+const OTP_GATED_PREFIXES = ["/account", "/checkout"];
+
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return NextResponse.next(); // env not set — skip silently
+
+  // Mandatory email-OTP gate: after a password sign-in on a new device the
+  // client sets this cookie; block the protected pages until it's cleared by
+  // a successful code verification (see /api/auth/otp-gate).
+  const path = request.nextUrl.pathname;
+  if (
+    request.cookies.get(OTP_PENDING_COOKIE)?.value === "1" &&
+    OTP_GATED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))
+  ) {
+    const redirect = new URL("/login", request.url);
+    redirect.searchParams.set("verify", "1");
+    return NextResponse.redirect(redirect);
+  }
 
   let response = NextResponse.next({ request });
 

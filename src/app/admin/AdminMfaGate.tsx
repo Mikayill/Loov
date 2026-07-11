@@ -10,36 +10,54 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Button from "@/components/ui/Button";
 
 export default function AdminMfaGate() {
   const router = useRouter();
-  const { mfaRequired, verifyTotp, signOut } = useAuth();
+  const { mfaRequired, verifyTotp, sendPhoneFactorCode, verifyPhoneFactor, signOut } = useAuth();
   const [factorId, setFactorId] = useState<string | null>(null);
+  const [method, setMethod] = useState<"totp" | "phone">("totp");
+  const [challengeId, setChallengeId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    mfaRequired().then((res) => {
+    mfaRequired().then(async (res) => {
       if (cancelled) return;
-      if (res.required && res.factorId) setFactorId(res.factorId);
+      if (res.required && res.factorId) {
+        setFactorId(res.factorId);
+        if (res.type === "phone") {
+          setMethod("phone");
+          // Phone factors don't have a code until challenged — send it now.
+          const ch = await sendPhoneFactorCode(res.factorId);
+          if (!cancelled) {
+            if (ch.error) setError(ch.error);
+            else setChallengeId(ch.challengeId ?? null);
+          }
+        }
+      }
       // Session might have been elevated in another tab — just re-render.
       else router.refresh();
     });
     return () => { cancelled = true; };
-  }, [mfaRequired, router]);
+  }, [mfaRequired, sendPhoneFactorCode, router]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!factorId) return;
     setError("");
     setBusy(true);
-    const res = await verifyTotp(factorId, code);
+    const res = method === "phone" && challengeId
+      ? await verifyPhoneFactor(factorId, challengeId, code)
+      : await verifyTotp(factorId, code);
     setBusy(false);
     if (res.error) { setError(res.error); return; }
     router.refresh(); // aal2 now → the layout renders the panel
   }
+
+  const codeLen = method === "phone" ? code.length >= 4 : code.length === 6;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "#F5F0EB" }}>
@@ -47,31 +65,32 @@ export default function AdminMfaGate() {
         <div className="text-4xl mb-3">🛡️</div>
         <h1 className="text-xl font-extrabold text-[#2A2320] mb-1">Admin verification</h1>
         <p className="text-sm text-[#9A8E88] mb-5">
-          This account has two-factor authentication. Enter the 6-digit code from your
-          authenticator app to open the admin panel.
+          {method === "phone"
+            ? "This account has two-factor authentication. Enter the code we just texted to your phone to open the admin panel."
+            : "This account has two-factor authentication. Enter the 6-digit code from your authenticator app to open the admin panel."}
         </p>
         <form onSubmit={submit} className="space-y-3">
           <input
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
             inputMode="numeric"
-            placeholder="123456"
+            placeholder={method === "phone" ? "123456" : "123456"}
             autoFocus
             className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
           />
           {error && <p className="text-red-500 text-xs font-semibold">{error}</p>}
-          <button
+          <Button
             type="submit"
-            disabled={busy || code.length !== 6 || !factorId}
-            className="w-full h-11 rounded-xl font-extrabold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            disabled={!codeLen || !factorId}
+            loading={busy}
+            fullWidth
           >
-            {busy ? "…" : "Verify & enter"}
-          </button>
+            Verify &amp; enter
+          </Button>
         </form>
         <button
           onClick={() => { signOut(); router.push("/login"); }}
-          className="mt-4 text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors"
+          className="mt-4 text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-all active:scale-95"
         >
           Sign out
         </button>

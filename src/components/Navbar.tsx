@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useProducts } from "@/lib/db/useProducts";
+import { tokenize, matchesQuery, loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
-import SearchModal from "./SearchModal";
+import SearchResultsPanel from "./SearchResultsPanel";
 
 const announcementKeys: TranslationKey[] = [
   "announce.freeShipping",
@@ -37,8 +39,90 @@ export default function Navbar() {
   const { user, signOut } = useAuth();
   const [annoIdx,     setAnnoIdx]     = useState(0);
   const [annoVisible, setAnnoVisible] = useState(true);
+  const [cartBump,    setCartBump]    = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef  = useRef<HTMLButtonElement>(null);
+  const prevTotalItems = useRef(totalItems);
+
+  /* ── Search — inline bar (desktop) / expanding row (mobile), no popup ── */
+  const products = useProducts();
+  const [query, setQuery] = useState("");
+  const [activeCat, setActiveCat] = useState<CatKey>("all");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchIconRef = useRef<HTMLButtonElement>(null);
+  const mobileSearchRowRef = useRef<HTMLDivElement>(null);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
+
+  const tokens = useMemo(() => tokenize(query), [query]);
+  const searchResults = useMemo(
+    () => products.filter((p) => (activeCat === "all" || p.category === activeCat) && matchesQuery(p, tokens, t)),
+    [products, tokens, activeCat, t]
+  );
+
+  function closeSearch() {
+    setSearchOpen(false);
+  }
+  function navigateFromSearch() {
+    setRecentSearches((prev) => saveRecentSearch(query, prev));
+    closeSearch();
+  }
+  function clearRecent() {
+    clearRecentSearches();
+    setRecentSearches([]);
+  }
+  function openSearch(focusMobile: boolean) {
+    setMenuOpen(false);
+    setSearchOpen(true);
+    requestAnimationFrame(() => (focusMobile ? mobileInputRef : desktopInputRef).current?.focus());
+  }
+
+  /* Close search on outside click */
+  useEffect(() => {
+    if (!searchOpen) return;
+    function handle(e: MouseEvent) {
+      const target = e.target as Node;
+      const inside =
+        (desktopSearchRef.current && desktopSearchRef.current.contains(target)) ||
+        (mobileSearchIconRef.current && mobileSearchIconRef.current.contains(target)) ||
+        (mobileSearchRowRef.current && mobileSearchRowRef.current.contains(target));
+      if (!inside) setSearchOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [searchOpen]);
+
+  /* Escape closes search */
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") closeSearch(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
+
+  /* html's scroll-padding-top (for anchor-link navigation elsewhere) makes
+     Chromium's "keep the edited input in view" heuristic nudge the whole
+     page up on every keystroke, since the input sits in a sticky header —
+     the header is already always visible, it just doesn't know that. Turn
+     the padding off only while the search UI is actually in use. */
+  useEffect(() => {
+    document.documentElement.style.scrollPaddingTop = searchOpen ? "0px" : "";
+    return () => { document.documentElement.style.scrollPaddingTop = ""; };
+  }, [searchOpen]);
+
+  /* Bump the cart badge whenever an item is added */
+  useEffect(() => {
+    if (totalItems > prevTotalItems.current) {
+      setCartBump(true);
+      const t = setTimeout(() => setCartBump(false), 350);
+      prevTotalItems.current = totalItems;
+      return () => clearTimeout(t);
+    }
+    prevTotalItems.current = totalItems;
+  }, [totalItems]);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -72,16 +156,17 @@ export default function Navbar() {
     setMenuOpen(false);
   }, [pathname]);
 
-  /* ⌘K / Ctrl+K opens search */
+  /* ⌘K / Ctrl+K opens search and focuses whichever input is visible */
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setSearchOpen(true);
+        openSearch(window.innerWidth < 768);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function isActive(href: string) {
@@ -136,24 +221,47 @@ export default function Navbar() {
               {/* Right group */}
               <div className="flex items-center gap-1.5 flex-shrink-0">
 
-                {/* Desktop search bar */}
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  aria-label="Search"
-                  className="hidden md:flex items-center gap-2.5 w-52 lg:w-64 h-9 px-3.5 rounded-xl border-2 border-[#DDD5CC] bg-[#FAFAF8] text-[#9A8E88] text-sm hover:border-[#5E9E8C] transition-colors group"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0 group-hover:text-[#5E9E8C] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span className="flex-1 text-left text-[13px] text-[#B0A89E] group-hover:text-[#9A8E88] transition-colors">Search products…</span>
-                  <kbd className="hidden lg:inline text-[10px] bg-[#EDE5D8] text-[#9A8E88] px-1.5 py-0.5 rounded font-mono leading-none">⌘K</kbd>
-                </button>
+                {/* Desktop search — real input, live dropdown, no popup */}
+                <div ref={desktopSearchRef} className="hidden md:block relative">
+                  <div className="flex items-center gap-2.5 w-52 lg:w-64 h-9 px-3.5 rounded-xl border-2 border-[#DDD5CC] bg-[#FAFAF8]">
+                    <svg className="w-4 h-4 flex-shrink-0 text-[#9A8E88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      ref={desktopInputRef}
+                      type="text"
+                      value={query}
+                      onChange={(e) => { setQuery(e.target.value); setSearchOpen(true); }}
+                      onFocus={() => setSearchOpen(true)}
+                      placeholder={t("search.placeholder")}
+                      aria-label="Search products"
+                      className="flex-1 min-w-0 text-[13px] text-[#2A2320] placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                    />
+                    {query && (
+                      <button type="button" onClick={() => { setQuery(""); desktopInputRef.current?.focus(); }} aria-label="Clear search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0">
+                        <span className="text-xs">✕</span>
+                      </button>
+                    )}
+                  </div>
+                  {searchOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[90vw] bg-white rounded-2xl border border-[#DDD5CC] shadow-2xl p-4 z-[200] animate-pop-in">
+                      <SearchResultsPanel
+                        query={query} setQuery={setQuery}
+                        activeCat={activeCat} setActiveCat={setActiveCat}
+                        results={searchResults} recentSearches={recentSearches}
+                        onClearRecent={clearRecent} onNavigate={navigateFromSearch}
+                      />
+                    </div>
+                  )}
+                </div>
 
-                {/* Mobile search icon */}
+                {/* Mobile search icon — expands an inline row below the nav, no popup */}
                 <button
-                  onClick={() => setSearchOpen(true)}
+                  ref={mobileSearchIconRef}
+                  onClick={() => (searchOpen ? closeSearch() : openSearch(true))}
                   aria-label="Search"
-                  className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors"
+                  aria-expanded={searchOpen}
+                  className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -164,7 +272,7 @@ export default function Navbar() {
                 <Link
                   href="/wishlist"
                   aria-label="Wishlist"
-                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill={wCount > 0 ? "#E8789A" : "none"} viewBox="0 0 24 24" stroke={wCount > 0 ? "#E8789A" : "currentColor"} strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -212,7 +320,7 @@ export default function Navbar() {
                 {/* Cart */}
                 <Link
                   href="/cart"
-                  className="relative flex items-center gap-1.5 font-bold px-4 py-2 rounded-full text-white text-sm transition-colors hover:opacity-90"
+                  className="relative flex items-center gap-1.5 font-bold px-4 py-2 rounded-full text-white text-sm transition-all active:scale-95 hover:opacity-90"
                   style={{ backgroundColor: "#5E9E8C" }}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -220,7 +328,7 @@ export default function Navbar() {
                   </svg>
                   <span className="hidden sm:inline">Cart</span>
                   {totalItems > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-[#2A2320] text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                    <span className={`absolute -top-1.5 -right-1.5 bg-[#2A2320] text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center leading-none ${cartBump ? "animate-bump" : ""}`}>
                       {totalItems > 9 ? "9+" : totalItems}
                     </span>
                   )}
@@ -229,8 +337,8 @@ export default function Navbar() {
                 {/* Hamburger — mobile */}
                 <button
                   ref={hamburgerRef}
-                  className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-[#EDE5D8] transition-colors gap-1.5"
-                  onClick={() => setMenuOpen((v) => !v)}
+                  className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-[#EDE5D8] transition-all active:scale-90 gap-1.5"
+                  onClick={() => { setSearchOpen(false); setMenuOpen((v) => !v); }}
                   aria-label="Toggle menu"
                   aria-expanded={menuOpen}
                 >
@@ -241,6 +349,40 @@ export default function Navbar() {
               </div>
             </div>
           </div>
+
+          {/* Mobile search — expanding row, not a full-screen popup */}
+          {searchOpen && (
+            <div ref={mobileSearchRowRef} className="md:hidden border-t border-[#DDD5CC] bg-white px-4 py-3 animate-fade-up">
+              <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-xl border-2 border-[#DDD5CC] bg-[#FAFAF8] mb-3">
+                <svg className="w-4 h-4 flex-shrink-0 text-[#9A8E88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  ref={mobileInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t("search.placeholder")}
+                  aria-label="Search products"
+                  className="flex-1 min-w-0 text-sm text-[#2A2320] placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                />
+                {query && (
+                  <button type="button" onClick={() => { setQuery(""); mobileInputRef.current?.focus(); }} aria-label="Clear search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0">
+                    <span className="text-xs">✕</span>
+                  </button>
+                )}
+                <button type="button" onClick={closeSearch} aria-label="Close search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0 text-xs font-bold">
+                  {t("search.close")}
+                </button>
+              </div>
+              <SearchResultsPanel
+                query={query} setQuery={setQuery}
+                activeCat={activeCat} setActiveCat={setActiveCat}
+                results={searchResults} recentSearches={recentSearches}
+                onClearRecent={clearRecent} onNavigate={navigateFromSearch}
+              />
+            </div>
+          )}
 
           {/* Mobile dropdown */}
           {menuOpen && (
@@ -294,9 +436,6 @@ export default function Navbar() {
           )}
         </nav>
       </header>
-
-      {/* Search modal — lives outside header to cover full page */}
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

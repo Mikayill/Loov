@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useProducts } from "@/lib/db/useProducts";
+import { useAuth } from "@/context/AuthContext";
 
 /** Each saved item remembers the price at the moment it was added, so we can
  *  surface a price-drop later (old price struck-through + a notification dot). */
@@ -28,49 +29,81 @@ interface WishlistContextType {
 }
 
 const WishlistContext = createContext<WishlistContextType | null>(null);
-const STORAGE_KEY = "loov-wishlist";
+
+/** Guest wishlist lives under the original unscoped key (no data loss for
+ *  shoppers already mid-session). Signed-in accounts get their own
+ *  namespaced key so switching accounts on the same browser never leaks
+ *  another account's saved items — see CartContext.tsx for the identical
+ *  pattern (including the guest→account adopt-on-first-sign-in rule). */
+const GUEST_KEY = "loov-wishlist";
+function keyFor(userId: string | null): string {
+  return userId ? `loov-wishlist:${userId}` : GUEST_KEY;
+}
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const products = useProducts(); // live catalog (DB with static fallback)
   const [items, setItems]       = useState<WishlistItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const activeKeyRef = useRef(GUEST_KEY);
+  const prevUserId = useRef<string | null | undefined>(undefined);
 
   const currentPrice = useCallback(
     (id: string): number | undefined => products.find((p) => p.id === id)?.price,
     [products]
   );
 
+  /** Old entries were a plain string[]; normalize to the object format. */
+  function parseItems(raw: string | null): WishlistItem[] {
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((entry: unknown) => {
+        if (typeof entry === "string") {
+          return { id: entry, priceWhenAdded: currentPrice(entry) ?? 0 };
+        }
+        if (entry && typeof entry === "object" && "id" in entry) {
+          const e = entry as WishlistItem;
+          return { id: e.id, priceWhenAdded: e.priceWhenAdded ?? currentPrice(e.id) ?? 0 };
+        }
+        return null;
+      })
+      .filter((x): x is WishlistItem => x !== null);
+  }
+
+  /* Reload whenever the active account changes (sign-in, sign-out, or
+     switching accounts) — same rule as CartContext: a guest's first
+     sign-in on this browser adopts their guest wishlist; switching between
+     two different accounts never mixes their saved items. */
   useEffect(() => {
+    const currentUserId = user?.id ?? null;
+    if (prevUserId.current === currentUserId) return;
+    const wasGuest = prevUserId.current === null || prevUserId.current === undefined;
+    prevUserId.current = currentUserId;
+
+    const targetKey = keyFor(currentUserId);
+    activeKeyRef.current = targetKey;
+    let targetItems: WishlistItem[] = [];
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          // Migrate the old string[] format to the new object format.
-          const migrated: WishlistItem[] = parsed
-            .map((entry: unknown) => {
-              if (typeof entry === "string") {
-                return { id: entry, priceWhenAdded: currentPrice(entry) ?? 0 };
-              }
-              if (entry && typeof entry === "object" && "id" in entry) {
-                const e = entry as WishlistItem;
-                return { id: e.id, priceWhenAdded: e.priceWhenAdded ?? currentPrice(e.id) ?? 0 };
-              }
-              return null;
-            })
-            .filter((x): x is WishlistItem => x !== null);
-          setItems(migrated);
+      targetItems = parseItems(localStorage.getItem(targetKey));
+      if (currentUserId && wasGuest && targetItems.length === 0) {
+        const guestItems = parseItems(localStorage.getItem(GUEST_KEY));
+        if (guestItems.length > 0) {
+          targetItems = guestItems;
+          localStorage.removeItem(GUEST_KEY);
         }
       }
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(targetKey);
     }
+    setItems(targetItems);
     setHydrated(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time migration on mount
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- currentPrice/parseItems are stable enough for this one-time-per-account load
+  }, [user?.id]);
 
   useEffect(() => {
-    if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (hydrated) localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
   }, [items, hydrated]);
 
   const toggle = useCallback((id: string) => {
@@ -102,7 +135,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const lowStock = useCallback(
     (id: string): number | null => {
       if (!items.some((i) => i.id === id)) return null;
-      const stock = products.find((p) => p.id === id)?.stock;
+      const product = products.find((p) => p.id === id);
+      if (!product) return null;
+      // Wishlist items don't remember which size/color was saved, so a
+      // per-variant-tracked product can't be read off a single number here —
+      // showing a possibly-wrong "N left" would be worse than showing none.
+      if (Object.keys(product.stockByVariant ?? {}).length > 0) return null;
+      const stock = product.stock;
       return stock !== undefined && stock > 0 && stock <= 5 ? stock : null;
     },
     [items, products]

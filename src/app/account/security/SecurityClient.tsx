@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import Button from "@/components/ui/Button";
+import { PHONE_COUNTRY_CODE, PHONE_LOCAL_PLACEHOLDER, phoneLocalPart, withCountryCode } from "@/lib/georgia";
 
 export default function SecurityClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { user, loading, updatePassword, deleteAccount,
-    listTotpFactors, enrollTotp, verifyTotp, unenrollTotp } = useAuth();
+  const { user, loading, updatePassword, updateProfile, linkPhone, deleteAccount } = useAuth();
 
   const [currentPw,  setCurrentPw]  = useState("");
   const [newPw,      setNewPw]      = useState("");
@@ -25,14 +26,20 @@ export default function SecurityClient() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  /* ── 2FA state ── */
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null); // verified factor = 2FA on
-  const [mfaLoaded, setMfaLoaded]     = useState(false);
-  const [enrolling, setEnrolling]     = useState<{ factorId: string; qr: string; secret: string } | null>(null);
-  const [mfaCode, setMfaCode]         = useState("");
-  const [mfaBusy, setMfaBusy]         = useState(false);
-  const [mfaError, setMfaError]       = useState("");
-  const [showDisable, setShowDisable] = useState(false);
+  /* ── Add a missing email/phone (Security page lets an account fill in
+     whichever contact method it doesn't already have). ── */
+  const [emailInput, setEmailInput]   = useState("");
+  const [emailBusy, setEmailBusy]     = useState(false);
+  const [emailError, setEmailError]   = useState("");
+  const [emailInfo, setEmailInfo]     = useState("");
+  const [phoneAddInput, setPhoneAddInput] = useState("");
+  const [phoneAddBusy, setPhoneAddBusy]   = useState(false);
+  const [phoneAddError, setPhoneAddError] = useState("");
+  const [phoneAddDone, setPhoneAddDone]   = useState(false);
+
+  /* Trusted-device (this browser skips the sign-in code for 30 days). */
+  const [deviceTrusted, setDeviceTrusted] = useState(false);
+  const [forgettingDevice, setForgettingDevice] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -41,13 +48,22 @@ export default function SecurityClient() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    listTotpFactors().then(({ factors }) => {
-      if (cancelled) return;
-      setMfaFactorId(factors[0]?.id ?? null);
-      setMfaLoaded(true);
-    });
+    fetch("/api/auth/trusted-device")
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setDeviceTrusted(!!d.trusted); })
+      .catch(() => {});
     return () => { cancelled = true; };
-  }, [user, listTotpFactors]);
+  }, [user]);
+
+  async function forgetDevice() {
+    setForgettingDevice(true);
+    try {
+      await fetch("/api/auth/trusted-device", { method: "DELETE" });
+      setDeviceTrusted(false);
+    } catch { /* */ } finally {
+      setForgettingDevice(false);
+    }
+  }
 
   if (loading || !user) {
     return (
@@ -72,7 +88,7 @@ export default function SecurityClient() {
   async function handleChangePw(e: React.FormEvent) {
     e.preventDefault();
     setPwError("");
-    if (newPw.length < 6) { setPwError(t("sec.newPasswordMin6")); return; }
+    if (newPw.length < 8 || !/\d/.test(newPw)) { setPwError(t("sec.newPasswordMin8Digit")); return; }
     if (newPw !== confirmPw) { setPwError(t("sec.passwordsNoMatch")); return; }
     setPwLoading(true);
     const res = await updatePassword(newPw);
@@ -101,40 +117,30 @@ export default function SecurityClient() {
     router.push("/");
   }
 
-  async function handleStartEnroll() {
-    setMfaError(""); setMfaBusy(true); setMfaCode("");
-    const res = await enrollTotp();
-    setMfaBusy(false);
-    if (res.error || !res.factorId) { setMfaError(res.error || "Could not start 2FA setup."); return; }
-    setEnrolling({ factorId: res.factorId, qr: res.qr ?? "", secret: res.secret ?? "" });
+  async function handleAddEmail(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailError(""); setEmailInfo(""); setEmailBusy(true);
+    const res = await updateProfile(user!.name, emailInput);
+    setEmailBusy(false);
+    if (res.error) { setEmailError(res.error); return; }
+    if (res.info) setEmailInfo(res.info);
+    setEmailInput("");
   }
 
-  async function handleConfirmEnroll(e: React.FormEvent) {
+  async function handleAddPhone(e: React.FormEvent) {
     e.preventDefault();
-    if (!enrolling) return;
-    setMfaError(""); setMfaBusy(true);
-    const res = await verifyTotp(enrolling.factorId, mfaCode);
-    setMfaBusy(false);
-    if (res.error) { setMfaError(res.error); return; }
-    setMfaFactorId(enrolling.factorId);
-    setEnrolling(null);
-    setMfaCode("");
-  }
-
-  async function handleDisableMfa(e: React.FormEvent) {
-    e.preventDefault();
-    if (!mfaFactorId) return;
-    setMfaError(""); setMfaBusy(true);
-    const res = await unenrollTotp(mfaFactorId, mfaCode);
-    setMfaBusy(false);
-    if (res.error) { setMfaError(res.error); return; }
-    setMfaFactorId(null);
-    setShowDisable(false);
-    setMfaCode("");
+    setPhoneAddError(""); setPhoneAddBusy(true);
+    const res = await linkPhone(phoneAddInput);
+    setPhoneAddBusy(false);
+    if (res.error) { setPhoneAddError(res.error); return; }
+    setPhoneAddDone(true);
+    setPhoneAddInput("");
   }
 
   const { score, label: pwLabel, color: pwColor } = pwStrength(newPw);
   const isEmailProvider = user.provider === "email";
+  const isPhoneProvider = user.provider === "phone";
+  const hasPassword = isEmailProvider || isPhoneProvider;
   const providerLabel: Record<string, string> = {
     google: t("sec.providerGoogle"), facebook: t("sec.providerFacebook"), phone: t("sec.providerPhone"), email: t("sec.providerEmail"),
   };
@@ -184,11 +190,11 @@ export default function SecurityClient() {
           </div>
         </div>
 
-        {/* Change password */}
-        {isEmailProvider ? (
+        {/* Change/add password */}
+        {hasPassword ? (
           <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
             <h2 className="font-extrabold text-[#2A2320] mb-5 flex items-center gap-2">
-              <span>🔒</span> {t("sec.changePassword")}
+              <span>🔒</span> {isEmailProvider ? t("sec.changePassword") : t("sec.addPassword")}
             </h2>
 
             {pwSuccess && (
@@ -198,7 +204,8 @@ export default function SecurityClient() {
             )}
 
             <form onSubmit={handleChangePw} className="space-y-4">
-              {/* Current password */}
+              {/* Current password — email accounts only; phone accounts are adding their first one */}
+              {isEmailProvider && (
               <div>
                 <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("sec.currentPassword")} *</label>
                 <input
@@ -208,6 +215,7 @@ export default function SecurityClient() {
                   className="w-full h-10 px-3 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium focus:border-[#5E9E8C] outline-none transition-colors"
                 />
               </div>
+              )}
 
               {/* New password */}
               <div>
@@ -257,21 +265,9 @@ export default function SecurityClient() {
 
               {pwError && <p className="text-red-400 text-xs font-semibold">{pwError}</p>}
 
-              <button
-                type="submit" disabled={pwLoading}
-                className="w-full h-10 rounded-xl font-extrabold text-white text-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#5E9E8C" }}
-              >
-                {pwLoading ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                    </svg>
-                    {t("sec.updating")}
-                  </>
-                ) : `${t("sec.updatePasswordBtn")} →`}
-              </button>
+              <Button type="submit" loading={pwLoading} loadingText={t("sec.updating")} className="!h-10" fullWidth>
+                {isEmailProvider ? t("sec.updatePasswordBtn") : t("sec.addPasswordBtn")} →
+              </Button>
             </form>
           </div>
         ) : (
@@ -285,119 +281,80 @@ export default function SecurityClient() {
           </div>
         )}
 
-        {/* Two-factor auth (TOTP authenticator app) */}
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
-          <div className="flex items-center justify-between mb-3">
+        {/* Contact methods — fill in whichever one is missing so both are
+            available to log in with / receive account emails. */}
+        {(!user.email || !user.phone) && (
+          <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6 space-y-5">
             <h2 className="font-extrabold text-[#2A2320] flex items-center gap-2">
-              <span>🛡️</span> {t("sec.twoFactor")}
+              <span>📇</span> {t("sec.contactMethods")}
             </h2>
-            {mfaLoaded && (
-              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                mfaFactorId ? "bg-[#EAF2F0] text-[#5E9E8C]" : "bg-[#F5F0EB] text-[#9A8E88]"
-              }`}>
-                {mfaFactorId ? t("sec.mfaOn") : t("sec.mfaOff")}
-              </span>
+
+            {!user.email && (
+              <div>
+                <p className="text-sm font-semibold text-[#2A2320] mb-2">{t("sec.addEmail")}</p>
+                <form onSubmit={handleAddEmail} className="flex items-end gap-3 flex-wrap">
+                  <div className="flex-1 min-w-[180px]">
+                    <input
+                      type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="you@example.com" required
+                      className="w-full h-10 px-3 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium focus:border-[#5E9E8C] outline-none transition-colors"
+                    />
+                  </div>
+                  <Button type="submit" loading={emailBusy} loadingText={t("sec.updating")} className="!h-10 !w-auto px-5">
+                    {t("sec.addEmailBtn")}
+                  </Button>
+                </form>
+                {emailInfo && <p className="text-xs text-[#5E9E8C] font-semibold mt-1.5">{emailInfo}</p>}
+                {emailError && <p className="text-xs text-red-400 font-semibold mt-1.5">{emailError}</p>}
+              </div>
+            )}
+
+            {!user.phone && (
+              <div>
+                <p className="text-sm font-semibold text-[#2A2320] mb-2">{t("sec.addPhone")}</p>
+                {phoneAddDone ? (
+                  <p className="text-xs text-[#5E9E8C] font-semibold">✓ {t("sec.addPhoneDone")}</p>
+                ) : (
+                  <>
+                    <form onSubmit={handleAddPhone} className="flex items-end gap-3 flex-wrap">
+                      <div className="flex-1 min-w-[180px]">
+                        <div className="flex items-stretch h-10 rounded-xl border-2 border-[#DDD5CC] bg-white overflow-hidden focus-within:border-[#5E9E8C] transition-colors">
+                          <span className="flex items-center pl-3 pr-2 text-sm font-bold text-[#5E5450] bg-[#F5F0EB] border-r-2 border-[#DDD5CC] select-none">{PHONE_COUNTRY_CODE}</span>
+                          <input
+                            type="tel" value={phoneLocalPart(phoneAddInput)} onChange={(e) => setPhoneAddInput(withCountryCode(e.target.value))}
+                            placeholder={PHONE_LOCAL_PLACEHOLDER} required
+                            className="flex-1 min-w-0 h-full px-3 bg-transparent text-sm font-medium outline-none"
+                          />
+                        </div>
+                      </div>
+                      <Button type="submit" loading={phoneAddBusy} loadingText={t("sec.updating")} className="!h-10 !w-auto px-5">
+                        {t("sec.addPhoneBtn")}
+                      </Button>
+                    </form>
+                    {phoneAddError && <p className="text-xs text-red-400 font-semibold mt-1.5">{phoneAddError}</p>}
+                  </>
+                )}
+              </div>
             )}
           </div>
-          <p className="text-sm text-[#5E5450] mb-4">{t("sec.twoFactorBody")}</p>
+        )}
 
-          {!mfaLoaded ? null : enrolling ? (
-            /* Step 2: scan the QR + confirm a code */
-            <form onSubmit={handleConfirmEnroll} className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
-                {enrolling.qr && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={enrolling.qr} alt="2FA QR code" className="w-40 h-40 rounded-xl border border-[#DDD5CC] bg-white p-2" />
-                )}
-                <div className="flex-1 space-y-2 text-sm text-[#5E5450]">
-                  <p className="font-semibold text-[#2A2320]">{t("sec.mfaScanQr")}</p>
-                  <p className="text-xs">{t("sec.mfaManualKey")}</p>
-                  <code className="block bg-[#F5F0EB] border border-[#DDD5CC] rounded-lg px-3 py-2 text-[11px] font-mono break-all select-all">
-                    {enrolling.secret}
-                  </code>
-                </div>
-              </div>
-              <div className="flex items-end gap-3 flex-wrap">
-                <div>
-                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("sec.mfaEnterCode")}</label>
-                  <input
-                    value={mfaCode}
-                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    inputMode="numeric"
-                    placeholder="123456"
-                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={mfaBusy || mfaCode.length !== 6}
-                  className="h-11 px-6 rounded-xl font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: "#5E9E8C" }}
-                >
-                  {mfaBusy ? "…" : t("sec.mfaActivate")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setEnrolling(null); setMfaCode(""); setMfaError(""); }}
-                  className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450]"
-                >
-                  {t("addr.cancel")}
-                </button>
-              </div>
-              {mfaError && <p className="text-red-500 text-xs font-semibold">{mfaError}</p>}
-            </form>
-          ) : mfaFactorId ? (
-            showDisable ? (
-              /* Disable: confirm with a current code */
-              <form onSubmit={handleDisableMfa} className="space-y-3">
-                <p className="text-sm font-semibold text-[#2A2320]">{t("sec.mfaDisableConfirm")}</p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <input
-                    value={mfaCode}
-                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    inputMode="numeric"
-                    placeholder="123456"
-                    className="w-36 h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-lg font-extrabold tracking-[0.3em] outline-none focus:border-[#5E9E8C]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={mfaBusy || mfaCode.length !== 6}
-                    className="h-11 px-5 rounded-xl font-bold text-white text-sm bg-red-500 disabled:opacity-50 hover:opacity-90 transition-opacity"
-                  >
-                    {mfaBusy ? "…" : t("sec.mfaDisable")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setShowDisable(false); setMfaCode(""); setMfaError(""); }}
-                    className="h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450]"
-                  >
-                    {t("addr.cancel")}
-                  </button>
-                </div>
-                {mfaError && <p className="text-red-500 text-xs font-semibold">{mfaError}</p>}
-              </form>
-            ) : (
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <p className="text-sm font-semibold text-[#5E9E8C]">✓ {t("sec.mfaEnabledNote")}</p>
-                <button
-                  onClick={() => { setShowDisable(true); setMfaError(""); }}
-                  className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
-                >
-                  {t("sec.mfaDisable")}
-                </button>
-              </div>
-            )
-          ) : (
-            <div>
+        {/* Sign-in verification — automatic, no setup needed */}
+        <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
+          <h2 className="font-extrabold text-[#2A2320] mb-2 flex items-center gap-2">
+            <span>🛡️</span> {t("sec.verification")}
+          </h2>
+          <p className="text-sm text-[#5E5450]">{t("sec.verificationBody")}</p>
+          {deviceTrusted && (
+            <div className="mt-4 flex items-center justify-between gap-3 flex-wrap bg-[#F5F0EB] rounded-xl p-3">
+              <p className="text-xs text-[#5E5450]">✓ {t("sec.deviceTrusted")}</p>
               <button
-                onClick={handleStartEnroll}
-                disabled={mfaBusy}
-                className="font-bold px-5 py-2.5 rounded-xl text-white text-sm disabled:opacity-60 hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#5E9E8C" }}
+                onClick={forgetDevice}
+                disabled={forgettingDevice}
+                className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-all active:scale-95 disabled:opacity-60"
               >
-                {mfaBusy ? "…" : `${t("sec.mfaEnable")} →`}
+                {forgettingDevice ? t("sec.updating") : t("sec.forgetDevice")}
               </button>
-              {mfaError && <p className="text-red-500 text-xs font-semibold mt-2">{mfaError}</p>}
             </div>
           )}
         </div>
@@ -415,7 +372,7 @@ export default function SecurityClient() {
               </div>
               <button
                 onClick={() => setShowDelete(true)}
-                className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
+                className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-all active:scale-95"
               >
                 {t("sec.deleteAccount")}
               </button>
@@ -432,20 +389,24 @@ export default function SecurityClient() {
               />
               {deleteError && <p className="text-red-500 text-xs font-semibold">{deleteError}</p>}
               <div className="flex gap-3">
-                <button
+                <Button
                   onClick={() => { setShowDelete(false); setDeleteInput(""); setDeleteError(""); }}
                   disabled={deleting}
-                  className="flex-1 h-9 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] hover:border-[#9A8E88] transition-colors disabled:opacity-50"
+                  variant="secondary"
+                  className="flex-1 !h-9"
                 >
                   {t("common.cancel")}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleDelete}
-                  disabled={deleteInput !== "DELETE" || deleting}
-                  className="flex-1 h-9 rounded-xl text-sm font-bold text-white bg-red-400 hover:bg-red-500 transition-colors disabled:opacity-40"
+                  disabled={deleteInput !== "DELETE"}
+                  loading={deleting}
+                  loadingText={t("sec.deleting")}
+                  variant="danger"
+                  className="flex-1 !h-9"
                 >
-                  {deleting ? t("sec.deleting") : t("sec.confirmDelete")}
-                </button>
+                  {t("sec.confirmDelete")}
+                </Button>
               </div>
             </div>
           )}

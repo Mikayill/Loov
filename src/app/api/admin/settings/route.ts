@@ -23,6 +23,9 @@ const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNu
   loyaltyGoldThreshold: { min: 0, max: 1000000, int: true },
   loyaltySilverMultiplier: { min: 1, max: 10 },
   loyaltyGoldMultiplier: { min: 1, max: 10 },
+  deliveryMinDays: { min: 0, max: 30, int: true },
+  deliveryMaxDays: { min: 0, max: 30, int: true },
+  loyaltyMaxRedeemPercent: { min: 1, max: 100, int: true },
 };
 
 export async function GET() {
@@ -68,6 +71,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "WhatsApp number must be 8–15 digits (or empty to hide)" }, { status: 400 });
     }
     updates.push({ key: FIELD_TO_KEY.whatsappNumber, value: digits });
+  }
+  const minDays = body.deliveryMinDays !== undefined ? Number(body.deliveryMinDays) : undefined;
+  const maxDays = body.deliveryMaxDays !== undefined ? Number(body.deliveryMaxDays) : undefined;
+  if (minDays !== undefined && maxDays !== undefined && minDays > maxDays) {
+    return NextResponse.json({ error: "deliveryMinDays must be ≤ deliveryMaxDays" }, { status: 400 });
   }
   if (updates.length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 

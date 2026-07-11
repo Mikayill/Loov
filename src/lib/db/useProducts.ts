@@ -11,19 +11,23 @@
 
 import { useEffect, useState } from "react";
 import type { Product } from "@/types";
+import type { Locale } from "@/lib/i18n/config";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { mapProductRow, type ProductRow } from "@/lib/db/productMap";
 import { products as staticProducts } from "@/lib/products";
 import { isNewArrival } from "@/lib/pricing";
 import { settingsFromRows, DEFAULT_SETTINGS } from "@/lib/settings";
+import { useLocale } from "@/context/LocaleContext";
 
-let cache: Product[] | null = null;
-let inflight: Promise<Product[]> | null = null;
+// Cached per locale — product name/description resolve differently per
+// language, so switching locale must not serve another language's cache.
+const cache: Partial<Record<Locale, Product[]>> = {};
+const inflight: Partial<Record<Locale, Promise<Product[]>>> = {};
 
-async function loadCatalog(): Promise<Product[]> {
-  if (cache) return cache;
-  if (!inflight) {
-    inflight = (async () => {
+async function loadCatalog(locale: Locale): Promise<Product[]> {
+  if (cache[locale]) return cache[locale]!;
+  if (!inflight[locale]) {
+    inflight[locale] = (async () => {
       try {
         const supabase = createSupabaseBrowserClient();
         // Fetch catalog + settings together so the "New" badge honours the
@@ -37,34 +41,37 @@ async function loadCatalog(): Promise<Product[]> {
         const newBadgeDays = settingsRes.error
           ? DEFAULT_SETTINGS.newBadgeDays
           : settingsFromRows(settingsRes.data ?? []).newBadgeDays;
-        cache = (data as ProductRow[])
-          .map(mapProductRow)
+        const list = (data as ProductRow[])
+          .map((row) => mapProductRow(row, locale))
           .map((p) => ({ ...p, isNew: isNewArrival(p, newBadgeDays) }))
           .sort((a, b) => Number(a.id) - Number(b.id));
-        return cache;
+        cache[locale] = list;
+        return list;
       } catch (e) {
         console.warn("[useProducts] DB fetch failed — static fallback:", (e as Error).message);
         return staticProducts;
       } finally {
-        inflight = null;
+        delete inflight[locale];
       }
     })();
   }
-  return inflight;
+  return inflight[locale]!;
 }
 
-/** Live catalog: static list immediately, DB data as soon as it arrives. */
+/** Live catalog: static list immediately, DB data as soon as it arrives.
+ *  Refetches (from cache, or the network the first time) when locale changes. */
 export function useProducts(): Product[] {
-  const [list, setList] = useState<Product[]>(cache ?? staticProducts);
+  const { locale } = useLocale();
+  const [list, setList] = useState<Product[]>(cache[locale] ?? staticProducts);
 
   useEffect(() => {
-    if (cache) return; // already fresh
+    if (cache[locale]) { setList(cache[locale]!); return; }
     let cancelled = false;
-    loadCatalog().then((data) => {
+    loadCatalog(locale).then((data) => {
       if (!cancelled) setList(data);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [locale]);
 
   return list;
 }

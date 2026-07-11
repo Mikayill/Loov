@@ -16,6 +16,7 @@ import type { PromoDef, PromoError } from "@/lib/promo";
 import { validatePromo } from "@/lib/db/promo";
 import { priceCartWithBundles, type BundleGroupLine } from "@/lib/bundlePricing";
 import type { Bundle } from "@/lib/bundles";
+import { variantStock } from "@/lib/stock";
 
 function itemKey(item: CartItem) {
   return `${item.product.id}::${item.selectedColor}::${item.selectedSize}::${item.bundleSlug ?? ""}`;
@@ -80,6 +81,8 @@ function CartItemCard({
   /** This item's share of the flat bundle price (only meaningful when bundleMatched). */
   allocatedPrice?: number;
 }) {
+  const stock = variantStock(item.product, item.selectedSize, item.selectedColor);
+  const atMax = stock !== null && item.quantity >= stock;
   return (
     <div
       className="bg-white rounded-2xl border-2 p-4 sm:p-5 flex gap-3 sm:gap-4 hover:shadow-sm transition-all"
@@ -163,7 +166,7 @@ function CartItemCard({
               type="button"
               onClick={() => onQty(item.quantity + 1)}
               aria-label="Increase quantity"
-              disabled={item.product.stock !== undefined && item.quantity >= item.product.stock}
+              disabled={atMax}
               className="w-9 h-9 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               +

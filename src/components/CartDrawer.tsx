@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { CartItem } from "@/types";
 import { formatPrice } from "@/lib/format";
@@ -10,6 +9,8 @@ import { useSettings } from "@/lib/db/useSettings";
 import { useLocale } from "@/context/LocaleContext";
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
+import LinkButton from "@/components/ui/LinkButton";
+import { variantStock } from "@/lib/stock";
 
 function DrawerItem({
   item,
@@ -22,6 +23,9 @@ function DrawerItem({
   onQty: (n: number) => void;
   t: (key: TranslationKey) => string;
 }) {
+  const stock = variantStock(item.product, item.selectedSize, item.selectedColor);
+  const atMax = stock !== null && item.quantity >= stock;
+
   return (
     <div className="flex items-start gap-3 py-4 border-b border-[#F0E8E0] last:border-0">
       {/* Thumb */}
@@ -52,7 +56,7 @@ function DrawerItem({
           <div className="flex items-center border border-[#DDD5CC] rounded-lg overflow-hidden">
             <button
               onClick={() => onQty(item.quantity - 1)}
-              className="w-7 h-7 flex items-center justify-center text-[#2A2320] font-bold hover:bg-[#F5F0EB] transition-colors disabled:opacity-30 text-sm"
+              className="w-7 h-7 flex items-center justify-center text-[#2A2320] font-bold hover:bg-[#F5F0EB] transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 text-sm"
               disabled={item.quantity <= 1}
             >
               −
@@ -62,7 +66,8 @@ function DrawerItem({
             </span>
             <button
               onClick={() => onQty(item.quantity + 1)}
-              className="w-7 h-7 flex items-center justify-center text-[#2A2320] font-bold hover:bg-[#F5F0EB] transition-colors text-sm"
+              disabled={atMax}
+              className="w-7 h-7 flex items-center justify-center text-[#2A2320] font-bold hover:bg-[#F5F0EB] transition-all active:scale-90 text-sm disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -76,7 +81,7 @@ function DrawerItem({
             <button
               onClick={onRemove}
               aria-label="Remove"
-              className="w-6 h-6 rounded-full bg-[#F5F0EB] text-[#9A8E88] hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-xs font-bold transition-colors"
+              className="w-6 h-6 rounded-full bg-[#F5F0EB] text-[#9A8E88] hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-xs font-bold transition-all active:scale-90"
             >
               ✕
             </button>
@@ -139,7 +144,7 @@ export default function CartDrawer() {
 
       {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full z-[401] w-full sm:w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 h-full z-[401] w-full sm:w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-smooth ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -157,7 +162,7 @@ export default function CartDrawer() {
           <button
             onClick={close}
             aria-label="Close cart"
-            className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors font-bold"
+            className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 font-bold"
           >
             ✕
           </button>
@@ -196,14 +201,9 @@ export default function CartDrawer() {
               <div className="text-5xl mb-4">🛒</div>
               <p className="font-bold text-[#2A2320] mb-2">{t("cart.empty.title")}</p>
               <p className="text-sm text-[#9A8E88] mb-6">{t("drawer.emptySubtitle")}</p>
-              <Link
-                href="/products"
-                onClick={close}
-                className="font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#5E9E8C" }}
-              >
+              <LinkButton href="/products" onClick={close} className="!rounded-full px-6">
                 {t("drawer.shopNow")} →
-              </Link>
+              </LinkButton>
             </div>
           ) : (
             <div>
@@ -242,21 +242,12 @@ export default function CartDrawer() {
             </div>
 
             {/* CTA buttons */}
-            <Link
-              href="/checkout"
-              onClick={close}
-              className="w-full py-3.5 rounded-2xl font-extrabold text-white text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
-              style={{ backgroundColor: "#5E9E8C" }}
-            >
+            <LinkButton href="/checkout" onClick={close} size="lg" fullWidth className="!rounded-2xl">
               {t("drawer.checkout")} →
-            </Link>
-            <Link
-              href="/cart"
-              onClick={close}
-              className="w-full py-3 rounded-2xl font-bold text-sm border-2 border-[#DDD5CC] text-[#5E5450] flex items-center justify-center hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors"
-            >
+            </LinkButton>
+            <LinkButton href="/cart" onClick={close} variant="secondary" size="lg" fullWidth className="!rounded-2xl">
               {t("drawer.viewCart")}
-            </Link>
+            </LinkButton>
           </div>
         )}
       </div>

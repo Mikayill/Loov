@@ -18,7 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const price = variable ? minEffectivePrice(product) : effectivePrice(product);
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 border border-[#DDD5CC]">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-snappy hover:-translate-y-1 active:scale-[0.98] border border-[#DDD5CC]">
         {/* Image area */}
         <div
           className="relative flex items-center justify-center h-44 text-6xl select-none overflow-hidden"

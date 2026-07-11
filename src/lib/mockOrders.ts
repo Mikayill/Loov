@@ -19,6 +19,9 @@ export interface MockOrder {
   /** When the order was marked delivered — starts the 14-day return window. */
   deliveredAt?: string;
   status: OrderStatus;
+  /** True only while the raw DB status is exactly "pending" — the customer
+   *  can still cancel before anything is prepared/shipped. */
+  cancellable?: boolean;
   items: OrderItem[];
   total: number;
   address: string;

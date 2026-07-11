@@ -17,6 +17,10 @@
   --color-teal: #5E9E8C;
   --color-teal-dark: #4D8A78;
   --font-nunito: var(--font-nunito);
+
+  /* Easing tokens — snappy (slight overshoot) for taps/hovers, smooth for modals/drawers */
+  --ease-snappy: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html {
@@ -47,11 +51,17 @@ svg {
 }
 
 /* Accessible keyboard focus for every interactive element.
-   Uses :focus-visible so it only shows for keyboard users, not mouse clicks. */
-:focus-visible {
-  outline: 2px solid #5E9E8C;
-  outline-offset: 2px;
-  border-radius: 4px;
+   Uses :focus-visible so it only shows for keyboard users, not mouse clicks.
+   Wrapped in Tailwind's "base" layer (not left unlayered) so a component can
+   still override it with a `focus-visible:outline-none` utility where needed —
+   unlayered CSS always beats layered utilities regardless of specificity,
+   which is what silently blocked those overrides before. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #5E9E8C;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 /* Respect users who prefer reduced motion */
@@ -85,7 +95,42 @@ svg {
 .animate-search-panel { animation: loov-slide-down 0.22s ease-out; }
 .animate-search-overlay { animation: loov-fade-in 0.22s ease-out; }
 
+/* Modal pop-in (scale + fade) — used by NewsletterPopup/QuickView/BundleQuickView */
+@keyframes loov-pop-in {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+@keyframes loov-pop-out {
+  from { transform: scale(1);    opacity: 1; }
+  to   { transform: scale(0.94); opacity: 0; }
+}
+.animate-pop-in  { animation: loov-pop-in 0.22s var(--ease-smooth); }
+.animate-pop-out { animation: loov-pop-out 0.16s var(--ease-smooth) forwards; }
+.animate-fade-in  { animation: loov-fade-in 0.2s var(--ease-smooth); }
+.animate-fade-out { animation: loov-fade-in 0.16s var(--ease-smooth) reverse forwards; }
+
+/* Small counter "bump" — cart badge when an item is added */
+@keyframes loov-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.animate-bump { animation: loov-bump 0.35s var(--ease-snappy); }
+
+/* Scroll-reveal fade-up */
+@keyframes loov-fade-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-fade-up { animation: loov-fade-up 0.5s var(--ease-smooth) forwards; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,
-  .animate-search-overlay { animation: none; }
+  .animate-search-overlay,
+  .animate-pop-in,
+  .animate-pop-out,
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-bump,
+  .animate-fade-up { animation: none; }
 }

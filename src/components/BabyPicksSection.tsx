@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useProducts } from "@/lib/db/useProducts";
 import { fetchMyProfile } from "@/lib/db/profile";
 import { monthsOld, productFitsAge, ageLabel } from "@/lib/babyAge";
+import { hasAnyStock } from "@/lib/stock";
 import ProductCard from "@/components/ProductCard";
 
 export default function BabyPicksSection() {
@@ -41,7 +42,7 @@ export default function BabyPicksSection() {
   if (months === null) return null;
 
   const picks = products
-    .filter((p) => productFitsAge(p, months) && (p.stock == null || p.stock > 0))
+    .filter((p) => productFitsAge(p, months) && hasAnyStock(p))
     .slice(0, 8);
   if (picks.length === 0) return null;
 

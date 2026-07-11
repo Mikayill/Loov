@@ -1,20 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-    </svg>
-  );
-}
+import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -25,8 +18,13 @@ const GoogleIcon = () => (
   </svg>
 );
 
+/** Site-wide minimum: at least 8 characters and at least one digit. */
+function isValidPassword(password: string): boolean {
+  return password.length >= 8 && /\d/.test(password);
+}
+
 function PasswordStrength({ password, t }: { password: string; t: (key: TranslationKey) => string }) {
-  const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) && /[0-9]/.test(password) ? 4 : 3;
+  const strength = password.length === 0 ? 0 : !isValidPassword(password) ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) ? 4 : 3;
   const labels = ["", t("auth.strengthWeak"), t("auth.strengthFair"), t("auth.strengthGood"), t("auth.strengthStrong")];
   const colors = ["", "#EF4444", "#F59E0B", "#3B82F6", "#5E9E8C"];
   if (!password) return null;
@@ -45,7 +43,7 @@ function PasswordStrength({ password, t }: { password: string; t: (key: Translat
 export default function RegisterClient() {
   const router = useRouter();
   const { t } = useLocale();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signUpWithEmail, signInWithGoogle, verifySignupCode, resendSignupCode } = useAuth();
 
   const [name,       setName]       = useState("");
   const [email,      setEmail]      = useState("");
@@ -56,19 +54,52 @@ export default function RegisterClient() {
   const [loading,    setLoading]    = useState(false);
   const [socialLoad, setSocialLoad] = useState<"google" | null>(null);
   const [error,      setError]      = useState("");
-  const [info,       setInfo]       = useState("");
+  const [errorCode,  setErrorCode]  = useState<string | undefined>(undefined);
+  /* Email confirmation pending — either click the link we sent, or (once the
+     Supabase email template includes {{ .Token }}) type the code instead. */
+  const [pendingConfirm, setPendingConfirm] = useState(false);
+  const [signupCode, setSignupCode] = useState("");
+  const [codeBusy,   setCodeBusy]   = useState(false);
+  const [codeError,  setCodeError]  = useState("");
+  const [resendLeft, setResendLeft] = useState(60);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (!agreed) { setError(t("auth.agreeToTermsFirst")); return; }
-    if (password !== confirm) { setError(t("auth.passwordsNoMatch")); return; }
-    setError(""); setInfo(""); setLoading(true);
+    if (!agreed) { setError(t("auth.agreeToTermsFirst")); setErrorCode(undefined); return; }
+    if (!isValidPassword(password)) { setError(t("auth.passwordMin8Digit")); setErrorCode(undefined); return; }
+    if (password !== confirm) { setError(t("auth.passwordsNoMatch")); setErrorCode(undefined); return; }
+    setError(""); setErrorCode(undefined); setLoading(true);
     const res = await signUpWithEmail(name, email, password);
     setLoading(false);
-    if (res.error) { setError(res.error); return; }
-    /* Email confirmation required — show the notice instead of redirecting */
-    if (res.info) { setInfo(res.info); return; }
+    if (res.error) { setError(res.error); setErrorCode(res.errorCode); return; }
+    /* Email confirmation required — show the code-entry step instead of redirecting */
+    if (res.info) { setPendingConfirm(true); setResendLeft(60); return; }
     router.push("/account");
+  }
+
+  /* Resend cooldown countdown (60s matches Supabase's per-user SMTP interval). */
+  useEffect(() => {
+    if (!pendingConfirm) return;
+    const id = setInterval(() => setResendLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [pendingConfirm]);
+
+  async function handleVerifySignupCode(e: React.FormEvent) {
+    e.preventDefault();
+    setCodeError(""); setCodeBusy(true);
+    const res = await verifySignupCode(email, signupCode);
+    setCodeBusy(false);
+    if (res.error) { setCodeError(res.error); return; }
+    router.push("/account");
+  }
+
+  async function handleResendSignupCode() {
+    if (resendLeft > 0) return;
+    setCodeError(""); setCodeBusy(true);
+    const res = await resendSignupCode(email);
+    setCodeBusy(false);
+    if (res.error) { setCodeError(res.error); return; }
+    setResendLeft(60);
   }
 
   async function handleSocial(provider: "google") {
@@ -93,10 +124,41 @@ export default function RegisterClient() {
 
         <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
 
+          {pendingConfirm ? (
+            /* Email confirmation pending — type the code we emailed (or click the link in it) */
+            <form onSubmit={handleVerifySignupCode} className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl mb-2">📬</div>
+                <p className="font-extrabold text-[#2A2320]">{t("auth.confirmEmailTitle")}</p>
+                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.confirmEmailBody").replace("{email}", email)}</p>
+              </div>
+              <input
+                value={signupCode}
+                onChange={(e) => setSignupCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                inputMode="numeric"
+                placeholder="123456"
+                autoFocus
+                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+              />
+              {codeError && <p className="text-red-400 text-xs font-semibold text-center">{codeError}</p>}
+              <Button type="submit" disabled={signupCode.length < 6} loading={codeBusy} loadingText={t("auth.verifying")} fullWidth>
+                {t("auth.verifyAndSignIn")} →
+              </Button>
+              <button
+                type="button"
+                onClick={handleResendSignupCode}
+                disabled={resendLeft > 0 || codeBusy}
+                className="w-full text-center text-xs font-semibold text-[#5E9E8C] hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+              >
+                {resendLeft > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendLeft)) : t("auth.emailOtpResend")}
+              </button>
+            </form>
+          ) : (
+          <>
           {/* Social buttons */}
           <div>
             <button onClick={() => handleSocial("google")} disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all disabled:opacity-60">
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60">
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
             </button>
@@ -167,20 +229,26 @@ export default function RegisterClient() {
               </span>
             </label>
 
-            {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
-            {info && (
-              <div className="bg-[#EAF2F0] border border-[#C8DDD8] rounded-xl p-3.5 flex items-start gap-2.5">
-                <span className="text-base flex-shrink-0">📬</span>
-                <p className="text-xs font-semibold text-[#2A2320] leading-relaxed">{info}</p>
-              </div>
+            {error && (
+              <p className="text-red-400 text-xs font-semibold">
+                {error}
+                {errorCode === "already_registered" && (
+                  <>
+                    {" "}
+                    <Link href="/login" className="underline font-bold hover:text-red-500">
+                      {t("auth.signIn")}
+                    </Link>
+                  </>
+                )}
+              </p>
             )}
 
-            <button type="submit" disabled={loading}
-              className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ backgroundColor: "#5E9E8C" }}>
-              {loading ? <><Spinner /> {t("auth.creatingAccount")}</> : `${t("auth.createAccountBtn")} →`}
-            </button>
+            <Button type="submit" loading={loading} loadingText={t("auth.creatingAccount")} fullWidth>
+              {t("auth.createAccountBtn")} →
+            </Button>
           </form>
+          </>
+          )}
         </div>
 
         <p className="text-center text-sm text-[#9A8E88] mt-5">

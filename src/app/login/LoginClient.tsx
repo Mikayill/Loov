@@ -5,17 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
+import { PHONE_COUNTRY_CODE, PHONE_LOCAL_PLACEHOLDER, phoneLocalPart, withCountryCode } from "@/lib/georgia";
 
 type Tab = "email" | "phone";
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-    </svg>
-  );
-}
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -30,7 +24,7 @@ export default function LoginClient() {
   const router = useRouter();
   const { t } = useLocale();
   const { signInWithEmail, signInWithGoogle, sendPhoneOtp, signInWithPhone,
-    mfaRequired, verifyTotp, signOut } = useAuth();
+    sendEmailOtp, verifyEmailOtp, checkTrustedDevice, trustThisDevice, signOut } = useAuth();
 
   const [tab,        setTab]        = useState<Tab>("email");
   const [email,      setEmail]      = useState("");
@@ -42,45 +36,83 @@ export default function LoginClient() {
   const [loading,    setLoading]    = useState(false);
   const [socialLoad, setSocialLoad] = useState<"google" | null>(null);
   const [error,      setError]      = useState("");
-  /* 2FA challenge — set when the password was right but a TOTP code is needed. */
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
-  const [mfaCode,     setMfaCode]     = useState("");
+  /* Mandatory email-OTP step — set once the password was right but this
+     browser isn't a trusted device yet. Not shown for Google or phone-OTP
+     sign-in (Google is already strongly verified; phone login IS a code). */
+  const [emailOtpStep, setEmailOtpStep] = useState(false);
+  const [emailOtpCode, setEmailOtpCode] = useState("");
+  const [rememberDevice, setRememberDevice] = useState(true);
+  /* 60s matches Supabase's SMTP "minimum interval per user" — a shorter
+     cooldown here would let the shopper hit a rate-limit error on resend. */
+  const [resendCooldown, setResendCooldown] = useState(60);
 
-  /* Surface errors passed back from /auth/callback (?error=...) */
+  /* Surface errors from /auth/callback (?error=...) and the OTP-gate bounce
+     (?verify=1, when someone opened a protected page before verifying). */
   useEffect(() => {
-    const err = new URLSearchParams(window.location.search).get("error");
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
     if (err) setError(err);
-  }, []);
+    else if (params.get("verify") === "1") setError(t("auth.verifyNeeded"));
+  }, [t]);
+
+  /* Resend cooldown countdown — 30s before the first resend, 60s after each one. */
+  useEffect(() => {
+    if (!emailOtpStep) return;
+    const id = setInterval(() => setResendCooldown((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [emailOtpStep]);
+
+  /** Server side of the OTP step — see /api/auth/otp-gate + proxy.ts. */
+  function setOtpGate(action: "open" | "close") {
+    return fetch("/api/auth/otp-gate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    }).catch(() => {});
+  }
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
     const res = await signInWithEmail(email, password);
     if (res.error) { setLoading(false); setError(res.error); return; }
-    /* Password OK — but accounts with 2FA still owe a TOTP code (aal2). */
-    const mfa = await mfaRequired();
+    /* Password OK — skip the OTP step entirely on a device we already trust. */
+    const trusted = await checkTrustedDevice();
+    if (trusted) { setLoading(false); router.push("/account"); return; }
+    /* Not trusted → lock the protected pages until the code is verified. */
+    await setOtpGate("open");
+    const sendRes = await sendEmailOtp(email);
     setLoading(false);
-    if (mfa.required && mfa.factorId) {
-      setMfaFactorId(mfa.factorId);
-      return;
-    }
+    if (sendRes.error) { setError(sendRes.error); return; }
+    setEmailOtpStep(true);
+    setResendCooldown(60);
+  }
+
+  async function handleEmailOtpVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError(""); setLoading(true);
+    const res = await verifyEmailOtp(email, emailOtpCode);
+    if (res.error) { setLoading(false); setError(res.error); return; }
+    if (rememberDevice) await trustThisDevice();
+    await setOtpGate("close");
+    setLoading(false);
     router.push("/account");
   }
 
-  async function handleMfaVerify(e: React.FormEvent) {
-    e.preventDefault();
-    if (!mfaFactorId) return;
+  async function handleResendEmailOtp() {
+    if (resendCooldown > 0) return;
     setError(""); setLoading(true);
-    const res = await verifyTotp(mfaFactorId, mfaCode);
+    const res = await sendEmailOtp(email);
     setLoading(false);
     if (res.error) { setError(res.error); return; }
-    router.push("/account");
+    setResendCooldown(60);
   }
 
-  function cancelMfa() {
+  function cancelEmailOtp() {
+    setOtpGate("close");
     signOut();
-    setMfaFactorId(null);
-    setMfaCode("");
+    setEmailOtpStep(false);
+    setEmailOtpCode("");
     setError("");
   }
 
@@ -125,37 +157,54 @@ export default function LoginClient() {
 
         <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
 
-          {/* ── 2FA step: password accepted, waiting for the authenticator code ── */}
-          {mfaFactorId ? (
-            <form onSubmit={handleMfaVerify} className="space-y-4">
+          {/* ── Mandatory email-OTP step: password accepted, new/unremembered device ── */}
+          {emailOtpStep ? (
+            <form onSubmit={handleEmailOtpVerify} className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl mb-2">🛡️</div>
-                <p className="font-extrabold text-[#2A2320]">{t("auth.mfaTitle")}</p>
-                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.mfaBody")}</p>
+                <div className="text-4xl mb-2">📧</div>
+                <p className="font-extrabold text-[#2A2320]">{t("auth.emailOtpTitle")}</p>
+                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.emailOtpBody").replace("{email}", email)}</p>
               </div>
               <input
-                value={mfaCode}
-                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                value={emailOtpCode}
+                onChange={(e) => setEmailOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
                 className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
               />
+              <label className="flex items-center gap-2 text-xs text-[#5E5450] font-semibold cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberDevice}
+                  onChange={(e) => setRememberDevice(e.target.checked)}
+                  className="w-4 h-4 rounded accent-[#5E9E8C]"
+                />
+                {t("auth.emailOtpRemember")}
+              </label>
               {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
-              <button
-                type="submit" disabled={loading || mfaCode.length !== 6}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#5E9E8C" }}
+              <Button
+                type="submit" disabled={emailOtpCode.length < 6} loading={loading} loadingText={t("auth.verifying")} fullWidth
               >
-                {loading ? <><Spinner /> {t("auth.verifying")}</> : `${t("auth.verifyAndSignIn")} →`}
-              </button>
-              <button
-                type="button"
-                onClick={cancelMfa}
-                className="w-full text-center text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors"
-              >
-                {t("auth.mfaCancel")}
-              </button>
+                {t("auth.verifyAndSignIn")} →
+              </Button>
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={cancelEmailOtp}
+                  className="text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors"
+                >
+                  {t("auth.mfaCancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendEmailOtp}
+                  disabled={resendCooldown > 0}
+                  className="text-xs font-semibold text-[#5E9E8C] hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendCooldown)) : t("auth.emailOtpResend")}
+                </button>
+              </div>
             </form>
           ) : (
           <>
@@ -164,7 +213,7 @@ export default function LoginClient() {
             <button
               onClick={() => handleSocial("google")}
               disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60"
             >
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
@@ -226,13 +275,9 @@ export default function LoginClient() {
                 </div>
               </div>
               {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
-              <button
-                type="submit" disabled={loading}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#5E9E8C" }}
-              >
-                {loading ? <><Spinner /> {t("auth.signingIn")}</> : `${t("auth.signInBtn")} →`}
-              </button>
+              <Button type="submit" loading={loading} loadingText={t("auth.signingIn")} fullWidth>
+                {t("auth.signInBtn")} →
+              </Button>
             </form>
           )}
 
@@ -241,11 +286,14 @@ export default function LoginClient() {
             <form onSubmit={otpSent ? handlePhoneLogin : handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.phoneNumber")}</label>
-                <input
-                  type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+995 5XX XXX XXX" required disabled={otpSent}
-                  className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors disabled:bg-[#F5F0EB]"
-                />
+                <div className={`flex items-stretch h-11 rounded-xl border-2 border-[#DDD5CC] bg-white overflow-hidden focus-within:border-[#5E9E8C] transition-colors ${otpSent ? "opacity-60" : ""}`}>
+                  <span className="flex items-center pl-4 pr-2 text-sm font-bold text-[#5E5450] bg-[#F5F0EB] border-r-2 border-[#DDD5CC] select-none">{PHONE_COUNTRY_CODE}</span>
+                  <input
+                    type="tel" value={phoneLocalPart(phone)} onChange={(e) => setPhone(withCountryCode(e.target.value))}
+                    placeholder={PHONE_LOCAL_PLACEHOLDER} required disabled={otpSent}
+                    className="flex-1 min-w-0 h-full px-4 bg-transparent text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] outline-none disabled:bg-[#F5F0EB]"
+                  />
+                </div>
               </div>
               {otpSent && (
                 <div>
@@ -265,13 +313,13 @@ export default function LoginClient() {
                 </div>
               )}
               {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
-              <button
-                type="submit" disabled={loading}
-                className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#5E9E8C" }}
+              <Button
+                type="submit" loading={loading}
+                loadingText={otpSent ? t("auth.verifying") : t("auth.sending")}
+                fullWidth
               >
-                {loading ? <><Spinner /> {otpSent ? t("auth.verifying") : t("auth.sending")}</> : otpSent ? `${t("auth.verifyAndSignIn")} →` : `${t("auth.sendCode")} →`}
-              </button>
+                {otpSent ? `${t("auth.verifyAndSignIn")} →` : `${t("auth.sendCode")} →`}
+              </Button>
             </form>
           )}
           </>

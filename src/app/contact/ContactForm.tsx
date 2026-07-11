@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CsrfField from "@/components/CsrfField";
 import { useLocale } from "@/context/LocaleContext";
+import Button from "@/components/ui/Button";
 
 type Field = { name: string; email: string; subject: string; message: string };
 const empty: Field = { name: "", email: "", subject: "", message: "" };
@@ -199,24 +200,15 @@ export default function ContactForm() {
       )}
 
       {/* Submit */}
-      <button
+      <Button
         type="submit"
-        disabled={loading}
-        className="w-full py-3.5 rounded-2xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
-        style={{ backgroundColor: "#5E9E8C" }}
+        loading={loading}
+        loadingText={t("contact.form.sending")}
+        fullWidth
+        className="!rounded-2xl !h-auto py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
       >
-        {loading ? (
-          <>
-            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            {t("contact.form.sending")}
-          </>
-        ) : (
-          `${t("contact.form.sendMessage")} →`
-        )}
-      </button>
+        {t("contact.form.sendMessage")} →
+      </Button>
     </form>
   );
 }

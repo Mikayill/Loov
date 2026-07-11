@@ -20,7 +20,10 @@ type T = (key: TranslationKey) => string;
 
 /* ── Colors ────────────────────────────────────────────────── */
 
-const COLOR_KEYS: Record<string, TranslationKey> = {
+/** Canonical (lowercase) color keys this store recognizes. Exported so
+ *  src/lib/catalogTags.ts can validate admin-entered colors against the
+ *  same set this label layer knows how to translate. */
+export const COLOR_KEYS: Record<string, TranslationKey> = {
   "white": "label.color.white",
   "cream": "label.color.cream",
   "beige": "label.color.beige",

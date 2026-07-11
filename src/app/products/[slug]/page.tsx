@@ -1,5 +1,7 @@
 import { getProductBySlug, getAllProducts } from "@/lib/db/products";
 import { getReviewStats } from "@/lib/db/reviews";
+import { hasAnyStock } from "@/lib/stock";
+import { minEffectivePrice } from "@/lib/pricing";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -61,11 +63,10 @@ export default async function ProductPage({ params }: Props) {
       "@type": "Offer",
       url: `https://loov.ge/products/${product.slug}`,
       priceCurrency: "GEL",
-      price: product.price,
-      availability:
-        (product.stock ?? 1) > 0
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
+      price: minEffectivePrice(product),
+      availability: hasAnyStock(product)
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
     },
   };
 

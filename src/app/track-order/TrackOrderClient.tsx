@@ -10,6 +10,7 @@ import { fmtDate } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/config";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import { orderStatusLabel, colorLabel, sizeLabel } from "@/lib/i18n/labels";
+import Button from "@/components/ui/Button";
 
 type TrackStep = { label: string; date: string; done: boolean; active: boolean };
 
@@ -108,18 +109,14 @@ export default function TrackOrderClient() {
             />
           </div>
         </div>
-        <button
+        <Button
           onClick={handleTrack}
-          disabled={loading || !input.trim() || !email.trim()}
-          className="w-full h-11 rounded-xl font-extrabold text-white text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ backgroundColor: "#5E9E8C" }}
+          disabled={!input.trim() || !email.trim()}
+          loading={loading}
+          fullWidth
         >
-          {loading ? (
-            <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-          ) : (
-            `${t("track.trackBtn")} →`
-          )}
-        </button>
+          {t("track.trackBtn")} →
+        </Button>
         <p className="text-[10px] text-[#9A8E88] mt-2">
           {t("track.privacyNote")}
         </p>

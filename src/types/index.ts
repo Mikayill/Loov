@@ -29,6 +29,10 @@ export interface Product {
   /** Per-size base prices, e.g. { "90×90 cm": 48 }. A size absent from the
    *  map uses `price`. Discounts apply on top of the size price. */
   sizePrices?: Record<string, number>;
+  /** Per-(size, color) stock counts, e.g. { "0-3 Months": { "White": 4 } }.
+   *  A (size, color) pair absent from the map means the admin hasn't set a
+   *  per-variant count yet — falls back to `stock` (see src/lib/stock.ts). */
+  stockByVariant?: Record<string, Record<string, number>>;
   /** Normalized fabric slug (cotton/muslin/bamboo/terry/…) — drives filtering. */
   fabric?: string;
   /** Editable highlight bullets on the Description tab. */
@@ -55,11 +59,30 @@ export interface CartItem {
   bundleSlug?: string;
 }
 
+/** Result of a stock-clamped cart write — every caller can tell whether the
+ *  full requested quantity actually made it in, and show its own feedback. */
+export interface CartAddResult {
+  /** Quantity actually in the cart for this line after the call. */
+  added: number;
+  /** True if stock capped the request below what was asked for. */
+  maxReached: boolean;
+  /** Real remaining stock for this (size, color) at call time; null = unlimited. */
+  available: number | null;
+}
+
+/** Fires whenever a clamp happens, so CartToast can show a warning — a new
+ *  `ts` on every occurrence (even if name/available repeat) re-triggers it. */
+export interface MaxReachedNotice {
+  name: string;
+  available: number;
+  ts: number;
+}
+
 export interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, color: string, size: string, qty?: number, bundleSlug?: string) => void;
+  addItem: (product: Product, color: string, size: string, qty?: number, bundleSlug?: string) => CartAddResult;
   removeItem: (productId: string, color: string, size: string, bundleSlug?: string) => void;
-  updateQuantity: (productId: string, color: string, size: string, quantity: number, bundleSlug?: string) => void;
+  updateQuantity: (productId: string, color: string, size: string, quantity: number, bundleSlug?: string) => CartAddResult;
   clearCart: () => void;
   totalItems: number;
   /** Plain per-product sum — NOT bundle-aware. Used only where a rough total
@@ -67,4 +90,6 @@ export interface CartContextType {
    *  `priceCartWithBundles` instead — don't "fix" this into a bundle-aware
    *  total, it would double-apply the bundle discount wherever both are shown. */
   totalPrice: number;
+  /** Most recent stock-clamp event, for CartToast's warning variant. */
+  maxReachedNotice: MaxReachedNotice | null;
 }
