@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { useLocale } from "@/context/LocaleContext";
 
 export default function GlobalError({
@@ -14,6 +15,8 @@ export default function GlobalError({
   const { t } = useLocale();
   useEffect(() => {
     console.error(error);
+    // React error-boundary errors are not auto-captured — report explicitly.
+    Sentry.captureException(error);
   }, [error]);
 
   return (

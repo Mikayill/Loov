@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /* Allow the browser to reach our own Supabase project (auth, DB, storage
    images, realtime). Derived from the public env var so it stays correct
@@ -15,6 +16,10 @@ const supabaseHost = (() => {
 const supabaseHttp = `https://${supabaseHost}`;
 const supabaseWs = `wss://${supabaseHost}`;
 
+/* Sentry error-reporting endpoint (host part of the DSN) — must be allowed in
+   connect-src or the browser CSP silently blocks error reports. */
+const sentryIngest = "https://o4511720590802944.ingest.de.sentry.io";
+
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
@@ -30,7 +35,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: ${supabaseHttp}`,
       "font-src 'self' data:",
-      `connect-src 'self' ${supabaseHttp} ${supabaseWs}`,
+      `connect-src 'self' ${supabaseHttp} ${supabaseWs} ${sentryIngest}`,
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -47,4 +52,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "loov-0v",
+  project: "javascript-nextjs",
+  // Source-map upload only runs when SENTRY_AUTH_TOKEN is set (CI/Vercel);
+  // without it the build still succeeds — stack traces are just unminified.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  // Don't ship source maps to the public — upload (if any) then delete.
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+});
