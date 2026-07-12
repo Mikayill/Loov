@@ -133,7 +133,7 @@ export default function RewardsClient() {
           {
             icon: "🚀",
             title: t("acct.rewards.levelUpTitle"),
-            text: t("acct.rewards.levelUpBody"),
+            text: t("acct.rewards.levelUpBody").replace("{n}", String(Math.round((settings.loyaltyGoldMultiplier - 1) * 100))),
           },
         ].map((c) => (
           <div key={c.title} className="bg-white rounded-2xl border border-[#DDD5CC] p-5">

@@ -8,6 +8,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import { useProducts } from "@/lib/db/useProducts";
+import { useSettings } from "@/lib/db/useSettings";
 import { tokenize, matchesQuery, loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -31,6 +32,7 @@ const navLinks: { href: string; key: TranslationKey }[] = [
 
 export default function Navbar() {
   const { t } = useLocale();
+  const { freeShippingThreshold } = useSettings();
   const { totalItems }   = useCart();
   const { count: wCount, hasUrgency } = useWishlist();
   const pathname         = usePathname();
@@ -187,7 +189,8 @@ export default function Navbar() {
             className="transition-opacity duration-300"
             style={{ opacity: annoVisible ? 1 : 0 }}
           >
-            {t(announcementKeys[annoIdx])}
+            {/* {n} = admin-set free-shipping threshold — never hardcode it here */}
+            {t(announcementKeys[annoIdx]).replace("{n}", String(freeShippingThreshold))}
           </span>
         </div>
 

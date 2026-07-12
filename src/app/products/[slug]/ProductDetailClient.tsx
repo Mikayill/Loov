@@ -95,7 +95,7 @@ export default function ProductDetailClient({
   const { has, toggle } = useWishlist();
   const { tier } = useLoyalty();
   const { t, locale } = useLocale();
-  const { freeShippingThreshold, pointsPerGel, standardShippingPrice, expressEnabled, expressPrice, deliveryMinDays, deliveryMaxDays } = useSettings();
+  const { freeShippingThreshold, pointsPerGel, standardShippingPrice, expressEnabled, expressPrice, deliveryMinDays, deliveryMaxDays, giftWrapPrice } = useSettings();
 
   /** Colors available for a given size — a color is excluded only if the
    *  admin explicitly set its stock to 0 for that size in the stock matrix
@@ -697,12 +697,13 @@ export default function ProductDetailClient({
             <div className="space-y-6 transition-opacity">
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: "Material",       value: product.material || "100% Organic Cotton" },
-                  { label: "Weight",         value: product.weight || "180 GSM" },
-                  // Certification only shows when set per-product in admin —
-                  // no blanket claim we can't back with supplier documents.
-                  { label: "Certification",  value: product.certification || "" },
-                  { label: "Origin",         value: product.origin || "Made in Georgia" },
+                  // Every spec only shows when set per-product in admin — no
+                  // invented defaults ("organic cotton", "made in Georgia")
+                  // we can't back for that specific product.
+                  { label: t("pdp.specMaterial"),      value: product.material || "" },
+                  { label: t("pdp.specWeight"),        value: product.weight || "" },
+                  { label: t("pdp.specCertification"), value: product.certification || "" },
+                  { label: t("pdp.specOrigin"),        value: product.origin || "" },
                 ].filter((item) => item.value).map((item) => (
                   <div key={item.label} className="bg-[#F5F0EB] rounded-2xl p-4 border border-[#DDD5CC]">
                     <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">{item.label}</p>
@@ -711,17 +712,11 @@ export default function ProductDetailClient({
                 ))}
               </div>
               <div>
-                <h4 className="font-bold text-[#2A2320] mb-3">Care Instructions</h4>
+                <h4 className="font-bold text-[#2A2320] mb-3">{t("pdp.careTitle")}</h4>
                 <ul className="space-y-2">
                   {(product.careInstructions && product.careInstructions.length
                     ? product.careInstructions
-                    : [
-                        "Machine wash at 30°C on a gentle cycle",
-                        "Do not bleach or use harsh chemicals",
-                        "Tumble dry on low heat or air dry",
-                        "Iron on low if needed — do not iron prints",
-                        "Do not dry clean",
-                      ]
+                    : [t("pdp.care1"), t("pdp.care2"), t("pdp.care3"), t("pdp.care4"), t("pdp.care5")]
                   ).map((care) => (
                     <li key={care} className="flex items-start gap-2 text-sm text-[#5E5450]">
                       <span className="text-[#9A8E88] font-bold mt-0.5">·</span>
@@ -736,12 +731,13 @@ export default function ProductDetailClient({
           {activeTab === "delivery" && (
             <div className="space-y-4 transition-opacity">
               {[
-                { icon: "🚀", title: "Standard Delivery", desc: `${deliveryMinDays}–${deliveryMaxDays} business days · Free on orders over ${freeShippingThreshold} ₾ (${standardShippingPrice} ₾ otherwise)`, bg: "#EAF2F0" },
+                { icon: "🚀", title: t("pdp.delivStandardTitle"), desc: t("pdp.delivStandardDesc").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)).replace("{threshold}", String(freeShippingThreshold)).replace("{price}", String(standardShippingPrice)), bg: "#EAF2F0" },
                 ...(expressEnabled
-                  ? [{ icon: "⚡", title: "Express Delivery", desc: `Next business day — order before 14:00 · ${expressPrice} ₾`, bg: "#F0EDE8" }]
+                  ? [{ icon: "⚡", title: t("pdp.delivExpressTitle"), desc: t("pdp.delivExpressDesc").replace("{price}", String(expressPrice)), bg: "#F0EDE8" }]
                   : []),
-                { icon: "🔄", title: "Free Returns", desc: "Return any item within 14 days — no questions asked", bg: "#EAF2F0" },
-                { icon: "🎁", title: "Gift Packaging", desc: "Add a gift message and ribbon wrap at checkout — completely free", bg: "#F0EDE8" },
+                { icon: "🔄", title: t("pdp.delivReturnsTitle"), desc: t("pdp.delivReturnsDesc"), bg: "#EAF2F0" },
+                // Gift wrap price follows the admin setting (0 ⇒ "free") — never claim "free" while checkout charges.
+                { icon: "🎁", title: t("pdp.delivGiftTitle"), desc: t("pdp.delivGiftDesc").replace("{price}", giftWrapPrice > 0 ? `${giftWrapPrice} ₾` : t("cart.free").toLowerCase()), bg: "#F0EDE8" },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl border border-[#DDD5CC]" style={{ backgroundColor: item.bg }}>
                   <span className="text-2xl flex-shrink-0">{item.icon}</span>
@@ -772,7 +768,7 @@ export default function ProductDetailClient({
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ backgroundColor: "#EDE5D8" }}>
-                    {["Size", "Age", "Height", "Weight"].map((h) => (
+                    {[t("sg.colSize"), t("sg.colAge"), t("sg.colHeight"), t("sg.colWeight")].map((h) => (
                       <th key={h} className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>

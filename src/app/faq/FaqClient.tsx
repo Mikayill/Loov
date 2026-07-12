@@ -6,9 +6,9 @@ import { useSettings } from "@/lib/db/useSettings";
 import { useLocale } from "@/context/LocaleContext";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
-/* Answers with shipping prices are built from the live store settings, so the
-   FAQ never contradicts what checkout actually charges. */
-function buildFaqs(s: { expressEnabled: boolean; freeShippingThreshold: number; standardShippingPrice: number; expressPrice: number }, t: (key: TranslationKey) => string) {
+/* Answers with shipping prices/durations are built from the live store
+   settings, so the FAQ never contradicts what checkout actually charges. */
+function buildFaqs(s: { expressEnabled: boolean; freeShippingThreshold: number; standardShippingPrice: number; expressPrice: number; deliveryMinDays: number; deliveryMaxDays: number; giftWrapPrice: number }, t: (key: TranslationKey) => string) {
   return [
     {
       category: t("faq.catShipping"),
@@ -16,7 +16,7 @@ function buildFaqs(s: { expressEnabled: boolean; freeShippingThreshold: number; 
       items: [
         {
           q: t("faq.ship.q1"),
-          a: `${t("faq.ship.a1Base")}${s.expressEnabled ? t("faq.ship.a1Express") : ""}${t("faq.ship.a1Cities")}`,
+          a: `${t("faq.ship.a1Base").replace("{min}", String(s.deliveryMinDays)).replace("{max}", String(s.deliveryMaxDays))}${s.expressEnabled ? t("faq.ship.a1Express") : ""}${t("faq.ship.a1Cities")}`,
         },
         {
           q: t("faq.ship.q2"),
@@ -52,7 +52,8 @@ function buildFaqs(s: { expressEnabled: boolean; freeShippingThreshold: number; 
       items: [
         { q: t("faq.ord.q1"), a: t("faq.ord.a1") },
         { q: t("faq.ord.q2"), a: t("faq.ord.a2") },
-        { q: t("faq.ord.q3"), a: t("faq.ord.a3") },
+        // Gift wrap price follows the admin setting (0 ⇒ "free"); the FAQ can never lie about it.
+        { q: t("faq.ord.q3"), a: t("faq.ord.a3").replace("{price}", s.giftWrapPrice > 0 ? `${s.giftWrapPrice} ₾` : t("cart.free").toLowerCase()) },
         { q: t("faq.ord.q4"), a: t("faq.ord.a4") },
       ],
     },

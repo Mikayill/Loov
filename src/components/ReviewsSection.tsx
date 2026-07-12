@@ -106,7 +106,17 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     const d = await res.json();
     setSubmitting(false);
     if (d.ok) { setThanks(true); setText(""); setRating(5); await load(); }
-    else setError(d.error || "Something went wrong");
+    else {
+      // Server errors carry a `code` → show them in the shopper's language.
+      const byCode: Record<string, string> = {
+        too_short: t("rev.minChars").replace("{n}", String(Math.max(0, 10 - text.trim().length))),
+        too_long: t("rev.reviewPlaceholder"),
+        not_eligible: t("rev.onlyBuyers"),
+        already_reviewed: t("rev.alreadyReviewed"),
+        unavailable: t("rev.loadFailed"),
+      };
+      setError(byCode[d.code as string] ?? d.error ?? t("rev.loadFailed"));
+    }
   }
 
   const fmtReviewDate = (iso: string) => fmtDate(iso, locale, "short");

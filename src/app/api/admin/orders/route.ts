@@ -6,6 +6,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { buildStatusMessage, type OrderStatusKey } from "@/lib/i18n/orderMessages";
 import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
 import { getSettings } from "@/lib/db/settings";
+import { reverseOrderLoyalty, restoreOrderLoyalty } from "@/lib/loyaltyReversal";
+import { adjustPromoUse } from "@/lib/promoValidation";
 import type { Locale } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
@@ -129,12 +131,22 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid order or status" }, { status: 400 });
   }
 
-  // Read the current status + items so we can keep stock in sync with cancellations.
-  const { data: current, error: readErr } = await admin
+  // Read the current status + items so we can keep stock, loyalty points and
+  // the promo usage counter in sync with cancellations.
+  let read = await admin
     .from("orders")
-    .select("status, email, first_name, locale, order_items(product_id, quantity)")
+    .select("status, email, first_name, locale, promo_code, order_items(product_id, quantity)")
     .eq("id", id)
     .single();
+  // promo_code column needs supabase/discounts.sql — retry without it.
+  if (read.error && /promo_code/i.test(read.error.message)) {
+    read = (await admin
+      .from("orders")
+      .select("status, email, first_name, locale, order_items(product_id, quantity)")
+      .eq("id", id)
+      .single()) as typeof read;
+  }
+  const { data: current, error: readErr } = read;
   if (readErr || !current) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
   const oldStatus = current.status as string;
@@ -163,6 +175,18 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: "Not enough stock to reactivate this order." }, { status: 409 });
       }
     }
+  }
+
+  // Loyalty + promo bookkeeping — mirrors the customer cancel flow so an
+  // admin cancel never eats the customer's redeemed points, never lets
+  // earned points survive, and keeps the promo usage counter honest.
+  const promoCode = ("promo_code" in current ? (current.promo_code as string | null) : null) ?? null;
+  if (status === "cancelled") {
+    await reverseOrderLoyalty(admin, String(id));
+    if (promoCode) await adjustPromoUse(admin, promoCode, -1);
+  } else if (oldStatus === "cancelled") {
+    await restoreOrderLoyalty(admin, String(id));
+    if (promoCode) await adjustPromoUse(admin, promoCode, 1);
   }
 
   // Delivered → stamp delivered_at (starts the 14-day return window).

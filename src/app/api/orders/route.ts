@@ -26,7 +26,8 @@ import {
 import { getSettings } from "@/lib/db/settings";
 import { effectivePrice } from "@/lib/pricing";
 import { promoDiscountAmount } from "@/lib/promo";
-import { validatePromoServer, recordPromoUse } from "@/lib/promoValidation";
+import { validatePromoServer, recordPromoUse, adjustPromoUse } from "@/lib/promoValidation";
+import { reverseOrderLoyalty } from "@/lib/loyaltyReversal";
 import { priceCartWithBundles, type BundleGroupLine, type BundleDef } from "@/lib/bundlePricing";
 
 /** Fire the confirmation email via Resend. Failures never block the order. */
@@ -89,8 +90,10 @@ interface OrderInput {
   items: OrderItemInput[];
 }
 
-function bad(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
+/** Error response. `code` (when set) lets the client show a translated
+ *  message instead of the raw English `error` string. */
+function bad(message: string, status = 400, code?: string) {
+  return NextResponse.json({ error: message, ...(code ? { code } : {}) }, { status });
 }
 
 export async function POST(req: NextRequest) {
@@ -241,11 +244,11 @@ export async function POST(req: NextRequest) {
   if (body.promoCode) {
     if (!admin) return bad("Promo codes are temporarily unavailable", 500);
     const check = await validatePromoServer(admin, body.promoCode, userId);
-    if (check.error === "signin") return bad("Promo codes require an account — please sign in");
-    if (check.error === "expired") return bad("This promo code has expired");
-    if (check.error === "limit") return bad("This promo code has reached its usage limit");
-    if (check.error === "used") return bad("You've already used this promo code");
-    if (check.error || !check.promo) return bad("Invalid promo code");
+    if (check.error === "signin") return bad("Promo codes require an account — please sign in", 400, "promo_signin");
+    if (check.error === "expired") return bad("This promo code has expired", 400, "promo_expired");
+    if (check.error === "limit") return bad("This promo code has reached its usage limit", 400, "promo_limit");
+    if (check.error === "used") return bad("You've already used this promo code", 400, "promo_used");
+    if (check.error || !check.promo) return bad("Invalid promo code", 400, "promo_invalid");
     resolvedPromo = check.promo;
   }
 
@@ -256,14 +259,14 @@ export async function POST(req: NextRequest) {
 
   // Express must actually be offered (admin can turn it off in /admin/settings).
   if (body.shipping === "express" && !settings.expressEnabled) {
-    return bad("Express delivery is currently unavailable");
+    return bad("Express delivery is currently unavailable", 400, "express_unavailable");
   }
   // Express is always charged; the free-shipping threshold applies to standard only.
   const shippingCost =
     body.shipping === "express"
       ? settings.expressPrice
       : promoShippingFree || postPromoSubtotal >= settings.freeShippingThreshold ? 0 : settings.standardShippingPrice;
-  const giftWrapCost = body.giftWrap ? 5 : 0;
+  const giftWrapCost = body.giftWrap ? settings.giftWrapPrice : 0;
 
   // ── Loov Rewards redemption (server-side rules, never trust the client) ──
   let redeemPoints = Number(body.redeemPoints) || 0;
@@ -294,7 +297,7 @@ export async function POST(req: NextRequest) {
         .filter((r) => r.delta > 0 && r.reason !== "return")
         .reduce((s, r) => s + r.delta, 0);
       const balance = rows.reduce((s, r) => s + r.delta, 0);
-      if (redeemPoints > balance) return bad("Not enough points for this redemption");
+      if (redeemPoints > balance) return bad("Not enough points for this redemption", 400, "not_enough_points");
     } else {
       if (!/loyalty_transactions/.test(txErr.message)) {
         console.warn("[orders] loyalty balance check failed:", txErr.message);
@@ -308,7 +311,9 @@ export async function POST(req: NextRequest) {
   const pointsDiscount = (redeemPoints / REDEEM_BLOCK) * GEL_PER_BLOCK;
   const total = Math.max(0, postPromoSubtotal + shippingCost + giftWrapCost - pointsDiscount);
 
-  const orderNumber = `BBK-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.floor(
+  // "LOOV-" prefix since the rebrand (12 Jul 2026) — older orders keep their
+  // original "BBK-" numbers; lookups match the stored string so both work.
+  const orderNumber = `LOOV-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.floor(
     Math.random() * 36
   ).toString(36).toUpperCase()}`;
 
@@ -343,7 +348,8 @@ export async function POST(req: NextRequest) {
         const badId = insufficient[1];
         const name = byId.get(badId)?.name ?? "An item";
         return NextResponse.json(
-          { error: `Sorry — "${name}" just sold out or doesn't have enough stock left.` },
+          // `code` + `productName` let the client render this in the shopper's language.
+          { error: `Sorry — "${name}" just sold out or doesn't have enough stock left.`, code: "sold_out", productName: name },
           { status: 409 }
         );
       }
@@ -456,10 +462,15 @@ export async function POST(req: NextRequest) {
   if (resolvedPromo && admin) await recordPromoUse(admin, resolvedPromo.rowId);
 
   // ── Loov Rewards: write the ledger for signed-in users (server-side) ──
+  // Points are earned on the MERCHANDISE amount actually paid (subtotal after
+  // promo and points discounts) — shipping and gift wrap fees don't earn,
+  // matching how major loyalty programs work. Keep the client promise
+  // (CheckoutClient "willEarn") on the same formula.
+  const earnBase = Math.max(0, postPromoSubtotal - pointsDiscount);
   let pointsEarned = 0;
   if (userId && admin && ledger === "db") {
     pointsEarned = pointsForAmountAt(
-      total,
+      earnBase,
       settings.pointsPerGel,
       tierForAt(lifetimeEarned, tiersFromSettings(settings))
     );
@@ -525,11 +536,20 @@ export async function PATCH(req: NextRequest) {
   const admin = createSupabaseAdminClient();
   if (!admin) return bad("Cancellation is unavailable right now.", 500);
 
-  const { data: order, error: readErr } = await admin
+  let readRes = await admin
     .from("orders")
-    .select("id, status, user_id, order_items(product_id, quantity, color, size)")
+    .select("id, status, user_id, promo_code, order_items(product_id, quantity, color, size)")
     .eq("order_number", orderNumber)
     .maybeSingle();
+  // promo_code column needs supabase/discounts.sql — retry without it.
+  if (readRes.error && /promo_code/i.test(readRes.error.message)) {
+    readRes = (await admin
+      .from("orders")
+      .select("id, status, user_id, order_items(product_id, quantity, color, size)")
+      .eq("order_number", orderNumber)
+      .maybeSingle()) as typeof readRes;
+  }
+  const { data: order, error: readErr } = readRes;
   if (readErr || !order) return bad("Order not found", 404);
   if (order.user_id !== userId) return bad("Order not found", 404); // don't leak others' orders
   if (order.status !== "pending") {
@@ -548,25 +568,13 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  // Reverse the loyalty ledger for this order (reason "return" so lifetime /
-  // tier math already excludes it, same as the refund path).
-  try {
-    const { data: txs } = await admin
-      .from("loyalty_transactions")
-      .select("delta, reason")
-      .eq("order_id", order.id);
-    if (txs && txs.length > 0 && !txs.some((t) => t.reason === "return")) {
-      const earned = txs.filter((t) => t.reason === "order" && Number(t.delta) > 0).reduce((s, t) => s + Number(t.delta), 0);
-      const redeemed = -txs.filter((t) => t.reason === "redeem" && Number(t.delta) < 0).reduce((s, t) => s + Number(t.delta), 0);
-      const rows = [
-        ...(earned > 0 ? [{ user_id: userId, order_id: order.id, delta: -earned, reason: "return" }] : []),
-        ...(redeemed > 0 ? [{ user_id: userId, order_id: order.id, delta: redeemed, reason: "return" }] : []),
-      ];
-      if (rows.length > 0) await admin.from("loyalty_transactions").insert(rows);
-    }
-  } catch (e) {
-    console.warn("[orders] cancel loyalty reversal failed:", (e as Error).message);
-  }
+  // Reverse the loyalty ledger (shared with the admin cancel flow — reason
+  // "return" so lifetime/tier math already excludes it) and release the promo
+  // usage slot (the per-user check already ignores cancelled orders; the
+  // global counter must follow, or a cancelled order burns a limited slot).
+  await reverseOrderLoyalty(admin, String(order.id));
+  const cancelledPromo = ("promo_code" in order ? (order.promo_code as string | null) : null) ?? null;
+  if (cancelledPromo) await adjustPromoUse(admin, cancelledPromo, -1);
 
   const { error: updErr } = await admin.from("orders").update({ status: "cancelled" }).eq("id", order.id);
   if (updErr) return bad(updErr.message, 500);

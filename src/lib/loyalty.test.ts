@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  pointsForAmount,
   pointsForAmountAt,
   discountForPoints,
   maxRedeemablePoints,
@@ -10,9 +9,9 @@ import {
 } from "@/lib/loyalty";
 
 describe("earning", () => {
-  it("pointsForAmount uses 2/₾ at base tier, floored", () => {
-    expect(pointsForAmount(10)).toBe(20);
-    expect(pointsForAmount(10.7)).toBe(21); // floor(21.4)
+  it("pointsForAmountAt uses the given rate at base tier, floored", () => {
+    expect(pointsForAmountAt(10, 2)).toBe(20);
+    expect(pointsForAmountAt(10.7, 2)).toBe(21); // floor(21.4)
   });
   it("pointsForAmountAt honors admin rate + tier multiplier", () => {
     const gold = tiersFor().find((t) => t.id === "gold")!;
@@ -21,6 +20,18 @@ describe("earning", () => {
   });
   it("falls back to default rate on a bad value", () => {
     expect(pointsForAmountAt(10, NaN)).toBe(20);
+  });
+});
+
+describe("perk lines", () => {
+  it("every perk is generated from settings — no stale promises", () => {
+    const tiers = tiersFor({ pointsPerGel: 3, silverMultiplier: 1.3, goldMultiplier: 1.75 });
+    expect(tiers[0].perks).toEqual(["3 points per 1 ₾"]);
+    expect(tiers[1].perks).toEqual(["+30% bonus points"]);
+    expect(tiers[2].perks).toEqual(["+75% bonus points"]);
+    // the removed false promises never come back
+    const all = tiers.flatMap((t) => t.perks).join(" ");
+    expect(all).not.toMatch(/express|birthday|early access/i);
   });
 });
 

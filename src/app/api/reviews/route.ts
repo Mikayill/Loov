@@ -199,18 +199,19 @@ export async function POST(req: NextRequest) {
   const text = String(body.body ?? "").trim();
   const showName = !!body.showName;
 
+  // `code` lets the client show these in the shopper's language.
   if (!productId) return NextResponse.json({ error: "Missing product" }, { status: 400 });
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) return NextResponse.json({ error: "Rating must be 1–5 stars" }, { status: 400 });
-  if (text.length < 10) return NextResponse.json({ error: "Please write at least a few words (10+ characters)." }, { status: 400 });
-  if (text.length > 2000) return NextResponse.json({ error: "Review is too long (max 2000 characters)." }, { status: 400 });
+  if (text.length < 10) return NextResponse.json({ error: "Please write at least a few words (10+ characters).", code: "too_short" }, { status: 400 });
+  if (text.length > 2000) return NextResponse.json({ error: "Review is too long (max 2000 characters).", code: "too_long" }, { status: 400 });
 
   const admin = createSupabaseAdminClient();
-  if (!admin) return NextResponse.json({ error: "Reviews are temporarily unavailable." }, { status: 500 });
+  if (!admin) return NextResponse.json({ error: "Reviews are temporarily unavailable.", code: "unavailable" }, { status: 500 });
 
   // Eligibility: must have a DELIVERED order with this product.
   const delivered = await hasDelivered(admin, user.id, productId);
   if (!delivered) {
-    return NextResponse.json({ error: "Only customers who have received this product can review it." }, { status: 403 });
+    return NextResponse.json({ error: "Only customers who have received this product can review it.", code: "not_eligible" }, { status: 403 });
   }
 
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
@@ -227,7 +228,7 @@ export async function POST(req: NextRequest) {
   });
   if (error) {
     if (/duplicate key|unique/i.test(error.message)) {
-      return NextResponse.json({ error: "You've already reviewed this product." }, { status: 409 });
+      return NextResponse.json({ error: "You've already reviewed this product.", code: "already_reviewed" }, { status: 409 });
     }
     if (/relation .*reviews.* does not exist|reviews/i.test(error.message) && /exist/i.test(error.message)) {
       return NextResponse.json({ error: "Reviews aren't set up yet. Run supabase/features.sql." }, { status: 500 });
@@ -286,8 +287,8 @@ export async function PATCH(req: NextRequest) {
   }
   if (body.body !== undefined) {
     const text = String(body.body ?? "").trim();
-    if (text.length < 10) return NextResponse.json({ error: "Please write at least a few words (10+ characters)." }, { status: 400 });
-    if (text.length > 2000) return NextResponse.json({ error: "Review is too long (max 2000 characters)." }, { status: 400 });
+    if (text.length < 10) return NextResponse.json({ error: "Please write at least a few words (10+ characters).", code: "too_short" }, { status: 400 });
+    if (text.length > 2000) return NextResponse.json({ error: "Review is too long (max 2000 characters).", code: "too_long" }, { status: 400 });
     patch.body = text;
   }
   if (body.showName !== undefined) patch.show_name = !!body.showName;

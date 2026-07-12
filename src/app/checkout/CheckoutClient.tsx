@@ -275,7 +275,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     return () => { cancelled = true; };
   }, [user]);
 
-  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice, loyaltyMaxRedeemPercent, pointsPerGel, deliveryMinDays, deliveryMaxDays } = useSettings();
+  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice, loyaltyMaxRedeemPercent, pointsPerGel, deliveryMinDays, deliveryMaxDays, giftWrapPrice } = useSettings();
 
   /* Bundle-aware subtotal — same rule the server uses for the real charge
      (src/lib/bundlePricing.ts): a bundle-tagged group only gets the flat
@@ -318,7 +318,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     form.shipping === "express" && expressEnabled
       ? expressPrice
       : promoShippingFree || postPromoSubtotal >= freeShippingThreshold ? 0 : standardShippingPrice;
-  const giftWrapCost = giftWrap ? 5 : 0;
+  const giftWrapCost = giftWrap ? giftWrapPrice : 0;
 
   /* ── Loov Rewards ── */
   const redeemablePoints = maxRedeemablePoints(loyalty.balance, postPromoSubtotal, loyaltyMaxRedeemPercent / 100);
@@ -436,6 +436,20 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
       const data = await res.json();
       if (!res.ok || !data.ok) {
         if (res.status === 429) throw new Error(t("auth.errRateLimit"));
+        // Server errors carry a `code` so shoppers see them in their own language.
+        switch (data.code) {
+          case "sold_out":
+            throw new Error(t("checkout.errSoldOut").replace("{name}", data.productName ?? ""));
+          case "express_unavailable":
+            throw new Error(t("checkout.errExpressUnavailable"));
+          case "not_enough_points":
+            throw new Error(t("checkout.errNotEnoughPoints"));
+          case "promo_signin":   throw new Error(t("cart.promoMembersOnly"));
+          case "promo_expired":  throw new Error(t("cart.promoExpired"));
+          case "promo_limit":    throw new Error(t("cart.promoLimitReached"));
+          case "promo_used":     throw new Error(t("cart.promoAlreadyUsed"));
+          case "promo_invalid":  throw new Error(t("cart.promoInvalid"));
+        }
         throw new Error(data.error || t("checkout.errGeneric"));
       }
       setOrderNum(data.orderNumber);
@@ -446,7 +460,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         loyalty.refresh();
       } else {
         if (data.pointsRedeemed > 0) loyalty.redeemPoints(data.pointsRedeemed, data.orderNumber);
-        setEarnedPoints(loyalty.earnFromOrder(data.total, data.orderNumber));
+        // Merchandise-only earn base (mirrors the server): shipping/gift wrap don't earn.
+        const guestEarnBase = Math.max(0, (data.subtotal ?? data.total) - (data.promoDiscount ?? 0) - (data.pointsDiscount ?? 0));
+        setEarnedPoints(loyalty.earnFromOrder(guestEarnBase, data.orderNumber));
       }
       clearCart();
       setStep("success");
@@ -729,7 +745,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   <span className="text-2xl">🎁</span>
                   <div>
                     <p className="font-extrabold text-[#2A2320] text-sm">{t("checkout.addGiftWrap")}</p>
-                    <p className="text-xs text-[#9A8E88]">{t("checkout.giftWrapSub").replace("{price}", formatPrice(5))}</p>
+                    <p className="text-xs text-[#9A8E88]">{t("checkout.giftWrapSub").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
                   </div>
                 </div>
                 <button
@@ -844,7 +860,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   { label: t("checkout.email"),   value: form.email },
                   { label: t("checkout.phone"),   value: form.phone },
                   { label: t("checkout.address"), value: `${form.address}, ${form.district ? `${form.district}, ` : ""}${form.city}${form.zip ? ` ${form.zip}` : ""}${form.region ? `, ${form.region}` : ""}` },
-                  { label: t("checkout.delivery"),value: form.shipping === "express" ? t("checkout.expressNextDay") : t("checkout.standardDays") },
+                  { label: t("checkout.delivery"),value: form.shipping === "express" ? t("checkout.expressNextDay") : t("checkout.standardDays").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)) },
                 ].map((row) => (
                   <div key={row.label}>
                     <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{row.label}</p>
@@ -862,7 +878,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 <div className="mt-3 p-3 bg-[#EAF2F0] rounded-xl flex items-start gap-2">
                   <span className="text-base flex-shrink-0">🎁</span>
                   <div>
-                    <p className="text-xs font-bold text-[#2A2320]">{t("checkout.giftWrapAdded").replace("{price}", formatPrice(5))}</p>
+                    <p className="text-xs font-bold text-[#2A2320]">{t("checkout.giftWrapAdded").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
                     {giftMessage && <p className="text-xs text-[#5E5450] mt-0.5 italic">&ldquo;{giftMessage}&rdquo;</p>}
                   </div>
                 </div>
@@ -1043,7 +1059,8 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-xl px-3 py-2">
                 <span className="text-sm">⭐</span>
                 <span className="text-[11px] font-bold text-[#8B6914]">
-                  {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(total, pointsPerGel, loyalty.tier)))}
+                  {/* Same earn base as the server: merchandise after discounts — shipping/gift wrap never earn. */}
+                  {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(Math.max(0, postPromoSubtotal - pointsDiscount), pointsPerGel, loyalty.tier)))}
                 </span>
               </div>
               <div className="flex items-center justify-around pt-2">
@@ -1075,7 +1092,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           <div className="bg-[#F5F0EB] rounded-2xl p-5 mb-8 text-left space-y-3">
             {[
               { icon: "📦", text: t("checkout.deliveringTo").replace("{address}", `${form.address}, ${form.city}${form.region ? `, ${form.region}` : ""}`) },
-              { icon: "🚀", text: form.shipping === "express" ? t("checkout.expressNote") : t("checkout.standardNote") },
+              { icon: "🚀", text: form.shipping === "express" ? t("checkout.expressNote") : t("checkout.standardNote").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)) },
               ...(giftWrap ? [{ icon: "🎁", text: `${t("checkout.giftWrappedNote")}${giftMessage ? ` · "${giftMessage}"` : ""}` }] : []),
               ...(earnedPoints > 0
                 ? [{ icon: "⭐", text: t("checkout.earnedPointsNote").replace("{n}", String(earnedPoints)).replace("{balance}", String(loyalty.balance)) }]

@@ -122,3 +122,30 @@ export async function recordPromoUse(admin: AdminClient, rowId: string): Promise
     console.warn("[promo] usage counter failed:", (e as Error).message);
   }
 }
+
+/**
+ * Adjust the usage counter by ±1 when an order is cancelled (−1) or
+ * un-cancelled (+1), so the global limit stays in sync with the per-user
+ * check (which already excludes cancelled orders). Looks the code up by its
+ * text because orders only store `promo_code`. Best-effort like recordPromoUse.
+ */
+export async function adjustPromoUse(admin: AdminClient, code: string, delta: 1 | -1): Promise<void> {
+  try {
+    const { data: row } = await admin
+      .from("promo_codes")
+      .select("id, times_used")
+      .eq("code", code.trim().toUpperCase())
+      .maybeSingle();
+    if (!row) return;
+    const next = Math.max(0, Number(row.times_used) + delta);
+    if (next === row.times_used) return;
+    const { error } = await admin
+      .from("promo_codes")
+      .update({ times_used: next })
+      .eq("id", row.id)
+      .eq("times_used", row.times_used); // optimistic guard against double-count
+    if (error) console.warn("[promo] usage adjust failed:", error.message);
+  } catch (e) {
+    console.warn("[promo] usage adjust failed:", (e as Error).message);
+  }
+}

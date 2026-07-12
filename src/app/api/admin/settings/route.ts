@@ -26,6 +26,7 @@ const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNu
   deliveryMinDays: { min: 0, max: 30, int: true },
   deliveryMaxDays: { min: 0, max: 30, int: true },
   loyaltyMaxRedeemPercent: { min: 1, max: 100, int: true },
+  giftWrapPrice: { min: 0, max: 1000 },
 };
 
 export async function GET() {

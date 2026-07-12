@@ -12,7 +12,7 @@ export default async function TermsPage() {
   const { t } = await getT();
   const s = await getSettings();
 
-  const s4Body = `${t("legal.terms.s4BodyBase")}${s.expressEnabled ? t("legal.terms.s4BodyExpress") : ""}${t("legal.terms.s4BodyFree").replace("{threshold}", String(s.freeShippingThreshold))}`;
+  const s4Body = `${t("legal.terms.s4BodyBase").replace("{min}", String(s.deliveryMinDays)).replace("{max}", String(s.deliveryMaxDays))}${s.expressEnabled ? t("legal.terms.s4BodyExpress") : ""}${t("legal.terms.s4BodyFree").replace("{threshold}", String(s.freeShippingThreshold))}`;
 
   const sections = [
     { title: t("legal.terms.s1Title"), body: t("legal.terms.s1Body") },

@@ -4,6 +4,9 @@ import RecentlyViewedSection from "@/components/RecentlyViewedSection";
 import BabyPicksSection from "@/components/BabyPicksSection";
 import { getAllProducts } from "@/lib/db/products";
 import { getAllBundles } from "@/lib/db/bundles";
+import { getSettings } from "@/lib/db/settings";
+import { getHomeReviews } from "@/lib/db/reviews";
+import { fmtDate } from "@/lib/i18n/format";
 import { formatPrice } from "@/lib/format";
 import BundleQuickView from "@/components/BundleQuickView";
 import { getT } from "@/lib/i18n/server";
@@ -14,8 +17,8 @@ import Reveal from "@/components/ui/Reveal";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const { t } = await getT();
-  const [products, bundles] = await Promise.all([getAllProducts(), getAllBundles()]);
+  const { t, locale } = await getT();
+  const [products, bundles, settings, homeReviews] = await Promise.all([getAllProducts(), getAllBundles(), getSettings(), getHomeReviews()]);
   const productBySlug = new Map(products.map((p) => [p.slug, p]));
 
   /* Full catalog, season-appropriate items first, new arrivals leading each
@@ -74,8 +77,9 @@ export default async function HomePage() {
             <div className="hidden sm:flex flex-col gap-3 flex-shrink-0">
               {[
                 { value: "100%", label: t("home.hero.statOrganic") },
-                { value: "Free", label: t("home.hero.statFreeShip") },
-                { value: "14d",  label: t("home.hero.statReturns") },
+                // Threshold follows the admin setting; values are localized too.
+                { value: t("home.hero.statFreeValue"), label: t("home.hero.statFreeShip").replace("{n}", String(settings.freeShippingThreshold)) },
+                { value: t("home.hero.statReturnsValue"), label: t("home.hero.statReturns") },
               ].map((s) => (
                 <div
                   key={s.label}
@@ -214,81 +218,64 @@ export default async function HomePage() {
       {/* ── Recently Viewed (client-side, renders only if history exists) ── */}
       <RecentlyViewedSection />
 
-      {/* ── What Parents Say (at the bottom) ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="text-center mb-8">
-          <p className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest mb-2">{t("home.reviews.eyebrow")}</p>
-          <h2 className="text-2xl font-extrabold text-[#2A2320]">{t("home.reviews.title")}</h2>
-        </div>
+      {/* ── What Parents Say — REAL published reviews only (fabricated
+             testimonials removed 12 Jul 2026). Hidden until reviews exist. ── */}
+      {homeReviews.featured.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest mb-2">{t("home.reviews.eyebrow")}</p>
+            <h2 className="text-2xl font-extrabold text-[#2A2320]">{t("home.reviews.title")}</h2>
+          </div>
 
-        {/* Stats row */}
-        <div className="flex items-center justify-center gap-8 mb-8 flex-wrap">
-          {[
-            { value: "500+",  label: t("home.reviews.statFamilies") },
-            { value: "4.9",   label: t("home.reviews.statRating"), star: true },
-            { value: "100%",  label: t("home.reviews.statOrganic") },
-            { value: "14d",   label: t("home.reviews.statReturns") },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-2xl font-extrabold text-[#2A2320] flex items-center gap-1 justify-center">
-                {s.value}
-                {s.star && <span className="text-xl text-[#F0B840]">★</span>}
-              </p>
-              <p className="text-xs text-[#9A8E88] font-semibold mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </div>
+          {/* Stats row — computed from the real review data */}
+          <div className="flex items-center justify-center gap-8 mb-8 flex-wrap">
+            {[
+              { value: String(homeReviews.count), label: t("home.reviews.statReviews") },
+              { value: homeReviews.average.toFixed(1), label: t("home.reviews.statRating"), star: true },
+              { value: t("home.hero.statReturnsValue"), label: t("home.reviews.statReturns") },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <p className="text-2xl font-extrabold text-[#2A2320] flex items-center gap-1 justify-center">
+                  {s.value}
+                  {s.star && <span className="text-xl text-[#F0B840]">★</span>}
+                </p>
+                <p className="text-xs text-[#9A8E88] font-semibold mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
 
-        {/* Review cards */}
-        <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              name: "Nino T.",
-              city: "Tbilisi",
-              rating: 5,
-              text: t("home.reviews.r1"),
-              initials: "N",
-            },
-            {
-              name: "Mariam K.",
-              city: "Batumi",
-              rating: 5,
-              text: t("home.reviews.r2"),
-              initials: "M",
-            },
-            {
-              name: "Ana B.",
-              city: "Rustavi",
-              rating: 5,
-              text: t("home.reviews.r3"),
-              initials: "A",
-            },
-          ].map((r) => (
-            <div key={r.name} className="bg-white rounded-2xl border border-[#DDD5CC] p-5 hover:shadow-sm transition-shadow">
-              <div className="flex items-center gap-0.5 mb-3">
-                {[1,2,3,4,5].map((i) => (
-                  <svg key={i} className="w-4 h-4" viewBox="0 0 20 20" fill={i <= r.rating ? "#F0B840" : "#DDD5CC"}>
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-sm text-[#5E5450] leading-relaxed mb-4">&ldquo;{r.text}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0"
-                  style={{ backgroundColor: "#5E9E8C" }}
-                >
-                  {r.initials}
+          {/* Review cards */}
+          <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {homeReviews.featured.map((r, i) => {
+              const name = r.authorName || t("rev.anon");
+              return (
+                <div key={`${r.createdAt}-${i}`} className="bg-white rounded-2xl border border-[#DDD5CC] p-5 hover:shadow-sm transition-shadow">
+                  <div className="flex items-center gap-0.5 mb-3">
+                    {[1,2,3,4,5].map((s) => (
+                      <svg key={s} className="w-4 h-4" viewBox="0 0 20 20" fill={s <= r.rating ? "#F0B840" : "#DDD5CC"}>
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-sm text-[#5E5450] leading-relaxed mb-4">&ldquo;{r.body}&rdquo;</p>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0"
+                      style={{ backgroundColor: "#5E9E8C" }}
+                    >
+                      {name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#2A2320] text-sm">{name}</p>
+                      <p className="text-[11px] text-[#9A8E88]">{fmtDate(r.createdAt, locale, "short")} · {t("home.reviews.verified")}</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-[#2A2320] text-sm">{r.name}</p>
-                  <p className="text-[11px] text-[#9A8E88]">{r.city} · {t("home.reviews.verified")}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </Reveal>
-      </section>
+              );
+            })}
+          </Reveal>
+        </section>
+      )}
     </>
   );
 }

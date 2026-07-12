@@ -62,7 +62,7 @@ export default function LoginClient() {
     else if (params.get("verify") === "1") setError(t("auth.verifyNeeded"));
   }, [t]);
 
-  /* Resend cooldown countdown — 30s before the first resend, 60s after each one. */
+  /* Resend cooldown countdown — 60s between sends (matches Supabase's SMTP interval). */
   useEffect(() => {
     if (!emailOtpStep) return;
     const id = setInterval(() => setResendCooldown((s) => (s > 0 ? s - 1 : 0)), 1000);

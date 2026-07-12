@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const { t } = await getT();
-  const { expressEnabled, whatsappNumber } = await getSettings();
+  const { expressEnabled, whatsappNumber, deliveryMinDays, deliveryMaxDays } = await getSettings();
 
   const infoItems = [
     { icon: "📍", label: t("contact.address"), value: "Tbilisi, Georgia" },
@@ -21,7 +21,7 @@ export default async function ContactPage() {
   ];
 
   const faqs = [
-    { q: t("contact.q1"), a: `${t("contact.a1Base")}${expressEnabled ? t("contact.a1Express") : ""}` },
+    { q: t("contact.q1"), a: `${t("contact.a1Base").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays))}${expressEnabled ? t("contact.a1Express") : ""}` },
     { q: t("contact.q2"), a: t("contact.a2") },
     { q: t("contact.q3"), a: t("contact.a3") },
     { q: t("contact.q4"), a: t("contact.a4") },

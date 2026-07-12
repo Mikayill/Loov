@@ -126,24 +126,15 @@ export function tierName(id: "bronze" | "silver" | "gold" | string, t: T): strin
 }
 
 /**
- * Loyalty tier perks (src/lib/loyalty.ts TIERS[].perks) are canonical English
- * free strings — loyalty.ts stays untouched (admin-adjacent). Map the exact
- * text to a label key; unknown/new perk text falls back to the raw string.
+ * Loyalty tier perks (src/lib/loyalty.ts tiersFor()) are canonical English
+ * strings GENERATED from admin settings, so we translate the two patterns
+ * rather than exact strings. Unknown perk text falls back to the raw string.
  */
-const PERK_KEYS: Record<string, TranslationKey> = {
-  "2 points per 1 ₾": "label.perk.pointsRate",
-  "Birthday surprise": "label.perk.birthday",
-  "+25% bonus points": "label.perk.bonus25",
-  "Early access to new arrivals": "label.perk.earlyAccess",
-  "+50% bonus points": "label.perk.bonus50",
-  "Free express shipping": "label.perk.freeExpress",
-};
-
 export function perkLabel(perk: string, t: T): string {
-  const key = PERK_KEYS[perk];
-  if (key) return t(key);
-  // Bonus perks are generated from the admin-set multiplier ("+30% bonus
-  // points"), so translate the pattern rather than each exact string.
+  // "{n} points per 1 ₾" — n follows the admin-set pointsPerGel.
+  const rate = /^([\d.]+) points per 1 ₾$/.exec(perk);
+  if (rate) return t("label.perk.pointsRateN").replace("{n}", rate[1]);
+  // "+{n}% bonus points" — n follows the admin-set tier multiplier.
   const bonus = /^\+(\d+)% bonus points$/.exec(perk);
   if (bonus) return t("label.perk.bonusN").replace("{n}", bonus[1]);
   return perk;

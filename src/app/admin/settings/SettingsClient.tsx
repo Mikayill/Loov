@@ -46,6 +46,16 @@ const FIELDS: Field[] = [
     max: 1000,
   },
   {
+    key: "giftWrapPrice",
+    label: "Gift wrap price",
+    hint: "What gift wrapping costs at checkout. Set 0 to make it free — all storefront texts follow this value automatically.",
+    icon: "🎁",
+    suffix: "₾",
+    step: 1,
+    min: 0,
+    max: 1000,
+  },
+  {
     key: "newBadgeDays",
     label: '"New" badge duration',
     hint: 'A product automatically shows the "New" badge for this many days after you add it, then it drops off on its own. (You can still pin a product as New manually per product.)',

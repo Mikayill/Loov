@@ -274,34 +274,34 @@ Açık kalanlar (öncelik sıralı):
 # 🔬 KOD KALİTESİ DENETİMİ #2 (12 Tem 2026) — hardcoded değerler + mantık çelişkileri
 
 > Kapsam: ürün vaatleri ↔ kod davranışı, admin ayarları ↔ gömülü değerler, client ↔ server kuralları, i18n kaçakları.
-> Durum işaretleri: ⬜ bekliyor · ✅ yapıldı
+> Durum işaretleri: ⬜ bekliyor · ✅ yapıldı — **12 Tem 2026: 1-19 TAMAMI düzeltildi** (20 dış bağımlılık: posta kutusu). Kararlar: hediye paketi → `giftWrapPrice` ayarı (varsayılan 5₾, tüm metinler ayarı izler, 0=ücretsiz); Gold "free express" + "birthday" + "early access" perk'leri SİLİNDİ (uygulanmayan vaat).
 
 ## 🔴 Gerçek çelişkiler (müşteriye verilen söz ≠ kodun yaptığı)
-1. ⬜ **Hediye paketi "tamamen ücretsiz" yazıyor ama 5 ₾ alınıyor** — `announce.giftWrap` + `faq.ord.a3` + PDP delivery tabı (`ProductDetailClient.tsx:744`) 4 dilde "free" diyor; checkout client (`CheckoutClient.tsx:321`) + server (`api/orders/route.ts:266`) 5 ₾ tahsil ediyor. **KULLANICI KARARI GEREK: ücretsiz mi 5 ₾ mi?**
-2. ⬜ **Gold perk "Free express shipping" uygulanmıyor** — `loyalty.ts:55` vaat ediyor; `CheckoutClient.tsx:317` + `api/orders/route.ts:262` tier'a bakmadan expressPrice alıyor. **KULLANICI KARARI GEREK: gerçekten bedava yap vs perk metnini sil.**
-3. ⬜ **"Birthday surprise" + "Early access to new arrivals" perk'leri hayalet** — `loyalty.ts:37,45,56-57`; kodda hiçbir karşılığı yok. Metinden çıkarılmalı (ya da gerçekten uygulanmalı).
-4. ⬜ **İade politikası 3 kaynakta 3 farklı** — `faq.ret.a1` "Sale items are final sale" ↔ `legal.terms.s5Body` "any item" ↔ `api/returns` indirim kontrolü yok. FAQ cümlesi silinmeli (yasa da indirimli iadeyi engellemeye izin vermez).
-5. ⬜ **Admin iptalinde puan reversal yok** — müşteri iptali (`api/orders/route.ts:544-565`) stok+puan geri alıyor; admin iptali (`api/admin/orders/route.ts:158-161`) sadece stok. Redeemed puan kaybolur, earned puan kalır.
+1. ✅ **Hediye paketi "tamamen ücretsiz" yazıyor ama 5 ₾ alınıyor** — `announce.giftWrap` + `faq.ord.a3` + PDP delivery tabı (`ProductDetailClient.tsx:744`) 4 dilde "free" diyor; checkout client (`CheckoutClient.tsx:321`) + server (`api/orders/route.ts:266`) 5 ₾ tahsil ediyor. **KULLANICI KARARI GEREK: ücretsiz mi 5 ₾ mi?**
+2. ✅ **Gold perk "Free express shipping" uygulanmıyor** — `loyalty.ts:55` vaat ediyor; `CheckoutClient.tsx:317` + `api/orders/route.ts:262` tier'a bakmadan expressPrice alıyor. **KULLANICI KARARI GEREK: gerçekten bedava yap vs perk metnini sil.**
+3. ✅ **"Birthday surprise" + "Early access to new arrivals" perk'leri hayalet** — `loyalty.ts:37,45,56-57`; kodda hiçbir karşılığı yok. Metinden çıkarılmalı (ya da gerçekten uygulanmalı).
+4. ✅ **İade politikası 3 kaynakta 3 farklı** — `faq.ret.a1` "Sale items are final sale" ↔ `legal.terms.s5Body` "any item" ↔ `api/returns` indirim kontrolü yok. FAQ cümlesi silinmeli (yasa da indirimli iadeyi engellemeye izin vermez).
+5. ✅ **Admin iptalinde puan reversal yok** — müşteri iptali (`api/orders/route.ts:544-565`) stok+puan geri alıyor; admin iptali (`api/admin/orders/route.ts:158-161`) sadece stok. Redeemed puan kaybolur, earned puan kalır.
 
 ## 🟠 Admin ayarı varken hardcoded kalanlar
-6. ⬜ **"100 ₾" kargo eşiği gömülü** — `announce.freeShipping` + `home.hero.statFreeShip` (4 dil); `freeShippingThreshold` ayarlanabilirken. (Terms `{threshold}` ile doğru yapıyor — aynı desen uygulanmalı.)
-7. ⬜ **"2–4 gün" 5 anahtarda gömülü** — `checkout.standardDays` (review, `CheckoutClient.tsx:847`), `checkout.standardNote` (success, `:1078`), `contact.a1Base`, `faq.ship.a1Base`, `legal.terms.s4BodyBase`; `deliveryMin/MaxDays` ayarlanabilirken. Kargo seçici `{min}/{max}` kullanıyor — tutarsız.
-8. ⬜ **Bronze perk "2 points per 1 ₾" gömülü** (`loyalty.ts:37`, `tiersFor():82` bile kopyalıyor) + `acct.rewards.levelUpBody` "up to +50% at Gold" gömülü; `pointsPerGel` ve gold multiplier ayarlanabilirken.
-9. ⬜ **Hediye paketi 5 ₾ magic number** — client 3 yer (`CheckoutClient.tsx:321,732,865`) + server 1 yer → `settings.giftWrapPrice` olmalı (madde 1 kararına bağlı).
+6. ✅ **"100 ₾" kargo eşiği gömülü** — `announce.freeShipping` + `home.hero.statFreeShip` (4 dil); `freeShippingThreshold` ayarlanabilirken. (Terms `{threshold}` ile doğru yapıyor — aynı desen uygulanmalı.)
+7. ✅ **"2–4 gün" 5 anahtarda gömülü** — `checkout.standardDays` (review, `CheckoutClient.tsx:847`), `checkout.standardNote` (success, `:1078`), `contact.a1Base`, `faq.ship.a1Base`, `legal.terms.s4BodyBase`; `deliveryMin/MaxDays` ayarlanabilirken. Kargo seçici `{min}/{max}` kullanıyor — tutarsız.
+8. ✅ **Bronze perk "2 points per 1 ₾" gömülü** (`loyalty.ts:37`, `tiersFor():82` bile kopyalıyor) + `acct.rewards.levelUpBody` "up to +50% at Gold" gömülü; `pointsPerGel` ve gold multiplier ayarlanabilirken.
+9. ✅ **Hediye paketi 5 ₾ magic number** — client 3 yer (`CheckoutClient.tsx:321,732,865`) + server 1 yer → `settings.giftWrapPrice` olmalı (madde 1 kararına bağlı).
 
 ## 🟡 i18n kaçakları (müşteri yüzü İngilizce)
-10. ⬜ **PDP Specifications + Delivery tabları + bakım fallback + beden modal başlıkları İngilizce hardcoded** — `ProductDetailClient.tsx:700-705, 720-724, 739-744, 775`.
-11. ⬜ **PDP spec varsayılanları uydurma iddia üretiyor** — material boş → "100% Organic Cotton", weight boş → "180 GSM", origin boş → "Made in Georgia" (`:700-705`). Boş alan hiç gösterilmemeli (Certification deseni). Dürüst-içerik temizliğiyle çelişiyor.
-12. ⬜ **Sunucu hata mesajları İngilizce müşteriye ham basılıyor** — `CheckoutClient.tsx:439` `data.error` raw; `api/reviews/route.ts:204,289` İngilizce. Sunucu hata KODU dönmeli, client i18n'e eşlemeli (rate-limit'te desen zaten var).
-13. ⬜ **Ana sayfa hero stat değerleri İngilizce** — `page.tsx:77-78` "Free" ve "14d".
+10. ✅ **PDP Specifications + Delivery tabları + bakım fallback + beden modal başlıkları İngilizce hardcoded** — `ProductDetailClient.tsx:700-705, 720-724, 739-744, 775`.
+11. ✅ **PDP spec varsayılanları uydurma iddia üretiyor** — material boş → "100% Organic Cotton", weight boş → "180 GSM", origin boş → "Made in Georgia" (`:700-705`). Boş alan hiç gösterilmemeli (Certification deseni). Dürüst-içerik temizliğiyle çelişiyor.
+12. ✅ **Sunucu hata mesajları İngilizce müşteriye ham basılıyor** — `CheckoutClient.tsx:439` `data.error` raw; `api/reviews/route.ts:204,289` İngilizce. Sunucu hata KODU dönmeli, client i18n'e eşlemeli (rate-limit'te desen zaten var).
+13. ✅ **Ana sayfa hero stat değerleri İngilizce** — `page.tsx:77-78` "Free" ve "14d".
 
 ## 🔵 Küçük mantık / tutarlılık
-14. ⬜ **Promo `times_used` iptalde geri sayılmıyor** — kişi-başı sayaç cancelled'ı hariç tutuyor ama global limit düşmüyor → limitli kampanyada slot yanıyor.
-15. ⬜ **Sipariş no hâlâ "BBK-"** (Bebeco mirası) — `api/orders/route.ts:311` + track-order placeholder. LOV- benzeri yeni önek; eski siparişler BBK kalır (sorun değil).
-16. ⬜ **Express "before 14:00 → next day" cutoff kontrolü yok** — 23:00 siparişine de aynı söz.
-17. ⬜ **Puan kazanımı kargo+paket ücretini de sayıyor** (total bazlı; client=server tutarlı) — büyük mağazalar ürün ara toplamından verir. **Politika kararı.**
-18. ⬜ **Bayat yorum/ölü kod** — `LoginClient.tsx:65` "30s" yorumu (kod 60s); `loyalty.ts:7` "%30" doc (gerçek %20); `checkout.standardSub` ölü anahtar ×4; `tierFor/nextTierAfter/pointsForAmount` sadece testte; `label.perk.bonus25/50` bonusN ile gereksiz.
-19. ⬜ **Ana sayfa testimonials kurgu** — gerçek yorum sistemi canlıyken. Gerçek DB yorumlarından beslenmeli (veya bilinçli bırakılır).
+14. ✅ **Promo `times_used` iptalde geri sayılmıyor** — kişi-başı sayaç cancelled'ı hariç tutuyor ama global limit düşmüyor → limitli kampanyada slot yanıyor.
+15. ✅ **Sipariş no hâlâ "BBK-"** (Bebeco mirası) — `api/orders/route.ts:311` + track-order placeholder. LOV- benzeri yeni önek; eski siparişler BBK kalır (sorun değil).
+16. ✅ **Express "before 14:00 → next day" cutoff kontrolü yok** — 23:00 siparişine de aynı söz.
+17. ✅ **Puan kazanımı kargo+paket ücretini de sayıyor** (total bazlı; client=server tutarlı) — büyük mağazalar ürün ara toplamından verir. **Politika kararı.**
+18. ✅ **Bayat yorum/ölü kod** — `LoginClient.tsx:65` "30s" yorumu (kod 60s); `loyalty.ts:7` "%30" doc (gerçek %20); `checkout.standardSub` ölü anahtar ×4; `tierFor/nextTierAfter/pointsForAmount` sadece testte; `label.perk.bonus25/50` bonusN ile gereksiz.
+19. ✅ **Ana sayfa testimonials kurgu** — gerçek yorum sistemi canlıyken. Gerçek DB yorumlarından beslenmeli (veya bilinçli bırakılır).
 20. ⬜ **hello@loov.ge hayalet kutu, Privacy YASAL metninde de geçiyor** (`legal.privacy.s5/s6/s7Body` "5 iş günü içinde yanıt" GDPR taahhüdü) — posta kutusu açılmalı ya da metin değişmeli.
 
 ## ✅ Temiz çıkanlar

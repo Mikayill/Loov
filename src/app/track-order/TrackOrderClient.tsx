@@ -92,7 +92,7 @@ export default function TrackOrderClient() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-              placeholder="e.g. BBK-3V570MU"
+              placeholder="e.g. LOOV-3V570MU"
               className="w-full h-11 px-4 border-2 border-[#DDD5CC] rounded-xl text-sm font-medium text-[#2A2320] placeholder-[#C8B8B0] focus:outline-none focus:border-[#5E9E8C] transition-colors bg-white"
             />
           </div>

@@ -38,6 +38,8 @@ export interface StoreSettings {
   /** Highest share (%) of an order's subtotal a customer can pay for with
    *  Loov points, in whole 100-point/5₾ blocks. */
   loyaltyMaxRedeemPercent: number;
+  /** Price of gift wrapping at checkout (₾). 0 = free. */
+  giftWrapPrice: number;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -55,6 +57,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   deliveryMinDays: 2,
   deliveryMaxDays: 4,
   loyaltyMaxRedeemPercent: 20,
+  giftWrapPrice: 5,
 };
 
 /** Map DB key → settings field. */
@@ -73,6 +76,7 @@ export const SETTING_KEYS: Record<string, keyof StoreSettings> = {
   delivery_min_days: "deliveryMinDays",
   delivery_max_days: "deliveryMaxDays",
   loyalty_max_redeem_percent: "loyaltyMaxRedeemPercent",
+  gift_wrap_price: "giftWrapPrice",
 };
 
 /** Reverse map: settings field → DB key. */
@@ -91,6 +95,7 @@ export const FIELD_TO_KEY: Record<keyof StoreSettings, string> = {
   deliveryMinDays: "delivery_min_days",
   deliveryMaxDays: "delivery_max_days",
   loyaltyMaxRedeemPercent: "loyalty_max_redeem_percent",
+  giftWrapPrice: "gift_wrap_price",
 };
 
 /** Build a StoreSettings from raw {key: value} DB rows, filling gaps with defaults. */
