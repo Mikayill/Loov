@@ -9,8 +9,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminApiGuard } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { deleteStorageUrls } from "@/lib/storageCleanup";
 
 export const dynamic = "force-dynamic";
+
+const IMAGE_BUCKET = "product-images"; // bundle photos upload to the same bucket, under bundles/{slug}/
 
 function slugify(s: string): string {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -196,9 +199,24 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  // Snapshot the current photo BEFORE the edit — if it's being replaced or
+  // removed, the old Storage object is deleted after the write succeeds
+  // (best-effort; upload always writes a new timestamped file and never
+  // cleaned up the one it replaced).
+  let oldImageUrl: string | null = null;
+  if (clean.image_url !== undefined) {
+    const { data: before } = await admin.from("bundles").select("image_url").eq("slug", slug).maybeSingle();
+    oldImageUrl = before?.image_url ?? null;
+  }
+
   const { error } = await admin.from("bundles").update(clean).eq("slug", slug);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await writeAudit({ actorEmail: guard.email, action: "bundle.update", entity: "bundle", entityId: slug, detail: clean });
+
+  if (clean.image_url !== undefined && oldImageUrl && oldImageUrl !== clean.image_url) {
+    await deleteStorageUrls(admin, IMAGE_BUCKET, [oldImageUrl]);
+  }
+
   return NextResponse.json({ ok: true });
 }
 
@@ -210,8 +228,12 @@ export async function DELETE(req: NextRequest) {
 
   const slug = new URL(req.url).searchParams.get("slug");
   if (!slug) return NextResponse.json({ error: "Missing bundle slug" }, { status: 400 });
+
+  const { data: before } = await admin.from("bundles").select("image_url").eq("slug", slug).maybeSingle();
+
   const { error } = await admin.from("bundles").delete().eq("slug", slug);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await writeAudit({ actorEmail: guard.email, action: "bundle.delete", entity: "bundle", entityId: slug });
+  if (before?.image_url) await deleteStorageUrls(admin, IMAGE_BUCKET, [before.image_url]);
   return NextResponse.json({ ok: true });
 }

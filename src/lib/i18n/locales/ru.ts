@@ -379,6 +379,7 @@ export const ru: Dictionary = {
   "filter.age": "Возраст",
   "filter.color": "Цвет",
   "filter.fabric": "Ткань",
+  "filter.season": "Сезон",
   "filter.filterBy": "Фильтр по {name}",
   "filter.product1": "1 товар",
   "filter.products": "{n} товаров",

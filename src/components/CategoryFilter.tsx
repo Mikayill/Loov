@@ -3,11 +3,12 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
-import { Product } from "@/types";
+import { Product, Season } from "@/types";
 import { formatPrice } from "@/lib/format";
 import { hasVariablePricing, minEffectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
-import { categoryLabel, categoryPlural, colorLabel, fabricLabel } from "@/lib/i18n/labels";
+import { categoryLabel, categoryPlural, colorLabel, fabricLabel, seasonLabel } from "@/lib/i18n/labels";
+import { SEASON_META, matchesSeason } from "@/lib/season";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
 type ViewMode = "grid" | "list";
@@ -96,6 +97,7 @@ export default function CategoryFilter({
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedFabrics, setSelectedFabrics] = useState<string[]>([]);
   const [ageFilter,      setAgeFilter]      = useState<AgeFilter>("all");
+  const [seasonFilter,   setSeasonFilter]   = useState<Season>("all");
   const [viewMode,       setViewMode]       = useState<ViewMode>("grid");
   const [visibleCount,   setVisibleCount]   = useState(pageSize);
   const [filtersOpen,    setFiltersOpen]    = useState(false);
@@ -128,6 +130,13 @@ export default function CategoryFilter({
     [products]
   );
 
+  /* Season pills only appear once at least one product has a real season set
+     (an all-"all" catalog has nothing meaningful to filter by). */
+  const seasonsPresent = useMemo(
+    () => products.some((p) => p.season && p.season !== "all"),
+    [products]
+  );
+
   const filtered = useMemo(() => {
     let list = active === "All" ? products : products.filter((p) => p.category === active);
 
@@ -151,6 +160,10 @@ export default function CategoryFilter({
       list = list.filter((p) => matchesAge(p, ageFilter));
     }
 
+    if (seasonFilter !== "all") {
+      list = list.filter((p) => matchesSeason(p, seasonFilter));
+    }
+
     if (sort === "new")        list = [...list].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     if (sort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
@@ -169,17 +182,18 @@ export default function CategoryFilter({
     }
 
     return list;
-  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, products, preferredCats]);
+  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, products, preferredCats]);
 
   /* Reset pagination when filters change */
-  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, pageSize]);
+  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, pageSize]);
 
   const activeFilterCount =
     (priceRange !== "all" ? 1 : 0) +
     selectedColors.length +
     selectedFabrics.length +
     (active !== "All" ? 1 : 0) +
-    (ageFilter !== "all" ? 1 : 0);
+    (ageFilter !== "all" ? 1 : 0) +
+    (seasonFilter !== "all" ? 1 : 0);
 
   function toggleColor(name: string) {
     setSelectedColors((prev) =>
@@ -200,6 +214,7 @@ export default function CategoryFilter({
     setSelectedColors([]);
     setSelectedFabrics([]);
     setAgeFilter("all");
+    setSeasonFilter("all");
     setVisibleCount(pageSize);
   }
 
@@ -392,6 +407,29 @@ export default function CategoryFilter({
               </div>
             </>
           )}
+
+          {/* Season filter — only when the catalog has a real (non-"all") season set */}
+          {seasonsPresent && (
+            <>
+              <div className="h-6 w-px bg-[#DDD5CC] hidden sm:block" />
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.season")}:</span>
+                {(Object.keys(SEASON_META) as Season[]).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSeasonFilter(s)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
+                      seasonFilter === s
+                        ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
+                        : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                    }`}
+                  >
+                    {SEASON_META[s].emoji} {seasonLabel(s, t)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -402,6 +440,7 @@ export default function CategoryFilter({
         {ageFilter !== "all" && ` · ${t(AGE_FILTERS.find((a) => a.value === ageFilter)!.descKey)}`}
         {priceRange !== "all" && ` · ${t(priceRanges.find((p) => p.value === priceRange)!.labelKey)}`}
         {selectedColors.length > 0 && ` · ${selectedColors.map((c) => colorLabel(c, t)).join(", ")}`}
+        {seasonFilter !== "all" && ` · ${seasonLabel(seasonFilter, t)}`}
       </p>
 
       {/* Products */}

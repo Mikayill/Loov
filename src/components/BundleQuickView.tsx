@@ -115,6 +115,9 @@ export default function BundleQuickView({
           onClick={close}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="bundle-quick-view-title"
             className={`bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] flex flex-col ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
@@ -123,6 +126,7 @@ export default function BundleQuickView({
               <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("quick.view")}</span>
               <button
                 onClick={close}
+                aria-label="Close quick view"
                 className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 text-xs font-bold"
               >
                 ✕
@@ -149,7 +153,7 @@ export default function BundleQuickView({
                       {t("product.new")}
                     </span>
                   )}
-                  <h3 className="font-extrabold text-[#2A2320] text-sm leading-snug mb-0.5 line-clamp-2">{bundle.name}</h3>
+                  <h3 id="bundle-quick-view-title" className="font-extrabold text-[#2A2320] text-sm leading-snug mb-0.5 line-clamp-2">{bundle.name}</h3>
                   <p className="text-[11px] text-[#9A8E88] line-clamp-2">{bundle.tagline}</p>
                 </div>
               </div>

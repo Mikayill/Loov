@@ -105,6 +105,9 @@ export default function QuickViewButton({ product }: { product: Product }) {
           onClick={close}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quick-view-title"
             className={`bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
@@ -113,6 +116,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
               <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("quick.view")}</span>
               <button
                 onClick={close}
+                aria-label="Close quick view"
                 className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 text-xs font-bold"
               >
                 ✕
@@ -139,7 +143,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
                       {t("product.new")}
                     </span>
                   )}
-                  <h3 className="font-bold text-[#2A2320] text-sm leading-snug mb-1 line-clamp-2">
+                  <h3 id="quick-view-title" className="font-bold text-[#2A2320] text-sm leading-snug mb-1 line-clamp-2">
                     {product.name}
                   </h3>
                   <p className="text-lg font-extrabold text-[#2A2320]">

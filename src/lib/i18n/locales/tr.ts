@@ -379,6 +379,7 @@ export const tr: Dictionary = {
   "filter.age": "Yaş",
   "filter.color": "Renk",
   "filter.fabric": "Kumaş",
+  "filter.season": "Sezon",
   "filter.filterBy": "{name} ile filtrele",
   "filter.product1": "1 ürün",
   "filter.products": "{n} ürün",

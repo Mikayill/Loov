@@ -241,6 +241,13 @@ export default function ProductDetailClient({
     if (stock !== null) setQuantity((q) => Math.max(1, Math.min(q, stock)));
   }, [stock]);
 
+  useEffect(() => {
+    if (!sizeGuide) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSizeGuide(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sizeGuide]);
+
   function handleAddToCart() {
     if (outOfStock) return;
     if (!selectedSize) { setNoSize(true); return; }
@@ -759,10 +766,16 @@ export default function ProductDetailClient({
           style={{ backgroundColor: "rgba(42,35,32,0.5)", backdropFilter: "blur(4px)" }}
           onClick={() => setSizeGuide(false)}
         >
-          <div className="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="size-guide-title"
+            className="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-extrabold text-[#2A2320]">{t("pdp.sizeGuide")}</h3>
-              <button onClick={() => setSizeGuide(false)} className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors font-bold">✕</button>
+              <h3 id="size-guide-title" className="text-xl font-extrabold text-[#2A2320]">{t("pdp.sizeGuide")}</h3>
+              <button onClick={() => setSizeGuide(false)} aria-label="Close size guide" className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors font-bold">✕</button>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
               <table className="w-full text-sm">

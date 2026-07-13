@@ -144,6 +144,9 @@ export default function CartDrawer() {
 
       {/* Panel */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-drawer-title"
         className={`fixed top-0 right-0 h-full z-[401] w-full sm:w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-smooth ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
@@ -152,7 +155,7 @@ export default function CartDrawer() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#DDD5CC] flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛒</span>
-            <h2 className="font-extrabold text-[#2A2320] text-base">{t("cart.title")}</h2>
+            <h2 id="cart-drawer-title" className="font-extrabold text-[#2A2320] text-base">{t("cart.title")}</h2>
             {totalItems > 0 && (
               <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#5E9E8C", color: "white" }}>
                 {totalItems}

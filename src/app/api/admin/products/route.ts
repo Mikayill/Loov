@@ -5,6 +5,9 @@ import { writeAudit } from "@/lib/admin/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { CATEGORY_TEMPLATES } from "@/lib/catalogTags";
 import { notifyBackInStock, rowHasAnyStock } from "@/lib/email/backInStock";
+import { deleteStorageUrls, removedUrls } from "@/lib/storageCleanup";
+
+const IMAGE_BUCKET = "product-images";
 
 export const dynamic = "force-dynamic";
 
@@ -222,6 +225,20 @@ export async function PATCH(req: NextRequest) {
     if (before) wasOutOfStock = !rowHasAnyStock(before);
   }
 
+  // Snapshot the gallery BEFORE the edit — any photo dropped from the new
+  // `image_urls` array gets deleted from Storage after the write succeeds
+  // (best-effort; every upload so far only ever added files and left the
+  // replaced/removed ones behind).
+  let oldImageUrls: string[] = [];
+  if (clean.image_urls !== undefined) {
+    const { data: before } = await admin
+      .from("products")
+      .select("image_urls, image_url")
+      .eq("id", String(id))
+      .maybeSingle();
+    oldImageUrls = [...(before?.image_urls ?? []), before?.image_url].filter(Boolean) as string[];
+  }
+
   let { error } = await admin.from("products").update(clean).eq("id", String(id));
   // If supabase/product-i18n.sql hasn't been run yet, retry without those
   // columns so unrelated edits (price, stock, colors…) never fail because of it.
@@ -253,6 +270,13 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  // Clean up any photo that just fell out of the gallery (removed, or
+  // replaced as the primary) — best-effort, never blocks the response.
+  if (clean.image_urls !== undefined && oldImageUrls.length > 0) {
+    const newUrls = clean.image_urls as string[];
+    await deleteStorageUrls(admin, IMAGE_BUCKET, removedUrls(oldImageUrls, newUrls));
+  }
+
   return NextResponse.json({ ok: true });
 }
 
@@ -264,8 +288,19 @@ export async function DELETE(req: NextRequest) {
 
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing product id" }, { status: 400 });
+
+  // Snapshot the gallery so its Storage files can be cleaned up once the row
+  // is gone (best-effort — a failed delete just leaves the row gone as before).
+  const { data: before } = await admin
+    .from("products")
+    .select("image_urls, image_url")
+    .eq("id", id)
+    .maybeSingle();
+  const imageUrls = [...(before?.image_urls ?? []), before?.image_url].filter(Boolean) as string[];
+
   const { error } = await admin.from("products").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   await writeAudit({ actorEmail: guard.email, action: "product.delete", entity: "product", entityId: id });
+  await deleteStorageUrls(admin, IMAGE_BUCKET, imageUrls);
   return NextResponse.json({ ok: true });
 }

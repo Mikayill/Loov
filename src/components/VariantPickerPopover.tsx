@@ -82,13 +82,17 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); close(); }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="variant-picker-title"
         className={`bg-white rounded-2xl w-full max-w-xs shadow-2xl overflow-hidden p-5 ${open ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3 gap-2">
-          <h3 className="font-bold text-sm text-[#2A2320] line-clamp-1">{product.name}</h3>
+          <h3 id="variant-picker-title" className="font-bold text-sm text-[#2A2320] line-clamp-1">{product.name}</h3>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); close(); }}
+            aria-label="Close"
             className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] active:scale-90 transition-all text-xs font-bold flex-shrink-0"
           >
             ✕

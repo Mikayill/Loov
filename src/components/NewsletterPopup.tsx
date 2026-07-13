@@ -57,6 +57,13 @@ export default function NewsletterPopup() {
     try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch { /* */ }
   }
 
+  useEffect(() => {
+    if (!show) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [show]);
+
   function copyCode() {
     navigator.clipboard?.writeText(PROMO_CODE).then(() => {
       setCopied(true);
@@ -74,6 +81,9 @@ export default function NewsletterPopup() {
       onClick={close}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="newsletter-popup-title"
         className={`relative bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-xl border border-[#EDE5D8] ${show ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -91,7 +101,7 @@ export default function NewsletterPopup() {
         {/* Hero */}
         <div className="px-6 pt-8 pb-5 text-center bg-[#F5F0EB]">
           <div className="text-4xl mb-2.5">🌿</div>
-          <h2 className="text-lg font-extrabold text-[#2A2320] mb-1.5 leading-tight">
+          <h2 id="newsletter-popup-title" className="text-lg font-extrabold text-[#2A2320] mb-1.5 leading-tight">
             {t("news.title")}
           </h2>
           <p className="text-[#5E5450] text-xs leading-relaxed">

@@ -381,6 +381,7 @@ export const ka: Dictionary = {
   "filter.age": "ასაკი",
   "filter.color": "ფერი",
   "filter.fabric": "ქსოვილი",
+  "filter.season": "სეზონი",
   "filter.filterBy": "ფილტრი {name}-ის მიხედვით",
   "filter.product1": "1 პროდუქტი",
   "filter.products": "{n} პროდუქტი",

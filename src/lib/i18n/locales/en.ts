@@ -405,6 +405,7 @@ export const en = {
   "filter.age": "Age",
   "filter.color": "Color",
   "filter.fabric": "Fabric",
+  "filter.season": "Season",
   "filter.filterBy": "Filter by {name}",
   "filter.product1": "1 product",
   "filter.products": "{n} products",
