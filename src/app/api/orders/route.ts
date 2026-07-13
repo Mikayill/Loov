@@ -14,7 +14,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PHONE_PATTERN, POSTAL_CODE_PATTERN } from "@/lib/georgia";
 import { buildOrderMessage } from "@/lib/i18n/orderMessages";
 import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
-import { rateLimited } from "@/lib/rateLimit";
+import { serverRateLimited } from "@/lib/rateLimit";
 import type { Locale } from "@/lib/i18n/config";
 import {
   REDEEM_BLOCK,
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
   /* ── Flood guard: a real shopper never places 5 COD orders in 10 minutes;
      a bot doing so would drain stock reservations + trigger email spam. ── */
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (rateLimited(`orders:${ip}`, 5, 10 * 60_000)) {
+  if (await serverRateLimited(`orders:${ip}`, 5, 10 * 60_000)) {
     return bad("Too many orders from this connection — please wait a few minutes and try again.", 429);
   }
 
@@ -148,13 +148,25 @@ export async function POST(req: NextRequest) {
   const supabase = await createSupabaseServerClient();
 
   // ── Re-price server-side from the DB (never trust client prices) ──
+  // name_ka/ru/tr are only for error messages in the shopper's language
+  // (e.g. sold-out) — order_items keeps the canonical English name.
   const ids = [...new Set(body.items.map((i) => i.productId))];
   const firstTry = await supabase
     .from("products")
-    .select("id, slug, name, price, discount_percent, size_prices")
+    .select("id, slug, name, name_ka, name_ru, name_tr, price, discount_percent, size_prices")
     .in("id", ids);
   let products: unknown[] | null = firstTry.data;
   let prodErr = firstTry.error;
+  // Localized-name columns missing (supabase/product-i18n.sql not run yet) →
+  // retry with English only.
+  if (prodErr && /name_(ka|ru|tr)/i.test(prodErr.message)) {
+    const retry = await supabase
+      .from("products")
+      .select("id, slug, name, price, discount_percent, size_prices")
+      .in("id", ids);
+    products = retry.data;
+    prodErr = retry.error;
+  }
   // size_prices column missing (supabase/size-prices.sql not run yet) →
   // fall back to base pricing so orders NEVER fail on a missing migration.
   if (prodErr && /size_prices/i.test(prodErr.message)) {
@@ -171,6 +183,9 @@ export async function POST(req: NextRequest) {
     id: string;
     slug: string;
     name: string;
+    name_ka?: string | null;
+    name_ru?: string | null;
+    name_tr?: string | null;
     price: number;
     discount_percent?: number | null;
     size_prices?: Record<string, number> | null;
@@ -308,6 +323,40 @@ export async function POST(req: NextRequest) {
     redeemPoints = 0; // guests cannot redeem points
   }
 
+  // ── Claim the redeemed points ATOMICALLY before anything is committed ──
+  // claim_redeem_points (supabase/loyalty-atomic.sql) locks the user's ledger,
+  // re-checks the balance and writes the "redeem" row in one transaction —
+  // two simultaneous checkouts can no longer spend the same points twice.
+  // Until that migration is run we fall back to the older post-order write
+  // (the check-then-write race stays theoretical at this scale).
+  let redeemClaimId: string | null = null; // ledger row id when the RPC claimed
+  let redeemLegacy = false;                // fall back to post-order ledger write
+  if (redeemPoints > 0 && ledger === "db" && userId && admin) {
+    const { data: claim, error: claimErr } = await admin.rpc("claim_redeem_points", {
+      p_user: userId,
+      p_points: redeemPoints,
+    });
+    if (claimErr) {
+      if (/claim_redeem_points/i.test(claimErr.message)) {
+        console.warn("[orders] claim_redeem_points missing — run supabase/loyalty-atomic.sql. Using legacy ledger write.");
+      } else {
+        console.warn("[orders] claim_redeem_points failed, using legacy ledger write:", claimErr.message);
+      }
+      redeemLegacy = true;
+    } else if (!claim) {
+      // Balance changed between the read above and the claim (concurrent spend).
+      return bad("Not enough points for this redemption", 400, "not_enough_points");
+    } else {
+      redeemClaimId = String(claim);
+    }
+  }
+  /** Give the claimed points back if the order fails after this point. */
+  const releaseClaim = async () => {
+    if (redeemClaimId && admin) {
+      await admin.from("loyalty_transactions").delete().eq("id", redeemClaimId);
+    }
+  };
+
   const pointsDiscount = (redeemPoints / REDEEM_BLOCK) * GEL_PER_BLOCK;
   const total = Math.max(0, postPromoSubtotal + shippingCost + giftWrapCost - pointsDiscount);
 
@@ -346,10 +395,17 @@ export async function POST(req: NextRequest) {
       const insufficient = /INSUFFICIENT_STOCK:([^:]+)(?::([^:]+):([^:]+))?/.exec(m);
       if (insufficient) {
         const badId = insufficient[1];
-        const name = byId.get(badId)?.name ?? "An item";
+        const p = byId.get(badId);
+        // Product name in the shopper's language (falls back to English) so
+        // the localized error doesn't embed an English name.
+        const loc = String(body.locale ?? "en");
+        const localized =
+          (loc === "ka" && p?.name_ka) || (loc === "ru" && p?.name_ru) || (loc === "tr" && p?.name_tr) || null;
+        const name = localized || p?.name || "An item";
+        await releaseClaim();
         return NextResponse.json(
           // `code` + `productName` let the client render this in the shopper's language.
-          { error: `Sorry — "${name}" just sold out or doesn't have enough stock left.`, code: "sold_out", productName: name },
+          { error: `Sorry — "${p?.name ?? "An item"}" just sold out or doesn't have enough stock left.`, code: "sold_out", productName: name },
           { status: 409 }
         );
       }
@@ -357,6 +413,7 @@ export async function POST(req: NextRequest) {
         console.warn("[orders] reserve_stock missing — run supabase/stock.sql. Skipping stock guard.");
       } else {
         console.error("[orders] reserve_stock failed:", m);
+        await releaseClaim();
         return bad("Could not verify stock — please try again", 500);
       }
     } else {
@@ -417,6 +474,7 @@ export async function POST(req: NextRequest) {
   if (orderErr) {
     console.error("[orders] insert failed:", orderErr.message);
     if (stockReserved && admin) await admin.rpc("release_stock", { p_items: reservedItems });
+    await releaseClaim();
     return bad("Could not save order — please try again", 500);
   }
 
@@ -455,6 +513,7 @@ export async function POST(req: NextRequest) {
     // have no DELETE policy, so this needs the service-role client.
     await (admin ?? supabase).from("orders").delete().eq("id", orderId);
     if (stockReserved && admin) await admin.rpc("release_stock", { p_items: reservedItems });
+    await releaseClaim();
     return bad("Could not save order items — please try again", 500);
   }
 
@@ -474,8 +533,14 @@ export async function POST(req: NextRequest) {
       settings.pointsPerGel,
       tierForAt(lifetimeEarned, tiersFromSettings(settings))
     );
+    // The "redeem" row was already claimed atomically above (claim_redeem_points)
+    // — just attach it to the now-existing order. Only write it here as a
+    // fallback when the atomic claim wasn't available (redeemLegacy / no migration).
+    if (redeemClaimId) {
+      await admin.from("loyalty_transactions").update({ order_id: orderId }).eq("id", redeemClaimId);
+    }
     const rows = [
-      ...(redeemPoints > 0
+      ...(redeemPoints > 0 && !redeemClaimId && redeemLegacy
         ? [{ user_id: userId, order_id: orderId, delta: -redeemPoints, reason: "redeem" }]
         : []),
       ...(pointsEarned > 0

@@ -243,7 +243,17 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
         }),
       });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.error || t("checkout.errGeneric"));
+      if (!res.ok) {
+        // Server errors carry a `code` → show them in the shopper's language.
+        const byCode: Record<string, string> = {
+          iban_invalid: t("acct.return.validIban"),
+          photo_required: t("acct.return.addPhoto"),
+          not_delivered: t("acct.return.notDeliveredYet"),
+          window_closed: t("acct.return.windowClosedTitle"),
+          active_exists: t("acct.return.alreadyInProgress"),
+        };
+        throw new Error(byCode[d.code as string] ?? d.error ?? t("checkout.errGeneric"));
+      }
       setSuccess({ returnNumber: d.returnNumber, refundAmount: d.refundAmount });
     } catch (e) {
       setError((e as Error).message);

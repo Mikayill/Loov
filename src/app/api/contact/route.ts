@@ -6,30 +6,14 @@
  * reply_to so the owner can answer directly from their mail client.
  *
  * Anti-abuse: same-origin check (CSRF), honeypot field ("website" must stay
- * empty — bots fill it), and a small in-memory rate limit per IP (best-effort;
- * resets on redeploy, which is fine for a contact form).
+ * empty — bots fill it), and the shared cross-instance rate limiter
+ * (src/lib/rateLimit.ts — DB-backed once supabase/rate-limits.sql is run).
  */
 import { NextRequest, NextResponse } from "next/server";
 import { renderEmailHtml, EMAIL_FROM } from "@/lib/email/render";
+import { serverRateLimited } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
-
-const MAX_PER_WINDOW = 3;
-const WINDOW_MS = 60_000;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= MAX_PER_WINDOW) { hits.set(ip, recent); return true; }
-  recent.push(now);
-  hits.set(ip, recent);
-  // Keep the map from growing unbounded.
-  if (hits.size > 1000) {
-    for (const [k, v] of hits) if (v.every((t) => now - t >= WINDOW_MS)) hits.delete(k);
-  }
-  return false;
-}
 
 export async function POST(req: NextRequest) {
   // Same-origin (CSRF) guard, matching /api/orders.
@@ -40,7 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (rateLimited(ip)) {
+  if (await serverRateLimited(`contact:${ip}`, 3, 60_000)) {
     return NextResponse.json({ error: "Too many messages — please wait a minute and try again." }, { status: 429 });
   }
 

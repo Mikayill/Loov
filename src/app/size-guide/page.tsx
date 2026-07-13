@@ -32,6 +32,15 @@ function localizeAge(age: string, t: (key: TranslationKey) => string): string {
 export default async function SizeGuidePage() {
   const { t } = await getT();
 
+  /* TOG = warmth rating for sleepwear/sleep sacks — pick by room temperature.
+     TOG values are an industry standard, not per-product claims. */
+  const togRows = [
+    { room: t("sg.togR1Room"), tog: "0.5",  dress: t("sg.togR1Dress") },
+    { room: t("sg.togR2Room"), tog: "1.0",  dress: t("sg.togR2Dress") },
+    { room: t("sg.togR3Room"), tog: "2.5",  dress: t("sg.togR3Dress") },
+    { room: t("sg.togR4Room"), tog: "2.5+", dress: t("sg.togR4Dress") },
+  ];
+
   const blanketSizes = [
     { size: "80×100 cm",  use: t("sg.blanket1") },
     { size: "100×120 cm", use: t("sg.blanket2") },
@@ -162,6 +171,36 @@ export default async function SizeGuidePage() {
               <p className="text-sm text-[#5E5450] leading-relaxed">{item.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Sleep & TOG guide — we sell sleep sacks/pajamas, so parents need this */}
+      <section className="mb-10">
+        <h2 className="text-xl font-extrabold text-[#2A2320] mb-2">🌙 {t("sg.togTitle")}</h2>
+        <p className="text-sm text-[#5E5450] leading-relaxed mb-4 max-w-2xl">{t("sg.togIntro")}</p>
+        <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ backgroundColor: "#EDE5D8" }}>
+                <th className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{t("sg.togColRoom")}</th>
+                <th className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{t("sg.togColTog")}</th>
+                <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.togColDress")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {togRows.map((row, i) => (
+                <tr key={row.tog} className={`border-t border-[#DDD5CC] ${i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}`}>
+                  <td className="px-4 py-3 font-semibold text-[#2A2320] whitespace-nowrap">{row.room}</td>
+                  <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.tog} TOG</td>
+                  <td className="px-4 py-3 text-[#5E5450] text-xs">{row.dress}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex items-start gap-3 bg-[#FFF8E8] border border-[#F0C85A] rounded-2xl p-4 mt-4">
+          <span className="text-xl flex-shrink-0">🛡️</span>
+          <p className="text-sm text-[#8B6914] font-medium leading-relaxed">{t("sg.togNote")}</p>
         </div>
       </section>
 

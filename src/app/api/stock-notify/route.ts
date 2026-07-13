@@ -7,7 +7,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { rateLimited } from "@/lib/rateLimit";
+import { serverRateLimited } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (rateLimited(`stock-notify:${ip}`, 10, 60_000)) {
+  if (await serverRateLimited(`stock-notify:${ip}`, 10, 60_000)) {
     return NextResponse.json({ error: "Too many requests — please wait a minute." }, { status: 429 });
   }
 

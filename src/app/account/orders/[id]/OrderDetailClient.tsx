@@ -86,7 +86,10 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         body: JSON.stringify({ id }),
       });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.error || "Failed");
+      if (!res.ok) {
+        // `code` → localized message; raw English only as a last resort.
+        throw new Error(d.code === "cancel_too_late" ? t("acct.return.cancelTooLate") : d.error || t("checkout.errGeneric"));
+      }
       setReturns((prev) => prev.map((r) => (r.id === id ? { ...r, status: "cancelled" as ReturnStatus } : r)));
     } catch (e) {
       alert((e as Error).message);

@@ -24,8 +24,12 @@ const nunito = Nunito({
   display: "swap",
 });
 
+// NOTE: no `template` here — every page's own generateMetadata() already
+// bakes "— Loov" (or "| Loov") into its title (see meta.*.title across all
+// 4 locales, plus product/blog/bundle/order pages). A template would double
+// it into "Foo — Loov — Loov" on every single page (found + fixed 13 Jul 2026).
 export const metadata: Metadata = {
-  title: { default: "Loov — Soft Baby Clothing", template: "%s — Loov" },
+  title: "Loov — Soft Baby Clothing",
   description:
     "Premium organic baby clothing for your little one. Shop bodysuits, rompers, blankets, towels and more. Delivering across Georgia.",
   keywords: ["baby clothing", "organic cotton", "newborn", "Georgia", "Tbilisi", "loov", "baby shop"],
@@ -222,6 +226,7 @@ export default async function RootLayout({
                 <div className="flex items-center gap-5">
                   <a href="/privacy" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.privacy")}</a>
                   <a href="/terms"   className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.terms")}</a>
+                  <a href="/accessibility" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("a11y.title")}</a>
                   <a href="/contact" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.contact")}</a>
                 </div>
               </div>

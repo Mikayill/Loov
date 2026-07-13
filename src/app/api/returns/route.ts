@@ -30,8 +30,10 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function bad(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
+/** Error response. `code` (when set) lets the client show a translated
+ *  message instead of the raw English `error` string. */
+function bad(message: string, status = 400, code?: string) {
+  return NextResponse.json({ error: message, ...(code ? { code } : {}) }, { status });
 }
 
 /** Table missing → the SQL file hasn't been run yet. */
@@ -126,13 +128,13 @@ export async function POST(req: NextRequest) {
   const meta = reasonMeta(reason);
   if (!meta) return bad("Please choose a return reason");
   if (description.length > 2000) return bad("Description is too long (max 2000 characters).");
-  if (!isValidGeorgianIban(iban)) return bad("Please enter a valid Georgian IBAN (GE + 20 characters).");
+  if (!isValidGeorgianIban(iban)) return bad("Please enter a valid Georgian IBAN (GE + 20 characters).", 400, "iban_invalid");
   if (photos.length > 3) return bad("Maximum 3 photos");
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const photoPrefix = `${supabaseUrl}/storage/v1/object/public/return-photos/`;
   if (photos.some((p) => !p.startsWith(photoPrefix))) return bad("Invalid photo URL");
   if (meta.photoRequired && photos.length === 0) {
-    return bad("Please add at least one photo showing the problem.");
+    return bad("Please add at least one photo showing the problem.", 400, "photo_required");
   }
   if (itemsIn.length === 0) return bad("Select at least one item to return");
   for (const it of itemsIn) {
@@ -165,14 +167,14 @@ export async function POST(req: NextRequest) {
     }
   }
   if (!orderRow || orderRow.user_id !== user.id) return bad("Order not found", 404);
-  if (orderRow.status !== "delivered") return bad("Only delivered orders can be returned.");
+  if (orderRow.status !== "delivered") return bad("Only delivered orders can be returned.", 400, "not_delivered");
 
   const windowEnd = returnWindowEndsAt(
     orderRow.delivered_at as string | undefined,
     orderRow.created_at as string
   );
   if (new Date() > windowEnd) {
-    return bad("The 14-day return window for this order has closed.");
+    return bad("The 14-day return window for this order has closed.", 400, "window_closed");
   }
 
   // ── One active return per order ──
@@ -189,7 +191,7 @@ export async function POST(req: NextRequest) {
       return bad(error.message, 500);
     }
     if (existing && existing.length > 0) {
-      return bad("There is already an active return for this order.", 409);
+      return bad("There is already an active return for this order.", 409, "active_exists");
     }
   }
 
@@ -264,7 +266,7 @@ export async function POST(req: NextRequest) {
       return bad("Returns aren't set up yet. Run supabase/returns.sql in the SQL Editor.", 500);
     }
     if (/duplicate key|unique/i.test(insErr.message)) {
-      return bad("There is already an active return for this order.", 409);
+      return bad("There is already an active return for this order.", 409, "active_exists");
     }
     return bad(insErr.message, 500);
   }
@@ -307,7 +309,7 @@ export async function PATCH(req: NextRequest) {
   if (error) return bad(isMissingTable(error.message) ? "Returns aren't set up yet." : error.message, 500);
   if (!row || row.user_id !== user.id) return bad("Return not found", 404);
   if (row.status !== "requested") {
-    return bad("This return can no longer be cancelled — please contact us.", 409);
+    return bad("This return can no longer be cancelled — please contact us.", 409, "cancel_too_late");
   }
 
   const { error: updErr } = await admin

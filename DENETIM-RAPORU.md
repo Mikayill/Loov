@@ -306,3 +306,23 @@ Açık kalanlar (öncelik sıralı):
 
 ## ✅ Temiz çıkanlar
 Şifre kuralı (8+rakam) ×5 tutarlı · kargo eşiği/fiyatı her yerde ayardan · puan formülü client=server, tier merdiveni hep `tiersFromSettings` · footer Visa/MC rozetleri temiz · puan tavanı metinlerde hardcode yok · refund puan düzeltmesi idempotent.
+
+
+---
+
+# 🪞 SELF-AUDIT — kod tarafımın açıkları (13 Tem 2026)
+
+> Kullanıcı: "bütün suçu bana attın kod tarafı mükemmel mi ki?" — haklı soruydu. Kendi tasarım kararlarımı aynı sertlikle denetleyip API/foto gerektirmeyen HER ŞEYİ aynı gün düzelttim.
+
+1. ✅ **Rate limit artık DB-destekli (cross-instance)** — `supabase/rate-limits.sql` (⚠️ ÇALIŞTIRILMALI) + `rate_limit_hit()` atomik fonksiyon. `src/lib/rateLimit.ts` → yeni `serverRateLimited()`, migration yoksa eski in-memory limiter'a zarif düşer. `/api/orders`, `/api/stock-notify`, `/api/contact` bağlandı (contact'ın kendi kopya limiter'ı silindi, ortak koda taşındı).
+2. ✅ **Puan harcama artık ATOMİK** — `supabase/loyalty-atomic.sql` (⚠️ ÇALIŞTIRILMALI) + `claim_redeem_points()` (advisory lock ile bakiye kilitleyip tek transaction'da harcıyor). İki eşzamanlı checkout artık aynı puanı iki kez harcayamaz. Migration yoksa eski check-then-write davranışına düşer. Sipariş sonradan patlarsa claim geri alınıyor (`releaseClaim`).
+3. ✅ **Sold-out hata mesajı artık lokalize ürün adı kullanıyor** — `/api/orders` artık `name_ka/ru/tr` çekiyor, müşterinin dilindeki hata mesajında İngilizce ürün adı sızmıyor.
+4. ✅ **Returns API hata kodları eklendi** (`iban_invalid`, `photo_required`, `not_delivered`, `window_closed`, `active_exists`, `cancel_too_late`) — `ReturnRequestClient`/`OrderDetailClient` artık bunları 4 dilde gösteriyor, ham İngilizce mesaj kalmadı.
+5. ✅ **Test kapsamı 24 → 47'ye çıktı** — yeni `loyaltyReversal.test.ts` (6), `promoValidation.test.ts` (14), `rateLimit.test.ts` (3). Supabase admin client'ı gerçekçi simüle eden minik in-memory fake (`src/lib/testUtils/fakeSupabase.ts`) yazıldı — artık idempotency, iptal/geri-alma simetrisi, promo sayaç senkronu gerçekten test ediliyor.
+6. ✅ **TOG (uyku sıcaklık) rehberi** — `/size-guide`'a yeni bölüm (oda sıcaklığı → önerilen TOG → altına ne giydirilir tablosu + güvenli uyku notu), 4 dilde.
+7. ✅ **Erişilebilirlik sayfası** — `/accessibility` (dürüst dil: "WCAG 2.1 AA'ya doğru çalışıyoruz", tam uyum iddiası YOK), footer'a link eklendi, 4 dilde.
+8. ✅ **SİTE GENELİNDE ÇİFT BAŞLIK BUG'I bulundu ve düzeltildi** (bu turun en büyük yan bulgusu) — kök `layout.tsx`'teki `title.template: "%s — Loov"`, HER sayfanın kendi `meta.*.title`'ında zaten gömülü "— Loov" ekini ikiye katlıyordu ("Terms of Service — Loov — Loov" gibi) — ürün/blog/bundle/hesap sayfaları dahil, 4 dilde, SİTENİN HER SAYFASINDA. Template kaldırıldı, tek satırlık kök-sebep düzeltmesi tüm siteyi düzeltti. Canlı doğrulandı (10 sayfa × başlık kontrolü).
+
+**Bilinçli ERTELENEN (API/foto/hesap gerektirdiği için bu turda değil):** sepet senkronunda union-merge sadece misafir→üye geçişinde var (cihaz-cihaz hâlâ last-write-wins) — mimari değişiklik, ayrı oturum · OTP kapısının API-seviyesi zorlaması — mimari karar gerektirir · `useProducts`'ın tüm kataloğu client'a çekmesi — ölçek sorunu, ürün sayısı 20'de sorun değil · next/image, locale-URL, Lucide ikon geçişi — zaten planlı büyük kod turları.
+
+**Doğrulama:** tsc + build + 47 test temiz · prod sunucuda 10 sayfa × başlık kontrolü (çift "— Loov" kalmadı) · TOG/a11y sayfaları 4 dilde sızıntısız render.
