@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBundleBySlug } from "@/lib/db/bundles";
-import { getAllProducts } from "@/lib/db/products";
+import { getProductsBySlugs } from "@/lib/db/products";
 import type { Metadata } from "next";
 import BundleDetailClient from "./BundleDetailClient";
 
@@ -26,7 +26,8 @@ export default async function BundleDetailPage({ params }: Props) {
   const bundle = await getBundleBySlug(slug);
   if (!bundle) notFound();
 
-  const products = await getAllProducts();
+  // Only this bundle's own items — never the whole catalog.
+  const products = await getProductsBySlugs(bundle.items.map((i) => i.slug));
   const bundleProducts = bundle.items.map((item) => ({
     config: item,
     product: products.find((p) => p.slug === item.slug) ?? null,

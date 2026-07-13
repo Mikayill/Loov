@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { CartItem } from "@/types";
-import { useProducts } from "@/lib/db/useProducts";
+import { useSuggestedProducts } from "@/lib/db/useProductsByIds";
 import { useSettings } from "@/lib/db/useSettings";
 import ProductCard from "@/components/ProductCard";
 import { formatPrice } from "@/lib/format";
@@ -227,10 +227,7 @@ function EmptyCart({ t }: { t: (key: TranslationKey) => string }) {
    "You might also like" section
 ───────────────────────────────────────── */
 function CartSuggestions({ cartIds, t }: { cartIds: string[]; t: (key: TranslationKey) => string }) {
-  const products = useProducts();
-  const suggestions = products
-    .filter((p) => !cartIds.includes(p.id))
-    .slice(0, 3);
+  const suggestions = useSuggestedProducts(cartIds, 3);
   if (suggestions.length === 0) return null;
 
   return (

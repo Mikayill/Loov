@@ -49,7 +49,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
 
-          <WishlistButton productId={product.id} />
+          <WishlistButton productId={product.id} price={product.price} />
           <QuickViewButton product={product} />
         </div>
 

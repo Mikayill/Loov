@@ -214,7 +214,10 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
       form.append("file", file);
       const res = await fetch("/api/returns/upload", { method: "POST", body: form });
       const d = await res.json();
-      if (!res.ok) throw new Error(d.error || t("acct.return.uploadFailed"));
+      if (!res.ok) {
+        if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
+        throw new Error(d.error || t("acct.return.uploadFailed"));
+      }
       setPhotos((prev) => [...prev, d.url]);
     } catch (e) {
       setError((e as Error).message);
@@ -244,6 +247,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
       });
       const d = await res.json();
       if (!res.ok) {
+        if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
         // Server errors carry a `code` → show them in the shopper's language.
         const byCode: Record<string, string> = {
           iban_invalid: t("acct.return.validIban"),

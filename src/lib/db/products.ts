@@ -73,6 +73,45 @@ export async function getAllProducts(): Promise<Product[]> {
   }
 }
 
+/**
+ * A small, known set of products by id — for callers that only need a
+ * handful of specific rows (e.g. resolving a bundle's item slugs) rather
+ * than the whole catalog (see getAllProducts for that). Falls back to
+ * filtering the static list on error.
+ */
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.from("products").select("*").in("id", ids);
+    if (error) throw error;
+    if (!data || data.length === 0) return fallbackProducts.filter((p) => ids.includes(p.id));
+    const locale = await getServerLocale();
+    const { newBadgeDays } = await getSettings();
+    return withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays);
+  } catch (e) {
+    console.warn("[products] getProductsByIds failed — using static fallback:", (e as Error).message);
+    return fallbackProducts.filter((p) => ids.includes(p.id));
+  }
+}
+
+/** Same as getProductsByIds, keyed by slug (bundle items reference slugs). */
+export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
+  if (slugs.length === 0) return [];
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.from("products").select("*").in("slug", slugs);
+    if (error) throw error;
+    if (!data || data.length === 0) return fallbackProducts.filter((p) => slugs.includes(p.slug));
+    const locale = await getServerLocale();
+    const { newBadgeDays } = await getSettings();
+    return withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays);
+  } catch (e) {
+    console.warn("[products] getProductsBySlugs failed — using static fallback:", (e as Error).message);
+    return fallbackProducts.filter((p) => slugs.includes(p.slug));
+  }
+}
+
 /** A single product by slug. Falls back to the static list on error / miss. */
 export async function getProductBySlug(
   slug: string

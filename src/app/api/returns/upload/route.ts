@@ -4,8 +4,8 @@
  * the request is created; the returned URLs go into POST /api/returns.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +21,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
 
   const admin = createSupabaseAdminClient();
   if (!admin) return NextResponse.json({ error: "unavailable" }, { status: 500 });

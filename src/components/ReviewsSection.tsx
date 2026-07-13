@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale } from "@/context/LocaleContext";
 import { fmtDate } from "@/lib/i18n/format";
 
@@ -60,6 +61,7 @@ function RatingInput({ value, onChange }: { value: number; onChange: (n: number)
 }
 
 export default function ReviewsSection({ productId }: { productId: string }) {
+  const router = useRouter();
   const { t, locale } = useLocale();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<Stats>({ avg: 0, count: 0, breakdown: {} });
@@ -106,7 +108,9 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     const d = await res.json();
     setSubmitting(false);
     if (d.ok) { setThanks(true); setText(""); setRating(5); await load(); }
-    else {
+    else if (d.code === "otp_required") {
+      router.push("/login?verify=1");
+    } else {
       // Server errors carry a `code` → show them in the shopper's language.
       const byCode: Record<string, string> = {
         too_short: t("rev.minChars").replace("{n}", String(Math.max(0, 10 - text.trim().length))),

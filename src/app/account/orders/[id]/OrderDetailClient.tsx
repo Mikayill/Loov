@@ -87,6 +87,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
       });
       const d = await res.json();
       if (!res.ok) {
+        if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
         // `code` → localized message; raw English only as a last resort.
         throw new Error(d.code === "cancel_too_late" ? t("acct.return.cancelTooLate") : d.error || t("checkout.errGeneric"));
       }
@@ -108,7 +109,10 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         body: JSON.stringify({ action: "cancel", orderNumber: order.id }),
       });
       const d = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(d.error || "Failed");
+      if (!res.ok) {
+        if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
+        throw new Error(d.error || "Failed");
+      }
       setOrder((prev) => (prev ? { ...prev, status: "Cancelled", cancellable: false } : prev));
     } catch (e) {
       alert((e as Error).message);

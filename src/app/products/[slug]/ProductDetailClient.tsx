@@ -624,7 +624,7 @@ export default function ProductDetailClient({
 
           {/* Wishlist */}
           <button
-            onClick={() => toggle(product.id)}
+            onClick={() => toggle(product.id, product.price)}
             className={`w-full h-12 rounded-xl border-2 font-semibold transition-all duration-200 mb-7 flex items-center justify-center gap-2 text-sm ${
               has(product.id)
                 ? "border-red-400 bg-red-50 text-red-500 hover:bg-red-100"

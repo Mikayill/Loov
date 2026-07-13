@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
@@ -188,10 +189,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return NextResponse.json({ error: "You must be signed in to write a review." }, { status: 401 });
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
 
   const body = await req.json().catch(() => ({}));
   const productId = String(body.productId ?? "");
@@ -268,10 +268,9 @@ export async function PATCH(req: NextRequest) {
   if (crossOrigin(req)) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
 
   const body = await req.json().catch(() => ({}));
   const id = String(body.id ?? "");
@@ -313,10 +312,9 @@ export async function DELETE(req: NextRequest) {
   if (crossOrigin(req)) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
 
   const id = new URL(req.url).searchParams.get("id") ?? "";
   if (!id) return NextResponse.json({ error: "Missing review id" }, { status: 400 });

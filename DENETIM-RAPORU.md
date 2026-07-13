@@ -326,3 +326,39 @@ Açık kalanlar (öncelik sıralı):
 **Bilinçli ERTELENEN (API/foto/hesap gerektirdiği için bu turda değil):** sepet senkronunda union-merge sadece misafir→üye geçişinde var (cihaz-cihaz hâlâ last-write-wins) — mimari değişiklik, ayrı oturum · OTP kapısının API-seviyesi zorlaması — mimari karar gerektirir · `useProducts`'ın tüm kataloğu client'a çekmesi — ölçek sorunu, ürün sayısı 20'de sorun değil · next/image, locale-URL, Lucide ikon geçişi — zaten planlı büyük kod turları.
 
 **Doğrulama:** tsc + build + 47 test temiz · prod sunucuda 10 sayfa × başlık kontrolü (çift "— Loov" kalmadı) · TOG/a11y sayfaları 4 dilde sızıntısız render.
+
+---
+
+# 🏗️ 3 MİMARİ BOŞLUK KAPATILDI + FAVICON (13 Tem 2026)
+
+> Kullanıcı: "sırayla hallet, bana sorma, büyük şirketlerin (Temu/Trendyol/Alibaba/AliExpress) en iyi kararlarını sen bul uygula" — üç Explore ajanıyla kod tabanı incelendi, sonra sırayla uygulandı.
+
+## 0) Favicon
+`public/logo-square.png` (1600×1600, kare) → `sharp` ile `src/app/icon.png` (512×512) + `src/app/apple-icon.png` (180×180) üretildi (Next.js dosya-konvansiyonu, layout.tsx'e dokunmadan otomatik favicon). Eski `src/app/favicon.ico` (Next varsayılan üçgen) silindi.
+
+## 1) Sepet/Favori — tombstone'lı, satır-seviyeli merge
+**Kök sorun:** `saveRemote()` her zaman tüm diziyi eziyordu (blind overwrite), silme kaydı (tombstone) hiç tutulmuyordu — naif union-merge silinen ürünleri geri getirirdi.
+- `CartItem`/`WishlistItem`'a `updatedAt` eklendi; yeni saf fonksiyon `src/lib/cartMerge.ts` (`mergeLines`) — aynı key'de daha yeni `updatedAt` kazanır, tombstone item'dan daha yeniyse silinmiş sayılır, eksik `updatedAt` her zaman kaybeder (güvenli varsayılan).
+- DB'deki `items` jsonb şekli `{lines, tombstones}` oldu (geriye dönük uyumlu: eski düz dizi otomatik `{lines: dizi, tombstones: []}` okunur).
+- `src/lib/db/cartSync.ts` → `saveRemoteMerged()`: her yazımdan önce mevcut satırı okuyup birleştirir, `updated_at` eşleşmesiyle CAS-lite çakışma tespiti (1 kez retry).
+- Reconcile artık sadece girişte değil, **tab focus/visibilitychange**'de de tetikleniyor.
+- 13 yeni test (`cartMerge.test.ts`) — ekleme/silme/zaman çakışması/tombstone önceliği/eksik-updatedAt senaryoları.
+
+## 2) OTP kapısı API seviyesine taşındı
+**Kök sorun:** `loov-otp-pending` çerezi client-toggled çıplak bayrak, sunucu hiç doğrulamıyordu. `POST /api/account/delete` **sıfır** step-up koruması ile hesap siliyordu.
+- `trusted_devices` gerçek "doğrulandı" sinyali yapıldı: email-OTP doğrulamasından sonra artık **koşulsuz** (checkbox'tan bağımsız) bir kayıt açılıyor — "hatırla" işaretliyse 30 gün, değilse 4 saat.
+- Yeni `src/lib/auth/requireVerifiedSession.ts`: AAL2 (TOTP/telefon) VEYA canlı `trusted_devices` kaydı arar, yoksa `401 {code:"otp_required"}`.
+- Uygulandığı yerler (risk sırasıyla): `/api/account/delete` → `/api/returns` POST/PATCH + `/api/returns/upload` → `/api/orders` PATCH (sadece iptal) → `/api/reviews` POST/PATCH/DELETE.
+- **Bilinçli KAPSAM DIŞI:** `/api/orders` POST (sipariş verme — büyük sitelerde de normal alışveriş adımı step-up istemez) ve `/api/account/link-guest-orders` (LoyaltyContext'te OTP tamamlanmadan ÖNCE tetikleniyor — gate'lemek asıl işe yaradığı senaryoda sessizce bozardı; zaten kendi güçlü yetkilendirmesi var: e-posta onay kanıtı + puan sunucuda yeniden hesaplanıyor).
+- Client tarafı: `otp_required` kodu yakalanan her yerde (hesap silme, iade gönder/iptal/foto, sipariş iptal, yorum gönder/düzenle/sil) `/login?verify=1`'e yönlendiriyor.
+- Canlı doğrulama: 4 route'ta oturumsuz istek → 401 `not_signed_in`; `POST /api/orders` (sipariş verme) hâlâ misafirlere açık.
+
+## 3) Katalog — küçük sorgular + sunucu-taraflı arama
+**Kök sorun:** `products` tablosunda index yoktu, her yerde `select("*")` tüm satırları çekiyordu.
+- **3A (küçük bilinen-key sorguları):** `getProductsByIds`/`getProductsBySlugs` (sunucu) + `useProductsByIds`/`useSuggestedProducts` (client, `src/lib/db/useProductsByIds.ts`) — sepet önerisi, favoriler, son görüntülenenler, "yorumlarım", bundle detay artık sadece ihtiyaç duydukları birkaç ID'yi çekiyor. Yan bulgu: `WishlistContext.toggle()` yeni ürün eklerken fiyat aramak için tüm kataloğu tarıyordu — imza `toggle(id, price)` yapıldı, çağıranlar (zaten ellerinde `product` olan 3 yer) fiyatı doğrudan geçiyor, hiç sorgu gerekmiyor artık.
+- **3B (sunucu-taraflı arama):** `supabase/product-search.sql` (pg_trgm + isim trigram index + kategori index, migration sırası güvenli). Yeni `GET /api/products/search` — DB'de geniş `ilike` ön-filtre (sınırlı, `CANDIDATE_CAP=300`) + **aynı** `src/lib/search.ts` `matchesQuery()` fonksiyonu sunucuda çalıştırılıyor (davranış birebir korundu, sadece artık tüm kataloğu tarayıcıya çekmeden). Navbar + 404 arama bu endpoint'e (debounce'lu `useProductSearch` hook'u) taşındı; `BabyPicksSection` (yaş-uygunluk taraması) sınırlı bir havuza (`useProductPool`, 200 satır) taşındı.
+- **Bilinçli kapsam dışı:** `/products` sayfası + `CategoryFilter` (zaten tek seferlik sunucu-taraflı ISR-cache'li `getAllProducts()` çağrısı — canlı client-side tam-tablo çekimi DEĞİL, "Load More" bellekte dilimliyor ama DB'ye tekrar gitmiyor; büyük, karmaşık, çok-boyutlu filtre state'i olan bileşeni bugün riske atmadım — gerçek sorun her zaman client-side canlı çekimdi, o kapatıldı).
+- **`useProducts()` hook'u artık hiç tüketicisi kalmadığı için silindi** (tüm kullanım yerleri ya küçük-sorgu ya da arama endpoint'ine taşındı).
+- Canlı doğrulama: search endpoint hem boş-q (havuz) hem q'lu modda gerçek DB verisi döndürüyor; tüm sayfalar 200.
+
+**Doğrulama (üçü için ortak):** tsc + `next build` + 60 test (24'ten 60'a çıktı) her adımda temiz, prod sunucuda canlı curl testleri.

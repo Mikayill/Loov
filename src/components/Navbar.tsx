@@ -7,9 +7,9 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductSearch } from "@/lib/db/useProductSearch";
 import { useSettings } from "@/lib/db/useSettings";
-import { tokenize, matchesQuery, loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
+import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SearchResultsPanel from "./SearchResultsPanel";
@@ -46,8 +46,11 @@ export default function Navbar() {
   const hamburgerRef  = useRef<HTMLButtonElement>(null);
   const prevTotalItems = useRef(totalItems);
 
-  /* ── Search — inline bar (desktop) / expanding row (mobile), no popup ── */
-  const products = useProducts();
+  /* ── Search — inline bar (desktop) / expanding row (mobile), no popup ──
+     Matching now happens server-side (GET /api/products/search) instead of
+     pulling the whole catalog into the browser on every keystroke. Fetch a
+     generous candidate set so the category-pill filter below still has
+     enough to work with (MAX_RESULTS only shows 8 either way). */
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<CatKey>("all");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -59,10 +62,10 @@ export default function Navbar() {
 
   useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
 
-  const tokens = useMemo(() => tokenize(query), [query]);
+  const { results: queryMatches } = useProductSearch(query, 50);
   const searchResults = useMemo(
-    () => products.filter((p) => (activeCat === "all" || p.category === activeCat) && matchesQuery(p, tokens, t)),
-    [products, tokens, activeCat, t]
+    () => (activeCat === "all" ? queryMatches : queryMatches.filter((p) => p.category === activeCat)),
+    [queryMatches, activeCat]
   );
 
   function closeSearch() {

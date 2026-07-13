@@ -33,8 +33,11 @@ interface AuthResult {
   /** Non-error notice, e.g. "check your inbox to confirm your email". */
   info?: string;
   /** Machine-readable reason for `error`, so the UI can offer a contextual
-   *  action (e.g. a "Sign in" link) without string-matching translated text. */
-  errorCode?: "already_registered";
+   *  action (e.g. a "Sign in" link) without string-matching translated text.
+   *  "otp_required" = the API refused because this session hasn't stepped up
+   *  verification recently enough (see requireVerifiedSession.ts) — the UI
+   *  should redirect to /login?verify=1 rather than show `error` as-is. */
+  errorCode?: "already_registered" | "otp_required";
 }
 
 interface AuthContextType {
@@ -81,8 +84,13 @@ interface AuthContextType {
   verifyEmailOtp: (email: string, token: string) => Promise<AuthResult>;
   /** Is this browser already trusted (skip the OTP step) for the signed-in user? */
   checkTrustedDevice: () => Promise<boolean>;
-  /** Mark this browser as trusted for ~30 days (call right after a fresh OTP verify). */
-  trustThisDevice: () => Promise<void>;
+  /** Mark this browser as trusted (call right after a fresh OTP verify) —
+   *  ~30 days when `remember` is true (default), a short few-hour window
+   *  otherwise. Always call this after a successful verify, regardless of
+   *  the "remember me" checkbox: it's what lets requireVerifiedSession()
+   *  treat a just-completed OTP as proof for the rest of this browsing
+   *  session, not just for shoppers who opted into long-term remembering. */
+  trustThisDevice: (remember?: boolean) => Promise<void>;
   /** Link a phone number to an account that doesn't have one yet (Security page). */
   linkPhone: (phone: string) => Promise<AuthResult>;
   /** Confirm the code emailed at signup (alternative to clicking the link —
@@ -278,6 +286,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const d = await res.json().catch(() => ({}));
       return {
         error: d.error || t("auth.deleteAccountFailed"),
+        errorCode: d.code === "otp_required" ? "otp_required" : undefined,
         activeOrders: typeof d.activeOrders === "number" ? d.activeOrders : undefined,
         activeReturns: typeof d.activeReturns === "number" ? d.activeReturns : undefined,
       };
@@ -389,9 +398,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const trustThisDevice = useCallback(async (): Promise<void> => {
+  const trustThisDevice = useCallback(async (remember: boolean = true): Promise<void> => {
     try {
-      await fetch("/api/auth/trusted-device", { method: "POST" });
+      await fetch("/api/auth/trusted-device", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remember }),
+      });
     } catch {
       /* best-effort — worst case the OTP is asked again next time */
     }

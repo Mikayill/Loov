@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { formatPrice } from "@/lib/format";
 import { effectivePrice, discountPercent } from "@/lib/pricing";
 import { Product } from "@/types";
@@ -56,10 +56,9 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
 
 export default function WishlistClient() {
   const { t } = useLocale();
-  const products = useProducts();
   const { ids, toggle, priceDrop, lowStock, lowStockCount } = useWishlist();
+  const saved = useProductsByIds(ids);
   const { addItem } = useCart();
-  const saved = products.filter((p) => ids.includes(p.id));
   const [copied, setCopied] = useState(false);
   const [addAllStatus, setAddAllStatus] = useState<"idle" | "added" | "blocked">("idle");
 
@@ -196,7 +195,7 @@ export default function WishlistClient() {
                   product.emoji
                 )}
                 <button
-                  onClick={(e) => { e.preventDefault(); toggle(product.id); }}
+                  onClick={(e) => { e.preventDefault(); toggle(product.id, product.price); }}
                   className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-red-400 text-white flex items-center justify-center shadow-sm hover:bg-red-500 transition-all active:scale-90"
                   aria-label="Remove from wishlist"
                 >

@@ -27,6 +27,7 @@ import {
   returnWindowEndsAt,
   type ReturnItem,
 } from "@/lib/returns";
+import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
@@ -110,10 +111,12 @@ export async function POST(req: NextRequest) {
     return bad("Cross-origin request rejected", 403);
   }
 
+  // Financial (IBAN) + PII (photos) — requires a recently-verified session.
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
+
   const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return bad("You must be signed in to request a return.", 401);
 
   const body = await req.json().catch(() => ({}));
   const orderNumber = String(body.orderNumber ?? "").trim();
@@ -289,10 +292,9 @@ export async function PATCH(req: NextRequest) {
     return bad("Cross-origin request rejected", 403);
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return bad("You must be signed in.", 401);
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
 
   const body = await req.json().catch(() => ({}));
   const id = String(body.id ?? "");

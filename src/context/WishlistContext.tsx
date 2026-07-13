@@ -1,20 +1,27 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { useAuth } from "@/context/AuthContext";
-import { loadRemote, saveRemote } from "@/lib/db/cartSync";
+import { loadRemote, saveRemoteMerged } from "@/lib/db/cartSync";
+import { mergeLines, parseEnvelopeJson, pruneTombstones, type MergeEnvelope, type Tombstone } from "@/lib/cartMerge";
 
 /** Each saved item remembers the price at the moment it was added, so we can
  *  surface a price-drop later (old price struck-through + a notification dot). */
 interface WishlistItem {
   id: string;
   priceWhenAdded: number;
+  /** epoch ms of the last add/re-save — drives the tombstone-aware
+   *  cross-device merge (src/lib/cartMerge.ts). Missing on legacy saved
+   *  items; treated as 0 (always loses to a freshly-stamped edit). */
+  updatedAt?: number;
 }
 
 interface WishlistContextType {
   ids: string[];
-  toggle: (id: string) => void;
+  /** `price` = the product's current price, so adding never needs a lookup —
+   *  every caller already has the full product in hand (ProductCard/PDP/quick view). */
+  toggle: (id: string, price: number) => void;
   has: (id: string) => boolean;
   count: number;
   /** Old (higher) price if this item is now cheaper than when saved, else null. */
@@ -43,41 +50,46 @@ function keyFor(userId: string | null): string {
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const products = useProducts(); // live catalog (DB with static fallback)
   const [items, setItems]       = useState<WishlistItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const activeKeyRef = useRef(GUEST_KEY);
   const prevUserId = useRef<string | null | undefined>(undefined);
   const dbTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tombstonesRef = useRef<Tombstone[]>([]);
+  const itemsRef = useRef<WishlistItem[]>([]);
+  useEffect(() => { itemsRef.current = items; }, [items]);
 
+  // Only ever needs prices for items ALREADY saved (priceDrop/lowStock below)
+  // — adding a new item gets its price passed directly by the caller (see
+  // `toggle`), so this never has to look up the whole catalog.
+  const savedProducts = useProductsByIds(items.map((i) => i.id));
   const currentPrice = useCallback(
-    (id: string): number | undefined => products.find((p) => p.id === id)?.price,
-    [products]
+    (id: string): number | undefined => savedProducts.find((p) => p.id === id)?.price,
+    [savedProducts]
   );
 
-  /** Old entries were a plain string[]; normalize to the object format. */
-  function parseItems(raw: string | null): WishlistItem[] {
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((entry: unknown) => {
-        if (typeof entry === "string") {
-          return { id: entry, priceWhenAdded: currentPrice(entry) ?? 0 };
-        }
-        if (entry && typeof entry === "object" && "id" in entry) {
-          const e = entry as WishlistItem;
-          return { id: e.id, priceWhenAdded: e.priceWhenAdded ?? currentPrice(e.id) ?? 0 };
-        }
-        return null;
-      })
-      .filter((x): x is WishlistItem => x !== null);
-  }
+  /** Old entries were a plain string[], or an object without `updatedAt` —
+   *  normalize to the current shape. */
+  const normalizeLine = useCallback(
+    (entry: unknown): WishlistItem | null => {
+      if (typeof entry === "string") {
+        return { id: entry, priceWhenAdded: currentPrice(entry) ?? 0, updatedAt: 0 };
+      }
+      if (entry && typeof entry === "object" && "id" in entry) {
+        const e = entry as WishlistItem;
+        return { id: e.id, priceWhenAdded: e.priceWhenAdded ?? currentPrice(e.id) ?? 0, updatedAt: e.updatedAt ?? 0 };
+      }
+      return null;
+    },
+    [currentPrice]
+  );
 
   /* Reload whenever the active account changes (sign-in, sign-out, or
      switching accounts) — same rule as CartContext: a guest's first
      sign-in on this browser adopts their guest wishlist; switching between
-     two different accounts never mixes their saved items. */
+     two different accounts never mixes their saved items. Cross-device
+     reconcile uses the tombstone-aware merge (src/lib/cartMerge.ts) so a
+     deletion on one device isn't resurrected by a stale copy on another. */
   useEffect(() => {
     const currentUserId = user?.id ?? null;
     if (prevUserId.current === currentUserId) return;
@@ -86,64 +98,77 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     const targetKey = keyFor(currentUserId);
     activeKeyRef.current = targetKey;
-    let targetItems: WishlistItem[] = [];
-    let adoptedGuest = false;
+    let targetEnvelope: MergeEnvelope<WishlistItem> = { lines: [], tombstones: [] };
     try {
-      targetItems = parseItems(localStorage.getItem(targetKey));
-      if (currentUserId && wasGuest && targetItems.length === 0) {
-        const guestItems = parseItems(localStorage.getItem(GUEST_KEY));
-        if (guestItems.length > 0) {
-          targetItems = guestItems;
-          adoptedGuest = true;
+      targetEnvelope = parseEnvelopeJson<WishlistItem>(localStorage.getItem(targetKey), normalizeLine);
+      if (currentUserId && wasGuest && targetEnvelope.lines.length === 0) {
+        const guestEnvelope = parseEnvelopeJson<WishlistItem>(localStorage.getItem(GUEST_KEY), normalizeLine);
+        if (guestEnvelope.lines.length > 0) {
+          targetEnvelope = guestEnvelope;
           localStorage.removeItem(GUEST_KEY);
         }
       }
     } catch {
       localStorage.removeItem(targetKey);
     }
-    setItems(targetItems);
+    tombstonesRef.current = targetEnvelope.tombstones;
+    setItems(targetEnvelope.lines);
     setHydrated(true);
 
-    /* Cross-device reconcile (signed-in only, best-effort) — union by id so
-       saved items from another device aren't lost. */
+    /* Cross-device reconcile (signed-in only, best-effort) — runs on sign-in
+       AND whenever the tab regains focus. */
     if (currentUserId) {
       let cancelled = false;
-      (async () => {
+      const reconcile = async () => {
         const remote = await loadRemote<WishlistItem>("user_wishlists");
-        if (cancelled) return;
-        if (remote && remote.length > 0) {
-          if (adoptedGuest && targetItems.length > 0) {
-            const seen = new Set(remote.map((i) => i.id));
-            setItems([...remote, ...targetItems.filter((i) => !seen.has(i.id))]);
-          } else {
-            setItems(remote);
-          }
-        } else if (targetItems.length > 0) {
-          saveRemote("user_wishlists", currentUserId, targetItems);
-        }
-      })();
-      return () => { cancelled = true; };
+        if (cancelled || !remote) return;
+        const localNow: MergeEnvelope<WishlistItem> = { lines: itemsRef.current, tombstones: tombstonesRef.current };
+        const merged = mergeLines(localNow, remote.envelope, (i) => i.id);
+        tombstonesRef.current = pruneTombstones(merged.tombstones);
+        setItems(merged.lines);
+      };
+      reconcile();
+      const onVisible = () => { if (document.visibilityState === "visible") reconcile(); };
+      document.addEventListener("visibilitychange", onVisible);
+      window.addEventListener("focus", onVisible);
+      return () => {
+        cancelled = true;
+        document.removeEventListener("visibilitychange", onVisible);
+        window.removeEventListener("focus", onVisible);
+      };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- currentPrice/parseItems are stable enough for this one-time-per-account load
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- normalizeLine is stable enough for this one-time-per-account load
   }, [user?.id]);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
+    const envelope: MergeEnvelope<WishlistItem> = { lines: items, tombstones: pruneTombstones(tombstonesRef.current) };
+    tombstonesRef.current = envelope.tombstones;
+    localStorage.setItem(activeKeyRef.current, JSON.stringify(envelope));
     const uid = user?.id;
     if (uid) {
       if (dbTimer.current) clearTimeout(dbTimer.current);
-      dbTimer.current = setTimeout(() => saveRemote("user_wishlists", uid, items), 700);
+      dbTimer.current = setTimeout(() => {
+        const localSnapshot: MergeEnvelope<WishlistItem> = { lines: itemsRef.current, tombstones: tombstonesRef.current };
+        saveRemoteMerged<WishlistItem>("user_wishlists", uid, (remote) =>
+          remote ? mergeLines(localSnapshot, remote, (i) => i.id) : localSnapshot
+        );
+      }, 700);
     }
   }, [items, hydrated, user?.id]);
 
-  const toggle = useCallback((id: string) => {
-    setItems((prev) =>
-      prev.some((i) => i.id === id)
-        ? prev.filter((i) => i.id !== id)
-        : [...prev, { id, priceWhenAdded: currentPrice(id) ?? 0 }]
-    );
-  }, [currentPrice]);
+  const toggle = useCallback((id: string, price: number) => {
+    setItems((prev) => {
+      if (prev.some((i) => i.id === id)) {
+        tombstonesRef.current = [...tombstonesRef.current, { key: id, removedAt: Date.now() }];
+        return prev.filter((i) => i.id !== id);
+      }
+      // Alive again — drop any stale tombstone so a re-add isn't re-deleted
+      // by a merge against an old remote tombstone.
+      tombstonesRef.current = tombstonesRef.current.filter((t) => t.key !== id);
+      return [...prev, { id, priceWhenAdded: price, updatedAt: Date.now() }];
+    });
+  }, []);
 
   const has = useCallback((id: string) => items.some((i) => i.id === id), [items]);
 
@@ -166,7 +191,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const lowStock = useCallback(
     (id: string): number | null => {
       if (!items.some((i) => i.id === id)) return null;
-      const product = products.find((p) => p.id === id);
+      const product = savedProducts.find((p) => p.id === id);
       if (!product) return null;
       // Wishlist items don't remember which size/color was saved, so a
       // per-variant-tracked product can't be read off a single number here —
@@ -175,7 +200,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       const stock = product.stock;
       return stock !== undefined && stock > 0 && stock <= 5 ? stock : null;
     },
-    [items, products]
+    [items, savedProducts]
   );
 
   const lowStockCount = items.filter((i) => lowStock(i.id) !== null).length;

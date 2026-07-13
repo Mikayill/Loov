@@ -161,6 +161,7 @@ export default function SecurityClient() {
     const res = await deleteAccount();
     setDeleting(false);
     if (res.error) {
+      if (res.errorCode === "otp_required") { router.push("/login?verify=1"); return; }
       // Localized messages for the "still have active orders/returns" blocks.
       if (res.activeOrders !== undefined) {
         setDeleteError(t("sec.activeOrdersBlock").replace("{n}", String(res.activeOrders)));

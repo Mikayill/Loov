@@ -8,14 +8,19 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
+  // Highest-risk action in the app — permanently deletes the account.
+  // Requires a recently-verified session (AAL2 or a live trusted-device),
+  // not just any valid cookie.
+  const verified = await requireVerifiedSession();
+  if (verified instanceof NextResponse) return verified;
+  const user = verified;
+
   const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   const admin = createSupabaseAdminClient();
   if (!admin) return NextResponse.json({ error: "Deletion is unavailable right now." }, { status: 500 });

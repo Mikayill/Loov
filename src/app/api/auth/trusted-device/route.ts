@@ -18,6 +18,11 @@ export const dynamic = "force-dynamic";
 
 const COOKIE_NAME = "loov-trusted-device";
 const TRUST_DAYS = 30;
+/** Minted whenever "remember this device" wasn't checked — still lets
+ *  requireVerifiedSession() (src/lib/auth/requireVerifiedSession.ts) treat
+ *  a JUST-completed email-OTP verification as step-up proof for the rest of
+ *  this browsing session, without extending trust for a full month. */
+const SHORT_TRUST_HOURS = 4;
 
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -63,8 +68,16 @@ export async function POST(req: NextRequest) {
   const user = userData?.user;
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
+  // `remember: false` (default true) mints a short-lived record instead of a
+  // full 30-day one — used to make EVERY successful email-OTP verify count
+  // as step-up proof for API-level checks, not just the ones where the
+  // shopper explicitly opted into a long-lived "remember me" cookie.
+  const body = await req.json().catch(() => ({}));
+  const remember = body?.remember !== false;
+  const maxAgeSeconds = remember ? TRUST_DAYS * 24 * 60 * 60 : SHORT_TRUST_HOURS * 60 * 60;
+
   const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + TRUST_DAYS * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + maxAgeSeconds * 1000);
 
   const { error } = await supabase.from("trusted_devices").insert({
     user_id: user.id,
@@ -83,7 +96,7 @@ export async function POST(req: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: TRUST_DAYS * 24 * 60 * 60,
+    maxAge: maxAgeSeconds,
   });
   return res;
 }

@@ -136,7 +136,12 @@ export default function LoginClient() {
     setError(""); setLoading(true);
     const res = await verifyEmailOtp(email, emailOtpCode);
     if (res.error) { setLoading(false); setError(res.error); return; }
-    if (rememberDevice) await trustThisDevice();
+    // Always trust this device after a successful verify — even when
+    // "remember" is unchecked, this makes the just-completed OTP count as
+    // step-up proof for the rest of the browsing session (short-lived
+    // record; see trusted-device/route.ts). Checking the box only extends
+    // that to ~30 days instead of a few hours.
+    await trustThisDevice(rememberDevice);
     await setOtpGate("close");
     setLoading(false);
     router.push("/account");

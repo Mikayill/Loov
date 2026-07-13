@@ -238,7 +238,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
               {/* Wishlist + View details */}
               <div className="flex gap-2">
                 <button
-                  onClick={(e) => { e.stopPropagation(); toggle(product.id); }}
+                  onClick={(e) => { e.stopPropagation(); toggle(product.id, product.price); }}
                   className={`flex-1 h-9 rounded-xl border-2 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
                     has(product.id)
                       ? "border-red-400 bg-red-50 text-red-500"

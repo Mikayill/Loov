@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Product } from "@/types";
 import { useLocale } from "@/context/LocaleContext";
 import { categoryLabel } from "@/lib/i18n/labels";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { formatPrice } from "@/lib/format";
 import { effectivePrice } from "@/lib/pricing";
 
@@ -23,21 +22,18 @@ export function trackProductView(productId: string) {
 
 export default function RecentlyViewedSection({ excludeId }: { excludeId?: string }) {
   const { t } = useLocale();
-  const products = useProducts();
-  const [viewed, setViewed] = useState<Product[]>([]);
+  const [ids, setIds] = useState<string[]>([]);
 
   useEffect(() => {
     try {
-      const ids: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-      const result = ids
-        .filter((id) => id !== excludeId)
-        .map((id) => products.find((p) => p.id === id))
-        .filter(Boolean) as Product[];
-      setViewed(result.slice(0, 4));
+      const stored: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+      setIds(stored.filter((id) => id !== excludeId).slice(0, 4));
     } catch {
       // ignore
     }
-  }, [excludeId, products]);
+  }, [excludeId]);
+
+  const viewed = useProductsByIds(ids);
 
   if (viewed.length === 0) return null;
 
@@ -48,7 +44,7 @@ export default function RecentlyViewedSection({ excludeId }: { excludeId?: strin
         <button
           onClick={() => {
             localStorage.removeItem(STORAGE_KEY);
-            setViewed([]);
+            setIds([]);
           }}
           className="text-xs text-[#9A8E88] hover:text-red-400 transition-colors font-semibold"
         >

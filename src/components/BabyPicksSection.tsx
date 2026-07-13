@@ -14,7 +14,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductPool } from "@/lib/db/useProductSearch";
 import { fetchMyProfile } from "@/lib/db/profile";
 import { monthsOld, productFitsAge, ageLabel } from "@/lib/babyAge";
 import { hasAnyStock } from "@/lib/stock";
@@ -22,7 +22,7 @@ import ProductCard from "@/components/ProductCard";
 
 export default function BabyPicksSection() {
   const { user } = useAuth();
-  const products = useProducts();
+  const { products } = useProductPool(200);
   const [babyName, setBabyName] = useState<string | null>(null);
   const [months, setMonths] = useState<number | null>(null);
 

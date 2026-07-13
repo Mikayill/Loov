@@ -2,7 +2,7 @@
 
 import { useWishlist } from "@/context/WishlistContext";
 
-export default function WishlistButton({ productId }: { productId: string }) {
+export default function WishlistButton({ productId, price }: { productId: string; price: number }) {
   const { has, toggle } = useWishlist();
   const liked = has(productId);
 
@@ -11,7 +11,7 @@ export default function WishlistButton({ productId }: { productId: string }) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggle(productId);
+        toggle(productId, price);
       }}
       aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
       className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${

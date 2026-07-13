@@ -4,12 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import SearchResultsPanel from "@/components/SearchResultsPanel";
 import { useLocale } from "@/context/LocaleContext";
-import { useProducts } from "@/lib/db/useProducts";
-import { tokenize, matchesQuery, loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
+import { useProductSearch } from "@/lib/db/useProductSearch";
+import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 
 export default function NotFound() {
   const { t } = useLocale();
-  const products = useProducts();
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<CatKey>("all");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -19,10 +18,10 @@ export default function NotFound() {
 
   useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
 
-  const tokens = useMemo(() => tokenize(query), [query]);
+  const { results: queryMatches } = useProductSearch(query, 50);
   const results = useMemo(
-    () => products.filter((p) => (activeCat === "all" || p.category === activeCat) && matchesQuery(p, tokens, t)),
-    [products, tokens, activeCat, t]
+    () => (activeCat === "all" ? queryMatches : queryMatches.filter((p) => p.category === activeCat)),
+    [queryMatches, activeCat]
   );
 
   useEffect(() => {

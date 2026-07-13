@@ -6,13 +6,13 @@
  *  · "Awaiting review" — delivered products without a review yet
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import { fmtDate } from "@/lib/i18n/format";
-import { useProducts } from "@/lib/db/useProducts";
+import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { fetchMyOrders } from "@/lib/db/myOrders";
 import type { Product } from "@/types";
 
@@ -86,7 +86,6 @@ export default function MyReviewsClient() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { locale, t } = useLocale();
-  const products = useProducts();
 
   const [reviews, setReviews] = useState<MyReview[]>([]);
   const [awaiting, setAwaiting] = useState<string[]>([]); // productIds without a review
@@ -135,7 +134,14 @@ export default function MyReviewsClient() {
     return () => { cancelled = true; };
   }, [user]);
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  // Only the ids that actually appear in this user's reviews/awaiting list —
+  // typically a handful, never the whole catalog.
+  const neededIds = useMemo(
+    () => [...new Set([...reviews.map((r) => r.productId), ...awaiting])],
+    [reviews, awaiting]
+  );
+  const relatedProducts = useProductsByIds(neededIds);
+  const productMap = new Map(relatedProducts.map((p) => [p.id, p]));
 
   function startEdit(r: MyReview) {
     setEditingId(r.id);
@@ -156,7 +162,10 @@ export default function MyReviewsClient() {
     });
     const d = await res.json().catch(() => ({}));
     setSaving(false);
-    if (!d.ok) { setEditError(d.error || t("checkout.errGeneric")); return; }
+    if (!d.ok) {
+      if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
+      setEditError(d.error || t("checkout.errGeneric")); return;
+    }
     setReviews((prev) =>
       prev.map((r) => (r.id === id ? { ...r, rating: editRating, body: editText.trim(), showName: editShowName } : r))
     );
@@ -169,6 +178,7 @@ export default function MyReviewsClient() {
     const d = await res.json().catch(() => ({}));
     setDeleting(false);
     setConfirmDeleteId(null);
+    if (d.code === "otp_required") { router.push("/login?verify=1"); return; }
     if (!d.ok) return;
     const removed = reviews.find((r) => r.id === id);
     setReviews((prev) => prev.filter((r) => r.id !== id));

@@ -57,6 +57,11 @@ export interface CartItem {
    *  of the same color/size must NOT merge, or the bundle-match check in
    *  `src/lib/bundlePricing.ts` breaks). */
   bundleSlug?: string;
+  /** epoch ms of the last add/quantity-change to this line — drives the
+   *  tombstone-aware cross-device merge in src/lib/cartMerge.ts. Missing on
+   *  carts saved before that feature shipped; treated as 0 (always loses to
+   *  a freshly-stamped edit) so old data can never clobber new. */
+  updatedAt?: number;
 }
 
 /** Result of a stock-clamped cart write — every caller can tell whether the

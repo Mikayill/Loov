@@ -12,20 +12,12 @@ import { CartItem, CartContextType, CartAddResult, MaxReachedNotice, Product } f
 import { effectivePrice } from "@/lib/pricing";
 import { variantStock } from "@/lib/stock";
 import { useAuth } from "@/context/AuthContext";
-import { loadRemote, saveRemote } from "@/lib/db/cartSync";
+import { loadRemote, saveRemoteMerged } from "@/lib/db/cartSync";
+import { mergeLines, parseEnvelopeJson, pruneTombstones, type MergeEnvelope, type Tombstone } from "@/lib/cartMerge";
 
 /** Unique key for one cart line (product + variant + bundle). */
 function lineKey(i: CartItem): string {
   return `${i.product.id}::${i.selectedColor}::${i.selectedSize}::${i.bundleSlug ?? ""}`;
-}
-
-/** Merge two carts (used when a guest with an active cart signs into an
- *  account that already has one on another device): keep the account's lines,
- *  append the guest's lines that aren't already there. Avoids losing the cart
- *  the shopper is actively building without double-counting. */
-function mergeCarts(remote: CartItem[], local: CartItem[]): CartItem[] {
-  const seen = new Set(remote.map(lineKey));
-  return [...remote, ...local.filter((i) => !seen.has(lineKey(i)))];
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -52,12 +44,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const activeKeyRef = useRef(GUEST_KEY);
   const prevUserId = useRef<string | null | undefined>(undefined);
   const dbTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tombstones (recent removals) don't need their own render — kept in a ref,
+  // mirrored to localStorage/DB alongside `items` in the effects below.
+  const tombstonesRef = useRef<Tombstone[]>([]);
+  // Mirrors `items` for handlers (visibilitychange reconcile) that are set up
+  // once per account and would otherwise see a stale closure.
+  const itemsRef = useRef<CartItem[]>([]);
+  useEffect(() => { itemsRef.current = items; }, [items]);
 
   /* Reload whenever the active account changes (sign-in, sign-out, or
      switching accounts). Local storage gives an instant render; for signed-in
      users we then reconcile with the account's DB cart so it follows them
-     across devices (supabase/cart-wishlist.sql). Guest cart is adopted on the
-     first sign-in; two different accounts never see each other's items. */
+     across devices (supabase/cart-wishlist.sql) via a tombstone-aware merge
+     (src/lib/cartMerge.ts) — never a blind overwrite. Guest cart is adopted
+     on the first sign-in; two different accounts never see each other's items. */
   useEffect(() => {
     const currentUserId = user?.id ?? null;
     if (prevUserId.current === currentUserId) return;
@@ -66,56 +66,67 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const targetKey = keyFor(currentUserId);
     activeKeyRef.current = targetKey;
-    let targetItems: CartItem[] = [];
-    let adoptedGuest = false;
+    let targetEnvelope: MergeEnvelope<CartItem> = { lines: [], tombstones: [] };
     try {
-      const targetRaw = localStorage.getItem(targetKey);
-      if (targetRaw) {
-        const parsed = JSON.parse(targetRaw);
-        if (Array.isArray(parsed)) targetItems = parsed;
-      }
-      if (currentUserId && wasGuest && targetItems.length === 0) {
-        const guestRaw = localStorage.getItem(GUEST_KEY);
-        if (guestRaw) {
-          const guestParsed = JSON.parse(guestRaw);
-          if (Array.isArray(guestParsed) && guestParsed.length > 0) {
-            targetItems = guestParsed;
-            adoptedGuest = true;
-            localStorage.removeItem(GUEST_KEY);
-          }
+      targetEnvelope = parseEnvelopeJson<CartItem>(localStorage.getItem(targetKey));
+      // First sign-in on this browser adopts the guest cart wholesale — the
+      // general merge below (against remote) folds it in correctly either way.
+      if (currentUserId && wasGuest && targetEnvelope.lines.length === 0) {
+        const guestEnvelope = parseEnvelopeJson<CartItem>(localStorage.getItem(GUEST_KEY));
+        if (guestEnvelope.lines.length > 0) {
+          targetEnvelope = guestEnvelope;
+          localStorage.removeItem(GUEST_KEY);
         }
       }
     } catch {
       localStorage.removeItem(targetKey);
     }
-    setItems(targetItems);
+    tombstonesRef.current = targetEnvelope.tombstones;
+    setItems(targetEnvelope.lines);
     setHydrated(true);
 
-    /* Cross-device reconcile (signed-in only, best-effort). */
+    /* Cross-device reconcile (signed-in only, best-effort) — runs on sign-in
+       AND whenever the tab regains focus, so two open devices actually
+       converge without requiring a fresh sign-in each time. */
     if (currentUserId) {
       let cancelled = false;
-      (async () => {
+      const reconcile = async () => {
         const remote = await loadRemote<CartItem>("user_carts");
-        if (cancelled) return;
-        if (remote && remote.length > 0) {
-          // Merge the just-adopted guest cart in; otherwise trust the account's.
-          setItems(adoptedGuest ? mergeCarts(remote, targetItems) : remote);
-        } else if (targetItems.length > 0) {
-          saveRemote("user_carts", currentUserId, targetItems);
-        }
-      })();
-      return () => { cancelled = true; };
+        if (cancelled || !remote) return;
+        const localNow: MergeEnvelope<CartItem> = { lines: itemsRef.current, tombstones: tombstonesRef.current };
+        const merged = mergeLines(localNow, remote.envelope, lineKey);
+        tombstonesRef.current = pruneTombstones(merged.tombstones);
+        setItems(merged.lines);
+      };
+      reconcile();
+      const onVisible = () => { if (document.visibilityState === "visible") reconcile(); };
+      document.addEventListener("visibilitychange", onVisible);
+      window.addEventListener("focus", onVisible);
+      return () => {
+        cancelled = true;
+        document.removeEventListener("visibilitychange", onVisible);
+        window.removeEventListener("focus", onVisible);
+      };
     }
   }, [user?.id]);
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(activeKeyRef.current, JSON.stringify(items));
+    const envelope: MergeEnvelope<CartItem> = { lines: items, tombstones: pruneTombstones(tombstonesRef.current) };
+    tombstonesRef.current = envelope.tombstones;
+    localStorage.setItem(activeKeyRef.current, JSON.stringify(envelope));
     const uid = user?.id;
     if (uid) {
       // Debounced push to the account's DB cart (rapid +/- clicks coalesce).
+      // saveRemoteMerged re-reads the current remote row and merges against
+      // it (CAS-lite) rather than blindly overwriting it.
       if (dbTimer.current) clearTimeout(dbTimer.current);
-      dbTimer.current = setTimeout(() => saveRemote("user_carts", uid, items), 700);
+      dbTimer.current = setTimeout(() => {
+        const localSnapshot: MergeEnvelope<CartItem> = { lines: itemsRef.current, tombstones: tombstonesRef.current };
+        saveRemoteMerged<CartItem>("user_carts", uid, (remote) =>
+          remote ? mergeLines(localSnapshot, remote, lineKey) : localSnapshot
+        );
+      }, 700);
     }
   }, [items, hydrated, user?.id]);
 
@@ -137,19 +148,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const actualAdd = Math.max(0, Math.min(qty, room));
         result = { added: actualAdd, maxReached: actualAdd < qty, available };
         if (actualAdd <= 0) return prev;
+        // Alive again — drop any stale tombstone for this key so a re-add
+        // isn't accidentally re-deleted by a merge against an old remote tombstone.
+        const key = `${product.id}::${color}::${size}::${bundleSlug ?? ""}`;
+        tombstonesRef.current = tombstonesRef.current.filter((t) => t.key !== key);
         if (existing) {
           return prev.map((i) =>
             i.product.id === product.id &&
             i.selectedColor === color &&
             i.selectedSize === size &&
             (i.bundleSlug ?? "") === (bundleSlug ?? "")
-              ? { ...i, quantity: i.quantity + actualAdd }
+              ? { ...i, quantity: i.quantity + actualAdd, updatedAt: Date.now() }
               : i
           );
         }
         return [
           ...prev,
-          { product, quantity: actualAdd, selectedColor: color, selectedSize: size, bundleSlug },
+          { product, quantity: actualAdd, selectedColor: color, selectedSize: size, bundleSlug, updatedAt: Date.now() },
         ];
       });
       if (typeof window !== "undefined" && result.added > 0) {
@@ -166,17 +181,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeItem = useCallback(
     (productId: string, color: string, size: string, bundleSlug?: string) => {
-      setItems((prev) =>
-        prev.filter(
+      setItems((prev) => {
+        const target = prev.find(
           (i) =>
-            !(
-              i.product.id === productId &&
-              i.selectedColor === color &&
-              i.selectedSize === size &&
-              (i.bundleSlug ?? "") === (bundleSlug ?? "")
-            )
-        )
-      );
+            i.product.id === productId &&
+            i.selectedColor === color &&
+            i.selectedSize === size &&
+            (i.bundleSlug ?? "") === (bundleSlug ?? "")
+        );
+        if (target) {
+          tombstonesRef.current = [...tombstonesRef.current, { key: lineKey(target), removedAt: Date.now() }];
+        }
+        return prev.filter((i) => i !== target);
+      });
     },
     []
   );
@@ -197,7 +214,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             const cap = available === null ? MAX_PER_LINE : Math.min(available, MAX_PER_LINE);
             const clamped = Math.max(1, Math.min(quantity, cap));
             result = { added: clamped, maxReached: clamped < quantity, available };
-            return { ...i, quantity: clamped };
+            return { ...i, quantity: clamped, updatedAt: Date.now() };
           }
           return i;
         })
@@ -213,7 +230,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [items]
   );
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems((prev) => {
+      const now = Date.now();
+      tombstonesRef.current = [...tombstonesRef.current, ...prev.map((i) => ({ key: lineKey(i), removedAt: now }))];
+      return [];
+    });
+  }, []);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce(
