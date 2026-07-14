@@ -162,15 +162,140 @@ export default function ProductDetailClient({
      first→last never "jumps" — it's the same fade transition either way. */
   function prevImg() { setActiveImg((i) => (i - 1 + images.length) % images.length); }
   function nextImg() { setActiveImg((i) => (i + 1) % images.length); }
-  /* Touch swipe (mobile) — swipe left = next photo, right = previous. */
-  const touchStartX = useRef<number | null>(null);
-  function onTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX; }
-  function onTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null || images.length < 2) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(dx) > 40) { dx < 0 ? nextImg() : prevImg(); }
-    touchStartX.current = null;
+
+
+  /* ── Image zoom ──────────────────────────────────────────────────────
+     Desktop: click steps 1× → 1.75× → 2.5× → 1×; while zoomed the
+     transform-origin follows the cursor, so moving toward a corner pans
+     the photo to that corner. Mobile: two-finger pinch (1–3×) with
+     one-finger pan while zoomed and double-tap 1×↔2×; swipe-to-next
+     only works at 1×. Native listeners because React registers touch
+     events as passive (preventDefault would be ignored). */
+  const ZOOM_STEPS = [1, 1.75, 2.5];
+  const [zoomStep, setZoomStep] = useState(0);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
+  const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 });
+  const [pinching, setPinching] = useState(false);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const pinchRef = useRef({
+    mode: "none" as "none" | "pinch" | "pan",
+    startDist: 0, startScale: 1, startTx: 0, startTy: 0,
+    panX: 0, panY: 0, lastTap: 0, swipeX: null as number | null,
+    scale: 1, tx: 0, ty: 0,
+  });
+
+  function zoomClick(e: React.MouseEvent) {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return; // touch → pinch instead
+    const rect = galleryRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setZoomOrigin({
+      x: Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)),
+      y: Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)),
+    });
+    setZoomStep((s) => (s + 1) % ZOOM_STEPS.length);
   }
+  function zoomMove(e: React.MouseEvent) {
+    if (zoomStep === 0) return;
+    const rect = galleryRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setZoomOrigin({
+      x: Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)),
+      y: Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)),
+    });
+  }
+
+  /* Pinch/pan/double-tap + swipe — one set of non-passive native listeners. */
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    const r = pinchRef.current;
+    const dist = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    const clamp = (s: number, tx: number, ty: number) => {
+      const rect = el.getBoundingClientRect();
+      const mx = (rect.width * (s - 1)) / 2;
+      const my = (rect.height * (s - 1)) / 2;
+      return { tx: Math.max(-mx, Math.min(mx, tx)), ty: Math.max(-my, Math.min(my, ty)) };
+    };
+    const apply = (s: number, tx: number, ty: number) => {
+      r.scale = s; r.tx = tx; r.ty = ty;
+      setPinch({ scale: s, tx, ty });
+    };
+    const onStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        r.mode = "pinch"; setPinching(true);
+        r.startDist = dist(e.touches);
+        r.startScale = r.scale; r.startTx = r.tx; r.startTy = r.ty;
+        return;
+      }
+      const now = Date.now();
+      if (now - r.lastTap < 300) {
+        e.preventDefault();
+        r.lastTap = 0;
+        if (r.scale > 1) apply(1, 0, 0);
+        else apply(2, 0, 0);
+        return;
+      }
+      r.lastTap = now;
+      if (r.scale > 1) {
+        r.mode = "pan";
+        r.panX = e.touches[0].clientX - r.tx;
+        r.panY = e.touches[0].clientY - r.ty;
+      } else {
+        r.mode = "none";
+        r.swipeX = e.touches[0].clientX;
+      }
+    };
+    const onMove = (e: TouchEvent) => {
+      if (r.mode === "pinch" && e.touches.length === 2) {
+        e.preventDefault();
+        const s = Math.max(1, Math.min(3, (r.startScale * dist(e.touches)) / r.startDist));
+        const c = clamp(s, r.startTx, r.startTy);
+        apply(s, c.tx, c.ty);
+      } else if (r.mode === "pan" && e.touches.length === 1) {
+        e.preventDefault();
+        const c = clamp(r.scale, e.touches[0].clientX - r.panX, e.touches[0].clientY - r.panY);
+        apply(r.scale, c.tx, c.ty);
+      }
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (r.mode === "none" && r.swipeX !== null && e.touches.length === 0) {
+        const dx = e.changedTouches[0].clientX - r.swipeX;
+        if (Math.abs(dx) > 40 && r.scale === 1) (dx < 0 ? nextImg : prevImg)();
+        r.swipeX = null;
+      }
+      if (e.touches.length === 0) {
+        if (r.scale < 1.05) apply(1, 0, 0);
+        r.mode = "none"; setPinching(false);
+      } else if (e.touches.length === 1 && r.scale > 1) {
+        r.mode = "pan";
+        r.panX = e.touches[0].clientX - r.tx;
+        r.panY = e.touches[0].clientY - r.ty;
+      }
+    };
+    el.addEventListener("touchstart", onStart, { passive: false });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images.length]);
+
+  /* Changing photo resets both zooms. */
+  useEffect(() => {
+    setZoomStep(0);
+    setPinch({ scale: 1, tx: 0, ty: 0 });
+    pinchRef.current.scale = 1; pinchRef.current.tx = 0; pinchRef.current.ty = 0;
+  }, [activeImg]);
+
+  const desktopScale = ZOOM_STEPS[zoomStep];
+  const zoomTransform =
+    pinch.scale > 1
+      ? `translate(${pinch.tx}px, ${pinch.ty}px) scale(${pinch.scale})`
+      : `scale(${desktopScale})`;
 
   const off = discountPercent(product);
   /* Price follows the selected size (per-size pricing). */
@@ -276,11 +401,24 @@ export default function ProductDetailClient({
         <div className="space-y-4">
           {/* Main image — colour selection does NOT change the photo */}
           <div
-            className="relative w-full aspect-square rounded-card flex items-center justify-center overflow-hidden border border-line touch-pan-y select-none"
-            style={{ backgroundColor: product.cardColor }}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
+            ref={galleryRef}
+            className={`relative w-full aspect-square rounded-card flex items-center justify-center overflow-hidden border border-line select-none ${
+              zoomStep >= ZOOM_STEPS.length - 1 ? "md:cursor-zoom-out" : "md:cursor-zoom-in"
+            }`}
+            style={{ backgroundColor: product.cardColor, touchAction: pinch.scale > 1 || pinching ? "none" : "pan-y" }}
+            onClick={zoomClick}
+            onMouseMove={zoomMove}
+            onMouseLeave={() => setZoomStep(0)}
           >
+            {/* Zoom layer — badges & arrows stay outside so they never scale */}
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                transform: zoomTransform,
+                transformOrigin: pinch.scale > 1 ? "center" : `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                transition: pinching ? "none" : "transform 0.25s var(--ease-smooth)",
+              }}
+            >
             {images.length > 0 ? (
               images.map((src, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -298,6 +436,7 @@ export default function ProductDetailClient({
                 {product.emoji}
               </span>
             )}
+            </div>
             {product.isNew && (
               <span className="absolute top-5 left-5 bg-canvas/90 text-accent text-xs font-bold px-3 py-1.5 rounded-control uppercase tracking-[0.12em]">
                 New
@@ -311,7 +450,7 @@ export default function ProductDetailClient({
             {images.length > 1 && (
               <>
                 <button
-                  onClick={prevImg}
+                  onClick={(e) => { e.stopPropagation(); prevImg(); }}
                   aria-label="Previous photo"
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
@@ -320,7 +459,7 @@ export default function ProductDetailClient({
                   </svg>
                 </button>
                 <button
-                  onClick={nextImg}
+                  onClick={(e) => { e.stopPropagation(); nextImg(); }}
                   aria-label="Next photo"
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
