@@ -41,8 +41,8 @@ function RoundCheck({
       aria-label={checked ? "Deselect item" : "Select item"}
       className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
       style={{
-        borderColor: checked ? "#5E9E8C" : "#DDD5CC",
-        backgroundColor: checked ? "#5E9E8C" : "white",
+        borderColor: checked ? "var(--color-accent)" : "var(--color-line)",
+        backgroundColor: checked ? "var(--color-accent)" : "white",
       }}
     >
       {checked && (
@@ -85,8 +85,8 @@ function CartItemCard({
   const atMax = stock !== null && item.quantity >= stock;
   return (
     <div
-      className="bg-white rounded-card border-2 p-4 sm:p-5 flex gap-3 sm:gap-4 hover:shadow-sm transition-all"
-      style={{ borderColor: selected ? "#5E9E8C" : "#DDD5CC" }}
+      className="bg-canvas rounded-card border-2 p-4 sm:p-5 flex gap-3 sm:gap-4 hover:shadow-sm transition-all"
+      style={{ borderColor: selected ? "var(--color-accent)" : "var(--color-line)" }}
     >
       {/* Checkbox */}
       <div className="flex items-center pt-1">
@@ -149,7 +149,7 @@ function CartItemCard({
 
         {/* Qty + price */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center border-2 border-line rounded-control overflow-hidden">
+          <div className="flex items-center border border-line rounded-control overflow-hidden">
             <button
               type="button"
               onClick={() => onQty(item.quantity - 1)}
@@ -186,7 +186,7 @@ function CartItemCard({
             )}
             <p
               className="font-extrabold text-base leading-tight transition-colors"
-              style={{ color: selected ? "#2A2320" : "#C8B8B0" }}
+              style={{ color: selected ? "#2A2320" : "var(--color-ink-muted)" }}
             >
               {formatPrice(bundleMatched ? (allocatedPrice ?? 0) : effectivePrice(item.product, item.selectedSize) * item.quantity)}
             </p>
@@ -214,8 +214,7 @@ function EmptyCart({ t }: { t: (key: TranslationKey) => string }) {
       </p>
       <Link
         href="/products"
-        className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 shadow-sm transition-opacity"
-        style={{ backgroundColor: "#5E9E8C" }}
+        className="inline-flex items-center gap-2 font-semibold uppercase tracking-[0.08em] text-[12px] px-8 py-3.5 rounded-control text-white bg-ink hover:bg-accent transition-colors"
       >
         {t("cart.emptyCta")} →
       </Link>
@@ -417,7 +416,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
         <div className="lg:col-span-2 space-y-4">
 
           {/* Select-all bar */}
-          <div className="flex items-center justify-between bg-white rounded-card border border-line px-5 py-3">
+          <div className="flex items-center justify-between bg-canvas rounded-card border border-line px-5 py-3">
             <button
               type="button"
               onClick={toggleAll}
@@ -428,8 +427,8 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
               <div
                 className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0"
                 style={{
-                  borderColor: allChecked || someChecked ? "#5E9E8C" : "#DDD5CC",
-                  backgroundColor: allChecked ? "#5E9E8C" : someChecked ? "#EAF2F0" : "white",
+                  borderColor: allChecked || someChecked ? "var(--color-accent)" : "var(--color-line)",
+                  backgroundColor: allChecked ? "var(--color-accent)" : someChecked ? "var(--color-accent-soft)" : "white",
                 }}
               >
                 {allChecked && (
@@ -438,7 +437,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                   </svg>
                 )}
                 {someChecked && (
-                  <div className="w-2.5 h-0.5 rounded-full" style={{ backgroundColor: "#5E9E8C" }} />
+                  <div className="w-2.5 h-0.5 rounded-full" style={{ backgroundColor: "var(--color-accent)" }} />
                 )}
               </div>
               <span className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
@@ -488,11 +487,11 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
 
         {/* ── Order summary (1/3) ── */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 bg-white rounded-3xl border border-line p-6 space-y-5">
+          <div className="sticky top-24 bg-canvas rounded-card border border-line p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-extrabold text-ink">{t("cart.orderSummary")}</h2>
               {validSelected.size > 0 && (
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#EAF2F0", color: "#5E9E8C" }}>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--color-accent-soft)", color: "var(--color-accent)" }}>
                   {selectedCount === 1 ? t("cart.item1") : t("cart.items").replace("{n}", String(selectedCount))}
                 </span>
               )}
@@ -500,7 +499,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
 
             {/* Shipping progress */}
             {selectedSubtotal > 0 ? (
-              <div className="p-4 rounded-card" style={{ backgroundColor: "#EAF2F0" }}>
+              <div className="p-4 rounded-card" style={{ backgroundColor: "var(--color-accent-soft)" }}>
                 {toFree > 0 ? (
                   <>
                     <p className="text-sm font-semibold text-ink-soft mb-2">
@@ -511,7 +510,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                     <div className="h-2.5 bg-sage rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${progressPct}%`, backgroundColor: "#5E9E8C" }}
+                        style={{ width: `${progressPct}%`, backgroundColor: "var(--color-accent)" }}
                       />
                     </div>
                   </>
@@ -584,12 +583,12 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                       onChange={(e) => { setPromoCode(e.target.value); setPromoMsg(""); }}
                       onKeyDown={(e) => e.key === "Enter" && handlePromo()}
                       placeholder={t("cart.promoPlaceholder")}
-                      className="flex-1 border-2 border-line rounded-control px-3 py-2.5 text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none focus:border-accent transition-colors bg-white"
+                      className="flex-1 border border-line rounded-control px-3 py-2.5 text-sm font-medium text-ink placeholder-ink-muted focus:outline-none focus:border-accent transition-colors bg-canvas"
                     />
                     <button
                       onClick={handlePromo}
                       disabled={promoBusy}
-                      className="px-4 py-2.5 rounded-control border-2 border-line text-sm font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-control border border-line text-sm font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors disabled:opacity-50"
                     >
                       {promoBusy ? "…" : t("common.apply")}
                     </button>
@@ -625,11 +624,9 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                    never trusts the stored discount amount. */
                 localStorage.setItem("loov_checkout_promo", appliedPromoCode);
               }}
-              className="w-full py-3.5 rounded-card font-extrabold text-white text-base transition-all flex items-center justify-center gap-2 shadow-sm"
-              style={{
-                backgroundColor: validSelected.size > 0 ? "#5E9E8C" : "#C8B8B0",
-                cursor: validSelected.size > 0 ? "pointer" : "not-allowed",
-              }}
+              className={`w-full py-3.5 rounded-control font-semibold uppercase tracking-[0.06em] text-white text-[13px] transition-colors flex items-center justify-center gap-2 ${
+                validSelected.size > 0 ? "bg-ink hover:bg-accent cursor-pointer" : "bg-ink-muted cursor-not-allowed"
+              }`}
             >
               {validSelected.size > 0
                 ? `${t("cart.checkoutBtn").replace("{n}", String(selectedCount))} →`

@@ -232,10 +232,10 @@ export default function CategoryFilter({
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
-                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold border-2 transition-all duration-200 ${
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-control text-[11.5px] uppercase tracking-[0.06em] font-semibold border transition-colors duration-200 ${
                   isActive
-                    ? "border-accent bg-accent text-white shadow-sm scale-105"
-                    : "border-line bg-white text-ink-soft hover:border-accent hover:text-accent"
+                    ? "border-ink bg-ink text-white"
+                    : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
                 }`}
               >
                 <span className="text-sm sm:text-base leading-none">{catIcons[cat]}</span>
@@ -250,9 +250,9 @@ export default function CategoryFilter({
             <button
               onClick={() => setFiltersOpen((v) => !v)}
               aria-expanded={filtersOpen}
-              className={`sm:hidden flex items-center gap-1.5 h-9 px-3 rounded-control border-2 text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`sm:hidden flex items-center gap-1.5 h-9 px-3 rounded-control border text-[11px] uppercase tracking-[0.06em] font-semibold transition-colors whitespace-nowrap ${
                 filtersOpen || activeFilterCount > 0
-                  ? "border-accent text-accent bg-accent-soft"
+                  ? "border-ink text-ink bg-panel"
                   : "border-line text-ink-soft"
               }`}
             >
@@ -265,8 +265,8 @@ export default function CategoryFilter({
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="h-9 px-3 pr-8 rounded-control border-2 border-line bg-white text-sm font-semibold text-ink-soft focus:border-accent outline-none cursor-pointer appearance-none"
-            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239A8E88'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", backgroundSize: "16px" }}
+            className="h-9 px-3 pr-8 rounded-control border border-line bg-canvas text-[12.5px] font-semibold text-ink-soft focus:border-ink outline-none cursor-pointer appearance-none"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2373736D'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", backgroundSize: "16px" }}
           >
             {sortOptions.map((o) => (
               <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
@@ -274,12 +274,12 @@ export default function CategoryFilter({
           </select>
 
           {/* View mode toggle */}
-          <div className="flex items-center border-2 border-line rounded-control overflow-hidden h-9">
+          <div className="flex items-center border border-line rounded-control overflow-hidden h-9">
             <button
               onClick={() => setViewMode("grid")}
               title={t("filter.gridView")}
               className={`w-9 h-full flex items-center justify-center transition-colors ${
-                viewMode === "grid" ? "bg-accent text-white" : "text-ink-muted hover:bg-canvas"
+                viewMode === "grid" ? "bg-ink text-white" : "text-ink-muted hover:bg-panel"
               }`}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -289,8 +289,8 @@ export default function CategoryFilter({
             <button
               onClick={() => setViewMode("list")}
               title={t("filter.listView")}
-              className={`w-9 h-full flex items-center justify-center border-l-2 border-line transition-colors ${
-                viewMode === "list" ? "bg-accent text-white" : "text-ink-muted hover:bg-canvas"
+              className={`w-9 h-full flex items-center justify-center border-l border-line transition-colors ${
+                viewMode === "list" ? "bg-ink text-white" : "text-ink-muted hover:bg-panel"
               }`}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -302,7 +302,7 @@ export default function CategoryFilter({
           {activeFilterCount > 0 && (
             <button
               onClick={clearAll}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-control border-2 border-red-200 bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-control border border-danger/30 bg-danger-soft text-danger text-[11px] uppercase tracking-[0.06em] font-semibold hover:border-danger transition-colors whitespace-nowrap"
             >
               ✕ {t("filter.clear")} ({activeFilterCount})
             </button>
@@ -312,7 +312,7 @@ export default function CategoryFilter({
 
       {/* ── Row 2: Advanced filters (only on /products page) ── */}
       {advanced && (
-        <div className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3 mb-4 py-2.5 sm:py-3 px-3 sm:px-4 bg-white rounded-card border border-line`}>
+        <div className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3 mb-4 py-2.5 sm:py-3 px-3 sm:px-4 bg-panel/60 rounded-card border border-line`}>
           {/* Price range */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.price")}:</span>
@@ -320,10 +320,10 @@ export default function CategoryFilter({
               <button
                 key={pr.value}
                 onClick={() => setPriceRange(pr.value)}
-                className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
+                className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
                   priceRange === pr.value
-                    ? "border-accent bg-accent text-white"
-                    : "border-line text-ink-soft hover:border-accent hover:text-accent"
+                    ? "border-ink bg-ink text-white"
+                    : "border-line text-ink-soft hover:border-ink hover:text-ink"
                 }`}
               >
                 {t(pr.labelKey)}
@@ -342,10 +342,10 @@ export default function CategoryFilter({
                 key={af.value}
                 onClick={() => setAgeFilter(af.value)}
                 title={t(af.descKey)}
-                className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
+                className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
                   ageFilter === af.value
-                    ? "border-accent bg-accent text-white"
-                    : "border-line text-ink-soft hover:border-accent hover:text-accent"
+                    ? "border-ink bg-ink text-white"
+                    : "border-line text-ink-soft hover:border-ink hover:text-ink"
                 }`}
               >
                 {t(af.labelKey)}
@@ -373,7 +373,7 @@ export default function CategoryFilter({
                       ? "border-accent ring-2 ring-accent ring-offset-1 scale-110"
                       : "border-line hover:scale-110 hover:border-ink-muted"
                   }`}
-                  style={{ backgroundColor: cf.hex, borderColor: isSelected ? "#5E9E8C" : (cf.border ?? cf.hex) }}
+                  style={{ backgroundColor: cf.hex, borderColor: isSelected ? "var(--color-accent)" : (cf.border ?? cf.hex) }}
                 >
                   {isSelected && (
                     <svg className="w-3.5 h-3.5 text-accent drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -395,10 +395,10 @@ export default function CategoryFilter({
                   <button
                     key={f}
                     onClick={() => toggleFabric(f)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
+                    className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
                       selectedFabrics.includes(f)
-                        ? "border-accent bg-accent text-white"
-                        : "border-line text-ink-soft hover:border-accent hover:text-accent"
+                        ? "border-ink bg-ink text-white"
+                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
                     }`}
                   >
                     {FABRIC_EMOJI[f]} {fabricLabel(f, t)}
@@ -418,10 +418,10 @@ export default function CategoryFilter({
                   <button
                     key={s}
                     onClick={() => setSeasonFilter(s)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
+                    className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
                       seasonFilter === s
-                        ? "border-accent bg-accent text-white"
-                        : "border-line text-ink-soft hover:border-accent hover:text-accent"
+                        ? "border-ink bg-ink text-white"
+                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
                     }`}
                   >
                     {SEASON_META[s].emoji} {seasonLabel(s, t)}
@@ -447,18 +447,21 @@ export default function CategoryFilter({
       {filtered.length > 0 ? (
         <>
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            /* Nordic: hairline-separated grid cells */
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-line border border-line rounded-card overflow-hidden">
               {visibleProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <div key={p.id} className="bg-canvas p-2.5 sm:p-3">
+                  <ProductCard product={p} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
               {visibleProducts.map((p) => (
                 <Link
                   key={p.id}
                   href={`/products/${p.slug}`}
-                  className="flex items-center gap-4 bg-white rounded-card border border-line p-4 hover:shadow-md hover:border-accent transition-all group"
+                  className="flex items-center gap-4 bg-canvas p-4 hover:bg-accent-soft/50 transition-colors group"
                 >
                   <div
                     className="w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0"
@@ -472,10 +475,10 @@ export default function CategoryFilter({
                         {categoryLabel(p.category as Product["category"], t)}
                       </span>
                       {p.isNew && (
-                        <span className="text-[9px] font-bold bg-accent text-white px-1.5 py-0.5 rounded-full uppercase">{t("product.new")}</span>
+                        <span className="text-[9px] font-bold text-accent uppercase tracking-[0.12em]">{t("product.new")}</span>
                       )}
                     </div>
-                    <p className="font-bold text-ink text-sm group-hover:text-accent transition-colors leading-snug line-clamp-2">
+                    <p className="font-bold text-ink text-sm group-hover:underline underline-offset-4 transition-colors leading-snug line-clamp-2">
                       {p.name}
                     </p>
                     <p className="text-xs text-ink-muted mt-1 line-clamp-1">{p.colors.map((c) => colorLabel(c, t)).join(" · ")}</p>
@@ -500,7 +503,7 @@ export default function CategoryFilter({
             <div className="mt-8 text-center">
               <button
                 onClick={() => setVisibleCount((n) => n + pageSize)}
-                className="font-bold px-8 py-3 rounded-full border-2 border-accent text-accent text-sm hover:bg-accent hover:text-white transition-all"
+                className="font-semibold px-8 py-3.5 rounded-control border border-ink text-ink text-[12px] uppercase tracking-[0.1em] hover:bg-ink hover:text-white transition-colors active:scale-[0.98]"
               >
                 {t("filter.loadMore")}
               </button>
@@ -514,8 +517,7 @@ export default function CategoryFilter({
           <p className="text-sm text-ink-muted mb-4">{t("filter.noMatchHint")}</p>
           <button
             onClick={clearAll}
-            className="font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="font-semibold px-6 py-3 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.1em] hover:bg-accent transition-colors active:scale-[0.98]"
           >
             {t("filter.clearAllFilters")}
           </button>

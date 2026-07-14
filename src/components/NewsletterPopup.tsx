@@ -84,7 +84,7 @@ export default function NewsletterPopup() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="newsletter-popup-title"
-        className={`relative bg-white rounded-card max-w-sm w-full overflow-hidden shadow-xl border border-panel ${show ? "animate-pop-in" : "animate-pop-out"}`}
+        className={`relative bg-canvas rounded-card max-w-sm w-full overflow-hidden shadow-xl border border-panel ${show ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
@@ -124,7 +124,7 @@ export default function NewsletterPopup() {
             href="/register"
             onClick={close}
             className="block w-full h-10 rounded-control font-extrabold text-white text-sm leading-[40px] hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("news.cta")} →
           </Link>

@@ -56,24 +56,24 @@ export default function RecentlyViewedSection({ excludeId }: { excludeId?: strin
           <Link
             key={product.id}
             href={`/products/${product.slug}`}
-            className="group bg-white rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+            className="group block"
           >
             <div
-              className="flex items-center justify-center h-28 text-5xl"
+              className="flex items-center justify-center h-28 text-5xl rounded-control overflow-hidden"
               style={{ backgroundColor: product.cardColor }}
             >
-              <span className="group-hover:scale-110 transition-transform duration-200">
+              <span className="group-hover:scale-105 transition-transform duration-200">
                 {product.emoji}
               </span>
             </div>
-            <div className="p-3">
-              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">
+            <div className="pt-2.5 px-0.5">
+              <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-0.5">
                 {categoryLabel(product.category, t)}
               </p>
-              <p className="text-xs font-bold text-ink group-hover:text-accent transition-colors leading-snug line-clamp-2 mb-1">
+              <p className="text-xs font-semibold text-ink group-hover:underline underline-offset-4 transition-colors leading-snug line-clamp-2 mb-1">
                 {product.name}
               </p>
-              <p className="text-sm font-extrabold text-ink">{formatPrice(effectivePrice(product))}</p>
+              <p className="text-sm font-bold text-ink tabular-nums">{formatPrice(effectivePrice(product))}</p>
             </div>
           </Link>
         ))}

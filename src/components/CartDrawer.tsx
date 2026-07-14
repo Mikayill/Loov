@@ -147,7 +147,7 @@ export default function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-drawer-title"
-        className={`fixed top-0 right-0 h-full z-[401] w-full sm:w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-smooth ${
+        className={`fixed top-0 right-0 h-full z-[401] w-full sm:w-[420px] bg-canvas shadow-2xl flex flex-col transition-transform duration-300 ease-smooth ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -157,7 +157,7 @@ export default function CartDrawer() {
             <span className="text-xl">🛒</span>
             <h2 id="cart-drawer-title" className="font-extrabold text-ink text-base">{t("cart.title")}</h2>
             {totalItems > 0 && (
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#5E9E8C", color: "white" }}>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-control bg-accent text-white">
                 {totalItems}
               </span>
             )}
@@ -184,7 +184,7 @@ export default function CartDrawer() {
                 <div className="h-2 bg-sage rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${progressPct}%`, backgroundColor: "#5E9E8C" }}
+                    style={{ width: `${progressPct}%`, backgroundColor: "var(--color-accent)" }}
                   />
                 </div>
               </>
@@ -204,7 +204,7 @@ export default function CartDrawer() {
               <div className="text-5xl mb-4">🛒</div>
               <p className="font-bold text-ink mb-2">{t("cart.empty.title")}</p>
               <p className="text-sm text-ink-muted mb-6">{t("drawer.emptySubtitle")}</p>
-              <LinkButton href="/products" onClick={close} className="!rounded-full px-6">
+              <LinkButton href="/products" onClick={close} className="px-6">
                 {t("drawer.shopNow")} →
               </LinkButton>
             </div>

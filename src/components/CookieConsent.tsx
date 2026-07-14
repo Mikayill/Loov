@@ -48,7 +48,7 @@ export default function CookieConsent() {
           <button
             onClick={accept}
             className="text-xs font-bold px-4 py-2 rounded-control text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("cookie.acceptAll")}
           </button>

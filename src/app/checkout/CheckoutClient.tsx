@@ -118,7 +118,7 @@ function Field({
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       <div
-        className={`flex items-stretch h-11 rounded-control border-2 bg-white overflow-hidden transition-colors focus-within:border-accent ${
+        className={`flex items-stretch h-11 rounded-control border-2 bg-canvas overflow-hidden transition-colors focus-within:border-accent ${
           invalid ? "border-red-400 focus-within:border-red-400" : "border-line"
         }`}
       >
@@ -139,7 +139,7 @@ function Field({
           autoComplete={autoComplete}
           aria-invalid={invalid}
           aria-describedby={invalid ? `${id}-error` : undefined}
-          className="flex-1 min-w-0 h-full px-4 bg-transparent text-ink text-sm font-medium outline-none placeholder:text-[#C8B8B0]"
+          className="flex-1 min-w-0 h-full px-4 bg-transparent text-ink text-sm font-medium outline-none placeholder:text-ink-muted"
         />
       </div>
       {invalid && (
@@ -484,7 +484,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="text-6xl mb-5">🛒</div>
         <h2 className="text-2xl font-extrabold text-ink mb-3">{t("cart.empty.title")}</h2>
         <p className="text-ink-soft mb-7 text-sm">{t("checkout.emptySubtitle")}</p>
-        <Link href="/products" className="font-bold px-7 py-3 rounded-full text-white hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+        <Link href="/products" className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3 rounded-control text-white bg-ink hover:bg-accent transition-colors">
           {t("checkout.browseProducts")} →
         </Link>
       </div>
@@ -506,7 +506,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           </div>
           <button
             onClick={() => setAddressToast((s) => ({ ...s, visible: false }))}
-            className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors bg-white/15 hover:bg-white/25"
+            className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors bg-canvas/15 hover:bg-canvas/25"
             aria-label="Dismiss"
           >
             ✕
@@ -531,7 +531,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Contact */}
-            <div className="bg-white rounded-card border border-line p-6">
+            <div className="bg-canvas rounded-card border border-line p-6">
               <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">1</span>
                 {t("checkout.contact")}
@@ -548,7 +548,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             </div>
 
             {/* Shipping address */}
-            <div className="bg-white rounded-card border border-line p-6">
+            <div className="bg-canvas rounded-card border border-line p-6">
               <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">2</span>
                 {t("checkout.shippingAddress")}
@@ -576,7 +576,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         <p className="text-sm font-bold text-ink flex items-center gap-2">
                           {a.label === "Home" ? t("addr.labelHome") : a.label === "Work" ? t("addr.labelWork") : t("addr.labelOther")}
                           {a.isDefault && (
-                            <span className="text-[9px] font-bold bg-white text-accent border border-accent px-1.5 py-0.5 rounded-full uppercase">
+                            <span className="text-[9px] font-bold bg-canvas text-accent border border-accent px-1.5 py-0.5 rounded-full uppercase">
                               {t("addr.default")}
                             </span>
                           )}
@@ -627,9 +627,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                       required
                       aria-invalid={!!errors.region}
                       aria-describedby={errors.region ? "region-error" : undefined}
-                      className={`w-full h-11 px-4 rounded-control border-2 bg-white text-sm font-medium outline-none transition-colors focus:border-accent ${
+                      className={`w-full h-11 px-4 rounded-control border-2 bg-canvas text-sm font-medium outline-none transition-colors focus:border-accent ${
                         errors.region ? "border-red-400" : "border-line"
-                      } ${form.region ? "text-ink" : "text-[#C8B8B0]"}`}
+                      } ${form.region ? "text-ink" : "text-ink-muted"}`}
                     >
                       <option value="" disabled>{t("checkout.selectRegion")}</option>
                       {GEORGIA_REGIONS.map((r) => (
@@ -651,8 +651,8 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         id="district"
                         value={form.district}
                         onChange={(e) => set("district", e.target.value)}
-                        className={`w-full h-11 px-4 rounded-control border-2 border-line bg-white text-sm font-medium outline-none transition-colors focus:border-accent ${
-                          form.district ? "text-ink" : "text-[#C8B8B0]"
+                        className={`w-full h-11 px-4 rounded-control border border-line bg-canvas text-sm font-medium outline-none transition-colors focus:border-accent ${
+                          form.district ? "text-ink" : "text-ink-muted"
                         }`}
                       >
                         <option value="">{t("checkout.selectDistrict")}</option>
@@ -691,14 +691,14 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                     onChange={(e) => set("notes", e.target.value)}
                     placeholder={t("checkout.notesPlaceholder")}
                     rows={3}
-                    className="w-full px-4 py-3 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-[#C8B8B0] resize-none"
+                    className="w-full px-4 py-3 rounded-control border border-line bg-canvas text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-ink-muted resize-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Shipping method */}
-            <div className="bg-white rounded-card border border-line p-6">
+            <div className="bg-canvas rounded-card border border-line p-6">
               <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">3</span>
                 {t("checkout.shippingMethod")}
@@ -739,7 +739,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             </div>
 
             {/* Gift wrap */}
-            <div className="bg-white rounded-card border border-line p-6">
+            <div className="bg-canvas rounded-card border border-line p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🎁</span>
@@ -758,7 +758,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform duration-200 ${
                       giftWrap ? "translate-x-6" : "translate-x-0"
                     }`}
                   />
@@ -775,7 +775,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                     placeholder={t("checkout.giftMessagePlaceholder")}
                     rows={3}
                     maxLength={200}
-                    className="w-full px-4 py-3 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-[#C8B8B0] resize-none"
+                    className="w-full px-4 py-3 rounded-control border border-line bg-canvas text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-ink-muted resize-none"
                   />
                   <p className="text-[10px] text-ink-muted text-right mt-1">{giftMessage.length}/200</p>
                 </div>
@@ -797,7 +797,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
           {/* Order mini-summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-card border border-line p-5">
+            <div className="sticky top-24 bg-canvas rounded-card border border-line p-5">
               <h3 className="font-extrabold text-ink text-sm mb-4">
                 {items.length === 1 ? t("checkout.yourOrder1") : t("checkout.yourOrder").replace("{n}", String(items.length))}
                 {items.length < allItems.length && ` (${t("checkout.ofInCart").replace("{total}", String(allItems.length))})`}
@@ -849,7 +849,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-5">
             {/* Shipping summary */}
-            <div className="bg-white rounded-card border border-line p-5">
+            <div className="bg-canvas rounded-card border border-line p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-extrabold text-ink">{t("checkout.shippingDetails")}</h2>
                 <button onClick={() => setStep("address")} className="text-xs font-bold text-accent hover:underline">{t("common.edit")}</button>
@@ -886,7 +886,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             </div>
 
             {/* Items */}
-            <div className="bg-white rounded-card border border-line p-5">
+            <div className="bg-canvas rounded-card border border-line p-5">
               <h2 className="font-extrabold text-ink mb-4">{t("checkout.orderItems")}</h2>
               <div className="space-y-3">
                 {items.map((item) => {
@@ -946,7 +946,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                     }`}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform duration-200 ${
                         usePoints ? "translate-x-6" : "translate-x-0"
                       }`}
                     />
@@ -1020,7 +1020,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
           {/* Price summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-card border border-line p-5 space-y-3">
+            <div className="sticky top-24 bg-canvas rounded-card border border-line p-5 space-y-3">
               <h3 className="font-extrabold text-ink text-sm">{t("checkout.priceSummary")}</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-ink-soft"><span>{t("cart.subtotal")}</span><span className="font-bold">{formatPrice(checkoutTotal)}</span></div>
@@ -1076,7 +1076,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
       {/* ══ STEP 3: Success ══ */}
       {step === "success" && (
         <div className="max-w-lg mx-auto text-center py-8">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-lg" style={{ backgroundColor: "#EAF2F0" }}>
+          <div className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-lg" style={{ backgroundColor: "var(--color-accent-soft)" }}>
             🎉
           </div>
           <h2 className="text-3xl font-extrabold text-ink mb-2">{t("checkout.orderPlaced")}</h2>
@@ -1112,7 +1112,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           {(() => {
             const msg = buildOrderMessage(locale, { name: form.firstName || "there", orderNum });
             return (
-              <div className="bg-white border border-line rounded-card p-5 mb-8 text-left">
+              <div className="bg-canvas border border-line rounded-card p-5 mb-8 text-left">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">📧</span>
                   <p className="text-sm font-bold text-ink">
@@ -1133,14 +1133,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/products"
-              className="font-bold px-7 py-3 rounded-full text-white hover:opacity-90 transition-opacity shadow-sm"
-              style={{ backgroundColor: "#5E9E8C" }}
+              className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control text-white bg-ink hover:bg-accent transition-colors"
             >
               {t("common.continueShopping")} →
             </Link>
             <Link
               href="/"
-              className="font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
+              className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control border border-ink text-ink hover:bg-ink hover:text-white transition-colors"
             >
               {t("checkout.backToHome")}
             </Link>

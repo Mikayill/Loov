@@ -275,7 +275,7 @@ export default function ProductDetailClient({
         <div className="space-y-4">
           {/* Main image — colour selection does NOT change the photo */}
           <div
-            className="relative w-full aspect-square rounded-3xl flex items-center justify-center overflow-hidden border border-line touch-pan-y select-none"
+            className="relative w-full aspect-square rounded-card flex items-center justify-center overflow-hidden border border-line touch-pan-y select-none"
             style={{ backgroundColor: product.cardColor }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
@@ -298,12 +298,12 @@ export default function ProductDetailClient({
               </span>
             )}
             {product.isNew && (
-              <span className="absolute top-5 left-5 bg-accent text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow">
+              <span className="absolute top-5 left-5 bg-canvas/90 text-accent text-xs font-bold px-3 py-1.5 rounded-control uppercase tracking-[0.12em]">
                 New
               </span>
             )}
             {off > 0 && (
-              <span className="absolute top-5 right-5 bg-[#D9534F] text-white text-sm font-extrabold px-3 py-1.5 rounded-full shadow">
+              <span className="absolute top-5 right-5 bg-canvas/90 text-danger text-sm font-extrabold px-3 py-1.5 rounded-control">
                 {t("pdp.save").replace("{n}", String(off))}
               </span>
             )}
@@ -353,7 +353,7 @@ export default function ProductDetailClient({
         {/* ── RIGHT: Info ── */}
         <div className="flex flex-col">
           {/* Category tag */}
-          <span className="inline-block self-start bg-panel text-ink-soft text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+          <span className="inline-block self-start bg-panel text-ink-soft text-[11px] font-bold uppercase tracking-[0.12em] px-3 py-1 rounded-control mb-3">
             {categoryLabel(product.category, t)}
           </span>
 
@@ -375,7 +375,7 @@ export default function ProductDetailClient({
           {/* Price + stock + share */}
           <div className="flex items-end justify-between mb-5 flex-wrap gap-3">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <p className={`text-4xl font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-ink"}`}>
+              <p className={`text-4xl font-extrabold tabular-nums ${off > 0 ? "text-danger" : "text-ink"}`}>
                 {formatAmount(unitPrice)} <span className="text-2xl">₾</span>
               </p>
               {off > 0 && (
@@ -384,10 +384,10 @@ export default function ProductDetailClient({
             </div>
             <button
               onClick={handleShare}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-control border text-sm font-semibold transition-colors ${
                 copied
-                  ? "border-accent bg-accent-soft text-accent"
-                  : "border-line bg-white text-ink-soft hover:border-accent hover:text-accent hover:shadow-sm"
+                  ? "border-accent bg-accent-soft text-accent-deep"
+                  : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
               }`}
             >
               {copied ? (
@@ -424,8 +424,7 @@ export default function ProductDetailClient({
                   <button
                     onClick={handleNotifyAccount}
                     disabled={notifyStatus === "sending"}
-                    className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
-                    style={{ backgroundColor: "#5E9E8C" }}
+                    className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-60 bg-ink hover:bg-accent active:scale-95 transition-all"
                   >
                     {notifyStatus === "sending" ? "…" : `🔔 ${t("pdp.notifyBtn")}`}
                   </button>
@@ -440,12 +439,11 @@ export default function ProductDetailClient({
                     <input
                       type="email" value={notifyEmail} onChange={(e) => setNotifyEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="flex-1 min-w-0 h-10 px-3 rounded-control border-2 border-line text-sm font-medium outline-none focus:border-accent"
+                      className="flex-1 min-w-0 h-10 px-3 rounded-control border border-line text-sm font-medium outline-none focus:border-ink"
                     />
                     <button
                       type="submit" disabled={notifyStatus === "sending"}
-                      className="h-10 px-4 rounded-control font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
-                      style={{ backgroundColor: "#5E9E8C" }}
+                      className="h-10 px-4 rounded-control font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 bg-ink hover:bg-accent active:scale-95 transition-all"
                     >
                       {notifyStatus === "sending" ? "…" : t("pdp.notifyBtn")}
                     </button>
@@ -479,7 +477,7 @@ export default function ProductDetailClient({
           {/* Loyalty points */}
           <Link
             href="/account/rewards"
-            className="inline-flex items-center gap-1.5 bg-[#FFF8E8] border border-[#F0C85A] rounded-full px-3 py-1.5 mb-5 hover:bg-[#FFF2D6] transition-colors group self-start"
+            className="inline-flex items-center gap-1.5 bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-1.5 mb-5 hover:bg-[#FFF2D6] transition-colors group self-start"
             title="Loov Rewards"
           >
             <span className="text-sm">⭐</span>
@@ -510,9 +508,9 @@ export default function ProductDetailClient({
                     disabled={disabled}
                     className={`w-9 h-9 rounded-full border-2 transition-all duration-200 relative ${
                       selectedColor === color
-                        ? "border-accent ring-2 ring-accent ring-offset-2 scale-110 shadow"
+                        ? "border-accent ring-2 ring-accent ring-offset-2 scale-110"
                         : disabled
-                        ? "border-[#E8E0D8] opacity-40 cursor-not-allowed"
+                        ? "border-line opacity-40 cursor-not-allowed"
                         : "border-line hover:scale-110 hover:border-ink-muted"
                     }`}
                     style={{ backgroundColor: hex(color) }}
@@ -552,10 +550,10 @@ export default function ProductDetailClient({
                   <button
                     key={size}
                     onClick={() => pickSize(size)}
-                    className={`px-4 py-2 rounded-control text-sm font-semibold border-2 transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-control text-sm font-semibold border transition-colors duration-200 ${
                       selectedSize === size
-                        ? "border-accent bg-accent-soft text-accent shadow-sm"
-                        : "border-line text-ink-soft hover:border-accent hover:bg-[#F5F8F7]"
+                        ? "border-ink bg-ink text-white"
+                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
                     }`}
                   >
                     {sizeLabel(size, t)}
@@ -577,7 +575,7 @@ export default function ProductDetailClient({
 
           {/* ── Quantity + Add to cart ── */}
           <div ref={ctaRef} className="flex items-center gap-3 mb-4">
-            <div className="flex items-center border-2 border-line rounded-control overflow-hidden flex-shrink-0">
+            <div className="flex items-center border border-line rounded-control overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90"
@@ -597,14 +595,13 @@ export default function ProductDetailClient({
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`flex-1 h-12 rounded-control font-extrabold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-sm text-sm ${
+              className={`flex-1 h-12 rounded-control font-semibold uppercase tracking-[0.06em] text-white transition-all duration-300 flex items-center justify-center gap-2 text-[13px] ${
                 cartStatus === "added"
-                  ? "scale-95 bg-green-500"
+                  ? "scale-95 bg-accent"
                   : cartStatus === "blocked" || outOfStock
-                  ? "bg-red-500"
-                  : "hover:opacity-90 active:scale-95"
+                  ? "bg-danger"
+                  : "bg-ink hover:bg-accent active:scale-95"
               } ${outOfStock ? "cursor-not-allowed" : ""}`}
-              style={cartStatus === "idle" && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
             >
               {outOfStock ? (
                 t("pdp.outOfStockBtn")
@@ -663,7 +660,7 @@ export default function ProductDetailClient({
 
       {/* ══ TABS ══ */}
       <div className="mt-16">
-        <div className="flex border-b-2 border-line mb-8 overflow-x-auto overflow-y-hidden">
+        <div className="flex border-b border-line mb-8 overflow-x-auto overflow-y-hidden gap-2">
           {(
             [
               { id: "description", label: t("pdp.tabDescription") },
@@ -674,10 +671,10 @@ export default function ProductDetailClient({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3 font-bold text-sm whitespace-nowrap transition-all duration-200 border-b-2 -mb-0.5 ${
+              className={`px-4 py-3 font-semibold text-[12px] uppercase tracking-[0.08em] whitespace-nowrap transition-colors duration-200 border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? "border-accent text-accent"
-                  : "border-transparent text-ink-muted hover:text-ink-soft"
+                  ? "border-ink text-ink"
+                  : "border-transparent text-ink-muted hover:text-ink"
               }`}
             >
               {tab.label}
@@ -763,14 +760,14 @@ export default function ProductDetailClient({
       {sizeGuide && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: "rgba(42,35,32,0.5)", backdropFilter: "blur(4px)" }}
+          style={{ backgroundColor: "rgba(20,20,18,0.5)", backdropFilter: "blur(4px)" }}
           onClick={() => setSizeGuide(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="size-guide-title"
-            className="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl"
+            className="bg-canvas rounded-card p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl border border-line"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -780,7 +777,7 @@ export default function ProductDetailClient({
             <div className="overflow-x-auto rounded-card border border-line">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ backgroundColor: "#EDE5D8" }}>
+                  <tr className="bg-panel">
                     {[t("sg.colSize"), t("sg.colAge"), t("sg.colHeight"), t("sg.colWeight")].map((h) => (
                       <th key={h} className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{h}</th>
                     ))}
@@ -788,7 +785,7 @@ export default function ProductDetailClient({
                 </thead>
                 <tbody>
                   {sizeGuideRows.map((row, i) => (
-                    <tr key={row.size} className={`border-t border-line transition-colors ${selectedSize === row.size ? "bg-accent-soft" : i % 2 === 0 ? "bg-white" : "bg-[#FAF7F4]"}`}>
+                    <tr key={row.size} className={`border-t border-line transition-colors ${selectedSize === row.size ? "bg-accent-soft" : i % 2 === 0 ? "bg-canvas" : "bg-panel/40"}`}>
                       <td className="px-4 py-3 font-bold text-ink whitespace-nowrap">{row.size}</td>
                       <td className="px-4 py-3 text-ink-soft">{row.age}</td>
                       <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.height}</td>
@@ -803,9 +800,9 @@ export default function ProductDetailClient({
       )}
 
       {/* ══ MOBILE STICKY CTA ══ */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
+      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-canvas border-t border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <div className="flex items-center border-2 border-line rounded-control overflow-hidden">
+          <div className="flex items-center border border-line rounded-control overflow-hidden">
             <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90">−</button>
             <span className="w-8 text-center font-extrabold text-ink">{quantity}</span>
             <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
@@ -813,12 +810,11 @@ export default function ProductDetailClient({
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`flex-1 h-11 rounded-control font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
-              cartStatus === "added" ? "bg-green-500 scale-95" :
-              cartStatus === "blocked" || outOfStock ? "bg-red-500" :
-              "hover:opacity-90 active:scale-95"
+            className={`flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.04em] text-white text-[12.5px] transition-all duration-300 flex items-center justify-center gap-1.5 ${
+              cartStatus === "added" ? "bg-accent scale-95" :
+              cartStatus === "blocked" || outOfStock ? "bg-danger" :
+              "bg-ink hover:bg-accent active:scale-95"
             } ${outOfStock ? "cursor-not-allowed" : ""}`}
-            style={cartStatus === "idle" && !outOfStock ? { backgroundColor: "#5E9E8C" } : {}}
           >
             {outOfStock ? t("pdp.outOfStockBtn") : cartStatus === "added" ? `✓ ${t("pdp.added")}` : cartStatus === "blocked" ? t("cart.cantAddMore") : `🛒 ${t("common.addToCart")} · ${formatPrice(unitPrice * quantity)}`}
           </button>

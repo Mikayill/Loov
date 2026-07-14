@@ -85,7 +85,7 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
         role="dialog"
         aria-modal="true"
         aria-labelledby="variant-picker-title"
-        className={`bg-white rounded-card w-full max-w-xs shadow-2xl overflow-hidden p-5 ${open ? "animate-pop-in" : "animate-pop-out"}`}
+        className={`bg-canvas rounded-card w-full max-w-xs shadow-2xl overflow-hidden p-5 ${open ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3 gap-2">
@@ -172,7 +172,7 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
               status === "blocked" || soldOut ? "bg-red-500" :
               "hover:opacity-90 active:scale-95"
             } ${soldOut ? "cursor-not-allowed" : ""}`}
-            style={status === "idle" && !soldOut ? { backgroundColor: "#5E9E8C" } : {}}
+            style={status === "idle" && !soldOut ? { backgroundColor: "var(--color-accent)" } : {}}
           >
             {status === "added" ? (
               <>

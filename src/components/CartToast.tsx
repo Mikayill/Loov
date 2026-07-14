@@ -74,7 +74,7 @@ export default function CartToast() {
           <>
             <div
               className="w-11 h-11 rounded-control flex items-center justify-center text-2xl flex-shrink-0"
-              style={{ backgroundColor: "#5E9E8C" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {toast.emoji}
             </div>
@@ -103,7 +103,7 @@ export default function CartToast() {
         )}
         <button
           onClick={() => setVisible(false)}
-          className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${isWarn ? "bg-white/15 hover:bg-white/25" : "bg-white/10 hover:bg-white/20"}`}
+          className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${isWarn ? "bg-canvas/15 hover:bg-canvas/25" : "bg-canvas/10 hover:bg-canvas/20"}`}
           aria-label="Dismiss"
         >
           ✕

@@ -92,7 +92,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
       <button
         onClick={handleOpen}
         aria-label="Quick view"
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-ink text-[11px] font-bold shadow-md opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap border border-line hover:bg-accent hover:text-white hover:border-accent"
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-control bg-canvas/90 backdrop-blur-sm text-ink text-[10.5px] font-semibold uppercase tracking-[0.08em] opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap border border-line hover:bg-ink hover:text-white hover:border-ink"
       >
         👁 {t("quick.view")}
       </button>
@@ -108,7 +108,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="quick-view-title"
-            className={`bg-white rounded-card w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
+            className={`bg-canvas rounded-card w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -139,7 +139,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
                 </div>
                 <div className="flex-1 min-w-0 py-1">
                   {product.isNew && (
-                    <span className="inline-block bg-accent text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide mb-1">
+                    <span className="inline-block text-accent text-[9px] font-bold uppercase tracking-[0.14em] mb-1">
                       {t("product.new")}
                     </span>
                   )}
@@ -226,7 +226,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
                     status === "blocked" || soldOut ? "bg-red-500" :
                     "hover:opacity-90 active:scale-95"
                   } ${soldOut ? "cursor-not-allowed" : ""}`}
-                  style={status === "idle" && !soldOut ? { backgroundColor: "#5E9E8C" } : {}}
+                  style={status === "idle" && !soldOut ? { backgroundColor: "var(--color-accent)" } : {}}
                 >
                   {status === "added" ? (
                     <>
