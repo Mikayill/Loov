@@ -176,7 +176,8 @@ export default function Navbar() {
           <span className="hidden md:inline opacity-90">{t("topbar.returns")}</span>
         </div>
 
-        <nav className="bg-canvas border-b border-line">
+        {/* Frosted glass — content scrolling under the sticky bar blurs through */}
+        <nav className="bg-canvas/75 backdrop-blur-xl backdrop-saturate-150 border-b border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-3 gap-3 md:gap-6">
 
@@ -320,7 +321,7 @@ export default function Navbar() {
           </div>
 
           {/* Category strip — tactile chip buttons */}
-          <div className="border-t border-line overflow-x-auto no-scrollbar bg-surface">
+          <div className="border-t border-line overflow-x-auto no-scrollbar bg-surface/60 backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 whitespace-nowrap py-2.5">
               <Link
                 href="/products"

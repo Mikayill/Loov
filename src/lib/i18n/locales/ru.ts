@@ -28,6 +28,8 @@ export const ru: Dictionary = {
   "topbar.delivery": "Доставка {min}–{max} дня по всей Грузии",
   "topbar.returns": "Лёгкий возврат в течение 14 дней",
   "theme.toggle": "Светлая / тёмная тема",
+  "deal.daysLeft": "Осталось {n} дн.",
+  "deal.lastDay": "Последний день!",
   "theme.light": "Светлая",
   "theme.dark": "Тёмная",
   "acct.appearance": "Оформление",

@@ -28,6 +28,13 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
   const { signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unread, setUnread] = useState<Record<Section, number>>({ orders: 0, returns: 0, reviews: 0 });
+
+  /* Admin is light-only: the .route-admin class disables every dark-theme
+     CSS override while the panel is mounted (storefront keeps the choice). */
+  useEffect(() => {
+    document.documentElement.classList.add("route-admin");
+    return () => document.documentElement.classList.remove("route-admin");
+  }, []);
   const seenThisVisit = useRef<Set<Section>>(new Set());
 
   const isActive = (href: string, exact?: boolean) =>

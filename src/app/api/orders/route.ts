@@ -154,10 +154,20 @@ export async function POST(req: NextRequest) {
   const ids = [...new Set(body.items.map((i) => i.productId))];
   const firstTry = await supabase
     .from("products")
-    .select("id, slug, name, name_ka, name_ru, name_tr, price, discount_percent, size_prices")
+    .select("id, slug, name, name_ka, name_ru, name_tr, price, discount_percent, discount_ends_at, size_prices")
     .in("id", ids);
   let products: unknown[] | null = firstTry.data;
   let prodErr = firstTry.error;
+  // discount_ends_at column missing (supabase/discount-timer.sql not run yet) →
+  // retry without it; untimed-discount behavior is preserved.
+  if (prodErr && /discount_ends_at/i.test(prodErr.message)) {
+    const retry = await supabase
+      .from("products")
+      .select("id, slug, name, name_ka, name_ru, name_tr, price, discount_percent, size_prices")
+      .in("id", ids);
+    products = retry.data;
+    prodErr = retry.error;
+  }
   // Localized-name columns missing (supabase/product-i18n.sql not run yet) →
   // retry with English only.
   if (prodErr && /name_(ka|ru|tr)/i.test(prodErr.message)) {
@@ -189,6 +199,7 @@ export async function POST(req: NextRequest) {
     name_tr?: string | null;
     price: number;
     discount_percent?: number | null;
+    discount_ends_at?: string | null;
     size_prices?: Record<string, number> | null;
   }
   const byId = new Map(
@@ -205,6 +216,7 @@ export async function POST(req: NextRequest) {
       {
         price: Number(p.price),
         discountPercent: Number(p.discount_percent) || 0,
+        discountEndsAt: p.discount_ends_at ?? null,
         sizePrices: p.size_prices ?? undefined,
       },
       it.size || undefined

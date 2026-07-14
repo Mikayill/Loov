@@ -25,6 +25,7 @@ interface Row {
   image_url: string | null;
   image_urls: string[] | null;
   discount_percent: number | null;
+  discount_ends_at: string | null;
   season: string | null;
   colors: string[] | null;
   sizes: string[] | null;
@@ -392,6 +393,22 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                     {Math.round(draft.price * (1 - (draft.discount_percent ?? 0) / 100))} ₾ <span className="line-through text-ink-muted font-normal">{draft.price} ₾</span>
                   </p>
                 )}
+                {(draft.discount_percent ?? 0) > 0 && (
+                  <div className="mt-2">
+                    <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">Ends on (optional)</label>
+                    <input
+                      type="date"
+                      value={draft.discount_ends_at ? draft.discount_ends_at.slice(0, 10) : ""}
+                      onChange={(e) => {
+                        const v = e.target.value ? new Date(e.target.value + "T23:59:59").toISOString() : null;
+                        setDraft({ ...draft, discount_ends_at: v });
+                      }}
+                      onBlur={() => save({ discount_ends_at: draft.discount_ends_at ?? null })}
+                      className="h-9 px-3 rounded-lg border border-line text-sm font-medium outline-none focus:border-accent"
+                    />
+                    <p className="text-[10px] text-ink-muted mt-1">Shoppers see “{'{n}'} days left”; discount stops after this day. Blank = no limit.</p>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Season</label>
@@ -583,6 +600,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     if ("stock" in patch) payload.stock = next.stock;
     if ("is_new" in patch) payload.isNew = next.is_new;
     if ("discount_percent" in patch) payload.discountPercent = next.discount_percent ?? 0;
+    if ("discount_ends_at" in patch) payload.discountEndsAt = next.discount_ends_at ?? null;
     if ("season" in patch) payload.season = next.season;
     if ("colors" in patch) payload.colors = next.colors;
     if ("sizes" in patch) payload.sizes = next.sizes;

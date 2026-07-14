@@ -11,19 +11,44 @@
 import type { Product } from "@/types";
 
 /** The minimal shape every pricing helper needs. */
+type Discountable = Pick<Product, "discountPercent"> & {
+  discountEndsAt?: string | null;
+};
 type Priceable = Pick<Product, "price" | "discountPercent"> & {
   sizePrices?: Record<string, number> | null;
+  discountEndsAt?: string | null;
 };
 
-/** The active discount percentage for a product (0 when none / invalid). */
-export function discountPercent(product: Pick<Product, "discountPercent">): number {
+/** True while a timed discount hasn't reached its end date (untimed = always). */
+export function discountStillRunning(product: Discountable, now = Date.now()): boolean {
+  if (!product.discountEndsAt) return true;
+  const ends = Date.parse(product.discountEndsAt);
+  return !Number.isFinite(ends) || ends > now;
+}
+
+/**
+ * The active discount percentage for a product (0 when none / invalid).
+ * A discount with an end date in the past no longer applies — this is the
+ * single gate, so cards, PDP AND server repricing all expire together.
+ */
+export function discountPercent(product: Discountable): number {
   const pct = product.discountPercent ?? 0;
-  return Number.isFinite(pct) && pct > 0 ? Math.min(90, Math.round(pct)) : 0;
+  if (!Number.isFinite(pct) || pct <= 0) return 0;
+  if (!discountStillRunning(product)) return 0;
+  return Math.min(90, Math.round(pct));
 }
 
 /** Whether the product is currently discounted. */
-export function isDiscounted(product: Pick<Product, "discountPercent">): boolean {
+export function isDiscounted(product: Discountable): boolean {
   return discountPercent(product) > 0;
+}
+
+/** Whole days (ceil) until a timed discount ends; null when untimed/expired. */
+export function discountDaysLeft(product: Discountable, now = Date.now()): number | null {
+  if (!product.discountEndsAt || !isDiscounted(product)) return null;
+  const ends = Date.parse(product.discountEndsAt);
+  if (!Number.isFinite(ends) || ends <= now) return null;
+  return Math.ceil((ends - now) / 86_400_000);
 }
 
 /** Pre-discount base price for a given size (falls back to the base price). */

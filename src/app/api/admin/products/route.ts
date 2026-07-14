@@ -82,6 +82,15 @@ function sanitize(body: Record<string, unknown>, partial: boolean): Record<strin
     if (!Number.isInteger(d) || d < 0 || d > 90) return "Discount must be a whole number 0–90";
     set("discount_percent", d);
   }
+  // ── new: timed discount end (run supabase/discount-timer.sql first) ──
+  if (body.discountEndsAt !== undefined) {
+    if (body.discountEndsAt === null || body.discountEndsAt === "") set("discount_ends_at", null);
+    else {
+      const ts = Date.parse(String(body.discountEndsAt));
+      if (!Number.isFinite(ts)) return "Invalid discount end date";
+      set("discount_ends_at", new Date(ts).toISOString());
+    }
+  }
   // ── new: season ──
   if (body.season !== undefined) {
     if (!SEASONS.includes(String(body.season))) return "Invalid season";

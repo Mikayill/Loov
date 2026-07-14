@@ -30,6 +30,7 @@ export interface ProductRow {
   image_url?: string | null;
   image_urls?: string[] | null;
   discount_percent?: number | null;
+  discount_ends_at?: string | null;
   season?: string | null;
   size_colors?: Record<string, string[]> | null;
   size_prices?: Record<string, number> | null;
@@ -81,6 +82,7 @@ export function mapProductRow(row: ProductRow, locale: Locale = "en"): Product {
     imageUrl: primary,
     imageUrls: gallery.length ? gallery : primary ? [primary] : [],
     discountPercent: row.discount_percent ?? 0,
+    discountEndsAt: row.discount_ends_at ?? null,
     season,
     sizeColors: row.size_colors ?? {},
     sizePrices: row.size_prices ?? undefined,

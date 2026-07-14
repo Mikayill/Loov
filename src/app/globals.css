@@ -39,7 +39,7 @@
 
 /* ── Dark theme — same semantic tokens, night values.
    Unlayered on purpose: must beat the @layer theme defaults. ── */
-html[data-theme="dark"] {
+html[data-theme="dark"]:not(.route-admin) {
   --color-canvas: #151513;
   --color-surface: #1E1E1B;
   --color-panel: #282824;
@@ -56,16 +56,16 @@ html[data-theme="dark"] {
 }
 /* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.
    Unlayered, so it also beats an element's own `text-white` utility. */
-html[data-theme="dark"] .bg-ink,
-html[data-theme="dark"] .hover\:bg-ink:hover {
+html[data-theme="dark"]:not(.route-admin) .bg-ink,
+html[data-theme="dark"]:not(.route-admin) .hover\:bg-ink:hover {
   color: #161614;
 }
-html[data-theme="dark"] .bg-accent,
-html[data-theme="dark"] .hover\:bg-accent:hover {
+html[data-theme="dark"]:not(.route-admin) .bg-accent,
+html[data-theme="dark"]:not(.route-admin) .hover\:bg-accent:hover {
   color: #12211B;
 }
 /* The wordmark is near-black raster art — invert it on dark ground. */
-html[data-theme="dark"] img[src="/logo.png"] {
+html[data-theme="dark"]:not(.route-admin) img[src="/logo.png"] {
   filter: invert(1) hue-rotate(180deg) brightness(1.08);
 }
 /* Brief cross-fade when the user flips the theme (removed right after). */
@@ -171,10 +171,10 @@ svg {
     box-shadow: inset 0 0 0 0 transparent, 0 1px 3px rgb(20 20 18 / 0.08);
   }
 }
-html[data-theme="dark"] .u-btn {
+html[data-theme="dark"]:not(.route-admin) .u-btn {
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 2px 8px rgb(0 0 0 / 0.35);
 }
-html[data-theme="dark"] .u-btn:hover {
+html[data-theme="dark"]:not(.route-admin) .u-btn:hover {
   box-shadow: 0 3px 6px rgb(0 0 0 / 0.55), 0 10px 24px rgb(0 0 0 / 0.4);
 }
 @media (prefers-reduced-motion: reduce) {

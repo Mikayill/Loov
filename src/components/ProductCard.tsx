@@ -1,14 +1,55 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/format";
-import { discountPercent, effectivePrice, hasVariablePricing, minEffectivePrice } from "@/lib/pricing";
+import { discountPercent, discountDaysLeft, effectivePrice, hasVariablePricing, minEffectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
 import { categoryLabel } from "@/lib/i18n/labels";
 import WishlistButton from "./WishlistButton";
 import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
+
+/* Small star row — review average, or a full 5 stars until the first review. */
+function Stars({ rating }: { rating?: { avg: number; count: number } }) {
+  const filled = rating && rating.count > 0 ? Math.round(rating.avg) : 5;
+  return (
+    <span className="flex items-center gap-1" aria-label={rating ? `${rating.avg}/5` : "5/5"}>
+      <span className="flex items-center gap-px">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <svg key={s} className={`w-3 h-3 ${s <= filled ? "fill-accent" : "fill-line"}`} viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </span>
+      {rating && rating.count > 0 && (
+        <span className="text-[10px] text-ink-muted font-medium tabular-nums">
+          {rating.avg.toFixed(1)} ({rating.count})
+        </span>
+      )}
+    </span>
+  );
+}
+
+/* "{n} days left / Last day!" — rendered after mount so SSR and the client
+   clock can't disagree mid-hydration. */
+export function DealCountdown({ product, className = "" }: { product: Product; className?: string }) {
+  const { t } = useLocale();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  const days = discountDaysLeft(product);
+  if (days === null) return null;
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.06em] text-danger ${className}`}>
+      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2.5 2.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      {days <= 1 ? t("deal.lastDay") : t("deal.daysLeft").replace("{n}", String(days))}
+    </span>
+  );
+}
 
 export default function ProductCard({ product }: { product: Product }) {
   const { t } = useLocale();
@@ -59,9 +100,10 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1">
             {categoryLabel(product.category, t)}
           </p>
-          <h3 className="font-semibold text-ink text-[13.5px] mb-2 leading-snug line-clamp-2 group-hover:underline underline-offset-4 decoration-ink/70">
+          <h3 className="font-semibold text-ink text-[13.5px] mb-1.5 leading-snug line-clamp-2 group-hover:underline underline-offset-4 decoration-ink/70">
             {product.name}
           </h3>
+          <div className="mb-2"><Stars rating={product.rating} /></div>
           <div className="flex items-center justify-between">
             <span className="flex items-baseline gap-1.5">
               {variable && (
@@ -76,6 +118,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
             <QuickAddButton product={product} />
           </div>
+          {off > 0 && <DealCountdown product={product} className="mt-1" />}
         </div>
       </div>
     </Link>

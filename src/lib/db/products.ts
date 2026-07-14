@@ -27,6 +27,42 @@ function withNewBadge(list: Product[], newBadgeDays: number): Product[] {
 }
 
 /**
+ * Attach the published-review average to each product (drives the card star
+ * row). Best-effort: any failure just returns the list without ratings —
+ * cards then show the 5-star default.
+ */
+async function withRatings(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  list: Product[]
+): Promise<Product[]> {
+  if (list.length === 0) return list;
+  try {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("product_id, rating")
+      .eq("status", "published")
+      .in("product_id", list.map((p) => p.id));
+    if (error || !data) return list;
+    const agg = new Map<string, { sum: number; count: number }>();
+    for (const r of data as { product_id: string; rating: number }[]) {
+      const key = String(r.product_id);
+      const cur = agg.get(key) ?? { sum: 0, count: 0 };
+      cur.sum += Number(r.rating) || 0;
+      cur.count += 1;
+      agg.set(key, cur);
+    }
+    return list.map((p) => {
+      const a = agg.get(String(p.id));
+      return a && a.count > 0
+        ? { ...p, rating: { avg: Math.round((a.sum / a.count) * 10) / 10, count: a.count } }
+        : p;
+    });
+  } catch {
+    return list;
+  }
+}
+
+/**
  * Cookie-free variant for STATIC contexts (sitemap generation at build time).
  * The cookie-based server client would force those routes dynamic.
  */
@@ -63,7 +99,7 @@ export async function getAllProducts(): Promise<Product[]> {
       .map((row) => mapRow(row, locale))
       .sort((a, b) => Number(a.id) - Number(b.id));
     const { newBadgeDays } = await getSettings();
-    return withNewBadge(list, newBadgeDays);
+    return withRatings(supabase, withNewBadge(list, newBadgeDays));
   } catch (e) {
     console.warn(
       "[products] Supabase fetch failed — using static fallback:",
@@ -88,7 +124,7 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
     if (!data || data.length === 0) return fallbackProducts.filter((p) => ids.includes(p.id));
     const locale = await getServerLocale();
     const { newBadgeDays } = await getSettings();
-    return withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays);
+    return withRatings(supabase, withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays));
   } catch (e) {
     console.warn("[products] getProductsByIds failed — using static fallback:", (e as Error).message);
     return fallbackProducts.filter((p) => ids.includes(p.id));
@@ -105,7 +141,7 @@ export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
     if (!data || data.length === 0) return fallbackProducts.filter((p) => slugs.includes(p.slug));
     const locale = await getServerLocale();
     const { newBadgeDays } = await getSettings();
-    return withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays);
+    return withRatings(supabase, withNewBadge((data as ProductRow[]).map((row) => mapRow(row, locale)), newBadgeDays));
   } catch (e) {
     console.warn("[products] getProductsBySlugs failed — using static fallback:", (e as Error).message);
     return fallbackProducts.filter((p) => slugs.includes(p.slug));
@@ -128,7 +164,8 @@ export async function getProductBySlug(
     const locale = await getServerLocale();
     const product = mapRow(data as ProductRow, locale);
     const { newBadgeDays } = await getSettings();
-    return { ...product, isNew: isNewArrival(product, newBadgeDays) };
+    const [withR] = await withRatings(supabase, [{ ...product, isNew: isNewArrival(product, newBadgeDays) }]);
+    return withR;
   } catch (e) {
     console.warn(
       "[products] Supabase fetch failed — using static fallback:",

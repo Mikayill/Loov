@@ -28,6 +28,8 @@ export const tr: Dictionary = {
   "topbar.delivery": "Gürcistan geneli {min}–{max} günde teslimat",
   "topbar.returns": "14 gün kolay iade",
   "theme.toggle": "Açık / koyu tema",
+  "deal.daysLeft": "{n} gün kaldı",
+  "deal.lastDay": "Son gün!",
   "theme.light": "Açık",
   "theme.dark": "Koyu",
   "acct.appearance": "Görünüm",

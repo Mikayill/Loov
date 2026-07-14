@@ -30,6 +30,8 @@ export const ka: Dictionary = {
   "topbar.delivery": "მიწოდება {min}–{max} დღეში მთელ საქართველოში",
   "topbar.returns": "მარტივი დაბრუნება 14 დღეში",
   "theme.toggle": "ღია / მუქი თემა",
+  "deal.daysLeft": "დარჩა {n} დღე",
+  "deal.lastDay": "ბოლო დღეა!",
   "theme.light": "ღია",
   "theme.dark": "მუქი",
   "acct.appearance": "იერსახე",

@@ -15,6 +15,7 @@ import { fmtDateNoYear } from "@/lib/i18n/format";
 import { useSettings } from "@/lib/db/useSettings";
 import { effectivePrice, discountPercent, basePriceForSize } from "@/lib/pricing";
 import { trackProductView } from "@/components/RecentlyViewedSection";
+import { DealCountdown } from "@/components/ProductCard";
 import { variantStock } from "@/lib/stock";
 
 /* ── colour map ── */
@@ -407,6 +408,8 @@ export default function ProductDetailClient({
               )}
             </button>
           </div>
+
+          {off > 0 && <DealCountdown product={product} className="mb-3 text-[11.5px]" />}
 
           {/* Stock indicator */}
           {outOfStock ? (

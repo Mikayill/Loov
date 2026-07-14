@@ -21,6 +21,10 @@ export interface Product {
   imageUrls?: string[];
   /** Percentage discount, 0/undefined = no discount. */
   discountPercent?: number;
+  /** When a timed discount ends (ISO) — past date disables the discount. */
+  discountEndsAt?: string | null;
+  /** Published-review aggregate for the card star row (absent = no data). */
+  rating?: { avg: number; count: number };
   /** Season the item belongs to — drives filtering + seasonal ordering. */
   season?: Season;
   /** Colors available per size, e.g. { "0-3 Months": ["White", "Sage"] }.

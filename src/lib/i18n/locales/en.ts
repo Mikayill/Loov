@@ -32,6 +32,8 @@ export const en = {
   "topbar.delivery": "Delivery {min}–{max} days across Georgia",
   "topbar.returns": "Easy 14-day returns",
   "theme.toggle": "Light / dark theme",
+  "deal.daysLeft": "{n} days left",
+  "deal.lastDay": "Last day!",
   "theme.light": "Light",
   "theme.dark": "Dark",
   "acct.appearance": "Appearance",
