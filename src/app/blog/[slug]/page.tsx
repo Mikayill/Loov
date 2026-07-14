@@ -44,7 +44,7 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* Hero */}
       <div
-        className="rounded-3xl flex items-center justify-center py-14 mb-8 text-8xl select-none border border-line"
+        className="rounded-card flex items-center justify-center py-14 mb-8 text-8xl select-none border border-line"
         style={{ backgroundColor: article.cardColor + "80" }}
       >
         {article.emoji}
@@ -64,7 +64,7 @@ export default async function ArticlePage({ params }: Props) {
       <h1 className="text-3xl sm:text-4xl font-extrabold text-ink leading-tight mb-4">
         {article.title}
       </h1>
-      <p className="text-ink-soft text-base leading-relaxed mb-8 border-l-4 pl-4" style={{ borderColor: "#5E9E8C" }}>
+      <p className="text-ink-soft text-base leading-relaxed mb-8 border-l-4 pl-4" style={{ borderColor: "var(--color-accent)" }}>
         {article.excerpt}
       </p>
 
@@ -83,7 +83,7 @@ export default async function ArticlePage({ params }: Props) {
       <div className="mt-10 flex items-center gap-4 p-5 bg-accent-soft rounded-card border border-sage">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
-          style={{ backgroundColor: "#5E9E8C" }}
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           🌿
         </div>
@@ -104,8 +104,8 @@ export default async function ArticlePage({ params }: Props) {
         <p className="text-xs text-ink-soft mb-4">{t("blog.shopBebecoSubtitle")}</p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-flex items-center gap-2 font-bold px-6 py-2.5 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {t("blog.browseCollection")} →
         </Link>
@@ -117,7 +117,7 @@ export default async function ArticlePage({ params }: Props) {
           <h2 className="text-lg font-extrabold text-ink mb-5">{t("blog.moreFromJournal")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {related.map((a) => (
-              <Link key={a.slug} href={`/blog/${a.slug}`} className="group flex gap-3 bg-white rounded-card border border-line p-4 hover:shadow-sm transition-shadow">
+              <Link key={a.slug} href={`/blog/${a.slug}`} className="group flex gap-3 bg-canvas rounded-card border border-line p-4 hover:shadow-sm transition-shadow">
                 <div
                   className="w-14 h-14 rounded-control flex items-center justify-center text-3xl flex-shrink-0"
                   style={{ backgroundColor: a.cardColor + "80" }}

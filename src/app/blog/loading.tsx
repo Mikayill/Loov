@@ -9,9 +9,9 @@ export default function BlogLoading() {
       </div>
 
       {/* Featured article */}
-      <div className="rounded-3xl overflow-hidden mb-8 grid grid-cols-1 md:grid-cols-2">
+      <div className="rounded-card overflow-hidden mb-8 grid grid-cols-1 md:grid-cols-2">
         <div className="h-64 md:h-72 bg-panel" />
-        <div className="bg-white p-8 space-y-4 flex flex-col justify-center">
+        <div className="bg-canvas p-8 space-y-4 flex flex-col justify-center">
           <div className="h-3 w-24 bg-panel rounded" />
           <div className="h-8 w-4/5 bg-line rounded-lg" />
           <div className="h-8 w-3/5 bg-line rounded-lg" />
@@ -27,7 +27,7 @@ export default function BlogLoading() {
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-card border border-line overflow-hidden">
+          <div key={i} className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="h-40 bg-panel" />
             <div className="p-5 space-y-3">
               <div className="h-3 w-20 bg-panel rounded" />

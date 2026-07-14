@@ -138,7 +138,7 @@ export default function SecurityClient() {
     if (/[0-9]/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
     const labels = ["", t("sec.strengthWeak"), t("sec.strengthFair"), t("sec.strengthGood"), t("sec.strengthStrong")];
-    const colors = ["", "#DC4A4A", "#E8A820", "#5E9E8C", "#3A7A68"];
+    const colors = ["", "#DC4A4A", "#E8A820", "var(--color-accent)", "#3A7A68"];
     return { score, label: labels[score], color: colors[score] };
   }
 
@@ -230,7 +230,7 @@ export default function SecurityClient() {
 
       <div className="space-y-6">
         {/* Sign-in method */}
-        <div className="bg-white rounded-card border border-line p-6">
+        <div className="bg-canvas rounded-card border border-line p-6">
           <h2 className="font-extrabold text-ink mb-4 flex items-center gap-2">
             <span>🔗</span> {t("sec.signInMethod")}
           </h2>
@@ -250,7 +250,7 @@ export default function SecurityClient() {
 
         {/* Change/add password */}
         {hasPassword ? (
-          <div className="bg-white rounded-card border border-line p-6">
+          <div className="bg-canvas rounded-card border border-line p-6">
             <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
               <span>🔒</span> {isEmailProvider ? t("sec.changePassword") : t("sec.addPassword")}
             </h2>
@@ -270,7 +270,7 @@ export default function SecurityClient() {
                   type={showPw ? "text" : "password"}
                   value={currentPw} onChange={(e) => setCurrentPw(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                  className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                 />
               </div>
               )}
@@ -283,7 +283,7 @@ export default function SecurityClient() {
                     type={showPw ? "text" : "password"}
                     value={newPw} onChange={(e) => setNewPw(e.target.value)}
                     placeholder={t("sec.minChars")}
-                    className="w-full h-10 px-3 pr-10 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                    className="w-full h-10 px-3 pr-10 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                   />
                   <button type="button" onClick={() => setShowPw((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft text-xs font-bold">
@@ -329,7 +329,7 @@ export default function SecurityClient() {
             </form>
           </div>
         ) : (
-          <div className="bg-white rounded-card border border-line p-6">
+          <div className="bg-canvas rounded-card border border-line p-6">
             <h2 className="font-extrabold text-ink mb-3 flex items-center gap-2">
               <span>🔒</span> {t("sec.password")}
             </h2>
@@ -342,7 +342,7 @@ export default function SecurityClient() {
         {/* Contact methods — fill in whichever one is missing so both are
             available to log in with / receive account emails. */}
         {(!user.email || !user.phone) && (
-          <div className="bg-white rounded-card border border-line p-6 space-y-5">
+          <div className="bg-canvas rounded-card border border-line p-6 space-y-5">
             <h2 className="font-extrabold text-ink flex items-center gap-2">
               <span>📇</span> {t("sec.contactMethods")}
             </h2>
@@ -355,7 +355,7 @@ export default function SecurityClient() {
                     <input
                       type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
                       placeholder="you@example.com" required
-                      className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                      className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                     />
                   </div>
                   <Button type="submit" loading={emailBusy} loadingText={t("sec.updating")} className="!h-10 !w-auto px-5">
@@ -376,7 +376,7 @@ export default function SecurityClient() {
                   <>
                     <form onSubmit={handleAddPhone} className="flex items-end gap-3 flex-wrap">
                       <div className="flex-1 min-w-[180px]">
-                        <div className="flex items-stretch h-10 rounded-control border-2 border-line bg-white overflow-hidden focus-within:border-accent transition-colors">
+                        <div className="flex items-stretch h-10 rounded-control border border-line bg-canvas overflow-hidden focus-within:border-accent transition-colors">
                           <span className="flex items-center pl-3 pr-2 text-sm font-bold text-ink-soft bg-canvas border-r-2 border-line select-none">{PHONE_COUNTRY_CODE}</span>
                           <input
                             type="tel" value={phoneLocalPart(phoneAddInput)} onChange={(e) => setPhoneAddInput(withCountryCode(e.target.value))}
@@ -398,7 +398,7 @@ export default function SecurityClient() {
         )}
 
         {/* Sign-in verification — automatic, no setup needed */}
-        <div className="bg-white rounded-card border border-line p-6">
+        <div className="bg-canvas rounded-card border border-line p-6">
           <h2 className="font-extrabold text-ink mb-2 flex items-center gap-2">
             <span>🛡️</span> {t("sec.verification")}
           </h2>
@@ -418,7 +418,7 @@ export default function SecurityClient() {
         </div>
 
         {/* Authenticator-app 2FA (optional, stronger than the email code) */}
-        <div className="bg-white rounded-card border border-line p-6">
+        <div className="bg-canvas rounded-card border border-line p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-extrabold text-ink flex items-center gap-2">
               <span>🔐</span> {t("sec.twoFactor")}
@@ -437,7 +437,7 @@ export default function SecurityClient() {
               <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
                 {enrolling.qr && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={enrolling.qr} alt="2FA QR code" className="w-40 h-40 rounded-control border border-line bg-white p-2" />
+                  <img src={enrolling.qr} alt="2FA QR code" className="w-40 h-40 rounded-control border border-line bg-canvas p-2" />
                 )}
                 <div className="flex-1 space-y-2 text-sm text-ink-soft">
                   <p className="font-semibold text-ink">{t("sec.mfaScanQr")}</p>
@@ -449,12 +449,12 @@ export default function SecurityClient() {
                 <div>
                   <label className="block text-xs font-bold text-ink mb-1.5">{t("sec.mfaEnterCode")}</label>
                   <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
-                    className="w-36 h-11 px-4 rounded-control border-2 border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
+                    className="w-36 h-11 px-4 rounded-control border border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
                 </div>
-                <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-6 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#5E9E8C" }}>
+                <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-6 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "var(--color-accent)" }}>
                   {totpBusy ? "…" : t("sec.mfaActivate")}
                 </button>
-                <button type="button" onClick={() => { setEnrolling(null); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border-2 border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
+                <button type="button" onClick={() => { setEnrolling(null); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
                   {t("addr.cancel")}
                 </button>
               </div>
@@ -466,11 +466,11 @@ export default function SecurityClient() {
                 <p className="text-sm font-semibold text-ink">{t("sec.mfaDisableConfirm")}</p>
                 <div className="flex items-center gap-3 flex-wrap">
                   <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
-                    className="w-36 h-11 px-4 rounded-control border-2 border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
+                    className="w-36 h-11 px-4 rounded-control border border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
                   <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-5 rounded-control font-bold text-white text-sm bg-red-500 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all">
                     {totpBusy ? "…" : t("sec.mfaDisable")}
                   </button>
-                  <button type="button" onClick={() => { setShowDisableTotp(false); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border-2 border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
+                  <button type="button" onClick={() => { setShowDisableTotp(false); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
                     {t("addr.cancel")}
                   </button>
                 </div>
@@ -486,7 +486,7 @@ export default function SecurityClient() {
             )
           ) : (
             <div>
-              <button onClick={startEnrollTotp} disabled={totpBusy} className="font-bold px-5 py-2.5 rounded-control text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "#5E9E8C" }}>
+              <button onClick={startEnrollTotp} disabled={totpBusy} className="font-bold px-5 py-2.5 rounded-control text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "var(--color-accent)" }}>
                 {totpBusy ? "…" : `${t("sec.mfaEnable")} →`}
               </button>
               {totpError && <p className="text-red-500 text-xs font-semibold mt-2">{totpError}</p>}
@@ -495,7 +495,7 @@ export default function SecurityClient() {
         </div>
 
         {/* Danger zone */}
-        <div className="bg-white rounded-card border-2 border-red-100 p-6">
+        <div className="bg-canvas rounded-card border-2 border-red-100 p-6">
           <h2 className="font-extrabold text-red-400 mb-3 flex items-center gap-2">
             <span>⚠️</span> {t("sec.dangerZone")}
           </h2>

@@ -8,7 +8,7 @@ export default function RegisterLoading() {
           <div className="h-4 w-44 bg-panel rounded mx-auto" />
         </div>
 
-        <div className="bg-white rounded-3xl border border-line p-7 space-y-5">
+        <div className="bg-canvas rounded-card border border-line p-7 space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <div className="h-11 bg-panel rounded-control" />
             <div className="h-11 bg-panel rounded-control" />

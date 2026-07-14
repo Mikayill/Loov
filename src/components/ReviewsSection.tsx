@@ -27,7 +27,7 @@ function Stars({ rating, size = "w-4 h-4" }: { rating: number; size?: string }) 
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} className={size} viewBox="0 0 20 20" fill={i <= rating ? "#F0B840" : "#DDD5CC"}>
+        <svg key={i} className={size} viewBox="0 0 20 20" fill={i <= rating ? "#F0B840" : "var(--color-line)"}>
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -51,7 +51,7 @@ function RatingInput({ value, onChange }: { value: number; onChange: (n: number)
           className="p-1.5 touch-manipulation active:scale-90 transition-transform"
           aria-label={`${i} star${i === 1 ? "" : "s"}`}
         >
-          <svg className="w-7 h-7 transition-transform hover:scale-110" viewBox="0 0 20 20" fill={i <= (hover || value) ? "#F0B840" : "#DDD5CC"}>
+          <svg className="w-7 h-7 transition-transform hover:scale-110" viewBox="0 0 20 20" fill={i <= (hover || value) ? "#F0B840" : "var(--color-line)"}>
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
         </button>
@@ -193,7 +193,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         ) : elig.alreadyReviewed ? (
           <p className="text-sm text-ink-muted font-medium">{t("rev.alreadyReviewed")}</p>
         ) : elig.canReview ? (
-          <div className="bg-white border border-line rounded-card p-5 max-w-xl">
+          <div className="bg-canvas border border-line rounded-card p-5 max-w-xl">
             <p className="font-bold text-ink mb-3">{t("rev.writeReview")}</p>
             <p className="text-xs font-semibold text-ink-muted mb-1">{t("rev.yourRating")}</p>
             <RatingInput value={rating} onChange={setRating} />
@@ -224,7 +224,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
               onClick={submit}
               disabled={submitting || text.trim().length < 10}
               className="mt-4 px-6 h-11 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#5E9E8C" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {submitting ? t("rev.submitting") : t("rev.submit")}
             </button>
@@ -244,10 +244,10 @@ export default function ReviewsSection({ productId }: { productId: string }) {
           {reviews.map((r) => {
             const display = r.name ?? t("rev.anon");
             return (
-              <div key={r.id} className="bg-white border border-line rounded-card p-5 space-y-3">
+              <div key={r.id} className="bg-canvas border border-line rounded-card p-5 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0" style={{ backgroundColor: "#5E9E8C" }}>
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0" style={{ backgroundColor: "var(--color-accent)" }}>
                       {display[0]?.toUpperCase()}
                     </div>
                     <div>

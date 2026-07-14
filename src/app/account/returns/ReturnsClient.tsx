@@ -56,7 +56,7 @@ export default function ReturnsClient() {
       <p className="text-sm text-ink-muted mb-8">{t("acct.returns.subtitle")}</p>
 
       {returns.length === 0 ? (
-        <div className="bg-white rounded-card border border-line p-12 text-center">
+        <div className="bg-canvas rounded-card border border-line p-12 text-center">
           <span className="text-5xl block mb-4">↩️</span>
           <h2 className="text-lg font-extrabold text-ink mb-2">{t("acct.returns.empty")}</h2>
           <p className="text-sm text-ink-soft mb-6 max-w-md mx-auto">
@@ -64,8 +64,8 @@ export default function ReturnsClient() {
           </p>
           <Link
             href="/account/orders"
-            className="inline-block font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("acct.returns.viewMyOrders")}
           </Link>
@@ -76,7 +76,7 @@ export default function ReturnsClient() {
             const rc = returnStatusConfig[ret.status];
             const itemCount = ret.items.reduce((s, it) => s + it.quantity, 0);
             return (
-              <div key={ret.id} className="bg-white rounded-card border border-line overflow-hidden">
+              <div key={ret.id} className="bg-canvas rounded-card border border-line overflow-hidden">
                 <div className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-canvas" style={{ backgroundColor: "#FAFAF8" }}>
                   <div>
                     <p className="font-mono font-extrabold text-sm text-ink">{ret.return_number}</p>

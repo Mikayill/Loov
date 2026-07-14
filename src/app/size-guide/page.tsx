@@ -91,7 +91,7 @@ export default async function SizeGuidePage() {
         <div className="overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: "#EDE5D8" }}>
+              <tr style={{ backgroundColor: "var(--color-panel)" }}>
                 {[t("sg.colSizeLabel"), t("sg.colAge"), t("sg.colHeight"), t("sg.colWeight"), t("sg.colChest")].map((h) => (
                   <th key={h} className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap first:rounded-tl-card last:rounded-tr-card">
                     {h}
@@ -101,7 +101,7 @@ export default async function SizeGuidePage() {
             </thead>
             <tbody>
               {sizeRows.map((row, i) => (
-                <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-canvas" : "bg-surface"}`}>
                   <td className="px-4 py-3 font-bold text-ink whitespace-nowrap">{row.size}</td>
                   <td className="px-4 py-3 text-ink-soft">{localizeAge(row.age, t)}</td>
                   <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.height}</td>
@@ -121,14 +121,14 @@ export default async function SizeGuidePage() {
           <div className="overflow-x-auto rounded-card border border-line">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ backgroundColor: "#EDE5D8" }}>
+                <tr style={{ backgroundColor: "var(--color-panel)" }}>
                   <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colSize")}</th>
                   <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colBestFor")}</th>
                 </tr>
               </thead>
               <tbody>
                 {blanketSizes.map((row, i) => (
-                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-canvas" : "bg-surface"}`}>
                     <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.size}</td>
                     <td className="px-4 py-3 text-ink-soft text-xs">{row.use}</td>
                   </tr>
@@ -143,14 +143,14 @@ export default async function SizeGuidePage() {
           <div className="overflow-x-auto rounded-card border border-line">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ backgroundColor: "#EDE5D8" }}>
+                <tr style={{ backgroundColor: "var(--color-panel)" }}>
                   <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colSize")}</th>
                   <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colBestFor")}</th>
                 </tr>
               </thead>
               <tbody>
                 {towelSizes.map((row, i) => (
-                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-canvas" : "bg-surface"}`}>
                     <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.size}</td>
                     <td className="px-4 py-3 text-ink-soft text-xs">{row.use}</td>
                   </tr>
@@ -166,7 +166,7 @@ export default async function SizeGuidePage() {
         <h2 className="text-xl font-extrabold text-ink mb-4">📐 {t("sg.howToMeasure")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {howToMeasure.map((item) => (
-            <div key={item.label} className="bg-white rounded-card border border-line p-5">
+            <div key={item.label} className="bg-canvas rounded-card border border-line p-5">
               <p className="font-bold text-ink mb-2">{item.label}</p>
               <p className="text-sm text-ink-soft leading-relaxed">{item.desc}</p>
             </div>
@@ -181,7 +181,7 @@ export default async function SizeGuidePage() {
         <div className="overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ backgroundColor: "#EDE5D8" }}>
+              <tr style={{ backgroundColor: "var(--color-panel)" }}>
                 <th className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{t("sg.togColRoom")}</th>
                 <th className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{t("sg.togColTog")}</th>
                 <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.togColDress")}</th>
@@ -189,7 +189,7 @@ export default async function SizeGuidePage() {
             </thead>
             <tbody>
               {togRows.map((row, i) => (
-                <tr key={row.tog} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                <tr key={row.tog} className={`border-t border-line ${i % 2 === 0 ? "bg-canvas" : "bg-surface"}`}>
                   <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.room}</td>
                   <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.tog} TOG</td>
                   <td className="px-4 py-3 text-ink-soft text-xs">{row.dress}</td>

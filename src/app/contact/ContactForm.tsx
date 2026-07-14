@@ -71,7 +71,7 @@ export default function ContactForm() {
 
   if (sent) {
     return (
-      <div className="bg-accent-soft border-2 border-sage rounded-3xl p-10 text-center h-full flex flex-col items-center justify-center gap-4">
+      <div className="bg-accent-soft border-2 border-sage rounded-card p-10 text-center h-full flex flex-col items-center justify-center gap-4">
         <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-3xl text-white shadow">
           ✓
         </div>
@@ -92,7 +92,7 @@ export default function ContactForm() {
   }
 
   const inputBase =
-    "w-full border-2 rounded-control px-4 py-3 text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none transition-colors bg-white";
+    "w-full border-2 rounded-control px-4 py-3 text-sm font-medium text-ink placeholder-ink-muted focus:outline-none transition-colors bg-canvas";
   const inputOk  = "border-line focus:border-accent";
   const inputErr = "border-red-300 focus:border-red-400 bg-red-50";
 

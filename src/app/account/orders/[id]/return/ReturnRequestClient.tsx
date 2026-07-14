@@ -39,8 +39,8 @@ function Blocked({ orderNumber, emoji, title, body, t }: { orderNumber: string; 
       <p className="text-sm text-ink-soft mb-6">{body}</p>
       <Link
         href={`/account/orders/${orderNumber}`}
-        className="inline-block font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-        style={{ backgroundColor: "#5E9E8C" }}
+        className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+        style={{ backgroundColor: "var(--color-accent)" }}
       >
         ← {t("acct.return.backToOrder")}
       </Link>
@@ -168,14 +168,14 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
             href={`/account/orders/${orderNumber}`}
-            className="font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("acct.return.viewOrder")}
           </Link>
           <Link
             href="/account/returns"
-            className="font-bold px-7 py-3 rounded-full text-sm border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
+            className="font-bold px-7 py-3 rounded-control text-sm border border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
           >
             {t("acct.return.myReturns")}
           </Link>
@@ -310,7 +310,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
 
       {/* ── STEP 1: select items ── */}
       {step === 1 && (
-        <div className="bg-white rounded-card border border-line overflow-hidden">
+        <div className="bg-canvas rounded-card border border-line overflow-hidden">
           <div className="px-5 py-4 border-b border-canvas text-sm font-bold text-ink" style={{ backgroundColor: "#FAFAF8" }}>
             {t("acct.return.whichItems")}
           </div>
@@ -323,7 +323,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
                   <button
                     onClick={() => setSelected((prev) => ({ ...prev, [i]: checked ? 0 : item.qty }))}
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                      checked ? "border-accent bg-accent" : "border-line bg-white"
+                      checked ? "border-accent bg-accent" : "border-line bg-canvas"
                     }`}
                     aria-label={checked ? "Deselect" : "Select"}
                   >
@@ -344,14 +344,14 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button
                         onClick={() => setSelected((prev) => ({ ...prev, [i]: Math.max(1, qty - 1) }))}
-                        className="w-7 h-7 rounded-full border border-line text-ink-soft font-bold hover:border-accent transition-colors"
+                        className="w-7 h-7 rounded-control border border-line text-ink-soft font-bold hover:border-accent transition-colors"
                       >
                         −
                       </button>
                       <span className="text-sm font-extrabold text-ink w-5 text-center">{qty}</span>
                       <button
                         onClick={() => setSelected((prev) => ({ ...prev, [i]: Math.min(item.qty, qty + 1) }))}
-                        className="w-7 h-7 rounded-full border border-line text-ink-soft font-bold hover:border-accent transition-colors disabled:opacity-40"
+                        className="w-7 h-7 rounded-control border border-line text-ink-soft font-bold hover:border-accent transition-colors disabled:opacity-40"
                         disabled={qty >= item.qty}
                       >
                         +
@@ -368,7 +368,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
       {/* ── STEP 2: reason, photos, IBAN ── */}
       {step === 2 && (
         <div className="space-y-5">
-          <div className="bg-white rounded-card border border-line p-5">
+          <div className="bg-canvas rounded-card border border-line p-5">
             <label className="block text-sm font-bold text-ink mb-2">{t("acct.return.whyReturning")}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {RETURN_REASONS.map((r) => (
@@ -388,7 +388,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             </div>
           </div>
 
-          <div className="bg-white rounded-card border border-line p-5">
+          <div className="bg-canvas rounded-card border border-line p-5">
             <label className="block text-sm font-bold text-ink mb-2">
               {t("acct.return.tellUsMore")} {descriptionRequired ? <span className="text-danger">{t("acct.return.required")}</span> : <span className="text-ink-muted font-normal">{t("acct.return.optionalParen")}</span>}
             </label>
@@ -401,7 +401,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             />
           </div>
 
-          <div className="bg-white rounded-card border border-line p-5">
+          <div className="bg-canvas rounded-card border border-line p-5">
             <label className="block text-sm font-bold text-ink mb-1">
               {t("acct.return.photosLabel")} {meta?.photoRequired ? <span className="text-danger">{t("acct.return.atLeast1Required")}</span> : <span className="text-ink-muted font-normal">{t("acct.return.optionalParen")}</span>}
             </label>
@@ -423,7 +423,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
               {photos.length < MAX_PHOTOS && (
                 <label className={`w-20 h-20 rounded-control border-2 border-dashed border-line flex flex-col items-center justify-center text-ink-muted cursor-pointer hover:border-accent hover:text-accent transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
                   {uploading ? (
-                    <div className="w-5 h-5 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                    <div className="w-5 h-5 rounded-control border-2 border-accent border-t-transparent animate-spin" />
                   ) : (
                     <>
                       <span className="text-xl leading-none">＋</span>
@@ -445,7 +445,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             </div>
           </div>
 
-          <div className="bg-white rounded-card border border-line p-5">
+          <div className="bg-canvas rounded-card border border-line p-5">
             <label className="block text-sm font-bold text-ink mb-1">{t("acct.return.ibanLabel")}</label>
             <p className="text-xs text-ink-muted mb-3">{t("acct.return.ibanHint")}</p>
             <input
@@ -466,7 +466,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
       {/* ── STEP 3: review ── */}
       {step === 3 && (
         <div className="space-y-5">
-          <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="px-5 py-4 border-b border-canvas text-sm font-bold text-ink" style={{ backgroundColor: "#FAFAF8" }}>
               {t("acct.return.returningItems").replace("{n}", String(selectedEntries.reduce((s, e) => s + e.qty, 0)))}
             </div>
@@ -508,7 +508,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             </div>
           </div>
 
-          <div className="bg-white rounded-card border border-line p-5 text-sm space-y-2">
+          <div className="bg-canvas rounded-card border border-line p-5 text-sm space-y-2">
             <p><span className="font-bold text-ink">{t("acct.return.reasonColon")}</span> <span className="text-ink-soft">{meta ? returnReasonLabel(meta.code, t) : ""}</span></p>
             {description.trim() && <p><span className="font-bold text-ink">{t("acct.return.detailsColon")}</span> <span className="text-ink-soft">{description.trim()}</span></p>}
             {photos.length > 0 && <p><span className="font-bold text-ink">{t("acct.return.photosColon")}</span> <span className="text-ink-soft">{t("acct.return.attached").replace("{n}", String(photos.length))}</span></p>}
@@ -535,14 +535,14 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
         {step > 1 ? (
           <button
             onClick={() => { setError(""); setStep((s) => s - 1); }}
-            className="px-6 py-3 rounded-full text-sm font-bold border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
+            className="px-6 py-3 rounded-control text-sm font-bold border border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
           >
             ← {t("common.back")}
           </button>
         ) : (
           <Link
             href={`/account/orders/${orderNumber}`}
-            className="px-6 py-3 rounded-full text-sm font-bold border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
+            className="px-6 py-3 rounded-control text-sm font-bold border border-line text-ink-soft hover:border-accent hover:text-accent transition-colors"
           >
             {t("common.cancel")}
           </Link>
@@ -552,7 +552,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             onClick={next}
             disabled={(step === 1 && !step1Ok) || (step === 2 && !step2Ok)}
             className="flex-1 py-3 rounded-full text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-40"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("acct.return.continueBtn")} →
           </button>
@@ -561,7 +561,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
             onClick={submit}
             disabled={submitting}
             className="flex-1 py-3 rounded-full text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {submitting ? t("acct.return.submitting") : t("acct.return.submitRequest")}
           </button>

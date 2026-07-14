@@ -47,7 +47,7 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
         status === "blocked" ? "bg-red-500 text-white" :
         "text-white hover:opacity-90 active:scale-95"
       }`}
-      style={status === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
+      style={status === "idle" ? { backgroundColor: "var(--color-accent)" } : {}}
     >
       {status === "added" ? `✓ ${t("quick.added")}` : status === "blocked" ? t("cart.cantAddMore") : t("common.addToCart")}
     </button>
@@ -104,8 +104,8 @@ export default function WishlistClient() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 active:scale-95 shadow-sm transition-all"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white hover:opacity-90 active:scale-95 shadow-sm transition-all"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {t("wl.browseProducts")} →
         </Link>
@@ -133,12 +133,12 @@ export default function WishlistClient() {
           {inStockSaved.length > 1 && (
             <button
               onClick={handleAddAll}
-              className={`text-sm font-bold px-4 py-1.5 rounded-full transition-all active:scale-95 ${
+              className={`text-sm font-bold px-4 py-1.5 rounded-control transition-all active:scale-95 ${
                 addAllStatus === "added" ? "bg-green-500 text-white" :
                 addAllStatus === "blocked" ? "bg-red-500 text-white" :
                 "text-white hover:opacity-90"
               }`}
-              style={addAllStatus === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
+              style={addAllStatus === "idle" ? { backgroundColor: "var(--color-accent)" } : {}}
             >
               {addAllStatus === "added" ? `✓ ${t("quick.added")}` : addAllStatus === "blocked" ? t("cart.cantAddMore") : t("wl.addAll")}
             </button>
@@ -180,7 +180,7 @@ export default function WishlistClient() {
         {saved.map((product) => (
           <div
             key={product.id}
-            className="bg-white rounded-card border border-line overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            className="bg-canvas rounded-card border border-line overflow-hidden shadow-sm hover:shadow-md transition-shadow"
           >
             {/* Image */}
             <Link href={`/products/${product.slug}`}>

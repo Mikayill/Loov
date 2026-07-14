@@ -28,7 +28,7 @@ export default async function BlogPage() {
       {/* Featured article */}
       <Link href={`/blog/${featured.slug}`} className="group block mb-6 sm:mb-10">
         <div
-          className="relative rounded-card sm:rounded-3xl overflow-hidden border border-line p-5 sm:p-12 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 hover:shadow-lg transition-shadow"
+          className="relative rounded-card sm:rounded-card overflow-hidden border border-line p-5 sm:p-12 flex flex-col sm:flex-row items-center gap-4 sm:gap-8 hover:shadow-lg transition-shadow"
           style={{ backgroundColor: featured.cardColor + "60" }}
         >
           <div className="text-6xl sm:text-[120px] flex-shrink-0 select-none group-hover:scale-110 transition-transform duration-300">
@@ -36,7 +36,7 @@ export default async function BlogPage() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 sm:mb-3 flex-wrap">
-              <span className="text-[11px] font-bold text-accent bg-white px-3 py-1 rounded-full border border-line">
+              <span className="text-[11px] font-bold text-accent bg-canvas px-3 py-1 rounded-control border border-line">
                 {blogCategoryLabel(featured.categoryId, t)}
               </span>
               <span className="text-[11px] text-ink-muted font-medium">{featured.readMinutes} {t("blog.minRead")}</span>
@@ -63,7 +63,7 @@ export default async function BlogPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
         {rest.map((article) => (
           <Link key={article.slug} href={`/blog/${article.slug}`} className="group block">
-            <div className="bg-white rounded-card border border-line overflow-hidden hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 h-full flex flex-col">
+            <div className="bg-canvas rounded-card border border-line overflow-hidden hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 h-full flex flex-col">
               <div
                 className="h-28 sm:h-36 flex items-center justify-center text-4xl sm:text-6xl select-none group-hover:scale-105 transition-transform duration-300"
                 style={{ backgroundColor: article.cardColor + "80" }}

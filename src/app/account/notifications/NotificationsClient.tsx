@@ -51,11 +51,11 @@ function Toggle({ enabled, disabled, onClick, label }: {
       className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
         enabled ? "" : "bg-line"
       } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-      style={enabled ? { backgroundColor: "#5E9E8C" } : {}}
+      style={enabled ? { backgroundColor: "var(--color-accent)" } : {}}
       aria-label={`Toggle ${label}`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform duration-200 ${
           enabled ? "translate-x-5" : "translate-x-0"
         }`}
       />
@@ -187,7 +187,7 @@ export default function NotificationsClient() {
         <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest px-1 mb-3">
           {t("notif.emailSection")}
         </p>
-        <div className="bg-white rounded-card border border-line divide-y divide-canvas">
+        <div className="bg-canvas rounded-card border border-line divide-y divide-canvas">
           {PREFS.filter((p) => p.id !== "sms").map(renderRow)}
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function NotificationsClient() {
         <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest px-1 mb-3">
           {t("notif.smsSection")}
         </p>
-        <div className="bg-white rounded-card border border-line">
+        <div className="bg-canvas rounded-card border border-line">
           {PREFS.filter((p) => p.id === "sms").map(renderRow)}
         </div>
       </div>

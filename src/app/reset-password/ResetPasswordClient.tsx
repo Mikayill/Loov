@@ -40,7 +40,7 @@ export default function ResetPasswordClient() {
           <h1 className="text-2xl font-extrabold text-ink">{t("auth.setNewPassword")}</h1>
         </div>
 
-        <div className="bg-white rounded-3xl border border-line shadow-sm p-7">
+        <div className="bg-canvas rounded-card border border-line shadow-sm p-7">
           {done ? (
             <div className="text-center py-6">
               <div className="text-4xl mb-3">✅</div>
@@ -60,12 +60,12 @@ export default function ResetPasswordClient() {
                 <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.newPassword")}</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
                   placeholder={t("auth.atLeast6")}
-                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
+                  className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.confirmNewPassword")}</label>
                 <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
-                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
+                  className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
               </div>
               {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
               <Button type="submit" loading={busy} loadingText={t("auth.saving")} fullWidth>

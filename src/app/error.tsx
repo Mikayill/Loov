@@ -24,7 +24,7 @@ export default function GlobalError({
       <div className="relative mb-6">
         <p
           className="text-[100px] sm:text-[140px] font-extrabold leading-none select-none"
-          style={{ color: "#EDE5D8" }}
+          style={{ color: "var(--color-panel)" }}
         >
           Oops
         </p>
@@ -43,21 +43,21 @@ export default function GlobalError({
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <button
           onClick={reset}
-          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full text-white hover:opacity-90 shadow-sm transition-opacity"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control text-white hover:opacity-90 shadow-sm transition-opacity"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {t("err.tryAgain")}
         </button>
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
+          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control border border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
         >
           {t("err.backToHome")}
         </Link>
       </div>
 
       {error.digest && (
-        <p className="text-[10px] text-[#C8B8B0] font-mono">
+        <p className="text-[10px] text-ink-muted font-mono">
           {t("err.errorId").replace("{id}", error.digest)}
         </p>
       )}

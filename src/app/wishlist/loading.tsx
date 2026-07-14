@@ -10,7 +10,7 @@ export default function WishlistLoading() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-card border border-line overflow-hidden">
+          <div key={i} className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="h-40 bg-panel" />
             <div className="p-3.5 space-y-2">
               <div className="h-3 w-16 bg-panel rounded" />

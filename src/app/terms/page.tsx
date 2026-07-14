@@ -42,7 +42,7 @@ export default async function TermsPage() {
         {sections.map((s, i) => (
           <div key={s.title}>
             <h2 className="font-extrabold text-ink mb-2 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "#5E9E8C" }}>{i + 1}</span>
+              <span className="w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "var(--color-accent)" }}>{i + 1}</span>
               {s.title}
             </h2>
             <p className="text-ink-soft text-sm leading-relaxed pl-8">{s.body}</p>
@@ -54,7 +54,7 @@ export default async function TermsPage() {
         <Link href="/privacy" className="flex-1 text-center font-bold text-sm text-accent border-2 border-accent px-5 py-3 rounded-full hover:bg-accent-soft transition-colors">
           {t("legal.terms.privacyLink")}
         </Link>
-        <Link href="/contact" className="flex-1 text-center font-bold text-sm text-white px-5 py-3 rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+        <Link href="/contact" className="flex-1 text-center font-bold text-sm text-white px-5 py-3 rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: "var(--color-accent)" }}>
           {t("legal.terms.contactBtn")} →
         </Link>
       </div>

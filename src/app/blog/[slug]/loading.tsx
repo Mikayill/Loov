@@ -19,7 +19,7 @@ export default function BlogPostLoading() {
       </div>
 
       {/* Emoji hero */}
-      <div className="h-48 rounded-3xl bg-panel mb-10" />
+      <div className="h-48 rounded-card bg-panel mb-10" />
 
       {/* Body paragraphs */}
       <div className="space-y-8">

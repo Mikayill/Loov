@@ -151,7 +151,7 @@ export default function AddressesClient() {
         {addresses.map((addr) => (
           <div
             key={addr.id}
-            className={`bg-white rounded-card border-2 p-5 transition-all ${
+            className={`bg-canvas rounded-card border-2 p-5 transition-all ${
               addr.isDefault ? "border-accent" : "border-line"
             }`}
           >
@@ -194,7 +194,7 @@ export default function AddressesClient() {
         ))}
 
         {addresses.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-card border border-line">
+          <div className="text-center py-12 bg-canvas rounded-card border border-line">
             <div className="text-4xl mb-3">📍</div>
             <p className="font-bold text-ink mb-1">{t("addr.empty")}</p>
             <p className="text-sm text-ink-muted">{t("addr.emptyBody")}</p>
@@ -212,7 +212,7 @@ export default function AddressesClient() {
           {t("addr.addNew")}
         </button>
       ) : (
-        <form onSubmit={handleAdd} className="bg-white rounded-card border-2 border-accent p-6 space-y-4">
+        <form onSubmit={handleAdd} className="bg-canvas rounded-card border-2 border-accent p-6 space-y-4">
           <h2 className="font-extrabold text-ink mb-4">{t("addr.newAddress")}</h2>
 
           {/* Label */}
@@ -228,7 +228,7 @@ export default function AddressesClient() {
                   key={l.v}
                   type="button"
                   onClick={() => set("label", l.v)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
+                  className={`px-4 py-1.5 rounded-control text-xs font-bold border-2 transition-all ${
                     form.label === l.v
                       ? "border-accent bg-accent-soft text-accent"
                       : "border-line text-ink-soft"
@@ -250,7 +250,7 @@ export default function AddressesClient() {
                 <input
                   value={form[key]} onChange={(e) => set(key, e.target.value)}
                   placeholder={placeholder} required
-                  className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                  className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                 />
               </div>
             ))}
@@ -262,7 +262,7 @@ export default function AddressesClient() {
               id="addr-street"
               value={form.street} onChange={(e) => set("street", e.target.value)}
               placeholder="123 Rustaveli Avenue" required autoComplete="address-line1"
-              className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+              className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
             />
           </div>
 
@@ -274,7 +274,7 @@ export default function AddressesClient() {
                 value={form.region}
                 onChange={(e) => { set("region", e.target.value); set("district", ""); }}
                 required
-                className={`w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors bg-white ${form.region ? "text-ink" : "text-[#C8B8B0]"}`}
+                className={`w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors bg-canvas ${form.region ? "text-ink" : "text-ink-muted"}`}
               >
                 <option value="" disabled>{t("addr.selectRegion")}</option>
                 {GEORGIA_REGIONS.map((r) => (
@@ -289,7 +289,7 @@ export default function AddressesClient() {
                   id="addr-district"
                   value={form.district}
                   onChange={(e) => set("district", e.target.value)}
-                  className={`w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors bg-white ${form.district ? "text-ink" : "text-[#C8B8B0]"}`}
+                  className={`w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors bg-canvas ${form.district ? "text-ink" : "text-ink-muted"}`}
                 >
                   <option value="">{t("addr.selectDistrict")}</option>
                   {TBILISI_DISTRICTS.map((d) => (
@@ -304,7 +304,7 @@ export default function AddressesClient() {
                   id="addr-city"
                   value={form.city} onChange={(e) => set("city", e.target.value)}
                   placeholder="Batumi" required autoComplete="address-level2"
-                  className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                  className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                 />
               </div>
             )}
@@ -318,7 +318,7 @@ export default function AddressesClient() {
                   id="addr-city-tb"
                   value={form.city} onChange={(e) => set("city", e.target.value)}
                   placeholder="Tbilisi" required autoComplete="address-level2"
-                  className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                  className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
                 />
               </div>
             )}
@@ -328,7 +328,7 @@ export default function AddressesClient() {
                 id="addr-zip"
                 value={form.zip} onChange={(e) => set("zip", e.target.value)}
                 placeholder={POSTAL_CODE_PLACEHOLDER} inputMode="numeric" maxLength={4}
-                className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+                className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
               />
             </div>
           </div>
@@ -339,7 +339,7 @@ export default function AddressesClient() {
               id="addr-phone"
               type="tel" inputMode="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)}
               placeholder={PHONE_PLACEHOLDER} required autoComplete="tel"
-              className="w-full h-10 px-3 rounded-control border-2 border-line text-sm font-medium focus:border-accent outline-none transition-colors"
+              className="w-full h-10 px-3 rounded-control border border-line text-sm font-medium focus:border-accent outline-none transition-colors"
             />
           </div>
 
@@ -350,7 +350,7 @@ export default function AddressesClient() {
             <button
               type="button"
               onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-              className="flex-1 h-10 rounded-control border-2 border-line text-sm font-bold text-ink-soft hover:border-ink-muted transition-colors"
+              className="flex-1 h-10 rounded-control border border-line text-sm font-bold text-ink-soft hover:border-ink-muted transition-colors"
             >
               {t("addr.cancel")}
             </button>
@@ -358,7 +358,7 @@ export default function AddressesClient() {
               type="submit"
               disabled={busy}
               className="flex-1 h-10 rounded-control text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-              style={{ backgroundColor: "#5E9E8C" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {busy ? "…" : `${t("addr.saveAddress")} →`}
             </button>

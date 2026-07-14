@@ -26,13 +26,13 @@ function isValidPassword(password: string): boolean {
 function PasswordStrength({ password, t }: { password: string; t: (key: TranslationKey) => string }) {
   const strength = password.length === 0 ? 0 : !isValidPassword(password) ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) ? 4 : 3;
   const labels = ["", t("auth.strengthWeak"), t("auth.strengthFair"), t("auth.strengthGood"), t("auth.strengthStrong")];
-  const colors = ["", "#EF4444", "#F59E0B", "#3B82F6", "#5E9E8C"];
+  const colors = ["", "#EF4444", "#F59E0B", "#3B82F6", "var(--color-accent)"];
   if (!password) return null;
   return (
     <div className="mt-1.5">
       <div className="flex gap-1 mb-1">
         {[1,2,3,4].map((i) => (
-          <div key={i} className="flex-1 h-1 rounded-full transition-colors" style={{ backgroundColor: i <= strength ? colors[strength] : "#DDD5CC" }} />
+          <div key={i} className="flex-1 h-1 rounded-full transition-colors" style={{ backgroundColor: i <= strength ? colors[strength] : "var(--color-line)" }} />
         ))}
       </div>
       <p className="text-[10px] font-semibold" style={{ color: colors[strength] }}>{labels[strength]}</p>
@@ -122,7 +122,7 @@ export default function RegisterClient() {
           <p className="text-ink-muted text-sm mt-1">{t("auth.joinFamily")}</p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-line shadow-sm p-7 space-y-5">
+        <div className="bg-canvas rounded-card border border-line shadow-sm p-7 space-y-5">
 
           {pendingConfirm ? (
             /* Email confirmation pending — type the code we emailed (or click the link in it) */
@@ -138,7 +138,7 @@ export default function RegisterClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
+                className="w-full h-12 px-4 rounded-control border border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
               {codeError && <p className="text-red-400 text-xs font-semibold text-center">{codeError}</p>}
               <Button type="submit" disabled={signupCode.length < 6} loading={codeBusy} loadingText={t("auth.verifying")} fullWidth>
@@ -148,7 +148,7 @@ export default function RegisterClient() {
                 type="button"
                 onClick={handleResendSignupCode}
                 disabled={resendLeft > 0 || codeBusy}
-                className="w-full text-center text-xs font-semibold text-accent hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+                className="w-full text-center text-xs font-semibold text-accent hover:underline disabled:text-ink-muted disabled:no-underline disabled:cursor-not-allowed"
               >
                 {resendLeft > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendLeft)) : t("auth.emailOtpResend")}
               </button>
@@ -158,7 +158,7 @@ export default function RegisterClient() {
           {/* Social buttons */}
           <div>
             <button onClick={() => handleSocial("google")} disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border-2 border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60">
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60">
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
             </button>
@@ -177,13 +177,13 @@ export default function RegisterClient() {
               <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.fullName")}</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="Ana Beridze" required
-                className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
+                className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.emailAddress")}</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
+                className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors" />
             </div>
             <div>
               <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.password")}</label>
@@ -191,7 +191,7 @@ export default function RegisterClient() {
                 <input type={showPass ? "text" : "password"} value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t("auth.minChars")} required
-                  className="w-full h-11 px-4 pr-11 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
+                  className="w-full h-11 px-4 pr-11 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors" />
                 <button type="button" onClick={() => setShowPass((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -209,7 +209,7 @@ export default function RegisterClient() {
               <input type={showPass ? "text" : "password"} value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder={t("auth.repeatPassword")} required
-                className={`w-full h-11 px-4 rounded-control border-2 text-sm font-medium text-ink placeholder:text-[#C8B8B0] outline-none transition-colors ${
+                className={`w-full h-11 px-4 rounded-control border-2 text-sm font-medium text-ink placeholder:text-ink-muted outline-none transition-colors ${
                   confirm && confirm !== password ? "border-red-300 focus:border-red-400" : "border-line focus:border-accent"
                 }`} />
               {confirm && confirm !== password && (

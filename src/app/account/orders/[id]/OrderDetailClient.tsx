@@ -142,8 +142,8 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         </p>
         <Link
           href="/account/orders"
-          className="inline-block font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           ← {t("acct.orders.title")}
         </Link>
@@ -206,7 +206,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         <div className="lg:col-span-2 space-y-5">
 
           {/* Items */}
-          <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>🛍️</span> {t("acct.orders.orderItems")}
             </div>
@@ -232,7 +232,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
           </div>
 
           {/* Delivery timeline */}
-          <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>📦</span> {t("acct.orders.deliveryTimeline")}
             </div>
@@ -251,7 +251,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
                     <div key={step.label} className="flex items-start gap-4">
                       <div className="flex flex-col items-center flex-shrink-0">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          step.done ? "border-accent bg-accent" : "border-line bg-white"
+                          step.done ? "border-accent bg-accent" : "border-line bg-canvas"
                         }`}>
                           {step.done && (
                             <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -276,7 +276,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         {/* Right: Summary + Delivery info */}
         <div className="space-y-5">
           {/* Order summary */}
-          <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>💰</span> {t("acct.orders.summary")}
             </div>
@@ -304,7 +304,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
           </div>
 
           {/* Delivery address */}
-          <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="bg-canvas rounded-card border border-line overflow-hidden">
             <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>📍</span> {t("acct.orders.deliveryAddressHeading")}
             </div>
@@ -322,7 +322,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
 
           {/* Return status card */}
           {latestReturn && (
-            <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="bg-canvas rounded-card border border-line overflow-hidden">
               <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
                 <span>↩️</span> {t("acct.return.title")}
               </div>
@@ -390,7 +390,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
               <button
                 onClick={cancelOrder}
                 disabled={cancellingOrder}
-                className="w-full py-3 rounded-card font-bold text-sm border-2 border-line text-ink-soft flex items-center justify-center gap-2 hover:border-[#DC4A4A] hover:text-danger transition-colors disabled:opacity-50"
+                className="w-full py-3 rounded-card font-bold text-sm border border-line text-ink-soft flex items-center justify-center gap-2 hover:border-[#DC4A4A] hover:text-danger transition-colors disabled:opacity-50"
               >
                 {cancellingOrder ? t("acct.orders.cancelling") : `✕ ${t("acct.orders.cancelOrder")}`}
               </button>
@@ -419,14 +419,14 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
             <Link
               href="/products"
               className="w-full py-3 rounded-card font-extrabold text-white text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
-              style={{ backgroundColor: "#5E9E8C" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {t("acct.orders.buyAgain")} →
             </Link>
           )}
           <Link
             href="/contact"
-            className="w-full py-3 rounded-card font-bold text-sm border-2 border-line text-ink-soft flex items-center justify-center hover:border-accent hover:text-accent transition-colors"
+            className="w-full py-3 rounded-card font-bold text-sm border border-line text-ink-soft flex items-center justify-center hover:border-accent hover:text-accent transition-colors"
           >
             {t("acct.orders.needHelp")}
           </Link>

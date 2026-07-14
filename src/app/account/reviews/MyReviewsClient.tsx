@@ -35,7 +35,7 @@ function Stars({ rating, size = "w-4 h-4" }: { rating: number; size?: string }) 
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} className={size} viewBox="0 0 20 20" fill={i <= rating ? "#F0B840" : "#DDD5CC"}>
+        <svg key={i} className={size} viewBox="0 0 20 20" fill={i <= rating ? "#F0B840" : "var(--color-line)"}>
           <path d={STAR_PATH} />
         </svg>
       ))}
@@ -57,7 +57,7 @@ function RatingInput({ value, onChange }: { value: number; onChange: (n: number)
           className="p-1.5 touch-manipulation active:scale-90 transition-transform"
           aria-label={`${i} star${i === 1 ? "" : "s"}`}
         >
-          <svg className="w-7 h-7 transition-transform hover:scale-110" viewBox="0 0 20 20" fill={i <= (hover || value) ? "#F0B840" : "#DDD5CC"}>
+          <svg className="w-7 h-7 transition-transform hover:scale-110" viewBox="0 0 20 20" fill={i <= (hover || value) ? "#F0B840" : "var(--color-line)"}>
             <path d={STAR_PATH} />
           </svg>
         </button>
@@ -214,7 +214,7 @@ export default function MyReviewsClient() {
 
       {/* ── My reviews ── */}
       {reviews.length === 0 ? (
-        <div className="bg-white rounded-card border border-line p-12 text-center">
+        <div className="bg-canvas rounded-card border border-line p-12 text-center">
           <span className="text-5xl block mb-4">⭐</span>
           <h2 className="text-lg font-extrabold text-ink mb-2">{t("acct.reviews.empty")}</h2>
           <p className="text-sm text-ink-soft mb-6 max-w-md mx-auto">
@@ -222,8 +222,8 @@ export default function MyReviewsClient() {
           </p>
           <Link
             href="/account/orders"
-            className="inline-block font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("acct.reviews.viewOrders")}
           </Link>
@@ -234,7 +234,7 @@ export default function MyReviewsClient() {
             const product = productMap.get(r.productId);
             const isEditing = editingId === r.id;
             return (
-              <div key={r.id} className="bg-white rounded-card border border-line p-5">
+              <div key={r.id} className="bg-canvas rounded-card border border-line p-5">
                 <div className="flex items-start gap-4">
                   <ProductThumb product={product} />
                   <div className="flex-1 min-w-0">
@@ -324,7 +324,7 @@ export default function MyReviewsClient() {
                             onClick={() => saveEdit(r.id)}
                             disabled={saving || editText.trim().length < 10}
                             className="px-5 h-10 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-                            style={{ backgroundColor: "#5E9E8C" }}
+                            style={{ backgroundColor: "var(--color-accent)" }}
                           >
                             {saving ? t("acct.reviews.saving") : t("acct.reviews.saveChanges")}
                           </button>
@@ -366,7 +366,7 @@ export default function MyReviewsClient() {
               const product = productMap.get(pid);
               if (!product) return null;
               return (
-                <div key={pid} className="bg-white rounded-card border border-line p-4 flex items-center gap-3">
+                <div key={pid} className="bg-canvas rounded-card border border-line p-4 flex items-center gap-3">
                   <ProductThumb product={product} />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-ink text-sm truncate">{product.name}</p>

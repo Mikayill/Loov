@@ -17,7 +17,7 @@ export default function WishlistButton({ productId, price }: { productId: string
       className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${
         liked
           ? "bg-red-400 text-white scale-110"
-          : "bg-white/80 backdrop-blur-sm text-ink-muted hover:bg-white hover:text-red-400 hover:scale-110"
+          : "bg-canvas/80 backdrop-blur-sm text-ink-muted hover:bg-canvas hover:text-red-400 hover:scale-110"
       }`}
     >
       <svg

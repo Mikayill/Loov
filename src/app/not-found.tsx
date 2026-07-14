@@ -46,7 +46,7 @@ export default function NotFound() {
         <div className="relative mb-6">
           <p
             className="text-[120px] sm:text-[160px] font-extrabold leading-none select-none"
-            style={{ color: "#EDE5D8" }}
+            style={{ color: "var(--color-panel)" }}
           >
             404
           </p>
@@ -64,7 +64,7 @@ export default function NotFound() {
 
         {/* Search bar — real input, live dropdown, no popup */}
         <div ref={searchRef} className="relative w-full max-w-sm mb-6">
-          <div className="flex items-center gap-3 px-5 py-3 bg-white border-2 border-line rounded-card shadow-sm">
+          <div className="flex items-center gap-3 px-5 py-3 bg-canvas border border-line rounded-card shadow-sm">
             <svg className="w-4 h-4 text-ink-muted flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -85,7 +85,7 @@ export default function NotFound() {
             )}
           </div>
           {searchOpen && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-card border border-line shadow-2xl p-4 z-[200] animate-pop-in text-left">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-canvas rounded-card border border-line shadow-2xl p-4 z-[200] animate-pop-in text-left">
               <SearchResultsPanel
                 query={query} setQuery={setQuery}
                 activeCat={activeCat} setActiveCat={setActiveCat}
@@ -100,14 +100,14 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 mb-10">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full text-white hover:opacity-90 shadow-sm transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control text-white hover:opacity-90 shadow-sm transition-opacity"
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             ← {t("err.backToHome")}
           </Link>
           <Link
             href="/products"
-            className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
+            className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control border border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
           >
             {t("err.browseProducts")}
           </Link>

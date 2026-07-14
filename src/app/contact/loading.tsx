@@ -10,7 +10,7 @@ export default function ContactLoading() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-16">
         {/* Form skeleton */}
-        <div className="lg:col-span-3 bg-white rounded-3xl border border-line p-7">
+        <div className="lg:col-span-3 bg-canvas rounded-card border border-line p-7">
           <div className="h-6 w-36 bg-line rounded mb-6" />
           <div className="space-y-5">
             {[1, 2, 3].map((i) => (
@@ -29,7 +29,7 @@ export default function ContactLoading() {
 
         {/* Sidebar skeleton */}
         <div className="lg:col-span-2 space-y-5">
-          <div className="bg-white rounded-3xl border border-line p-6 space-y-4">
+          <div className="bg-canvas rounded-card border border-line p-6 space-y-4">
             <div className="h-5 w-28 bg-line rounded" />
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex gap-3">

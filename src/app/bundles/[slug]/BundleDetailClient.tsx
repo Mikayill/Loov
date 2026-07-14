@@ -99,7 +99,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
         <div className="lg:col-span-2">
           {/* Hero card — photo when set, emoji fallback */}
           <div
-            className={`relative rounded-card sm:rounded-3xl flex flex-col items-center justify-center mb-4 sm:mb-5 overflow-hidden ${bundle.imageUrl ? "aspect-square" : "py-8 sm:py-14 px-6 sm:px-8"}`}
+            className={`relative rounded-card sm:rounded-card flex flex-col items-center justify-center mb-4 sm:mb-5 overflow-hidden ${bundle.imageUrl ? "aspect-square" : "py-8 sm:py-14 px-6 sm:px-8"}`}
             style={{ backgroundColor: bundle.cardColor }}
           >
             {bundle.imageUrl ? (
@@ -122,14 +122,14 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
           </div>
 
           {/* Price box */}
-          <div className="bg-white rounded-card border border-line p-4 sm:p-5 mb-4 sm:mb-5">
+          <div className="bg-canvas rounded-card border border-line p-4 sm:p-5 mb-4 sm:mb-5">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-[11px] text-ink-muted line-through mb-0.5">{formatPrice(separately)} {t("bundle.separately")}</p>
                 <p className="text-3xl font-extrabold text-ink">{formatPrice(bundle.bundlePrice)}</p>
               </div>
               <div className="text-center">
-                <div className="w-14 h-14 rounded-full flex flex-col items-center justify-center text-white font-extrabold" style={{ backgroundColor: "#5E9E8C" }}>
+                <div className="w-14 h-14 rounded-full flex flex-col items-center justify-center text-white font-extrabold" style={{ backgroundColor: "var(--color-accent)" }}>
                   <span className="text-lg leading-none">-{savingsPct}%</span>
                   <span className="text-[9px] font-bold opacity-80">OFF</span>
                 </div>
@@ -141,7 +141,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
           </div>
 
           {/* Features */}
-          <div className="bg-white rounded-card border border-line p-4 sm:p-5">
+          <div className="bg-canvas rounded-card border border-line p-4 sm:p-5">
             <h3 className="font-bold text-ink text-sm mb-3">{t("bundle.whyThis")}</h3>
             <ul className="space-y-2">
               {bundle.features.map((f) => (
@@ -173,7 +173,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
               return (
                 <div
                   key={`${product.slug}-${idx}`}
-                  className="bg-white rounded-card border-2 border-line p-3.5 sm:p-5"
+                  className="bg-canvas rounded-card border border-line p-3.5 sm:p-5"
                 >
                   <div className="flex gap-3 sm:gap-4 mb-3 sm:mb-4">
                     {/* Emoji thumbnail */}
@@ -258,7 +258,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
           </div>
 
           {/* Sticky CTA */}
-          <div className="sticky bottom-4 bg-white rounded-card border border-line shadow-lg p-4 sm:p-5">
+          <div className="sticky bottom-4 bg-canvas rounded-card border border-line shadow-lg p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-[11px] text-ink-muted line-through">{formatPrice(separately)}</p>
@@ -277,7 +277,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
                 status === "blocked" ? "bg-red-500" :
                 "hover:opacity-90 active:scale-[0.98]"
               }`}
-              style={status === "idle" ? { backgroundColor: "#5E9E8C" } : {}}
+              style={status === "idle" ? { backgroundColor: "var(--color-accent)" } : {}}
             >
               {status === "added" ? (
                 <>
@@ -297,14 +297,14 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
               <div className="flex gap-2 mt-2">
                 <Link
                   href="/cart"
-                  className="flex-1 py-2.5 rounded-control border-2 border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors text-center"
+                  className="flex-1 py-2.5 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors text-center"
                 >
                   {t("bundle.viewCart")} →
                 </Link>
                 <Link
                   href="/checkout"
                   className="flex-1 py-2.5 rounded-control text-xs font-bold text-white text-center hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: "#5E9E8C" }}
+                  style={{ backgroundColor: "var(--color-accent)" }}
                 >
                   {t("bundle.checkout")} →
                 </Link>
@@ -319,7 +319,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
         <p className="text-ink-muted text-sm mb-4">{t("bundle.exploreMore")}</p>
         <Link
           href="/bundles"
-          className="inline-flex items-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm"
+          className="inline-flex items-center gap-2 font-bold px-7 py-3 rounded-control border border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm"
         >
           ← {t("bundle.allBundles")}
         </Link>

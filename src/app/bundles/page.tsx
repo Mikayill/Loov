@@ -64,7 +64,7 @@ export default async function BundlesPage() {
             <Link
               key={bundle.slug}
               href={`/bundles/${bundle.slug}`}
-              className="group block bg-white rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+              className="group block bg-canvas rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
               {/* Hero — fixed ratio so every card is the same size */}
               <div
@@ -168,7 +168,7 @@ export default async function BundlesPage() {
         </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm"
+          className="inline-flex items-center gap-2 font-bold px-7 py-3 rounded-control border border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm"
         >
           {t("bundle.browseAll")} →
         </Link>

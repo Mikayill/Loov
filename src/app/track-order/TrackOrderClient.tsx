@@ -82,7 +82,7 @@ export default function TrackOrderClient() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-card border border-line p-6 mb-6">
+      <div className="bg-canvas rounded-card border border-line p-6 mb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label htmlFor="track-order-no" className="text-sm font-bold text-ink mb-2 block">{t("track.orderNumber")}</label>
@@ -93,7 +93,7 @@ export default function TrackOrderClient() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleTrack()}
               placeholder="e.g. LOOV-3V570MU"
-              className="w-full h-11 px-4 border-2 border-line rounded-control text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none focus:border-accent transition-colors bg-white"
+              className="w-full h-11 px-4 border border-line rounded-control text-sm font-medium text-ink placeholder-ink-muted focus:outline-none focus:border-accent transition-colors bg-canvas"
             />
           </div>
           <div>
@@ -105,7 +105,7 @@ export default function TrackOrderClient() {
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleTrack()}
               placeholder="you@example.com"
-              className="w-full h-11 px-4 border-2 border-line rounded-control text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none focus:border-accent transition-colors bg-white"
+              className="w-full h-11 px-4 border border-line rounded-control text-sm font-medium text-ink placeholder-ink-muted focus:outline-none focus:border-accent transition-colors bg-canvas"
             />
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function TrackOrderClient() {
       {searched && (
         <>
           {unavailable ? (
-            <div className="bg-white rounded-card border border-line p-8 text-center">
+            <div className="bg-canvas rounded-card border border-line p-8 text-center">
               <div className="text-4xl mb-3">🛠️</div>
               <p className="font-bold text-ink mb-2">{t("track.unavailableTitle")}</p>
               <p className="text-sm text-ink-muted">
@@ -136,7 +136,7 @@ export default function TrackOrderClient() {
               </p>
             </div>
           ) : !order ? (
-            <div className="bg-white rounded-card border border-line p-8 text-center">
+            <div className="bg-canvas rounded-card border border-line p-8 text-center">
               <div className="text-4xl mb-3">🔍</div>
               <p className="font-bold text-ink mb-2">{t("track.notFoundTitle")}</p>
               <p className="text-sm text-ink-muted">
@@ -146,7 +146,7 @@ export default function TrackOrderClient() {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="bg-canvas rounded-card border border-line overflow-hidden">
               {/* Order header */}
               <div className="px-6 py-4 border-b border-canvas flex items-center justify-between flex-wrap gap-3" style={{ backgroundColor: "#FAFAF8" }}>
                 <div>
@@ -188,7 +188,7 @@ export default function TrackOrderClient() {
                               ? "border-accent bg-accent"
                               : step.done
                               ? "border-accent bg-accent"
-                              : "border-line bg-white"
+                              : "border-line bg-canvas"
                           }`}>
                             {step.done && (
                               <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -196,7 +196,7 @@ export default function TrackOrderClient() {
                               </svg>
                             )}
                             {step.active && !step.done && (
-                              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                              <div className="w-2 h-2 rounded-full bg-canvas animate-pulse" />
                             )}
                           </div>
                           {!isLast && (

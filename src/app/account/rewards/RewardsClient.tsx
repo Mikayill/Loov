@@ -66,11 +66,11 @@ export default function RewardsClient() {
 
       {/* ── Balance card ── */}
       <div
-        className="rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden"
+        className="rounded-card p-6 sm:p-8 mb-6 text-white relative overflow-hidden"
         style={{ background: "linear-gradient(135deg, #5E9E8C 0%, #4A8474 100%)" }}
       >
-        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10" />
-        <div className="absolute -bottom-12 right-24 w-32 h-32 rounded-full bg-white/5" />
+        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-canvas/10" />
+        <div className="absolute -bottom-12 right-24 w-32 h-32 rounded-full bg-canvas/5" />
 
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
@@ -88,7 +88,7 @@ export default function RewardsClient() {
           </div>
 
           <div className="text-right">
-            <div className="inline-flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1.5 mb-2">
+            <div className="inline-flex items-center gap-1.5 bg-canvas/15 rounded-full px-3 py-1.5 mb-2">
               <span>{tier.emoji}</span>
               <span className="text-sm font-bold">{t("acct.rewards.member").replace("{tier}", tierName(tier.id, t))}</span>
             </div>
@@ -108,9 +108,9 @@ export default function RewardsClient() {
               <span>{t("acct.rewards.topTier")}</span>
             )}
           </div>
-          <div className="h-2.5 rounded-full bg-white/20 overflow-hidden">
+          <div className="h-2.5 rounded-full bg-canvas/20 overflow-hidden">
             <div
-              className="h-full rounded-full bg-white transition-all duration-700"
+              className="h-full rounded-full bg-canvas transition-all duration-700"
               style={{ width: `${tierProgress}%` }}
             />
           </div>
@@ -136,7 +136,7 @@ export default function RewardsClient() {
             text: t("acct.rewards.levelUpBody").replace("{n}", String(Math.round((settings.loyaltyGoldMultiplier - 1) * 100))),
           },
         ].map((c) => (
-          <div key={c.title} className="bg-white rounded-card border border-line p-5">
+          <div key={c.title} className="bg-canvas rounded-card border border-line p-5">
             <span className="text-2xl block mb-2">{c.icon}</span>
             <p className="font-extrabold text-ink text-sm mb-1">{c.title}</p>
             <p className="text-xs text-ink-soft leading-relaxed">{c.text}</p>
@@ -145,7 +145,7 @@ export default function RewardsClient() {
       </div>
 
       {/* ── Tiers ── */}
-      <div className="bg-white rounded-card border border-line p-6 mb-6">
+      <div className="bg-canvas rounded-card border border-line p-6 mb-6">
         <h2 className="font-extrabold text-ink mb-5">{t("acct.rewards.membershipTiers")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {tiersFromSettings(settings).map((tr) => {
@@ -186,7 +186,7 @@ export default function RewardsClient() {
       </div>
 
       {/* ── History ── */}
-      <div className="bg-white rounded-card border border-line p-6">
+      <div className="bg-canvas rounded-card border border-line p-6">
         <h2 className="font-extrabold text-ink mb-5">{t("acct.rewards.pointsHistory")}</h2>
         {transactions.length === 0 ? (
           <div className="text-center py-10">
@@ -197,8 +197,8 @@ export default function RewardsClient() {
             </p>
             <Link
               href="/products"
-              className="inline-block font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#5E9E8C" }}
+              className="inline-block font-bold px-6 py-2.5 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {t("acct.rewards.startShopping")} →
             </Link>

@@ -47,7 +47,7 @@ export default function ForgotPasswordClient() {
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-line shadow-sm p-7">
+        <div className="bg-canvas rounded-card border border-line shadow-sm p-7">
           {submitted ? (
             <div className="text-center py-4 space-y-5">
               <div className="w-16 h-16 rounded-full bg-accent-soft flex items-center justify-center text-3xl mx-auto shadow-sm">
@@ -88,7 +88,7 @@ export default function ForgotPasswordClient() {
                   onChange={(e) => { setEmail(e.target.value); setError(""); }}
                   placeholder="you@example.com"
                   required
-                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
+                  className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors"
                 />
                 {error && (
                   <p className="text-red-400 text-xs font-semibold mt-1.5">{error}</p>

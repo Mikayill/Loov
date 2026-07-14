@@ -15,7 +15,7 @@ function Stars({ count }: { count: number }) {
   return (
     <div className="flex gap-0.5">
       {[1,2,3,4,5].map(i => (
-        <svg key={i} className="w-3 h-3" viewBox="0 0 20 20" fill={i <= count ? "#F0B840" : "#DDD5CC"}>
+        <svg key={i} className="w-3 h-3" viewBox="0 0 20 20" fill={i <= count ? "#F0B840" : "var(--color-line)"}>
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -82,7 +82,7 @@ export default function OrdersClient() {
 
       {/* Empty state */}
       {orders.length === 0 && (
-        <div className="bg-white rounded-card border border-line p-12 text-center">
+        <div className="bg-canvas rounded-card border border-line p-12 text-center">
           <span className="text-5xl block mb-4">📦</span>
           <p className="font-extrabold text-ink text-lg mb-1">{t("acct.orders.empty")}</p>
           <p className="text-sm text-ink-soft mb-6">
@@ -90,8 +90,8 @@ export default function OrdersClient() {
           </p>
           <Link
             href="/products"
-            className="inline-block font-bold px-7 py-3 rounded-full text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {t("acct.orders.startShopping")} →
           </Link>
@@ -107,7 +107,7 @@ export default function OrdersClient() {
           const shipping = order.shippingCost ?? (itemTotal >= 100 ? 0 : order.shipping === "express" ? 25 : 15);
 
           return (
-            <div key={order.id} className="bg-white rounded-card border border-line overflow-hidden hover:shadow-md transition-shadow">
+            <div key={order.id} className="bg-canvas rounded-card border border-line overflow-hidden hover:shadow-md transition-shadow">
 
               {/* Order header */}
               <div className="flex items-center justify-between p-5 border-b border-canvas flex-wrap gap-4 bg-surface">
@@ -186,15 +186,15 @@ export default function OrdersClient() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="text-xs font-bold text-accent border border-accent px-3 py-1.5 rounded-full hover:bg-accent-soft transition-colors"
+                    className="text-xs font-bold text-accent border border-accent px-3 py-1.5 rounded-control hover:bg-accent-soft transition-colors"
                   >
                     {t("acct.orders.viewDetails")}
                   </Link>
                   {order.status === "Delivered" && (
                     <Link
                       href="/products"
-                      className="text-xs font-bold text-white px-4 py-1.5 rounded-full hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: "#5E9E8C" }}
+                      className="text-xs font-bold text-white px-4 py-1.5 rounded-control hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: "var(--color-accent)" }}
                     >
                       {t("acct.orders.buyAgain")} →
                     </Link>
@@ -212,8 +212,8 @@ export default function OrdersClient() {
         <p className="text-sm text-ink-soft mb-4">{t("acct.orders.browseLatest")}</p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-sm"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-2.5 rounded-control hover:opacity-90 transition-opacity shadow-sm"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {t("acct.orders.browseCollection")} →
         </Link>

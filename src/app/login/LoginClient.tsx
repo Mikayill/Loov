@@ -203,7 +203,7 @@ export default function LoginClient() {
           <p className="text-ink-muted text-sm mt-1">{t("auth.signInSubtitle")}</p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-line shadow-sm p-7 space-y-5">
+        <div className="bg-canvas rounded-card border border-line shadow-sm p-7 space-y-5">
 
           {/* ── Authenticator-app / SMS 2FA step (takes precedence over email-OTP) ── */}
           {mfaFactorId ? (
@@ -219,7 +219,7 @@ export default function LoginClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
+                className="w-full h-12 px-4 rounded-control border border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
               {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
               <Button type="submit" disabled={mfaCode.length !== 6} loading={loading} loadingText={t("auth.verifying")} fullWidth>
@@ -243,7 +243,7 @@ export default function LoginClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
+                className="w-full h-12 px-4 rounded-control border border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
               <label className="flex items-center gap-2 text-xs text-ink-soft font-semibold cursor-pointer select-none">
                 <input
@@ -272,7 +272,7 @@ export default function LoginClient() {
                   type="button"
                   onClick={handleResendEmailOtp}
                   disabled={resendCooldown > 0}
-                  className="text-xs font-semibold text-accent hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-xs font-semibold text-accent hover:underline disabled:text-ink-muted disabled:no-underline disabled:cursor-not-allowed"
                 >
                   {resendCooldown > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendCooldown)) : t("auth.emailOtpResend")}
                 </button>
@@ -285,7 +285,7 @@ export default function LoginClient() {
             <button
               onClick={() => handleSocial("google")}
               disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border-2 border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60"
             >
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
@@ -306,7 +306,7 @@ export default function LoginClient() {
                 key={tabKey}
                 onClick={() => { setTab(tabKey); setError(""); setOtpSent(false); }}
                 className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                  tab === tabKey ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink-soft"
+                  tab === tabKey ? "bg-canvas text-ink shadow-sm" : "text-ink-muted hover:text-ink-soft"
                 }`}
               >
                 {tabKey === "email" ? t("auth.tabEmail") : t("auth.tabPhone")}
@@ -322,7 +322,7 @@ export default function LoginClient() {
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com" required
-                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
+                  className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors"
                 />
               </div>
               <div>
@@ -335,7 +335,7 @@ export default function LoginClient() {
                     type={showPass ? "text" : "password"} value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••" required
-                    className="w-full h-11 px-4 pr-11 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
+                    className="w-full h-11 px-4 pr-11 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors"
                   />
                   <button type="button" onClick={() => setShowPass((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft transition-colors">
@@ -358,12 +358,12 @@ export default function LoginClient() {
             <form onSubmit={otpSent ? handlePhoneLogin : handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.phoneNumber")}</label>
-                <div className={`flex items-stretch h-11 rounded-control border-2 border-line bg-white overflow-hidden focus-within:border-accent transition-colors ${otpSent ? "opacity-60" : ""}`}>
+                <div className={`flex items-stretch h-11 rounded-control border border-line bg-canvas overflow-hidden focus-within:border-accent transition-colors ${otpSent ? "opacity-60" : ""}`}>
                   <span className="flex items-center pl-4 pr-2 text-sm font-bold text-ink-soft bg-canvas border-r-2 border-line select-none">{PHONE_COUNTRY_CODE}</span>
                   <input
                     type="tel" value={phoneLocalPart(phone)} onChange={(e) => setPhone(withCountryCode(e.target.value))}
                     placeholder={PHONE_LOCAL_PLACEHOLDER} required disabled={otpSent}
-                    className="flex-1 min-w-0 h-full px-4 bg-transparent text-sm font-medium text-ink placeholder:text-[#C8B8B0] outline-none disabled:bg-canvas"
+                    className="flex-1 min-w-0 h-full px-4 bg-transparent text-sm font-medium text-ink placeholder:text-ink-muted outline-none disabled:bg-canvas"
                   />
                 </div>
               </div>
@@ -373,7 +373,7 @@ export default function LoginClient() {
                   <input
                     type="text" value={otp} onChange={(e) => setOtp(e.target.value)}
                     placeholder="6-digit code" maxLength={6} required
-                    className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors tracking-widest text-center"
+                    className="w-full h-11 px-4 rounded-control border border-line text-sm font-medium text-ink placeholder:text-ink-muted focus:border-accent outline-none transition-colors tracking-widest text-center"
                   />
                   <p className="text-xs text-ink-muted mt-1.5 text-center">
                     {t("auth.codeSentTo").replace("{phone}", phone)}{" "}

@@ -163,7 +163,7 @@ export default function AccountClient() {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-red-400 border-2 border-line hover:border-red-200 px-4 py-2 rounded-control transition-all"
+          className="flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-red-400 border border-line hover:border-red-200 px-4 py-2 rounded-control transition-all"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -175,10 +175,10 @@ export default function AccountClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile card */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-card border border-line p-6 text-center">
+          <div className="bg-canvas rounded-card border border-line p-6 text-center">
             <div
               className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-extrabold text-white shadow-sm overflow-hidden"
-              style={{ backgroundColor: "#5E9E8C" }}
+              style={{ backgroundColor: "var(--color-accent)" }}
             >
               {avatarShown ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -207,7 +207,7 @@ export default function AccountClient() {
                 )}
                 <button
                   onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
-                  className="mt-4 w-full py-2.5 rounded-control border-2 border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors"
+                  className="mt-4 w-full py-2.5 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors"
                 >
                   {t("acct.editProfile")}
                 </button>
@@ -227,7 +227,7 @@ export default function AccountClient() {
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none"
+                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
                     required
                   />
                 </div>
@@ -237,7 +237,7 @@ export default function AccountClient() {
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none"
+                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
                   />
                 </div>
                 <div>
@@ -247,7 +247,7 @@ export default function AccountClient() {
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     placeholder="+995 5XX XX XX XX"
-                    className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none"
+                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
                   />
                   <p className="text-[10px] text-ink-muted mt-1">{t("acct.phoneHint")}</p>
                 </div>
@@ -263,7 +263,7 @@ export default function AccountClient() {
                         value={editBabyName}
                         onChange={(e) => setEditBabyName(e.target.value)}
                         placeholder={t("acct.optional")}
-                        className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none"
+                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
                       />
                     </div>
                     <div>
@@ -273,7 +273,7 @@ export default function AccountClient() {
                         value={editBabyDate}
                         max={new Date().toISOString().slice(0, 10)}
                         onChange={(e) => setEditBabyDate(e.target.value)}
-                        className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none"
+                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
                       />
                       <p className="text-[10px] text-ink-muted mt-1">{t("acct.birthDateHint")}</p>
                     </div>
@@ -282,7 +282,7 @@ export default function AccountClient() {
                       <select
                         value={editBabyGender}
                         onChange={(e) => setEditBabyGender(e.target.value as "" | BabyGender)}
-                        className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none bg-white"
+                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none bg-canvas"
                       >
                         <option value="">—</option>
                         <option value="boy">{t("acct.boy")}</option>
@@ -301,7 +301,7 @@ export default function AccountClient() {
                     <select
                       value={editLanguage}
                       onChange={(e) => { if (isLocale(e.target.value)) setEditLanguage(e.target.value); }}
-                      className="w-full h-10 px-3 rounded-control border-2 border-line text-sm text-ink font-medium focus:border-accent outline-none bg-white"
+                      className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none bg-canvas"
                     >
                       {LOCALES.map((l) => (
                         <option key={l} value={l}>{LOCALE_META[l].flag} {LOCALE_META[l].label}</option>
@@ -320,7 +320,7 @@ export default function AccountClient() {
                           className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-base transition-all ${
                             editAvatar === null ? "ring-2 ring-offset-2 ring-accent" : "opacity-70 hover:opacity-100"
                           }`}
-                          style={{ backgroundColor: "#5E9E8C" }}
+                          style={{ backgroundColor: "var(--color-accent)" }}
                         >
                           {editName[0]?.toUpperCase() || "?"}
                         </button>
@@ -349,14 +349,14 @@ export default function AccountClient() {
                     type="submit"
                     disabled={saving}
                     className="flex-1 py-2.5 rounded-control text-xs font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-                    style={{ backgroundColor: "#5E9E8C" }}
+                    style={{ backgroundColor: "var(--color-accent)" }}
                   >
                     {saving ? t("auth.saving") : t("acct.saveChanges")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditing(false)}
-                    className="flex-1 py-2.5 rounded-control border-2 border-line text-xs font-bold text-ink-soft hover:border-ink-muted transition-colors"
+                    className="flex-1 py-2.5 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-ink-muted transition-colors"
                   >
                     {t("acct.cancel")}
                   </button>
@@ -370,17 +370,17 @@ export default function AccountClient() {
         <div className="lg:col-span-2 space-y-4">
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <Link href="/cart" className="bg-white rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
+            <Link href="/cart" className="bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
               <div className="text-2xl mb-1">🛒</div>
               <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{totalItems}</p>
               <p className="text-xs text-ink-muted font-semibold">{t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice))}</p>
             </Link>
-            <Link href="/wishlist" className="bg-white rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
+            <Link href="/wishlist" className="bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
               <div className="text-2xl mb-1">❤️</div>
               <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{wishCount}</p>
               <p className="text-xs text-ink-muted font-semibold">{t("acct.savedToWishlist")}</p>
             </Link>
-            <Link href="/account/rewards" className="col-span-2 sm:col-span-1 bg-white rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
+            <Link href="/account/rewards" className="col-span-2 sm:col-span-1 bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
               <div className="text-2xl mb-1">⭐</div>
               <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{pointsBalance.toLocaleString()}</p>
               <p className="text-xs text-ink-muted font-semibold">{t("acct.bebecoPoints").replace("{tier}", `${tier.emoji} ${tierName(tier.id, t)}`)}</p>
@@ -388,7 +388,7 @@ export default function AccountClient() {
           </div>
 
           {/* Quick actions */}
-          <div className="bg-white rounded-card border border-line divide-y divide-canvas">
+          <div className="bg-canvas rounded-card border border-line divide-y divide-canvas">
             {[
               { icon: "📦", label: t("acct.myOrders"),   sub: t("acct.myOrdersSub"),       href: "/account/orders" },
               { icon: "↩️", label: t("acct.myReturns"),  sub: t("acct.myReturnsSub"),      href: "/account/returns" },

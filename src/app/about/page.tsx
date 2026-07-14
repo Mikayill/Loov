@@ -11,7 +11,7 @@ export default async function AboutPage() {
   const { t } = await getT();
 
   const values = [
-    { emoji: "🌿", title: t("about.value1Title"), desc: t("about.value1Desc"), bg: "#EAF2F0" },
+    { emoji: "🌿", title: t("about.value1Title"), desc: t("about.value1Desc"), bg: "var(--color-accent-soft)" },
     { emoji: "🔬", title: t("about.value2Title"), desc: t("about.value2Desc"), bg: "#EDF2E8" },
     { emoji: "💝", title: t("about.value3Title"), desc: t("about.value3Desc"), bg: "#EDE8F2" },
     { emoji: "🌍", title: t("about.value4Title"), desc: t("about.value4Desc"), bg: "#F2EDE8" },
@@ -22,7 +22,7 @@ export default async function AboutPage() {
 
       {/* ── Hero ── */}
       <section
-        className="text-center rounded-card sm:rounded-3xl px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
+        className="text-center rounded-card sm:rounded-card px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
         style={{ background: "linear-gradient(135deg, #F5F0EB 0%, #E8F0EE 60%, #EAE8F0 100%)" }}
       >
         <div className="absolute top-6 left-8 w-20 h-20 rounded-full opacity-30" style={{ backgroundColor: "#C8DDD8" }} />
@@ -31,7 +31,7 @@ export default async function AboutPage() {
           <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🌿</div>
           <h1 className="text-2xl sm:text-5xl font-extrabold text-ink mb-3 sm:mb-5 leading-tight">
             {t("about.heroTitleA")}<br />
-            <span style={{ color: "#5E9E8C" }}>{t("about.heroTitleB")}</span>
+            <span style={{ color: "var(--color-accent)" }}>{t("about.heroTitleB")}</span>
           </h1>
           <p className="text-sm sm:text-lg text-ink-soft max-w-2xl mx-auto leading-snug sm:leading-relaxed">
             {t("about.heroSubtitle")}
@@ -98,7 +98,7 @@ export default async function AboutPage() {
 
       {/* ── CTA ── */}
       <section
-        className="rounded-card sm:rounded-3xl p-6 sm:p-10 text-center"
+        className="rounded-card sm:rounded-card p-6 sm:p-10 text-center"
         style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EDF5 100%)" }}
       >
         <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🌸</div>
@@ -110,8 +110,8 @@ export default async function AboutPage() {
         </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-full text-white hover:opacity-90 transition-opacity shadow-sm"
-          style={{ backgroundColor: "#5E9E8C" }}
+          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white hover:opacity-90 transition-opacity shadow-sm"
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {t("about.ctaButton")} →
         </Link>

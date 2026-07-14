@@ -11,7 +11,7 @@ export default function AccountLoading() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile card */}
-        <div className="bg-white rounded-card border border-line p-6 text-center">
+        <div className="bg-canvas rounded-card border border-line p-6 text-center">
           <div className="w-20 h-20 rounded-full bg-sage mx-auto mb-4" />
           <div className="h-5 w-32 bg-line rounded mx-auto mb-2" />
           <div className="h-4 w-44 bg-panel rounded mx-auto mb-3" />
@@ -22,7 +22,7 @@ export default function AccountLoading() {
         <div className="lg:col-span-2 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-white rounded-card border border-line p-5">
+              <div key={i} className="bg-canvas rounded-card border border-line p-5">
                 <div className="h-7 w-8 bg-panel rounded mb-2" />
                 <div className="h-8 w-10 bg-line rounded mb-1" />
                 <div className="h-3 w-28 bg-panel rounded" />
@@ -30,7 +30,7 @@ export default function AccountLoading() {
             ))}
           </div>
 
-          <div className="bg-white rounded-card border border-line divide-y divide-canvas">
+          <div className="bg-canvas rounded-card border border-line divide-y divide-canvas">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">

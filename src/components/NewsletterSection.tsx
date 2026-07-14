@@ -52,7 +52,7 @@ export default function NewsletterSection() {
               value={email}
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
               placeholder="your@email.com"
-              className="flex-1 h-12 px-4 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-ink-muted"
+              className="flex-1 h-12 px-4 rounded-control border border-line bg-canvas text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-ink-muted"
             />
             <Button type="submit" size="lg" className="whitespace-nowrap">
               Subscribe 🌿

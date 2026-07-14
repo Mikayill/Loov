@@ -41,7 +41,7 @@ export default async function PrivacyPage() {
         {sections.map((s, i) => (
           <div key={s.title}>
             <h2 className="font-extrabold text-ink mb-2 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "#5E9E8C" }}>{i + 1}</span>
+              <span className="w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "var(--color-accent)" }}>{i + 1}</span>
               {s.title}
             </h2>
             <p className="text-ink-soft text-sm leading-relaxed pl-8">{s.body}</p>
@@ -52,7 +52,7 @@ export default async function PrivacyPage() {
       <div className="mt-10 p-5 bg-accent-soft rounded-card border border-sage text-center">
         <p className="text-sm font-bold text-ink mb-1">{t("legal.privacy.questionsTitle")}</p>
         <p className="text-xs text-ink-soft mb-3">{t("legal.privacy.questionsBody")}</p>
-        <Link href="/contact" className="inline-flex items-center gap-1.5 font-bold text-sm text-white px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+        <Link href="/contact" className="inline-flex items-center gap-1.5 font-bold text-sm text-white px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: "var(--color-accent)" }}>
           {t("legal.privacy.contactBtn")} →
         </Link>
       </div>

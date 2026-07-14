@@ -43,7 +43,7 @@ export default async function ContactPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-8 mb-10 sm:mb-16">
 
         {/* Contact form (3/5) */}
-        <div className="lg:col-span-3 bg-white rounded-card sm:rounded-3xl border border-line p-4 sm:p-7 shadow-sm">
+        <div className="lg:col-span-3 bg-canvas rounded-card sm:rounded-card border border-line p-4 sm:p-7 shadow-sm">
           <h2 className="text-lg font-extrabold text-ink mb-4 sm:mb-6">{t("contact.sendMessage")}</h2>
           <ContactForm />
         </div>
@@ -52,7 +52,7 @@ export default async function ContactPage() {
         <div className="lg:col-span-2 space-y-4 sm:space-y-5">
 
           {/* Info card */}
-          <div className="bg-white rounded-card sm:rounded-3xl border border-line p-4 sm:p-6 shadow-sm">
+          <div className="bg-canvas rounded-card sm:rounded-card border border-line p-4 sm:p-6 shadow-sm">
             <h3 className="text-base font-extrabold text-ink mb-4 sm:mb-5">{t("contact.getInTouch")}</h3>
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-4">
               {infoItems.map((item) => (
@@ -88,7 +88,7 @@ export default async function ContactPage() {
           {/* Response time badge */}
           <div
             className="rounded-card p-4 sm:p-5 border border-line flex items-center gap-3"
-            style={{ backgroundColor: "#EAF2F0" }}
+            style={{ backgroundColor: "var(--color-accent-soft)" }}
           >
             <span className="text-2xl">⚡</span>
             <div>
@@ -112,7 +112,7 @@ export default async function ContactPage() {
           {faqs.map((faq) => (
             <div
               key={faq.q}
-              className="bg-white rounded-card border border-line p-4 sm:p-6 shadow-sm"
+              className="bg-canvas rounded-card border border-line p-4 sm:p-6 shadow-sm"
             >
               <h3 className="font-bold text-ink mb-2 flex items-start gap-2">
                 <span className="text-accent flex-shrink-0">{t("contact.qPrefix")}</span>
