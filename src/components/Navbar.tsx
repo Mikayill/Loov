@@ -15,6 +15,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
 import { categoryPlural } from "@/lib/i18n/labels";
+import Wordmark from "./Wordmark";
 import type { Product } from "@/types";
 
 const navLinks: { href: string; key: TranslationKey }[] = [
@@ -186,8 +187,7 @@ export default function Navbar() {
 
               {/* Logo — the LOOV wordmark (warm-white variant, ink extracted) */}
               <Link href="/" className="flex items-center flex-shrink-0" aria-label="Loov — home">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
+                <Wordmark className="text-[21px] text-ink" />
               </Link>
 
               {/* Desktop search — Nordic: full-width functional bar in the center */}

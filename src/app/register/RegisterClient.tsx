@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import Button from "@/components/ui/Button";
+import Wordmark from "@/components/Wordmark";
 import Spinner from "@/components/ui/Spinner";
 
 const GoogleIcon = () => (
@@ -115,8 +116,7 @@ export default function RegisterClient() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
+            <Wordmark className="text-[26px] text-ink" />
           </Link>
           <h1 className="text-2xl font-extrabold text-ink">{t("auth.createAccount")}</h1>
           <p className="text-ink-muted text-sm mt-1">{t("auth.joinFamily")}</p>

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
+import Wordmark from "@/components/Wordmark";
 import { PHONE_COUNTRY_CODE, PHONE_LOCAL_PLACEHOLDER, phoneLocalPart, withCountryCode } from "@/lib/georgia";
 
 type Tab = "email" | "phone";
@@ -196,8 +197,7 @@ export default function LoginClient() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
+            <Wordmark className="text-[26px] text-ink" />
           </Link>
           <h1 className="text-2xl font-extrabold text-ink">{t("auth.welcomeBack")}</h1>
           <p className="text-ink-muted text-sm mt-1">{t("auth.signInSubtitle")}</p>

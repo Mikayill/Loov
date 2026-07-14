@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Wordmark from "@/components/Wordmark";
 import type { AdminUser } from "@/lib/admin/auth";
 
 type Section = "orders" | "returns" | "reviews";
@@ -103,8 +104,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       {/* Sidebar (desktop) */}
       <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-canvas border-r border-line p-4 sticky top-0 h-screen">
         <div className="flex items-center gap-2.5 px-2 mb-6">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
+          <Wordmark className="text-[17px] text-ink" />
           <p className="text-[10px] font-bold text-accent uppercase tracking-widest mt-0.5">Admin</p>
         </div>
         {nav}
@@ -127,8 +127,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       {/* Top bar (mobile) */}
       <header className="sm:hidden flex items-center justify-between bg-canvas border-b border-line px-4 py-3 sticky top-0 z-30">
         <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
+          <Wordmark className="text-[17px] text-ink" />
           <span className="font-extrabold text-accent text-sm">Admin</span>
         </div>
         <button onClick={() => setMobileOpen((v) => !v)} className="text-2xl leading-none px-2" aria-label="Menu">

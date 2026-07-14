@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
+import Wordmark from "@/components/Wordmark";
 import Button from "@/components/ui/Button";
 
 export default function ResetPasswordClient() {
@@ -34,8 +35,7 @@ export default function ResetPasswordClient() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
+            <Wordmark className="text-[26px] text-ink" />
           </Link>
           <h1 className="text-2xl font-extrabold text-ink">{t("auth.setNewPassword")}</h1>
         </div>

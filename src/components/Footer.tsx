@@ -1,5 +1,6 @@
 import { getT } from "@/lib/i18n/server";
 import FooterPhone from "./FooterPhone";
+import Wordmark from "./Wordmark";
 
 const socialLinks = [
   {
@@ -70,8 +71,7 @@ export default async function Footer() {
           {/* Brand + social */}
           <div className="bg-[#141412] py-8 pr-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center mb-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
+              <Wordmark className="text-[21px] text-white" />
             </div>
             <p className="text-xs text-white/55 leading-relaxed mb-5 max-w-[30ch]">
               {t("footer.tagline")}

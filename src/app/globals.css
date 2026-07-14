@@ -66,14 +66,6 @@ html[data-theme="dark"]:not(.route-admin) .bg-accent,
 html[data-theme="dark"]:not(.route-admin) .hover\:bg-accent:hover {
   color: #12211B;
 }
-/* The wordmark is near-black raster art — invert it on dark ground.
-   The footer is permanently dark, so its logo inverts in BOTH themes. */
-footer img[src="/logo.png"] {
-  filter: invert(1) hue-rotate(180deg) brightness(1.08);
-}
-html[data-theme="dark"]:not(.route-admin) img[src="/logo.png"] {
-  filter: invert(1) hue-rotate(180deg) brightness(1.08);
-}
 /* Brief cross-fade when the user flips the theme (removed right after). */
 html.theme-anim,
 html.theme-anim body,
@@ -139,6 +131,11 @@ svg {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* LOOV wordmark face (next/font/local exposes --font-cinzel on <html>) */
+.font-display {
+  font-family: var(--font-cinzel), "Cinzel Decorative", Georgia, serif;
 }
 
 /* Hide scrollbar for filter row */

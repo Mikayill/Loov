@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import Button from "@/components/ui/Button";
+import Wordmark from "@/components/Wordmark";
 import LinkButton from "@/components/ui/LinkButton";
 
 export default function ForgotPasswordClient() {
@@ -36,8 +37,7 @@ export default function ForgotPasswordClient() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-4" aria-label="Loov — home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
+            <Wordmark className="text-[26px] text-ink" />
           </Link>
           <h1 className="text-2xl font-extrabold text-ink">{t("auth.resetPassword")}</h1>
           <p className="text-ink-muted text-sm mt-1">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -23,6 +24,14 @@ const archivo = Archivo({
   subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
   display: "swap",
+});
+
+/* The logo's own typeface (OFL) — used ONLY for the LOOV wordmark. */
+const cinzel = localFont({
+  src: "./fonts/CinzelDecorative-Bold.ttf",
+  variable: "--font-cinzel",
+  display: "swap",
+  weight: "700",
 });
 
 // NOTE: no `template` here — every page's own generateMetadata() already
@@ -56,7 +65,7 @@ export default async function RootLayout({
   /* Theme cookie is read server-side so dark mode renders without a flash. */
   const theme = (await cookies()).get("loov-theme")?.value === "dark" ? "dark" : undefined;
   return (
-    <html lang={locale} className={archivo.variable} data-theme={theme}>
+    <html lang={locale} className={`${archivo.variable} ${cinzel.variable}`} data-theme={theme}>
       <body className="min-h-screen flex flex-col bg-canvas text-ink">
         <LocaleProvider initialLocale={locale}>
         <AuthProvider>

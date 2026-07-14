@@ -11,27 +11,25 @@ export default async function AboutPage() {
   const { t } = await getT();
 
   const values = [
-    { emoji: "🌿", title: t("about.value1Title"), desc: t("about.value1Desc"), bg: "var(--color-accent-soft)" },
-    { emoji: "🔬", title: t("about.value2Title"), desc: t("about.value2Desc"), bg: "#EDF2E8" },
-    { emoji: "💝", title: t("about.value3Title"), desc: t("about.value3Desc"), bg: "#EDE8F2" },
-    { emoji: "🌍", title: t("about.value4Title"), desc: t("about.value4Desc"), bg: "#F2EDE8" },
+    { emoji: "🌿", title: t("about.value1Title"), desc: t("about.value1Desc"), tint: "#C8DDD8" },
+    { emoji: "🔬", title: t("about.value2Title"), desc: t("about.value2Desc"), tint: "#C4D4E4" },
+    { emoji: "💝", title: t("about.value3Title"), desc: t("about.value3Desc"), tint: "#D4CAE4" },
+    { emoji: "🌍", title: t("about.value4Title"), desc: t("about.value4Desc"), tint: "#E4D8C4" },
   ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-12">
 
-      {/* ── Hero ── */}
+      {/* ── Hero — token surfaces, so it reads correctly in BOTH themes ── */}
       <section
-        className="text-center rounded-card sm:rounded-card px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #F5F0EB 0%, #E8F0EE 60%, #EAE8F0 100%)" }}
+        className="text-center rounded-card border border-line px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
+        style={{ background: "linear-gradient(150deg, var(--color-accent-soft), var(--color-panel))" }}
       >
-        <div className="absolute top-6 left-8 w-20 h-20 rounded-full opacity-30" style={{ backgroundColor: "#C8DDD8" }} />
-        <div className="absolute bottom-6 right-8 w-28 h-28 rounded-full opacity-20" style={{ backgroundColor: "#D4CAE4" }} />
         <div className="relative">
           <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🌿</div>
-          <h1 className="text-2xl sm:text-5xl font-extrabold text-ink mb-3 sm:mb-5 leading-tight">
+          <h1 className="text-2xl sm:text-5xl font-extrabold text-ink mb-3 sm:mb-5 leading-tight text-balance">
             {t("about.heroTitleA")}<br />
-            <span style={{ color: "var(--color-accent)" }}>{t("about.heroTitleB")}</span>
+            <span className="text-accent">{t("about.heroTitleB")}</span>
           </h1>
           <p className="text-sm sm:text-lg text-ink-soft max-w-2xl mx-auto leading-snug sm:leading-relaxed">
             {t("about.heroSubtitle")}
@@ -67,7 +65,8 @@ export default async function AboutPage() {
               style={{ backgroundColor: card.bg }}
             >
               <span className="text-4xl">{card.emoji}</span>
-              <span className="text-xs font-bold text-ink-soft">{card.caption}</span>
+              {/* Pastel wells stay light in dark mode too → caption color is FIXED dark */}
+              <span className="text-xs font-bold" style={{ color: "#3B3B35" }}>{card.caption}</span>
             </div>
           ))}
         </div>
@@ -83,10 +82,14 @@ export default async function AboutPage() {
           {values.map((v) => (
             <div
               key={v.title}
-              className="rounded-card p-4 sm:p-6 border border-line flex gap-3 sm:gap-5 items-start"
-              style={{ backgroundColor: v.bg }}
+              className="rounded-card p-4 sm:p-6 border border-line bg-surface flex gap-3 sm:gap-5 items-start"
             >
-              <span className="text-3xl flex-shrink-0">{v.emoji}</span>
+              <span
+                className="w-12 h-12 rounded-control flex items-center justify-center text-2xl flex-shrink-0"
+                style={{ backgroundColor: v.tint + "66" }}
+              >
+                {v.emoji}
+              </span>
               <div>
                 <h3 className="font-bold text-ink mb-1.5">{v.title}</h3>
                 <p className="text-sm text-ink-soft leading-relaxed">{v.desc}</p>
@@ -98,8 +101,8 @@ export default async function AboutPage() {
 
       {/* ── CTA ── */}
       <section
-        className="rounded-card sm:rounded-card p-6 sm:p-10 text-center"
-        style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EDF5 100%)" }}
+        className="rounded-card border border-line p-6 sm:p-10 text-center"
+        style={{ background: "linear-gradient(150deg, var(--color-accent-soft), var(--color-panel))" }}
       >
         <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🌸</div>
         <h2 className="text-2xl font-extrabold text-ink mb-3">
