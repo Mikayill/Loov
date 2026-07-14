@@ -64,8 +64,7 @@ export default function ReturnsClient() {
           </p>
           <Link
             href="/account/orders"
-            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn inline-block font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
           >
             {t("acct.returns.viewMyOrders")}
           </Link>

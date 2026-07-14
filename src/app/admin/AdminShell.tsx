@@ -87,7 +87,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
           className={`flex items-center gap-3 px-3 py-2.5 rounded-control text-sm font-bold transition-colors ${
             isActive(n.href, n.exact)
               ? "bg-accent text-white"
-              : "text-ink-soft hover:bg-accent-soft"
+              : "text-ink-soft hover:bg-panel"
           }`}
         >
           <span className="text-base">{n.icon}</span>
@@ -111,7 +111,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
         <div className="mt-auto pt-4 border-t border-canvas">
           <p className="px-3 text-[11px] text-ink-muted truncate mb-2">{admin.email}</p>
           <div className="flex gap-2 px-1">
-            <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2 hover:bg-accent-soft transition-colors">
+            <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2 hover:bg-panel transition-colors">
               View site
             </Link>
             <button

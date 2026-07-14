@@ -104,8 +104,7 @@ export default function WishlistClient() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white hover:opacity-90 active:scale-95 shadow-sm transition-all"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white active:scale-95 shadow-sm transition-all bg-ink hover:bg-ink/85"
         >
           {t("wl.browseProducts")} →
         </Link>

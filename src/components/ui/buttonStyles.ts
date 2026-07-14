@@ -6,7 +6,7 @@ const base =
   "inline-flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.08em] rounded-control transition-colors duration-200 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "u-btn text-white bg-ink hover:bg-accent",
+  primary: "u-btn text-white bg-ink hover:bg-ink/85",
   secondary: "u-btn u-btn-ghost border border-ink text-ink hover:bg-ink hover:text-white",
   ghost: "text-ink-soft hover:text-ink hover:bg-panel",
   danger: "u-btn text-white bg-danger hover:opacity-90",

@@ -110,8 +110,7 @@ export default async function AboutPage() {
         </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white hover:opacity-90 transition-opacity shadow-sm"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-control text-white transition-colors shadow-sm bg-ink hover:bg-ink/85"
         >
           {t("about.ctaButton")} →
         </Link>

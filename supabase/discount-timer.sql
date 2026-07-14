@@ -6,3 +6,8 @@ alter table public.products
 
 comment on column public.products.discount_ends_at is
   'When the current discount_percent expires. NULL = no time limit.';
+
+-- PostgREST caches the schema; without this the API keeps saying
+-- "Could not find the 'discount_ends_at' column ... in the schema cache"
+-- until the next restart.
+notify pgrst, 'reload schema';

@@ -222,8 +222,7 @@ export default function MyReviewsClient() {
           </p>
           <Link
             href="/account/orders"
-            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn inline-block font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
           >
             {t("acct.reviews.viewOrders")}
           </Link>
@@ -276,7 +275,7 @@ export default function MyReviewsClient() {
                             <>
                               <button
                                 onClick={() => startEdit(r)}
-                                className="text-xs font-bold text-accent px-3 py-1.5 rounded-lg border border-accent hover:bg-accent-soft transition-colors"
+                                className="text-xs font-bold text-accent px-3 py-1.5 rounded-lg border border-accent hover:bg-panel transition-colors"
                               >
                                 {t("acct.reviews.edit")}
                               </button>
@@ -323,8 +322,7 @@ export default function MyReviewsClient() {
                           <button
                             onClick={() => saveEdit(r.id)}
                             disabled={saving || editText.trim().length < 10}
-                            className="px-5 h-10 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-                            style={{ backgroundColor: "var(--color-accent)" }}
+                            className="u-btn px-5 h-10 rounded-control font-bold text-white text-sm disabled:opacity-50 transition-colors bg-ink hover:bg-ink/85"
                           >
                             {saving ? t("acct.reviews.saving") : t("acct.reviews.saveChanges")}
                           </button>

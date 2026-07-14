@@ -249,6 +249,14 @@ export async function PATCH(req: NextRequest) {
   }
 
   let { error } = await admin.from("products").update(clean).eq("id", String(id));
+  // supabase/discount-timer.sql not run yet → say exactly that instead of the
+  // raw PostgREST schema-cache message.
+  if (error && /discount_ends_at/i.test(error.message)) {
+    return NextResponse.json(
+      { error: "The discount end-date column is missing. Run supabase/discount-timer.sql in the Supabase SQL editor, then try again." },
+      { status: 400 }
+    );
+  }
   // If supabase/product-i18n.sql hasn't been run yet, retry without those
   // columns so unrelated edits (price, stock, colors…) never fail because of it.
   if (error && /column|schema cache/i.test(error.message) && /name_ka|name_ru|name_tr|description_ka|description_ru|description_tr/i.test(error.message)) {

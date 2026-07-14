@@ -484,7 +484,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="text-6xl mb-5">🛒</div>
         <h2 className="text-2xl font-extrabold text-ink mb-3">{t("cart.empty.title")}</h2>
         <p className="text-ink-soft mb-7 text-sm">{t("checkout.emptySubtitle")}</p>
-        <Link href="/products" className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3 rounded-control text-white bg-ink hover:bg-accent">
+        <Link href="/products" className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3 rounded-control text-white bg-ink hover:bg-ink/85">
           {t("checkout.browseProducts")} →
         </Link>
       </div>
@@ -1133,7 +1133,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/products"
-              className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control text-white bg-ink hover:bg-accent"
+              className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control text-white bg-ink hover:bg-ink/85"
             >
               {t("common.continueShopping")} →
             </Link>

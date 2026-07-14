@@ -313,7 +313,7 @@ export default function ProductDetailClient({
                 <button
                   onClick={prevImg}
                   aria-label="Previous photo"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-accent hover:text-white hover:border-accent active:scale-90 transition-all"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -322,7 +322,7 @@ export default function ProductDetailClient({
                 <button
                   onClick={nextImg}
                   aria-label="Next photo"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-accent hover:text-white hover:border-accent active:scale-90 transition-all"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -427,7 +427,7 @@ export default function ProductDetailClient({
                   <button
                     onClick={handleNotifyAccount}
                     disabled={notifyStatus === "sending"}
-                    className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-60 bg-ink hover:bg-accent active:scale-95 transition-all"
+                    className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-60 bg-ink hover:bg-ink/85 active:scale-95 transition-all"
                   >
                     {notifyStatus === "sending" ? "…" : `🔔 ${t("pdp.notifyBtn")}`}
                   </button>
@@ -446,7 +446,7 @@ export default function ProductDetailClient({
                     />
                     <button
                       type="submit" disabled={notifyStatus === "sending"}
-                      className="h-10 px-4 rounded-control font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 bg-ink hover:bg-accent active:scale-95 transition-all"
+                      className="h-10 px-4 rounded-control font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 bg-ink hover:bg-ink/85 active:scale-95 transition-all"
                     >
                       {notifyStatus === "sending" ? "…" : t("pdp.notifyBtn")}
                     </button>
@@ -603,7 +603,7 @@ export default function ProductDetailClient({
                   ? "scale-95 bg-accent"
                   : cartStatus === "blocked" || outOfStock
                   ? "bg-danger"
-                  : "bg-ink hover:bg-accent active:scale-95"
+                  : "bg-ink hover:bg-ink/85 active:scale-95"
               } ${outOfStock ? "cursor-not-allowed" : ""}`}
             >
               {outOfStock ? (
@@ -816,7 +816,7 @@ export default function ProductDetailClient({
             className={`u-btn flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.04em] text-white text-[12.5px] transition-all duration-300 flex items-center justify-center gap-1.5 ${
               cartStatus === "added" ? "bg-accent scale-95" :
               cartStatus === "blocked" || outOfStock ? "bg-danger" :
-              "bg-ink hover:bg-accent active:scale-95"
+              "bg-ink hover:bg-ink/85 active:scale-95"
             } ${outOfStock ? "cursor-not-allowed" : ""}`}
           >
             {outOfStock ? t("pdp.outOfStockBtn") : cartStatus === "added" ? `✓ ${t("pdp.added")}` : cartStatus === "blocked" ? t("cart.cantAddMore") : `🛒 ${t("common.addToCart")} · ${formatPrice(unitPrice * quantity)}`}

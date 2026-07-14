@@ -16,6 +16,7 @@
   --color-accent-soft: #E8EFEB;  /* tinted success/info backgrounds */
   --color-danger: #B03A3A;       /* errors, destructive actions */
   --color-danger-soft: #FDF3F3;  /* error backgrounds */
+  --color-star: #F0B840;         /* rating stars — warm gold, not brand green */
 
   /* Pastel category/imagery tints (display layer only) */
   --color-sage: #C8DDD8;
@@ -52,6 +53,7 @@ html[data-theme="dark"]:not(.route-admin) {
   --color-accent-soft: #24352C;
   --color-danger: #E58C8C;
   --color-danger-soft: #362323;
+  --color-star: #F5C65A;
   color-scheme: dark;
 }
 /* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.

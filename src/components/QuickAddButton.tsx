@@ -58,7 +58,7 @@ export default function QuickAddButton({ product }: { product: Product }) {
             ? "bg-accent text-white scale-110"
             : status === "blocked"
             ? "bg-red-500 text-white"
-            : "bg-panel text-ink-soft hover:bg-accent hover:text-white hover:scale-110"
+            : "bg-panel text-ink-soft hover:bg-ink/85 hover:text-white hover:scale-110"
         }`}
       >
         {status === "added" ? (

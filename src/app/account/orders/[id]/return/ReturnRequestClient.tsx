@@ -39,8 +39,7 @@ function Blocked({ orderNumber, emoji, title, body, t }: { orderNumber: string; 
       <p className="text-sm text-ink-soft mb-6">{body}</p>
       <Link
         href={`/account/orders/${orderNumber}`}
-        className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-        style={{ backgroundColor: "var(--color-accent)" }}
+        className="u-btn inline-block font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
       >
         ← {t("acct.return.backToOrder")}
       </Link>
@@ -168,8 +167,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
             href={`/account/orders/${orderNumber}`}
-            className="font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
           >
             {t("acct.return.viewOrder")}
           </Link>
@@ -551,8 +549,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
           <button
             onClick={next}
             disabled={(step === 1 && !step1Ok) || (step === 2 && !step2Ok)}
-            className="flex-1 py-3 rounded-full text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-40"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn flex-1 py-3 rounded-full text-sm font-extrabold text-white transition-colors disabled:opacity-40 bg-ink hover:bg-ink/85"
           >
             {t("acct.return.continueBtn")} →
           </button>
@@ -560,8 +557,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
           <button
             onClick={submit}
             disabled={submitting}
-            className="flex-1 py-3 rounded-full text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn flex-1 py-3 rounded-full text-sm font-extrabold text-white transition-colors disabled:opacity-60 bg-ink hover:bg-ink/85"
           >
             {submitting ? t("acct.return.submitting") : t("acct.return.submitRequest")}
           </button>

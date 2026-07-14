@@ -206,7 +206,7 @@ export default function AddressesClient() {
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 text-sm font-bold text-accent border-2 border-dashed border-accent w-full py-3 rounded-card hover:bg-accent-soft transition-colors justify-center"
+          className="flex items-center gap-2 text-sm font-bold text-accent border-2 border-dashed border-accent w-full py-3 rounded-card hover:bg-panel transition-colors justify-center"
         >
           <span className="text-lg">+</span>
           {t("addr.addNew")}
@@ -357,8 +357,7 @@ export default function AddressesClient() {
             <button
               type="submit"
               disabled={busy}
-              className="flex-1 h-10 rounded-control text-sm font-extrabold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              className="u-btn flex-1 h-10 rounded-control text-sm font-extrabold text-white transition-colors disabled:opacity-60 bg-ink hover:bg-ink/85"
             >
               {busy ? "…" : `${t("addr.saveAddress")} →`}
             </button>

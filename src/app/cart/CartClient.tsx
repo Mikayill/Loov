@@ -214,7 +214,7 @@ function EmptyCart({ t }: { t: (key: TranslationKey) => string }) {
       </p>
       <Link
         href="/products"
-        className="u-btn inline-flex items-center gap-2 font-semibold uppercase tracking-[0.08em] text-[12px] px-8 py-3.5 rounded-control text-white bg-ink hover:bg-accent"
+        className="u-btn inline-flex items-center gap-2 font-semibold uppercase tracking-[0.08em] text-[12px] px-8 py-3.5 rounded-control text-white bg-ink hover:bg-ink/85"
       >
         {t("cart.emptyCta")} →
       </Link>
@@ -625,7 +625,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                 localStorage.setItem("loov_checkout_promo", appliedPromoCode);
               }}
               className={`u-btn w-full py-3.5 rounded-control font-semibold uppercase tracking-[0.06em] text-white text-[13px] flex items-center justify-center gap-2 ${
-                validSelected.size > 0 ? "bg-ink hover:bg-accent cursor-pointer" : "bg-ink-muted cursor-not-allowed"
+                validSelected.size > 0 ? "bg-ink hover:bg-ink/85 cursor-pointer" : "bg-ink-muted cursor-not-allowed"
               }`}
             >
               {validSelected.size > 0

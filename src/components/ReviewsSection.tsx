@@ -172,7 +172,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
             <span>{t("rev.loadFailed")}</span>
             <button
               onClick={load}
-              className="font-bold text-accent border-2 border-accent px-4 py-1.5 rounded-full hover:bg-accent-soft transition-colors"
+              className="font-bold text-accent border-2 border-accent px-4 py-1.5 rounded-full hover:bg-panel transition-colors"
             >
               {t("rev.retry")}
             </button>
@@ -180,7 +180,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         ) : thanks ? (
           <div className="rounded-card bg-accent-soft border border-[#B9D9CF] p-4 text-sm font-semibold text-accent-deep">✓ {t("rev.thanks")}</div>
         ) : !elig.signedIn ? (
-          <Link href="/login" className="inline-block text-sm font-bold text-accent border-2 border-accent px-5 py-2.5 rounded-full hover:bg-accent-soft transition-colors">
+          <Link href="/login" className="inline-block text-sm font-bold text-accent border-2 border-accent px-5 py-2.5 rounded-full hover:bg-panel transition-colors">
             {t("rev.signInToReview")} →
           </Link>
         ) : elig.myReviewStatus === "hidden" ? (
@@ -223,8 +223,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
             <button
               onClick={submit}
               disabled={submitting || text.trim().length < 10}
-              className="mt-4 px-6 h-11 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              className="u-btn mt-4 px-6 h-11 rounded-control font-bold text-white text-sm disabled:opacity-50 transition-colors bg-ink hover:bg-ink/85"
             >
               {submitting ? t("rev.submitting") : t("rev.submit")}
             </button>
@@ -247,7 +246,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
               <div key={r.id} className="bg-canvas border border-line rounded-card p-5 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0" style={{ backgroundColor: "var(--color-accent)" }}>
+                    <div className="u-btn w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0 bg-ink hover:bg-ink/85">
                       {display[0]?.toUpperCase()}
                     </div>
                     <div>

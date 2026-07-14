@@ -176,8 +176,11 @@ export default function Navbar() {
           <span className="hidden md:inline opacity-90">{t("topbar.returns")}</span>
         </div>
 
-        {/* Frosted glass — content scrolling under the sticky bar blurs through */}
-        <nav className="bg-canvas/75 backdrop-blur-xl backdrop-saturate-150 border-b border-line">
+        {/* Frosted glass — applied per row: a nested backdrop-filter inside an
+            already-filtered ancestor is ignored by browsers, so the <nav> stays
+            plain and each bar frosts itself. */}
+        <nav className="border-b border-line">
+          <div className="bg-canvas/75 backdrop-blur-xl backdrop-saturate-150">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-3 gap-3 md:gap-6">
 
@@ -266,7 +269,7 @@ export default function Navbar() {
                     href="/account"
                     aria-label="My account"
                     title={user.name}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-extrabold text-sm transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden bg-accent"
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-ink font-extrabold text-sm bg-panel border border-line transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden"
                   >
                     {user.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -291,7 +294,7 @@ export default function Navbar() {
                 {/* Cart — Nordic: solid ink block, count inline */}
                 <Link
                   href="/cart"
-                  className="u-btn flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] hover:bg-accent"
+                  className="u-btn flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] hover:bg-ink/85"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -319,16 +322,17 @@ export default function Navbar() {
               </div>
             </div>
           </div>
+          </div>
 
           {/* Category strip — tactile chip buttons */}
-          <div className="border-t border-line overflow-x-auto no-scrollbar bg-surface/60 backdrop-blur-xl">
+          <div className="border-t border-line overflow-x-auto no-scrollbar bg-canvas/75 backdrop-blur-xl backdrop-saturate-150">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 whitespace-nowrap py-2.5">
               <Link
                 href="/products"
                 className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
                   pathname === "/products"
                     ? "bg-ink text-white border-ink"
-                    : "bg-canvas text-ink-soft border-line hover:border-ink hover:text-ink"
+                    : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
                 }`}
               >
                 {t("nav.products")}
@@ -337,7 +341,7 @@ export default function Navbar() {
                 <Link
                   key={cat}
                   href={`/products?cat=${cat}`}
-                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
+                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
                 >
                   {categoryPlural(cat, t)}
                 </Link>
@@ -347,7 +351,7 @@ export default function Navbar() {
                 className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
                   isActive("/blog")
                     ? "bg-ink text-white border-ink"
-                    : "bg-canvas text-ink-soft border-line hover:border-ink hover:text-ink"
+                    : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
                 }`}
               >
                 {t("nav.blog")}
@@ -356,8 +360,8 @@ export default function Navbar() {
                 href="/bundles"
                 className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-bold ${
                   isActive("/bundles")
-                    ? "bg-accent text-white border-accent"
-                    : "bg-accent-soft text-accent-deep border-accent/30 hover:border-accent"
+                    ? "bg-ink text-white border-ink"
+                    : "bg-canvas/60 text-accent-deep border-line hover:border-ink"
                 }`}
               >
                 {t("nav.bundles")}
@@ -409,21 +413,21 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(false)}
                   className={`flex items-center px-3 py-2.5 rounded-control text-sm font-semibold transition-colors ${
                     isActive(link.href)
-                      ? "bg-accent-soft text-accent"
-                      : "text-ink hover:bg-canvas"
+                      ? "bg-panel text-ink"
+                      : "text-ink hover:bg-panel"
                   }`}
                 >
                   {t(link.key)}
                 </Link>
               ))}
               {user ? (
-                <div className="flex items-center justify-between px-3 py-2.5 rounded-control bg-accent-soft">
+                <div className="flex items-center justify-between px-3 py-2.5 rounded-control bg-panel">
                   <Link
                     href="/account"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 min-w-0"
                   >
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 overflow-hidden bg-accent">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-ink text-xs font-extrabold flex-shrink-0 overflow-hidden bg-canvas border border-line">
                       {user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={user.avatar} alt="" className="w-full h-full object-cover" />
@@ -438,7 +442,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors bg-accent">
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors bg-ink">
                   {t("nav.signInRegister")}
                 </Link>
               )}

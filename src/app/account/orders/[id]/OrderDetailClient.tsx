@@ -142,8 +142,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         </p>
         <Link
           href="/account/orders"
-          className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-block font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
         >
           ← {t("acct.orders.title")}
         </Link>
@@ -401,7 +400,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
             <div>
               <Link
                 href={`/account/orders/${order.id}/return`}
-                className="w-full py-3 rounded-card font-bold text-sm border-2 border-accent text-accent flex items-center justify-center gap-2 hover:bg-accent-soft transition-colors"
+                className="w-full py-3 rounded-card font-bold text-sm border-2 border-accent text-accent flex items-center justify-center gap-2 hover:bg-panel transition-colors"
               >
                 ↩️ {t("acct.return.requestReturn")}
               </Link>
@@ -418,8 +417,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
           {order.status === "Delivered" && (
             <Link
               href="/products"
-              className="w-full py-3 rounded-card font-extrabold text-white text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              className="u-btn w-full py-3 rounded-card font-extrabold text-white text-sm flex items-center justify-center gap-2 transition-colors shadow-sm bg-ink hover:bg-ink/85"
             >
               {t("acct.orders.buyAgain")} →
             </Link>

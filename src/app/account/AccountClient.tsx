@@ -317,7 +317,7 @@ export default function AccountClient() {
             <button
               type="submit"
               disabled={saving}
-              className="u-btn flex-1 py-3 rounded-control text-[11px] font-semibold uppercase tracking-[0.1em] text-white bg-ink hover:bg-accent disabled:opacity-60"
+              className="u-btn flex-1 py-3 rounded-control text-[11px] font-semibold uppercase tracking-[0.1em] text-white bg-ink hover:bg-ink/85 disabled:opacity-60"
             >
               {saving ? t("auth.saving") : t("acct.saveChanges")}
             </button>

@@ -461,7 +461,7 @@ export default function CategoryFilter({
                 <Link
                   key={p.id}
                   href={`/products/${p.slug}`}
-                  className="flex items-center gap-4 bg-canvas p-4 hover:bg-accent-soft/50 transition-colors group"
+                  className="flex items-center gap-4 bg-canvas p-4 hover:bg-panel/70 transition-colors group"
                 >
                   <div
                     className="w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0"
@@ -517,7 +517,7 @@ export default function CategoryFilter({
           <p className="text-sm text-ink-muted mb-4">{t("filter.noMatchHint")}</p>
           <button
             onClick={clearAll}
-            className="u-btn font-semibold px-6 py-3 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.1em] hover:bg-accent"
+            className="u-btn font-semibold px-6 py-3 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.1em] hover:bg-ink/85"
           >
             {t("filter.clearAllFilters")}
           </button>

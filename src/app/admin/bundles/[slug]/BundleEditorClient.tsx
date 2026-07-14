@@ -233,7 +233,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
         </div>
         <div className="flex items-center gap-2">
           {draft.active && (
-            <a href={`/bundles/${slug}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-accent border border-sage rounded-full px-3 py-1.5 hover:bg-accent-soft transition-colors">
+            <a href={`/bundles/${slug}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-accent border border-sage rounded-full px-3 py-1.5 hover:bg-panel transition-colors">
               View on site ↗
             </a>
           )}
@@ -528,7 +528,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                     {separately > 0 && Math.abs(separately - draft.original_price) > 0.009 && (
                       <button
                         onClick={() => set({ original_price: Math.round(separately * 100) / 100 })}
-                        className="text-[11px] font-bold text-accent border border-sage rounded-full px-2.5 py-1 hover:bg-accent-soft transition-colors"
+                        className="text-[11px] font-bold text-accent border border-sage rounded-full px-2.5 py-1 hover:bg-panel transition-colors"
                       >
                         ⟳ Use {formatPrice(separately)}
                       </button>

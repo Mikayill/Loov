@@ -210,7 +210,7 @@ export default function OrdersClient() {
                       <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Ship to</p>
                       <button
                         onClick={() => copyShippingInfo(o)}
-                        className="text-[11px] font-bold text-accent border border-sage rounded-full px-2.5 py-1 hover:bg-accent-soft transition-colors"
+                        className="text-[11px] font-bold text-accent border border-sage rounded-full px-2.5 py-1 hover:bg-panel transition-colors"
                       >
                         {copied === o.id ? "✓ Copied" : "📋 Copy shipping info"}
                       </button>

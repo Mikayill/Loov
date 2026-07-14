@@ -90,8 +90,7 @@ export default function OrdersClient() {
           </p>
           <Link
             href="/products"
-            className="inline-block font-bold px-7 py-3 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn inline-block font-bold px-7 py-3 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
           >
             {t("acct.orders.startShopping")} →
           </Link>
@@ -186,15 +185,14 @@ export default function OrdersClient() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="text-xs font-bold text-accent border border-accent px-3 py-1.5 rounded-control hover:bg-accent-soft transition-colors"
+                    className="text-xs font-bold text-accent border border-accent px-3 py-1.5 rounded-control hover:bg-panel transition-colors"
                   >
                     {t("acct.orders.viewDetails")}
                   </Link>
                   {order.status === "Delivered" && (
                     <Link
                       href="/products"
-                      className="text-xs font-bold text-white px-4 py-1.5 rounded-control hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: "var(--color-accent)" }}
+                      className="u-btn text-xs font-bold text-white px-4 py-1.5 rounded-control transition-colors bg-ink hover:bg-ink/85"
                     >
                       {t("acct.orders.buyAgain")} →
                     </Link>
@@ -212,8 +210,7 @@ export default function OrdersClient() {
         <p className="text-sm text-ink-soft mb-4">{t("acct.orders.browseLatest")}</p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-2.5 rounded-control hover:opacity-90 transition-opacity shadow-sm"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-2.5 rounded-control transition-colors shadow-sm bg-ink hover:bg-ink/85"
         >
           {t("acct.orders.browseCollection")} →
         </Link>

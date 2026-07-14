@@ -455,7 +455,7 @@ export default function SettingsClient() {
             type="button"
             onClick={() => avatarFileRef.current?.click()}
             disabled={avatarBusy}
-            className="px-4 h-10 rounded-control font-bold text-sm text-accent border-2 border-accent hover:bg-accent-soft disabled:opacity-60 transition-colors"
+            className="px-4 h-10 rounded-control font-bold text-sm text-accent border-2 border-accent hover:bg-panel disabled:opacity-60 transition-colors"
           >
             {avatarBusy ? "Uploading…" : "+ Upload avatar"}
           </button>

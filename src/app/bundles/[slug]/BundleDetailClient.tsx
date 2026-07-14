@@ -129,7 +129,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
                 <p className="text-3xl font-extrabold text-ink">{formatPrice(bundle.bundlePrice)}</p>
               </div>
               <div className="text-center">
-                <div className="w-14 h-14 rounded-full flex flex-col items-center justify-center text-white font-extrabold" style={{ backgroundColor: "var(--color-accent)" }}>
+                <div className="u-btn w-14 h-14 rounded-full flex flex-col items-center justify-center text-white font-extrabold bg-ink hover:bg-ink/85">
                   <span className="text-lg leading-none">-{savingsPct}%</span>
                   <span className="text-[9px] font-bold opacity-80">OFF</span>
                 </div>
@@ -303,8 +303,7 @@ export default function BundleDetailClient({ bundle, bundleProducts }: Props) {
                 </Link>
                 <Link
                   href="/checkout"
-                  className="flex-1 py-2.5 rounded-control text-xs font-bold text-white text-center hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: "var(--color-accent)" }}
+                  className="u-btn flex-1 py-2.5 rounded-control text-xs font-bold text-white text-center transition-colors bg-ink hover:bg-ink/85"
                 >
                   {t("bundle.checkout")} →
                 </Link>

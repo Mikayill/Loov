@@ -50,7 +50,7 @@ export default async function HomePage() {
               <div className="flex items-center gap-3 flex-wrap">
                 <Link
                   href="/products"
-                  className="inline-flex items-center justify-center u-btn h-12 px-7 bg-ink text-white text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-accent"
+                  className="inline-flex items-center justify-center u-btn h-12 px-7 bg-ink text-white text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-ink/85"
                 >
                   {t("home.hero.shopCta")}
                 </Link>
@@ -193,7 +193,7 @@ export default async function HomePage() {
               <Link
                 key={bundle.slug}
                 href={`/bundles/${bundle.slug}`}
-                className="group relative grid grid-cols-[56px_1fr_auto] sm:grid-cols-[64px_1.6fr_auto_auto] items-center gap-3 sm:gap-6 px-3 sm:px-5 py-3.5 bg-canvas hover:bg-accent-soft/60 transition-colors"
+                className="group relative grid grid-cols-[56px_1fr_auto] sm:grid-cols-[64px_1.6fr_auto_auto] items-center gap-3 sm:gap-6 px-3 sm:px-5 py-3.5 bg-canvas hover:bg-panel/70 transition-colors"
               >
                 <span
                   className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-control flex items-center justify-center text-2xl sm:text-3xl overflow-hidden"
@@ -258,7 +258,7 @@ export default async function HomePage() {
                 <p className="text-5xl font-extrabold text-ink tracking-tight tabular-nums">{homeReviews.average.toFixed(1)}</p>
                 <div className="flex items-center justify-center gap-0.5 my-2" aria-hidden>
                   {[1,2,3,4,5].map((s) => (
-                    <svg key={s} className={`w-3.5 h-3.5 ${s <= Math.round(homeReviews.average) ? "fill-accent" : "fill-line"}`} viewBox="0 0 20 20">
+                    <svg key={s} className={`w-3.5 h-3.5 ${s <= Math.round(homeReviews.average) ? "fill-star" : "fill-line"}`} viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
@@ -276,7 +276,7 @@ export default async function HomePage() {
                     <div key={`${r.createdAt}-${i}`} className="border-t-2 border-ink pt-4">
                       <div className="flex items-center gap-0.5 mb-3" aria-label={`${r.rating}/5`}>
                         {[1,2,3,4,5].map((s) => (
-                          <svg key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "fill-accent" : "fill-line"}`} viewBox="0 0 20 20">
+                          <svg key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "fill-star" : "fill-line"}`} viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                         ))}

@@ -123,8 +123,7 @@ export default function NewsletterPopup() {
           <Link
             href="/register"
             onClick={close}
-            className="block w-full h-10 rounded-control font-extrabold text-white text-sm leading-[40px] hover:opacity-90 active:scale-95 transition-all"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn block w-full h-10 rounded-control font-extrabold text-white text-sm leading-[40px] active:scale-95 transition-all bg-ink hover:bg-ink/85"
           >
             {t("news.cta")} →
           </Link>

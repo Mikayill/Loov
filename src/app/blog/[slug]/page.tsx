@@ -104,8 +104,7 @@ export default async function ArticlePage({ params }: Props) {
         <p className="text-xs text-ink-soft mb-4">{t("blog.shopBebecoSubtitle")}</p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 font-bold px-6 py-2.5 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-flex items-center gap-2 font-bold px-6 py-2.5 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
         >
           {t("blog.browseCollection")} →
         </Link>

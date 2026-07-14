@@ -43,8 +43,7 @@ export default function GlobalError({
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <button
           onClick={reset}
-          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control text-white hover:opacity-90 shadow-sm transition-opacity"
-          style={{ backgroundColor: "var(--color-accent)" }}
+          className="u-btn inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-control text-white shadow-sm transition-colors bg-ink hover:bg-ink/85"
         >
           {t("err.tryAgain")}
         </button>

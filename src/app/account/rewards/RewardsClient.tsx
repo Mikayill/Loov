@@ -197,8 +197,7 @@ export default function RewardsClient() {
             </p>
             <Link
               href="/products"
-              className="inline-block font-bold px-6 py-2.5 rounded-control text-white text-sm hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              className="u-btn inline-block font-bold px-6 py-2.5 rounded-control text-white text-sm transition-colors bg-ink hover:bg-ink/85"
             >
               {t("acct.rewards.startShopping")} →
             </Link>

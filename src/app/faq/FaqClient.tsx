@@ -140,8 +140,7 @@ export default function FaqClient() {
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 font-bold text-sm text-white px-5 py-2.5 rounded-control hover:opacity-90 transition-opacity shadow-sm"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn inline-flex items-center gap-2 font-bold text-sm text-white px-5 py-2.5 rounded-control transition-colors shadow-sm bg-ink hover:bg-ink/85"
           >
             {t("faq.contactUsBtn")} →
           </Link>

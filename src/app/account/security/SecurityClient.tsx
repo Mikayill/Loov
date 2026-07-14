@@ -451,7 +451,7 @@ export default function SecurityClient() {
                   <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
                     className="w-36 h-11 px-4 rounded-control border border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
                 </div>
-                <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-6 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "var(--color-accent)" }}>
+                <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="u-btn h-11 px-6 rounded-control font-bold text-white text-sm disabled:opacity-50 active:scale-95 transition-all bg-ink hover:bg-ink/85">
                   {totpBusy ? "…" : t("sec.mfaActivate")}
                 </button>
                 <button type="button" onClick={() => { setEnrolling(null); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
@@ -486,7 +486,7 @@ export default function SecurityClient() {
             )
           ) : (
             <div>
-              <button onClick={startEnrollTotp} disabled={totpBusy} className="font-bold px-5 py-2.5 rounded-control text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all" style={{ backgroundColor: "var(--color-accent)" }}>
+              <button onClick={startEnrollTotp} disabled={totpBusy} className="u-btn font-bold px-5 py-2.5 rounded-control text-white text-sm disabled:opacity-60 active:scale-95 transition-all bg-ink hover:bg-ink/85">
                 {totpBusy ? "…" : `${t("sec.mfaEnable")} →`}
               </button>
               {totpError && <p className="text-red-500 text-xs font-semibold mt-2">{totpError}</p>}

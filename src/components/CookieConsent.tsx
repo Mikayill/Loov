@@ -41,14 +41,13 @@ export default function CookieConsent() {
         <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
           <button
             onClick={decline}
-            className="text-xs font-semibold text-ink-muted hover:text-white transition-colors px-3 py-1.5"
+            className="text-xs font-semibold opacity-70 hover:opacity-100 transition-opacity px-3 py-1.5"
           >
             {t("cookie.decline")}
           </button>
           <button
             onClick={accept}
-            className="text-xs font-bold px-4 py-2 rounded-control text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "var(--color-accent)" }}
+            className="u-btn text-xs font-bold px-4 py-2 rounded-control bg-canvas text-ink hover:opacity-90"
           >
             {t("cookie.acceptAll")}
           </button>
