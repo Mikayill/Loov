@@ -61,16 +61,16 @@ export default function LogsClient() {
       {/* Filter tabs */}
       <div className="flex gap-2 mb-4 flex-wrap">
         {TABS.map((tb) => (
-          <button key={tb.id} onClick={() => setTab(tb.id)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${tab === tb.id ? "bg-accent text-white" : "bg-white border border-line text-ink-soft"}`}>
+          <button key={tb.id} onClick={() => setTab(tb.id)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${tab === tb.id ? "bg-accent text-white" : "bg-canvas border border-line text-ink-soft"}`}>
             {tb.label}
           </button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-ink-muted text-sm bg-white rounded-card border border-line p-8 text-center">No activity yet.</p>
+        <p className="text-ink-muted text-sm bg-canvas rounded-card border border-line p-8 text-center">No activity yet.</p>
       ) : (
-        <div className="bg-white rounded-card border border-line divide-y divide-canvas">
+        <div className="bg-canvas rounded-card border border-line divide-y divide-canvas">
           {filtered.map((e) => (
             <div key={e.id} className="flex items-start gap-3 p-4">
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${KIND_STYLE[e.kind]}`}>{e.icon}</span>

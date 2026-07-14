@@ -80,16 +80,16 @@ export default function DashboardClient() {
             </>
           );
           return c.href ? (
-            <Link key={c.label} href={c.href} className="bg-white rounded-card border border-line p-5 hover:shadow-md transition-shadow">{inner}</Link>
+            <Link key={c.label} href={c.href} className="bg-canvas rounded-card border border-line p-5 hover:shadow-md transition-shadow">{inner}</Link>
           ) : (
-            <div key={c.label} className="bg-white rounded-card border border-line p-5">{inner}</div>
+            <div key={c.label} className="bg-canvas rounded-card border border-line p-5">{inner}</div>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent orders */}
-        <div className="bg-white rounded-card border border-line overflow-hidden">
+        <div className="bg-canvas rounded-card border border-line overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-canvas">
             <h2 className="font-extrabold text-ink">Recent orders</h2>
             <Link href="/admin/orders" className="text-xs font-bold text-accent hover:underline">View all →</Link>
@@ -115,7 +115,7 @@ export default function DashboardClient() {
         </div>
 
         {/* Low stock */}
-        <div className="bg-white rounded-card border border-line overflow-hidden">
+        <div className="bg-canvas rounded-card border border-line overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-canvas">
             <h2 className="font-extrabold text-ink">Low stock ⚠️</h2>
             <Link href="/admin/products" className="text-xs font-bold text-accent hover:underline">Manage →</Link>

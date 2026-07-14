@@ -94,7 +94,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
   return (
     <div className="min-h-screen flex flex-col sm:flex-row bg-canvas">
       {/* Sidebar (desktop) */}
-      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-white border-r border-line p-4 sticky top-0 h-screen">
+      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-canvas border-r border-line p-4 sticky top-0 h-screen">
         <div className="flex items-center gap-2.5 px-2 mb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
@@ -118,7 +118,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="sm:hidden flex items-center justify-between bg-white border-b border-line px-4 py-3 sticky top-0 z-30">
+      <header className="sm:hidden flex items-center justify-between bg-canvas border-b border-line px-4 py-3 sticky top-0 z-30">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
@@ -129,7 +129,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
         </button>
       </header>
       {mobileOpen && (
-        <div className="sm:hidden bg-white border-b border-line px-4 py-3">
+        <div className="sm:hidden bg-canvas border-b border-line px-4 py-3">
           {nav}
           <div className="flex gap-2 mt-3 pt-3 border-t border-canvas">
             <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2">View site</Link>

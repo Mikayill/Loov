@@ -22,7 +22,7 @@ const RANGES: { key: string; label: string }[] = [
   { key: "all", label: "All time" },
 ];
 
-const TEAL = "#5E9E8C";
+const TEAL = "#2E5E4E";
 // viewBox geometry
 const W = 1000, H = 340, L = 56, R = 16, T = 20, Bt = 40;
 const plotW = W - L - R, plotH = H - T - Bt;
@@ -150,8 +150,8 @@ export default function RevenueChart() {
           {/* grid + y labels (recessive) */}
           {grid.map((g, i) => (
             <g key={i}>
-              <line x1={L} y1={y(g)} x2={W - R} y2={y(g)} stroke="#EDE7DF" strokeWidth={1} />
-              <text x={L - 10} y={y(g) + 4} textAnchor="end" fontSize="13" fill="#9A8E88" fontWeight="600">
+              <line x1={L} y1={y(g)} x2={W - R} y2={y(g)} stroke="#E6E6E1" strokeWidth={1} />
+              <text x={L - 10} y={y(g) + 4} textAnchor="end" fontSize="13" fill="#73736D" fontWeight="600">
                 {shortMoney(g)}
               </text>
             </g>
@@ -159,7 +159,7 @@ export default function RevenueChart() {
 
           {/* x labels (thinned) */}
           {series.map((p, i) => (i % labelStep === 0 || i === n - 1) && (
-            <text key={i} x={x(i)} y={H - 12} textAnchor="middle" fontSize="12.5" fill="#9A8E88" fontWeight="600">
+            <text key={i} x={x(i)} y={H - 12} textAnchor="middle" fontSize="12.5" fill="#73736D" fontWeight="600">
               {p.label}
             </text>
           ))}

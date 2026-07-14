@@ -122,7 +122,7 @@ export default function ReturnsClient() {
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                filter === f ? "bg-accent text-white" : "bg-white border border-line text-ink-soft"
+                filter === f ? "bg-accent text-white" : "bg-canvas border border-line text-ink-soft"
               }`}
             >
               {f === "all" ? "All" : returnStatusConfig[f].label} {count > 0 && `(${count})`}
@@ -139,7 +139,7 @@ export default function ReturnsClient() {
           const contact = orders[row.order_id];
           const itemCount = row.items.reduce((s, it) => s + it.quantity, 0);
           return (
-            <div key={row.id} className="bg-white rounded-card border border-line overflow-hidden">
+            <div key={row.id} className="bg-canvas rounded-card border border-line overflow-hidden">
               {/* Header row */}
               <button
                 onClick={() => setOpenId(open ? null : row.id)}
@@ -300,7 +300,7 @@ export default function ReturnsClient() {
           );
         })}
         {filtered.length === 0 && (
-          <p className="p-6 text-center text-sm text-ink-muted bg-white rounded-card border border-line">
+          <p className="p-6 text-center text-sm text-ink-muted bg-canvas rounded-card border border-line">
             No returns{filter !== "all" ? ` (${filter})` : " yet"}.
           </p>
         )}

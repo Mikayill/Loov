@@ -94,7 +94,7 @@ export default function OrdersClient() {
       <div className="flex gap-2 flex-wrap mb-5">
         {["", ...STATUSES].map((s) => (
           <button key={s || "all"} onClick={() => setFilter(s)}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize transition-colors ${filter === s ? "bg-ink text-white" : "bg-white border border-line text-ink-soft hover:border-ink-muted"}`}>
+            className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize transition-colors ${filter === s ? "bg-ink text-white" : "bg-canvas border border-line text-ink-soft hover:border-ink-muted"}`}>
             {s || "All"}
           </button>
         ))}
@@ -102,7 +102,7 @@ export default function OrdersClient() {
 
       {error && <p className="text-red-500 font-semibold">{error}</p>}
       {!orders && !error && <div className="flex items-center justify-center py-24"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>}
-      {orders && orders.length === 0 && <p className="text-ink-muted text-sm bg-white rounded-card border border-line p-8 text-center">No orders here.</p>}
+      {orders && orders.length === 0 && <p className="text-ink-muted text-sm bg-canvas rounded-card border border-line p-8 text-center">No orders here.</p>}
 
       <div className="space-y-3">
         {orders?.map((o) => {
@@ -111,7 +111,7 @@ export default function OrdersClient() {
           const freeShipping = Number(o.shipping) === 0;
           const giftWrapCost = o.gift_wrap ? 5 : 0;
           return (
-            <div key={o.id} className="bg-white rounded-card border border-line overflow-hidden">
+            <div key={o.id} className="bg-canvas rounded-card border border-line overflow-hidden">
               <div className="flex items-center justify-between gap-4 p-4 flex-wrap">
                 <button onClick={() => setExpanded(open ? null : o.id)} className="flex items-center gap-3 text-left min-w-0">
                   <span className="text-ink-muted text-xs">{open ? "▼" : "▶"}</span>
@@ -151,7 +151,7 @@ export default function OrdersClient() {
                           </div>
                         );
                         return (
-                          <div key={i} className="flex items-center gap-3 bg-white rounded-control border border-panel p-2.5">
+                          <div key={i} className="flex items-center gap-3 bg-canvas rounded-control border border-panel p-2.5">
                             {p?.slug ? (
                               <a href={`/products/${p.slug}`} target="_blank" rel="noreferrer" title="Open product page" className="hover:opacity-80 transition-opacity">{thumb}</a>
                             ) : thumb}
@@ -181,7 +181,7 @@ export default function OrdersClient() {
                     </div>
 
                     {/* Money breakdown */}
-                    <div className="mt-3 bg-white rounded-control border border-panel p-3 space-y-1 text-xs">
+                    <div className="mt-3 bg-canvas rounded-control border border-panel p-3 space-y-1 text-xs">
                       <div className="flex justify-between text-ink-soft"><span>Subtotal</span><span className="font-bold">{formatPrice(o.subtotal)}</span></div>
                       <div className="flex justify-between text-ink-soft">
                         <span className="capitalize">{o.shipping_method} shipping{freeShipping ? " (free-shipping threshold)" : ""}</span>
@@ -215,7 +215,7 @@ export default function OrdersClient() {
                         {copied === o.id ? "✓ Copied" : "📋 Copy shipping info"}
                       </button>
                     </div>
-                    <div className="bg-white rounded-control border border-panel p-3 space-y-1.5">
+                    <div className="bg-canvas rounded-control border border-panel p-3 space-y-1.5">
                       <p className="text-ink font-bold">
                         {o.first_name} {o.last_name}
                         {o.locale && <span className="ml-1.5 text-xs" title={`Site language: ${o.locale}`}>{LOCALE_FLAGS[o.locale] ?? ""}</span>}

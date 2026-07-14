@@ -61,7 +61,7 @@ export default function AdminMfaGate() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "#F5F0EB" }}>
-      <div className="bg-white rounded-3xl border border-line shadow-sm p-8 w-full max-w-sm text-center">
+      <div className="bg-canvas rounded-card border border-line shadow-sm p-8 w-full max-w-sm text-center">
         <div className="text-4xl mb-3">🛡️</div>
         <h1 className="text-xl font-extrabold text-ink mb-1">Admin verification</h1>
         <p className="text-sm text-ink-muted mb-5">
@@ -76,7 +76,7 @@ export default function AdminMfaGate() {
             inputMode="numeric"
             placeholder={method === "phone" ? "123456" : "123456"}
             autoFocus
-            className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
+            className="w-full h-12 px-4 rounded-control border border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
           />
           {error && <p className="text-red-500 text-xs font-semibold">{error}</p>}
           <Button

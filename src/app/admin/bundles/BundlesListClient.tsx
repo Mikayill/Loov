@@ -133,7 +133,7 @@ export default function BundlesListClient() {
       <div className="flex items-center justify-between flex-wrap gap-3 mb-1">
         <h1 className="text-2xl font-extrabold text-ink">Bundles</h1>
         {!creating ? (
-          <button onClick={() => setCreating(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+          <button onClick={() => setCreating(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "var(--color-accent)" }}>
             + New bundle
           </button>
         ) : (
@@ -146,7 +146,7 @@ export default function BundlesListClient() {
               autoFocus
               className="h-10 px-3 rounded-control border-2 border-accent text-sm outline-none w-56"
             />
-            <button onClick={createBundle} disabled={busySlug === "__new__" || !newName.trim()} className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-50" style={{ backgroundColor: "#5E9E8C" }}>
+            <button onClick={createBundle} disabled={busySlug === "__new__" || !newName.trim()} className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-50" style={{ backgroundColor: "var(--color-accent)" }}>
               {busySlug === "__new__" ? "…" : "Create →"}
             </button>
             <button onClick={() => { setCreating(false); setNewName(""); }} className="h-10 px-3 rounded-control font-bold text-ink-soft text-sm border border-line">✕</button>
@@ -168,7 +168,7 @@ export default function BundlesListClient() {
           const itemCount = (b.items ?? []).length;
           const busy = busySlug === b.slug;
           return (
-            <div key={b.slug} className={`bg-white rounded-card border border-line p-3 flex items-center gap-3 flex-wrap ${busy ? "opacity-60" : ""}`}>
+            <div key={b.slug} className={`bg-canvas rounded-card border border-line p-3 flex items-center gap-3 flex-wrap ${busy ? "opacity-60" : ""}`}>
               {/* Reorder */}
               <div className="flex flex-col flex-shrink-0">
                 <button onClick={() => move(i, -1)} disabled={i === 0} className="text-ink-muted hover:text-ink disabled:opacity-20 text-xs leading-none p-0.5" title="Move up">▲</button>
@@ -215,7 +215,7 @@ export default function BundlesListClient() {
           );
         })}
         {rows.length === 0 && ready && (
-          <p className="text-sm text-ink-muted py-10 text-center bg-white rounded-card border border-dashed border-line">No bundles yet — create your first one with <strong>+ New bundle</strong>.</p>
+          <p className="text-sm text-ink-muted py-10 text-center bg-canvas rounded-card border border-dashed border-line">No bundles yet — create your first one with <strong>+ New bundle</strong>.</p>
         )}
       </div>
     </div>

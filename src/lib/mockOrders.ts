@@ -40,7 +40,7 @@ export interface MockOrder {
  * by those pages. */
 
 export const statusConfig: Record<OrderStatus, { bg: string; text: string; dot: string; label: string }> = {
-  Delivered:  { bg: "#EAF2F0", text: "#3A7A68", dot: "#5E9E8C", label: "Delivered" },
+  Delivered:  { bg: "var(--color-accent-soft)", text: "var(--color-accent-deep)", dot: "var(--color-accent)", label: "Delivered" },
   Shipped:    { bg: "#EAF0F8", text: "#2A5A8E", dot: "#4A7AC0", label: "Shipped" },
   Processing: { bg: "#FFF8E8", text: "#A06820", dot: "#D89830", label: "Processing" },
   Cancelled:  { bg: "#FEF2F2", text: "#B03A3A", dot: "#DC4A4A", label: "Cancelled" },

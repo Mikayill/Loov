@@ -230,7 +230,7 @@ export default function SettingsClient() {
 
       <div className="space-y-4">
         {FIELDS.map((f) => (
-          <div key={f.key} className="bg-white rounded-card border border-line p-5">
+          <div key={f.key} className="bg-canvas rounded-card border border-line p-5">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex-1 min-w-[220px]">
                 <label className="flex items-center gap-2 font-bold text-ink">
@@ -257,7 +257,7 @@ export default function SettingsClient() {
       </div>
 
       {/* ── Express Delivery: on/off toggle + price ── */}
-      <div className="mt-4 bg-white rounded-card border border-line p-5">
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-[220px]">
             <label className="flex items-center gap-2 font-bold text-ink">
@@ -276,10 +276,10 @@ export default function SettingsClient() {
               type="button"
               onClick={() => setSettings((s) => ({ ...s, expressEnabled: !s.expressEnabled }))}
               className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${settings.expressEnabled ? "" : "bg-line"}`}
-              style={settings.expressEnabled ? { backgroundColor: "#5E9E8C" } : {}}
+              style={settings.expressEnabled ? { backgroundColor: "var(--color-accent)" } : {}}
               aria-label="Toggle Express Delivery"
             >
-              <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${settings.expressEnabled ? "translate-x-5" : ""}`} />
+              <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform ${settings.expressEnabled ? "translate-x-5" : ""}`} />
             </button>
             <span className={`text-xs font-bold w-8 ${settings.expressEnabled ? "text-accent" : "text-ink-muted"}`}>
               {settings.expressEnabled ? "ON" : "OFF"}
@@ -303,7 +303,7 @@ export default function SettingsClient() {
       </div>
 
       {/* ── Delivery estimate range ── */}
-      <div className="mt-4 bg-white rounded-card border border-line p-5">
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
         <label className="flex items-center gap-2 font-bold text-ink">
           <span className="text-lg">🚚</span>
           Delivery estimate
@@ -328,7 +328,7 @@ export default function SettingsClient() {
                   max={f.max}
                   step={f.step}
                   onChange={(e) => setSettings((s) => ({ ...s, [f.key]: Number(e.target.value) }))}
-                  className="w-20 h-10 px-2 rounded-control border border-line font-extrabold text-ink outline-none focus:border-accent text-right bg-white"
+                  className="w-20 h-10 px-2 rounded-control border border-line font-extrabold text-ink outline-none focus:border-accent text-right bg-canvas"
                 />
                 <span className="text-[10px] font-semibold text-ink-muted w-10">{f.suffix}</span>
               </div>
@@ -343,7 +343,7 @@ export default function SettingsClient() {
       </div>
 
       {/* ── Membership tiers (Loov Rewards) ── */}
-      <div className="mt-4 bg-white rounded-card border border-line p-5">
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
         <label className="flex items-center gap-2 font-bold text-ink">
           <span className="text-lg">🏅</span>
           Membership tiers
@@ -370,7 +370,7 @@ export default function SettingsClient() {
                   max={f.max}
                   step={f.step}
                   onChange={(e) => setSettings((s) => ({ ...s, [f.key]: Number(e.target.value) }))}
-                  className="w-24 h-10 px-2 rounded-control border border-line font-extrabold text-ink outline-none focus:border-accent text-right bg-white"
+                  className="w-24 h-10 px-2 rounded-control border border-line font-extrabold text-ink outline-none focus:border-accent text-right bg-canvas"
                 />
                 <span className="text-[10px] font-semibold text-ink-muted w-12">{f.suffix}</span>
               </div>
@@ -385,7 +385,7 @@ export default function SettingsClient() {
       </div>
 
       {/* ── WhatsApp business number ── */}
-      <div className="mt-4 bg-white rounded-card border border-line p-5">
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-[220px]">
             <label className="flex items-center gap-2 font-bold text-ink">
@@ -410,7 +410,7 @@ export default function SettingsClient() {
       </div>
 
       {/* ── Profile avatars (preset gallery customers pick from) ── */}
-      <div className="mt-4 bg-white rounded-card border border-line p-5">
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
         <label className="flex items-center gap-2 font-bold text-ink">
           <span className="text-lg">🖼️</span>
           Profile avatars
@@ -477,7 +477,7 @@ export default function SettingsClient() {
           onClick={save}
           disabled={saving}
           className="px-6 h-11 rounded-control font-bold text-white text-sm disabled:opacity-60 hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#5E9E8C" }}
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {saving ? "Saving…" : "Save settings"}
         </button>

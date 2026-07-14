@@ -87,7 +87,7 @@ export const returnStatusConfig: Record<ReturnStatus, { bg: string; text: string
   requested: { bg: "#FFF8E8", text: "#A06820", dot: "#D89830", label: "Requested" },
   approved:  { bg: "#EAF0F8", text: "#2A5A8E", dot: "#4A7AC0", label: "Approved" },
   received:  { bg: "#F3EDFB", text: "#6B4A9E", dot: "#8E6AC8", label: "Received" },
-  refunded:  { bg: "#EAF2F0", text: "#3A7A68", dot: "#5E9E8C", label: "Refunded" },
+  refunded:  { bg: "var(--color-accent-soft)", text: "var(--color-accent-deep)", dot: "var(--color-accent)", label: "Refunded" },
   rejected:  { bg: "#FEF2F2", text: "#B03A3A", dot: "#DC4A4A", label: "Rejected" },
   cancelled: { bg: "#F2EFEB", text: "#7A7068", dot: "#9A8E88", label: "Cancelled" },
 };

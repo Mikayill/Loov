@@ -86,7 +86,7 @@ export default function ReviewsClient() {
 
       <div className="flex gap-2 mb-4">
         {(["all", "published", "hidden"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${filter === f ? "bg-accent text-white" : "bg-white border border-line text-ink-soft"}`}>
+          <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${filter === f ? "bg-accent text-white" : "bg-canvas border border-line text-ink-soft"}`}>
             {f[0].toUpperCase() + f.slice(1)}
           </button>
         ))}
@@ -94,7 +94,7 @@ export default function ReviewsClient() {
 
       <div className="space-y-3">
         {filtered.map((r) => (
-          <div key={r.id} className={`bg-white rounded-card border p-4 ${r.status === "hidden" ? "border-red-200 opacity-70" : "border-line"}`}>
+          <div key={r.id} className={`bg-canvas rounded-card border p-4 ${r.status === "hidden" ? "border-red-200 opacity-70" : "border-line"}`}>
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -144,7 +144,7 @@ export default function ReviewsClient() {
                     onClick={() => saveReply(r.id)}
                     disabled={replyBusy === r.id}
                     className="text-xs font-bold text-white px-3 py-1.5 rounded-lg disabled:opacity-60"
-                    style={{ backgroundColor: "#5E9E8C" }}
+                    style={{ backgroundColor: "var(--color-accent)" }}
                   >
                     {replyBusy === r.id ? "Saving…" : "Save reply"}
                   </button>
@@ -159,7 +159,7 @@ export default function ReviewsClient() {
             )}
           </div>
         ))}
-        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted bg-white rounded-card border border-line">No reviews {filter !== "all" ? `(${filter})` : "yet"}.</p>}
+        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted bg-canvas rounded-card border border-line">No reviews {filter !== "all" ? `(${filter})` : "yet"}.</p>}
       </div>
     </div>
   );

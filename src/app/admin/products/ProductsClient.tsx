@@ -141,7 +141,7 @@ function ColorPicker({ colors, onChange }: { colors: string[]; onChange: (next: 
           placeholder="Combo, e.g. White & Sage"
           className="flex-1 h-9 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent"
         />
-        <button type="button" onClick={addCombo} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
+        <button type="button" onClick={addCombo} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "var(--color-accent)" }}>Add</button>
       </div>
       {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
     </div>
@@ -210,7 +210,7 @@ function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: str
           placeholder="Custom dimension, e.g. 70x140cm"
           className="flex-1 h-9 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent"
         />
-        <button type="button" onClick={addDimension} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
+        <button type="button" onClick={addDimension} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "var(--color-accent)" }}>Add</button>
       </div>
       {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
     </div>
@@ -276,7 +276,7 @@ function NameDescriptionEditor({ draft, setDraft, save }: {
               className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
                 lang === l.code ? "text-white" : "bg-canvas text-ink-muted hover:text-accent"
               }`}
-              style={lang === l.code ? { backgroundColor: "#5E9E8C" } : undefined}
+              style={lang === l.code ? { backgroundColor: "var(--color-accent)" } : undefined}
             >
               {l.flag} {l.label}
             </button>
@@ -398,7 +398,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 <select
                   value={draft.season ?? "all"}
                   onChange={(e) => { setDraft({ ...draft, season: e.target.value }); save({ season: e.target.value }); }}
-                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white"
+                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-canvas"
                 >
                   {SEASONS.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
                 </select>
@@ -408,7 +408,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 <select
                   value={draft.fabric ?? ""}
                   onChange={(e) => { setDraft({ ...draft, fabric: e.target.value || null }); save({ fabric: e.target.value }); }}
-                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white"
+                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-canvas"
                 >
                   {FABRICS.map((f) => <option key={f.v} value={f.v}>{f.label}</option>)}
                 </select>
@@ -649,13 +649,13 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
       className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${draft.is_new ? "bg-accent" : "bg-line"}`}
       title="Pin as new arrival"
     >
-      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
+      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
     </button>
   );
 
   if (variant === "card") {
     return (
-      <div className={`bg-white rounded-card border border-line overflow-hidden ${busy ? "opacity-60" : ""}`}>
+      <div className={`bg-canvas rounded-card border border-line overflow-hidden ${busy ? "opacity-60" : ""}`}>
         <div className="p-3 flex items-start gap-3">
           {photoButton}
           {fileInput}
@@ -671,7 +671,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
               <select
                 value={draft.category}
                 onChange={(e) => save({ category: e.target.value })}
-                className="px-2 py-1 rounded-lg border border-line text-xs font-semibold text-ink bg-white outline-none focus:border-accent"
+                className="px-2 py-1 rounded-lg border border-line text-xs font-semibold text-ink bg-canvas outline-none focus:border-accent"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -766,7 +766,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
           <select
             value={draft.category}
             onChange={(e) => save({ category: e.target.value })}
-            className="px-2 py-1.5 rounded-lg border border-line text-xs font-semibold text-ink bg-white outline-none focus:border-accent"
+            className="px-2 py-1.5 rounded-lg border border-line text-xs font-semibold text-ink bg-canvas outline-none focus:border-accent"
           >
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -809,7 +809,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
             className={`w-10 h-6 rounded-full transition-colors relative ${draft.is_new ? "bg-accent" : "bg-line"}`}
             title="Pin as new arrival"
           >
-            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
           </button>
         </td>
 
@@ -879,13 +879,13 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+      <button onClick={() => setOpen(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "var(--color-accent)" }}>
         + Add product
       </button>
     );
   }
   return (
-    <div className="bg-white rounded-card border border-line p-4 flex flex-wrap items-end gap-3">
+    <div className="bg-canvas rounded-card border border-line p-4 flex flex-wrap items-end gap-3">
       {/* Photo */}
       <div>
         <label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Photo</label>
@@ -900,10 +900,10 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
       <div className="flex-1 min-w-[140px]"><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Name</label>
         <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 h-10 rounded-lg border border-line text-sm outline-none focus:border-accent" placeholder="Product name" /></div>
       <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Category</label>
-        <select value={category} onChange={(e) => pickCategory(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white">
+        <select value={category} onChange={(e) => pickCategory(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-canvas">
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select></div>
       <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Fabric</label>
-        <select value={fabric} onChange={(e) => setFabric(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white">
+        <select value={fabric} onChange={(e) => setFabric(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-canvas">
           {FABRICS.filter((f) => f.v).map((f) => <option key={f.v} value={f.v}>{f.label}</option>)}</select></div>
       <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Price ₾</label>
         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-24 h-10 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent" placeholder="0" /></div>
@@ -919,7 +919,7 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
           <input value={colors} onChange={(e) => setColors(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-line text-xs outline-none focus:border-accent" placeholder="e.g. White, Cream" />
         </div>
       </div>
-      <button onClick={create} disabled={busy} className="h-10 px-4 rounded-lg font-bold text-white text-sm disabled:opacity-60" style={{ backgroundColor: "#5E9E8C" }}>{busy ? "…" : "Create"}</button>
+      <button onClick={create} disabled={busy} className="h-10 px-4 rounded-lg font-bold text-white text-sm disabled:opacity-60" style={{ backgroundColor: "var(--color-accent)" }}>{busy ? "…" : "Create"}</button>
       <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-lg font-bold text-ink-soft text-sm border border-line">Cancel</button>
       <p className="w-full text-[11px] text-ink-muted">Sizes, colors &amp; fabric are pre-filled from the category — edit freely. Per-size prices, discount &amp; more photos: row&apos;s <strong>Edit</strong> button after creating.</p>
     </div>
@@ -955,7 +955,7 @@ export default function ProductsClient() {
       />
 
       {/* Desktop: dense inline-editable table */}
-      <div className="hidden sm:block bg-white rounded-card border border-line overflow-x-auto">
+      <div className="hidden sm:block bg-canvas rounded-card border border-line overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-line text-[10px] font-bold text-ink-muted uppercase tracking-widest">
@@ -981,7 +981,7 @@ export default function ProductsClient() {
             onChanged={(nr) => setRows((prev) => prev!.map((x) => x.id === nr.id ? nr : x))}
             onDeleted={(id) => setRows((prev) => prev!.filter((x) => x.id !== id))} />
         ))}
-        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted bg-white rounded-card border border-line">No products match &ldquo;{q}&rdquo;.</p>}
+        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted bg-canvas rounded-card border border-line">No products match &ldquo;{q}&rdquo;.</p>}
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ function normalize(r: BundleRow) {
   };
 }
 
-const SECTION = "bg-white rounded-card border border-line p-5";
+const SECTION = "bg-canvas rounded-card border border-line p-5";
 const LABEL = "block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5";
 const INPUT = "w-full h-10 px-3 rounded-control border border-line text-sm outline-none focus:border-accent";
 
@@ -241,7 +241,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
             onClick={save}
             disabled={saving || !dirty}
             className="h-10 px-5 rounded-control font-bold text-white text-sm disabled:opacity-40 hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {saving ? "Saving…" : savedFlash ? "✓ Saved" : "💾 Save changes"}
           </button>
@@ -375,7 +375,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                       />
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-shrink-0">
-                      <div className="flex items-center border border-line rounded-lg overflow-hidden bg-white">
+                      <div className="flex items-center border border-line rounded-lg overflow-hidden bg-canvas">
                         <button onClick={() => setQty(i, (it.quantity ?? 1) - 1)} disabled={(it.quantity ?? 1) <= 1} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-canvas disabled:opacity-30 transition-colors">−</button>
                         <span className="w-7 text-center text-sm font-extrabold select-none">{it.quantity ?? 1}</span>
                         <button onClick={() => setQty(i, (it.quantity ?? 1) + 1)} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-canvas transition-colors">+</button>
@@ -451,7 +451,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
           <div className="lg:sticky lg:top-4 space-y-5">
             <div className={SECTION}>
               <h2 className="font-extrabold text-ink text-sm mb-3">👁 Customer preview <span className="font-normal text-[10px] text-ink-muted">(live — exactly like /bundles)</span></h2>
-              <div className="max-w-[260px] mx-auto rounded-card border border-line overflow-hidden shadow-sm bg-white">
+              <div className="max-w-[260px] mx-auto rounded-card border border-line overflow-hidden shadow-sm bg-canvas">
                 <div
                   className={`relative flex items-center justify-center overflow-hidden ${draft.image_url ? "aspect-[4/3]" : "py-8"}`}
                   style={{ backgroundColor: draft.card_color ?? "#EDE5D8" }}
@@ -558,10 +558,10 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                   onClick={() => { if (draft.active || complete) set({ active: !draft.active }); }}
                   disabled={!draft.active && !complete}
                   className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:cursor-not-allowed ${draft.active ? "" : "bg-line"} ${!draft.active && !complete ? "opacity-50" : ""}`}
-                  style={draft.active ? { backgroundColor: "#5E9E8C" } : {}}
+                  style={draft.active ? { backgroundColor: "var(--color-accent)" } : {}}
                   aria-label="Toggle live"
                 >
-                  <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${draft.active ? "translate-x-5" : ""}`} />
+                  <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform ${draft.active ? "translate-x-5" : ""}`} />
                 </button>
               </div>
 
@@ -573,10 +573,10 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                 <button
                   onClick={() => set({ is_new: !draft.is_new })}
                   className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${draft.is_new ? "" : "bg-line"}`}
-                  style={draft.is_new ? { backgroundColor: "#5E9E8C" } : {}}
+                  style={draft.is_new ? { backgroundColor: "var(--color-accent)" } : {}}
                   aria-label="Toggle new badge"
                 >
-                  <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${draft.is_new ? "translate-x-5" : ""}`} />
+                  <span className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform ${draft.is_new ? "translate-x-5" : ""}`} />
                 </button>
               </div>
             </div>
@@ -590,12 +590,12 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <p className="text-sm font-semibold">⚠ Unsaved changes</p>
             <div className="flex items-center gap-2">
-              <button onClick={discard} className="h-9 px-4 rounded-control text-xs font-bold border border-white/30 hover:bg-white/10 transition-colors">Discard</button>
+              <button onClick={discard} className="h-9 px-4 rounded-control text-xs font-bold border border-white/30 hover:bg-canvas/10 transition-colors">Discard</button>
               <button
                 onClick={save}
                 disabled={saving}
                 className="h-9 px-5 rounded-control text-xs font-bold text-white disabled:opacity-60 hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: "#5E9E8C" }}
+                style={{ backgroundColor: "var(--color-accent)" }}
               >
                 {saving ? "Saving…" : "💾 Save changes"}
               </button>

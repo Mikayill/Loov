@@ -90,7 +90,7 @@ export default function PromosClient() {
     return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>;
   }
 
-  const inputCls = "h-10 px-3 rounded-control border border-line text-sm font-semibold text-ink outline-none focus:border-accent bg-white";
+  const inputCls = "h-10 px-3 rounded-control border border-line text-sm font-semibold text-ink outline-none focus:border-accent bg-canvas";
 
   return (
     <div className="max-w-4xl">
@@ -99,7 +99,7 @@ export default function PromosClient() {
         <button
           onClick={() => { setShowForm((v) => !v); setError(""); }}
           className="px-4 h-10 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: "#5E9E8C" }}
+          style={{ backgroundColor: "var(--color-accent)" }}
         >
           {showForm ? "Close" : "+ New code"}
         </button>
@@ -118,7 +118,7 @@ export default function PromosClient() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={create} className="bg-white rounded-card border-2 border-accent p-5 mb-5 flex flex-wrap items-end gap-3">
+        <form onSubmit={create} className="bg-canvas rounded-card border-2 border-accent p-5 mb-5 flex flex-wrap items-end gap-3">
           <div>
             <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Code</label>
             <input
@@ -175,7 +175,7 @@ export default function PromosClient() {
             type="submit"
             disabled={creating || !form.code}
             className="h-10 px-5 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#5E9E8C" }}
+            style={{ backgroundColor: "var(--color-accent)" }}
           >
             {creating ? "…" : "Create"}
           </button>
@@ -184,7 +184,7 @@ export default function PromosClient() {
 
       {/* List */}
       {promos.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-card border border-line">
+        <div className="text-center py-16 bg-canvas rounded-card border border-line">
           <div className="text-4xl mb-3">🎟️</div>
           <p className="font-bold text-ink mb-1">No promo codes yet</p>
           <p className="text-sm text-ink-muted">Create one with “+ New code”.</p>
@@ -196,7 +196,7 @@ export default function PromosClient() {
             const limitHit = p.usage_limit !== null && p.times_used >= p.usage_limit;
             const live = p.active && !expired && !limitHit;
             return (
-              <div key={p.id} className={`bg-white rounded-card border p-4 flex flex-wrap items-center gap-x-5 gap-y-3 ${live ? "border-line" : "border-panel opacity-80"}`}>
+              <div key={p.id} className={`bg-canvas rounded-card border p-4 flex flex-wrap items-center gap-x-5 gap-y-3 ${live ? "border-line" : "border-panel opacity-80"}`}>
                 {/* Code + type */}
                 <div className="min-w-[160px]">
                   <p className="font-mono font-extrabold text-ink tracking-wider">{p.code}</p>
@@ -223,7 +223,7 @@ export default function PromosClient() {
                       type="date"
                       value={p.expires_at ? p.expires_at.slice(0, 10) : ""}
                       onChange={(e) => patch(p.id, { expiresAt: e.target.value })}
-                      className="h-8 px-2 rounded-lg border border-line text-xs font-semibold outline-none focus:border-accent bg-white"
+                      className="h-8 px-2 rounded-lg border border-line text-xs font-semibold outline-none focus:border-accent bg-canvas"
                     />
                     {expired && <span className="text-[10px] font-bold text-red-500 uppercase">Expired {fmtDate(p.expires_at)}</span>}
                   </div>
@@ -241,7 +241,7 @@ export default function PromosClient() {
                       if ((p.usage_limit === null && v === "") || Number(v) === p.usage_limit) return;
                       patch(p.id, { usageLimit: v });
                     }}
-                    className="h-8 w-20 px-2 rounded-lg border border-line text-xs font-semibold text-right outline-none focus:border-accent bg-white"
+                    className="h-8 w-20 px-2 rounded-lg border border-line text-xs font-semibold text-right outline-none focus:border-accent bg-canvas"
                   />
                 </div>
 
@@ -252,10 +252,10 @@ export default function PromosClient() {
                   type="button"
                   onClick={() => patch(p.id, { active: !p.active })}
                   className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${p.active ? "" : "bg-line"}`}
-                  style={p.active ? { backgroundColor: "#5E9E8C" } : {}}
+                  style={p.active ? { backgroundColor: "var(--color-accent)" } : {}}
                   title={p.active ? "Active — click to pause" : "Paused — click to activate"}
                 >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${p.active ? "translate-x-5" : ""}`} />
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-canvas shadow-sm transition-transform ${p.active ? "translate-x-5" : ""}`} />
                 </button>
 
                 <button
