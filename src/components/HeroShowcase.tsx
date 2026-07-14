@@ -128,6 +128,29 @@ export default function HeroShowcase({ products }: { products: Product[] }) {
     return () => clearTimeout(id);
   }, [pos, many, products.length]);
 
+  /* Manual navigation. "Prev" from the first slide silently lands on the
+     clone at the end first, so the visible motion is always one clean step. */
+  function go(delta: 1 | -1) {
+    if (delta === 1) {
+      setAnimate(true);
+      setPos((p) => Math.min(p + 1, products.length));
+      return;
+    }
+    if (posRef.current === 0) {
+      setAnimate(false);
+      setPos(products.length);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          setAnimate(true);
+          setPos(products.length - 1);
+        })
+      );
+    } else {
+      setAnimate(true);
+      setPos((p) => p - 1);
+    }
+  }
+
   if (products.length === 0) return null;
 
   const activeDot = pos % products.length;
@@ -151,6 +174,32 @@ export default function HeroShowcase({ products }: { products: Product[] }) {
         {/* Clone of the first slide — landing pad for the endless-left loop */}
         {many && <Slide key="__clone" product={products[0]} />}
       </div>
+
+      {/* Prev / next arrows */}
+      {many && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous product"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-canvas/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-white hover:border-ink active:scale-90 transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next product"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-canvas/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-white hover:border-ink active:scale-90 transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
 
       {/* Progress dots */}
       {many && (
