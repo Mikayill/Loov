@@ -27,6 +27,11 @@ export const tr: Dictionary = {
   "topbar.shipping": "{n} ₾ üzeri ücretsiz kargo",
   "topbar.delivery": "Gürcistan geneli {min}–{max} günde teslimat",
   "topbar.returns": "14 gün kolay iade",
+  "theme.toggle": "Açık / koyu tema",
+  "theme.light": "Açık",
+  "theme.dark": "Koyu",
+  "acct.appearance": "Görünüm",
+  "acct.appearanceSub": "Loov'un bu cihazda nasıl görüneceğini seç",
 
   "footer.tagline": "Sevgiyle üretilmiş premium organik bebek giyimi. Gürcistan geneline mutluluk taşıyoruz.",
   "footer.shop": "Mağaza",

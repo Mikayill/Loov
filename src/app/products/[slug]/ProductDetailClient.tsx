@@ -595,7 +595,7 @@ export default function ProductDetailClient({
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`flex-1 h-12 rounded-control font-semibold uppercase tracking-[0.06em] text-white transition-all duration-300 flex items-center justify-center gap-2 text-[13px] ${
+              className={`u-btn flex-1 h-12 rounded-control font-semibold uppercase tracking-[0.06em] text-white transition-all duration-300 flex items-center justify-center gap-2 text-[13px] ${
                 cartStatus === "added"
                   ? "scale-95 bg-accent"
                   : cartStatus === "blocked" || outOfStock
@@ -810,7 +810,7 @@ export default function ProductDetailClient({
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.04em] text-white text-[12.5px] transition-all duration-300 flex items-center justify-center gap-1.5 ${
+            className={`u-btn flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.04em] text-white text-[12.5px] transition-all duration-300 flex items-center justify-center gap-1.5 ${
               cartStatus === "added" ? "bg-accent scale-95" :
               cartStatus === "blocked" || outOfStock ? "bg-danger" :
               "bg-ink hover:bg-accent active:scale-95"

@@ -13,6 +13,7 @@ import { fetchMyProfile, updateMyProfile, fetchAvatarPresets, type MyProfile, ty
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { tierName } from "@/lib/i18n/labels";
+import { useTheme } from "@/components/ThemeToggle";
 
 export default function AccountClient() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function AccountClient() {
   const { count: wishCount } = useWishlist();
   const { balance: pointsBalance, tier } = useLoyalty();
   const { locale, setLocale, t } = useLocale();
+  const [theme, setTheme] = useTheme();
 
   /* Hooks must run unconditionally on every render — declare them before any
      early return. */
@@ -154,281 +156,268 @@ export default function AccountClient() {
   const avatarShown = profile?.avatarUrl || user.avatar;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-extrabold text-ink">{t("acct.title")}</h1>
-          <p className="text-ink-muted text-sm mt-0.5">{t("acct.welcomeBack").replace("{name}", user.name)}</p>
-        </div>
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-2 text-sm font-bold text-ink-muted hover:text-red-400 border border-line hover:border-red-200 px-4 py-2 rounded-control transition-all"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          {t("acct.signOut")}
-        </button>
-      </div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile card */}
-        <div className="lg:col-span-1">
-          <div className="bg-canvas rounded-card border border-line p-6 text-center">
-            <div
-              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-extrabold text-white shadow-sm overflow-hidden"
-              style={{ backgroundColor: "var(--color-accent)" }}
-            >
-              {avatarShown ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarShown} alt="" className="w-full h-full object-cover" />
-              ) : (
-                user.name[0]?.toUpperCase()
-              )}
-            </div>
-            {!editing ? (
-              <>
-                <h2 className="font-extrabold text-ink text-lg">{user.name}</h2>
-                {user.email && <p className="text-ink-muted text-sm mt-0.5">{user.email}</p>}
-                <div className="mt-3 inline-flex items-center gap-1.5 bg-accent-soft text-accent text-[11px] font-bold px-3 py-1 rounded-full">
-                  <span>✓</span>
-                  <span>{providerLabel[user.provider] || t("acct.providerFallback")}</span>
-                </div>
-                {saveSuccess && (
-                  <div className="mt-3 text-xs font-bold text-accent bg-accent-soft rounded-lg py-1.5 px-3">
-                    ✓ {t("acct.profileUpdated")}
-                  </div>
-                )}
-                {saveInfo && (
-                  <div className="mt-3 text-xs font-semibold text-ink bg-[#FFF8E8] border border-[#F0C85A] rounded-lg py-2 px-3 text-left">
-                    📬 {saveInfo}
-                  </div>
-                )}
-                <button
-                  onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
-                  className="mt-4 w-full py-2.5 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors"
-                >
-                  {t("acct.editProfile")}
-                </button>
-              </>
+      {/* ── Identity header ── */}
+      <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-line mb-6">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-panel border border-line flex items-center justify-center text-xl sm:text-2xl font-bold text-ink flex-shrink-0 overflow-hidden">
+            {avatarShown ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarShown} alt="" className="w-full h-full object-cover" />
             ) : (
-              <form onSubmit={handleSaveProfile} className="text-left mt-2 space-y-3">
-                {!profileReady && (
-                  <div className="rounded-lg bg-[#FFF4E5] border border-[#F0C85A] px-3 py-2 text-[11px] text-[#8B6914] font-semibold leading-relaxed">
-                    ⚠️ {t("acct.profileSqlNote").split("{code}")[0]}
-                    <code className="font-mono">supabase/profile.sql</code>
-                    {t("acct.profileSqlNote").split("{code}")[1]}
-                  </div>
-                )}
-                <div>
-                  <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.name")}</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.email")}</label>
-                  <input
-                    type="email"
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.phone")}</label>
-                  <input
-                    type="tel"
-                    value={editPhone}
-                    onChange={(e) => setEditPhone(e.target.value)}
-                    placeholder="+995 5XX XX XX XX"
-                    className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
-                  />
-                  <p className="text-[10px] text-ink-muted mt-1">{t("acct.phoneHint")}</p>
-                </div>
-
-                {/* ── Your little one ── */}
-                <div className="pt-2 border-t border-canvas">
-                  <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2">👶 {t("acct.yourLittleOne")}</p>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.babyName")}</label>
-                      <input
-                        type="text"
-                        value={editBabyName}
-                        onChange={(e) => setEditBabyName(e.target.value)}
-                        placeholder={t("acct.optional")}
-                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.birthDate")}</label>
-                      <input
-                        type="date"
-                        value={editBabyDate}
-                        max={new Date().toISOString().slice(0, 10)}
-                        onChange={(e) => setEditBabyDate(e.target.value)}
-                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none"
-                      />
-                      <p className="text-[10px] text-ink-muted mt-1">{t("acct.birthDateHint")}</p>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.gender")}</label>
-                      <select
-                        value={editBabyGender}
-                        onChange={(e) => setEditBabyGender(e.target.value as "" | BabyGender)}
-                        className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none bg-canvas"
-                      >
-                        <option value="">—</option>
-                        <option value="boy">{t("acct.boy")}</option>
-                        <option value="girl">{t("acct.girl")}</option>
-                        <option value="na">{t("acct.preferNotToSay")}</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Preferences ── */}
-                <div className="pt-2 border-t border-canvas">
-                  <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2">⚙️ {t("acct.preferences")}</p>
-                  <div>
-                    <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{t("acct.siteLanguage")}</label>
-                    <select
-                      value={editLanguage}
-                      onChange={(e) => { if (isLocale(e.target.value)) setEditLanguage(e.target.value); }}
-                      className="w-full h-10 px-3 rounded-control border border-line text-sm text-ink font-medium focus:border-accent outline-none bg-canvas"
-                    >
-                      {LOCALES.map((l) => (
-                        <option key={l} value={l}>{LOCALE_META[l].flag} {LOCALE_META[l].label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {avatarPresets.length > 0 && (
-                    <div className="mt-3">
-                      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">{t("acct.avatar")}</label>
-                      <div className="flex flex-wrap gap-2">
-                        {/* Initial (no avatar) option */}
-                        <button
-                          type="button"
-                          onClick={() => setEditAvatar(null)}
-                          title={t("acct.useInitial")}
-                          className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-base transition-all ${
-                            editAvatar === null ? "ring-2 ring-offset-2 ring-accent" : "opacity-70 hover:opacity-100"
-                          }`}
-                          style={{ backgroundColor: "var(--color-accent)" }}
-                        >
-                          {editName[0]?.toUpperCase() || "?"}
-                        </button>
-                        {avatarPresets.map((url) => (
-                          <button
-                            key={url}
-                            type="button"
-                            onClick={() => setEditAvatar(url)}
-                            className={`w-11 h-11 rounded-full overflow-hidden transition-all ${
-                              editAvatar === url ? "ring-2 ring-offset-2 ring-accent" : "opacity-70 hover:opacity-100"
-                            }`}
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {saveError && <p className="text-red-400 text-xs font-semibold">{saveError}</p>}
-                {saveInfo && <p className="text-accent text-xs font-semibold bg-accent-soft px-3 py-2 rounded-lg">📬 {saveInfo}</p>}
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="flex-1 py-2.5 rounded-control text-xs font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-60"
-                    style={{ backgroundColor: "var(--color-accent)" }}
-                  >
-                    {saving ? t("auth.saving") : t("acct.saveChanges")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditing(false)}
-                    className="flex-1 py-2.5 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-ink-muted transition-colors"
-                  >
-                    {t("acct.cancel")}
-                  </button>
-                </div>
-              </form>
+              user.name[0]?.toUpperCase()
             )}
           </div>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight truncate">{user.name}</h1>
+            <div className="flex items-center gap-2.5 flex-wrap mt-1">
+              {user.email && <span className="text-[13px] text-ink-muted truncate">{user.email}</span>}
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-soft bg-panel px-2 py-0.5 rounded-control">
+                <span className="text-accent">✓</span>{providerLabel[user.provider] || t("acct.providerFallback")}
+              </span>
+            </div>
+          </div>
         </div>
+        <div className="flex items-center gap-2">
+          {!editing && (
+            <button
+              onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
+              className="u-btn u-btn-ghost px-4 py-2.5 rounded-control border border-ink text-[11px] font-semibold uppercase tracking-[0.08em] text-ink hover:bg-ink hover:text-white"
+            >
+              {t("acct.editProfile")}
+            </button>
+          )}
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2.5 rounded-control border border-line text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted hover:border-danger hover:text-danger transition-colors"
+          >
+            {t("acct.signOut")}
+          </button>
+        </div>
+      </div>
 
-        {/* Stats + quick links */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <Link href="/cart" className="bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
-              <div className="text-2xl mb-1">🛒</div>
-              <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{totalItems}</p>
-              <p className="text-xs text-ink-muted font-semibold">{t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice))}</p>
-            </Link>
-            <Link href="/wishlist" className="bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
-              <div className="text-2xl mb-1">❤️</div>
-              <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{wishCount}</p>
-              <p className="text-xs text-ink-muted font-semibold">{t("acct.savedToWishlist")}</p>
-            </Link>
-            <Link href="/account/rewards" className="col-span-2 sm:col-span-1 bg-canvas rounded-card border border-line p-5 hover:shadow-sm transition-shadow group">
-              <div className="text-2xl mb-1">⭐</div>
-              <p className="text-2xl font-extrabold text-ink group-hover:text-accent transition-colors">{pointsBalance.toLocaleString()}</p>
-              <p className="text-xs text-ink-muted font-semibold">{t("acct.bebecoPoints").replace("{tier}", `${tier.emoji} ${tierName(tier.id, t)}`)}</p>
-            </Link>
+      {/* Save feedback */}
+      {saveSuccess && (
+        <div className="mb-5 text-[13px] font-semibold text-accent-deep bg-accent-soft border border-accent/20 rounded-control py-2.5 px-4">
+          ✓ {t("acct.profileUpdated")}
+        </div>
+      )}
+      {saveInfo && !editing && (
+        <div className="mb-5 text-[13px] font-semibold text-ink bg-[#FFF8E8] border border-[#F0C85A] rounded-control py-2.5 px-4">
+          📬 {saveInfo}
+        </div>
+      )}
+
+      {editing ? (
+        /* ── Edit profile ── */
+        <form onSubmit={handleSaveProfile} className="max-w-2xl border border-line rounded-card p-6 sm:p-8 space-y-6 animate-fade-up">
+          {!profileReady && (
+            <div className="rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-3 py-2 text-[11px] text-[#8B6914] font-semibold leading-relaxed">
+              ⚠️ {t("acct.profileSqlNote").split("{code}")[0]}
+              <code className="font-mono">supabase/profile.sql</code>
+              {t("acct.profileSqlNote").split("{code}")[1]}
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.name")}</label>
+              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} required
+                className="w-full h-11 px-3.5 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.email")}</label>
+              <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
+                className="w-full h-11 px-3.5 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.phone")}</label>
+              <input type="tel" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="+995 5XX XX XX XX"
+                className="w-full h-11 px-3.5 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors" />
+              <p className="text-[11px] text-ink-muted mt-1">{t("acct.phoneHint")}</p>
+            </div>
           </div>
 
-          {/* Quick actions */}
-          <div className="bg-canvas rounded-card border border-line divide-y divide-canvas">
-            {[
-              { icon: "📦", label: t("acct.myOrders"),   sub: t("acct.myOrdersSub"),       href: "/account/orders" },
-              { icon: "↩️", label: t("acct.myReturns"),  sub: t("acct.myReturnsSub"),      href: "/account/returns" },
-              { icon: "📝", label: t("acct.myReviews"),  sub: t("acct.myReviewsSub"),      href: "/account/reviews" },
-              { icon: "⭐", label: t("acct.rewards"),    sub: t("acct.rewardsSub"),        href: "/account/rewards" },
-              { icon: "📍", label: t("acct.addresses"),  sub: t("acct.addressesSub"),      href: "/account/addresses" },
-              { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"), href: "/account/notifications" },
-              { icon: "🔒", label: t("acct.security"),   sub: t("acct.securitySub"),       href: "/account/security" },
-            ].map((item) => (
-              <Link key={item.label} href={item.href} className="flex items-center justify-between p-4 hover:bg-accent-soft transition-colors group">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl w-8 text-center">{item.icon}</span>
-                  <div>
-                    <p className="font-bold text-ink text-sm group-hover:text-accent transition-colors">{item.label}</p>
-                    <p className="text-[11px] text-ink-muted">{item.sub}</p>
-                  </div>
+          {/* ── Your little one ── */}
+          <div className="pt-5 border-t border-line">
+            <p className="text-[10px] font-semibold text-accent uppercase tracking-[0.14em] mb-3">👶 {t("acct.yourLittleOne")}</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.babyName")}</label>
+                <input type="text" value={editBabyName} onChange={(e) => setEditBabyName(e.target.value)} placeholder={t("acct.optional")}
+                  className="w-full h-11 px-3.5 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.gender")}</label>
+                <select value={editBabyGender} onChange={(e) => setEditBabyGender(e.target.value as "" | BabyGender)}
+                  className="w-full h-11 px-3 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors">
+                  <option value="">—</option>
+                  <option value="boy">{t("acct.boy")}</option>
+                  <option value="girl">{t("acct.girl")}</option>
+                  <option value="na">{t("acct.preferNotToSay")}</option>
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.birthDate")}</label>
+                <input type="date" value={editBabyDate} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setEditBabyDate(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors" />
+                <p className="text-[11px] text-ink-muted mt-1">{t("acct.birthDateHint")}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Preferences ── */}
+          <div className="pt-5 border-t border-line">
+            <p className="text-[10px] font-semibold text-accent uppercase tracking-[0.14em] mb-3">⚙️ {t("acct.preferences")}</p>
+            <div>
+              <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1.5">{t("acct.siteLanguage")}</label>
+              <select value={editLanguage} onChange={(e) => { if (isLocale(e.target.value)) setEditLanguage(e.target.value); }}
+                className="w-full h-11 px-3 rounded-control border border-line bg-canvas text-sm text-ink font-medium focus:border-ink outline-none transition-colors">
+                {LOCALES.map((l) => (
+                  <option key={l} value={l}>{LOCALE_META[l].flag} {LOCALE_META[l].label}</option>
+                ))}
+              </select>
+            </div>
+            {avatarPresets.length > 0 && (
+              <div className="mt-4">
+                <label className="block text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-2">{t("acct.avatar")}</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditAvatar(null)}
+                    title={t("acct.useInitial")}
+                    className={`w-11 h-11 rounded-full bg-panel border flex items-center justify-center text-ink font-bold text-base transition-all ${
+                      editAvatar === null ? "ring-2 ring-offset-2 ring-ink border-ink" : "border-line opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    {editName[0]?.toUpperCase() || "?"}
+                  </button>
+                  {avatarPresets.map((url) => (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setEditAvatar(url)}
+                      className={`w-11 h-11 rounded-full overflow-hidden transition-all ${
+                        editAvatar === url ? "ring-2 ring-offset-2 ring-ink" : "opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
                 </div>
-                <svg className="w-4 h-4 text-ink-muted group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+              </div>
+            )}
+          </div>
+
+          {saveError && <p className="text-danger text-xs font-semibold">{saveError}</p>}
+          {saveInfo && <p className="text-accent-deep text-xs font-semibold bg-accent-soft px-3 py-2 rounded-control">📬 {saveInfo}</p>}
+          <div className="flex gap-2 pt-1">
+            <button
+              type="submit"
+              disabled={saving}
+              className="u-btn flex-1 py-3 rounded-control text-[11px] font-semibold uppercase tracking-[0.1em] text-white bg-ink hover:bg-accent disabled:opacity-60"
+            >
+              {saving ? t("auth.saving") : t("acct.saveChanges")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="flex-1 py-3 rounded-control border border-line text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft hover:border-ink hover:text-ink transition-colors"
+            >
+              {t("acct.cancel")}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <>
+          {/* ── Stat strip — hairline cells ── */}
+          <div className="grid grid-cols-3 gap-px bg-line border border-line rounded-card overflow-hidden mb-6">
+            {[
+              { href: "/cart", value: String(totalItems), label: t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice)) },
+              { href: "/wishlist", value: String(wishCount), label: t("acct.savedToWishlist") },
+              { href: "/account/rewards", value: pointsBalance.toLocaleString(), label: t("acct.bebecoPoints").replace("{tier}", `${tier.emoji} ${tierName(tier.id, t)}`) },
+            ].map((s) => (
+              <Link key={s.href + s.label} href={s.href} className="bg-canvas px-4 py-5 hover:bg-panel transition-colors group">
+                <p className="text-2xl font-bold text-ink tabular-nums tracking-tight">{s.value}</p>
+                <p className="text-[11px] text-ink-muted font-medium mt-1 leading-snug">{s.label}</p>
               </Link>
             ))}
           </div>
 
-          {/* Shop CTA */}
-          <Link
-            href="/products"
-            className="flex items-center justify-between p-5 rounded-card text-white font-bold hover:opacity-90 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #5E9E8C 0%, #4A8A78 100%)" }}
-          >
-            <div>
-              <p className="font-extrabold">{t("acct.browseCollection")}</p>
-              <p className="text-sm opacity-80 font-normal mt-0.5">{t("acct.findSomething")}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* ── Account ledger ── */}
+            <div className="lg:col-span-2 border border-line rounded-card overflow-hidden divide-y divide-line self-start">
+              {[
+                { icon: "📦", label: t("acct.myOrders"),      sub: t("acct.myOrdersSub"),       href: "/account/orders" },
+                { icon: "↩️", label: t("acct.myReturns"),     sub: t("acct.myReturnsSub"),      href: "/account/returns" },
+                { icon: "📝", label: t("acct.myReviews"),     sub: t("acct.myReviewsSub"),      href: "/account/reviews" },
+                { icon: "⭐", label: t("acct.rewards"),       sub: t("acct.rewardsSub"),        href: "/account/rewards" },
+                { icon: "📍", label: t("acct.addresses"),     sub: t("acct.addressesSub"),      href: "/account/addresses" },
+                { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"),  href: "/account/notifications" },
+                { icon: "🔒", label: t("acct.security"),      sub: t("acct.securitySub"),       href: "/account/security" },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
+                      <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              ))}
             </div>
-            <svg className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-      </div>
+
+            {/* ── Right rail ── */}
+            <div className="space-y-6 self-start">
+              {/* Appearance */}
+              <div className="border border-line rounded-card p-5">
+                <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-1">{t("acct.appearance")}</p>
+                <p className="text-[12px] text-ink-muted mb-4 leading-snug">{t("acct.appearanceSub")}</p>
+                <div className="grid grid-cols-2 gap-px bg-line border border-line rounded-control overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={`py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
+                      theme === "light" ? "bg-ink text-white" : "bg-canvas text-ink-soft hover:bg-panel"
+                    }`}
+                  >
+                    ☀ {t("theme.light")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={`py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
+                      theme === "dark" ? "bg-ink text-white" : "bg-canvas text-ink-soft hover:bg-panel"
+                    }`}
+                  >
+                    ☾ {t("theme.dark")}
+                  </button>
+                </div>
+              </div>
+
+              {/* Browse CTA — quiet, on-system */}
+              <Link
+                href="/products"
+                className="u-btn u-btn-ghost group flex items-center justify-between p-5 rounded-card border border-line hover:border-ink"
+              >
+                <div>
+                  <p className="font-semibold text-ink text-[13.5px]">{t("acct.browseCollection")}</p>
+                  <p className="text-[11.5px] text-ink-muted mt-0.5">{t("acct.findSomething")}</p>
+                </div>
+                <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

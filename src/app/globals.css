@@ -37,6 +37,48 @@
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ── Dark theme — same semantic tokens, night values.
+   Unlayered on purpose: must beat the @layer theme defaults. ── */
+html[data-theme="dark"] {
+  --color-canvas: #161614;
+  --color-surface: #1B1B19;
+  --color-panel: #232321;
+  --color-line: #2E2E2B;
+  --color-ink: #F1F1ED;
+  --color-ink-soft: #C4C4BC;
+  --color-ink-muted: #8F8F87;
+  --color-accent: #7FB79D;       /* lighter pine — keeps contrast on dark ground */
+  --color-accent-deep: #A8CDBA;
+  --color-accent-soft: #22312A;
+  --color-danger: #E08484;
+  --color-danger-soft: #342222;
+  color-scheme: dark;
+}
+/* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.
+   Unlayered, so it also beats an element's own `text-white` utility. */
+html[data-theme="dark"] .bg-ink,
+html[data-theme="dark"] .hover\:bg-ink:hover {
+  color: #161614;
+}
+html[data-theme="dark"] .bg-accent,
+html[data-theme="dark"] .hover\:bg-accent:hover {
+  color: #12211B;
+}
+/* The wordmark is near-black raster art — invert it on dark ground. */
+html[data-theme="dark"] img[src="/logo.png"] {
+  filter: invert(1) hue-rotate(180deg) brightness(1.08);
+}
+/* Brief cross-fade when the user flips the theme (removed right after). */
+html.theme-anim,
+html.theme-anim body,
+html.theme-anim * {
+  transition:
+    background-color 0.35s var(--ease-smooth),
+    border-color 0.35s var(--ease-smooth),
+    color 0.35s var(--ease-smooth),
+    fill 0.35s var(--ease-smooth) !important;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
@@ -97,6 +139,48 @@ svg {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ── Tactile button system — quiet depth + lift on hover + press on click.
+   Added alongside the color utilities on every real button/CTA. ── */
+@layer components {
+  .u-btn {
+    box-shadow:
+      0 1px 2px rgb(20 20 18 / 0.16),
+      0 2px 8px rgb(20 20 18 / 0.07);
+    transition:
+      transform 0.2s var(--ease-smooth),
+      box-shadow 0.2s var(--ease-smooth),
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+    will-change: transform;
+  }
+  .u-btn:hover {
+    transform: translateY(-1.5px);
+    box-shadow:
+      0 3px 6px rgb(20 20 18 / 0.16),
+      0 10px 24px rgb(20 20 18 / 0.12);
+  }
+  .u-btn:active {
+    transform: translateY(0.5px) scale(0.99);
+    box-shadow: 0 1px 2px rgb(20 20 18 / 0.14);
+    transition-duration: 0.06s;
+  }
+  /* Outlined/ghost buttons: a faint filled base so they read as objects, not text */
+  .u-btn-ghost {
+    background-color: var(--color-canvas);
+    box-shadow: inset 0 0 0 0 transparent, 0 1px 3px rgb(20 20 18 / 0.08);
+  }
+}
+html[data-theme="dark"] .u-btn {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 2px 8px rgb(0 0 0 / 0.35);
+}
+html[data-theme="dark"] .u-btn:hover {
+  box-shadow: 0 3px 6px rgb(0 0 0 / 0.55), 0 10px 24px rgb(0 0 0 / 0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-btn, .u-btn:hover, .u-btn:active { transform: none; }
+}
+
 /* Adidas-style search panel: slide down from the header, dim the rest */
 @keyframes loov-slide-down {
   from { transform: translateY(-16px); opacity: 0; }
@@ -111,8 +195,8 @@ svg {
 
 /* Modal pop-in (scale + fade) — used by NewsletterPopup/QuickView/BundleQuickView */
 @keyframes loov-pop-in {
-  from { transform: scale(0.94); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
+  from { transform: scale(0.965) translateY(4px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);       opacity: 1; }
 }
 @keyframes loov-pop-out {
   from { transform: scale(1);    opacity: 1; }
@@ -131,12 +215,12 @@ svg {
 }
 .animate-bump { animation: loov-bump 0.35s var(--ease-snappy); }
 
-/* Scroll-reveal fade-up */
+/* Scroll-reveal fade-up — a touch slower and softer for an elegant settle */
 @keyframes loov-fade-up {
-  from { transform: translateY(12px); opacity: 0; }
+  from { transform: translateY(16px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-.animate-fade-up { animation: loov-fade-up 0.5s var(--ease-smooth) forwards; }
+.animate-fade-up { animation: loov-fade-up 0.65s var(--ease-smooth) forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,

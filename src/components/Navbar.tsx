@@ -12,6 +12,7 @@ import { useSettings } from "@/lib/db/useSettings";
 import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
 import { categoryPlural } from "@/lib/i18n/labels";
 import type { Product } from "@/types";
@@ -250,6 +251,9 @@ export default function Navbar() {
                   )}
                 </Link>
 
+                {/* Theme toggle */}
+                <ThemeToggle />
+
                 {/* Language switcher — desktop only */}
                 <div className="hidden md:block">
                   <LanguageSwitcher />
@@ -286,7 +290,7 @@ export default function Navbar() {
                 {/* Cart — Nordic: solid ink block, count inline */}
                 <Link
                   href="/cart"
-                  className="flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] transition-colors active:scale-95 hover:bg-accent"
+                  className="u-btn flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] hover:bg-accent"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

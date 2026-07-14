@@ -503,7 +503,7 @@ export default function CategoryFilter({
             <div className="mt-8 text-center">
               <button
                 onClick={() => setVisibleCount((n) => n + pageSize)}
-                className="font-semibold px-8 py-3.5 rounded-control border border-ink text-ink text-[12px] uppercase tracking-[0.1em] hover:bg-ink hover:text-white transition-colors active:scale-[0.98]"
+                className="u-btn u-btn-ghost font-semibold px-8 py-3.5 rounded-control border border-ink text-ink text-[12px] uppercase tracking-[0.1em] hover:bg-ink hover:text-white"
               >
                 {t("filter.loadMore")}
               </button>
@@ -517,7 +517,7 @@ export default function CategoryFilter({
           <p className="text-sm text-ink-muted mb-4">{t("filter.noMatchHint")}</p>
           <button
             onClick={clearAll}
-            className="font-semibold px-6 py-3 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.1em] hover:bg-accent transition-colors active:scale-[0.98]"
+            className="u-btn font-semibold px-6 py-3 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.1em] hover:bg-accent"
           >
             {t("filter.clearAllFilters")}
           </button>

@@ -50,13 +50,13 @@ export default async function HomePage() {
               <div className="flex items-center gap-3 flex-wrap">
                 <Link
                   href="/products"
-                  className="inline-flex items-center justify-center h-12 px-7 bg-ink text-white text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-accent transition-colors active:scale-[0.98]"
+                  className="inline-flex items-center justify-center u-btn h-12 px-7 bg-ink text-white text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-accent"
                 >
                   {t("home.hero.shopCta")}
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center h-12 px-6 border border-ink text-ink text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-ink hover:text-white transition-colors active:scale-[0.98]"
+                  className="inline-flex items-center justify-center u-btn u-btn-ghost h-12 px-6 border border-ink text-ink text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-ink hover:text-white"
                 >
                   {t("home.hero.ourStory")}
                 </Link>

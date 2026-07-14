@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { LoyaltyProvider } from "@/context/LoyaltyContext";
 import { getT } from "@/lib/i18n/server";
+import { cookies } from "next/headers";
 import Navbar from "@/components/Navbar";
 import FooterGate from "@/components/FooterGate";
 import StoreChromeGate from "@/components/StoreChromeGate";
@@ -52,8 +53,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { locale } = await getT();
+  /* Theme cookie is read server-side so dark mode renders without a flash. */
+  const theme = (await cookies()).get("loov-theme")?.value === "dark" ? "dark" : undefined;
   return (
-    <html lang={locale} className={archivo.variable}>
+    <html lang={locale} className={archivo.variable} data-theme={theme}>
       <body className="min-h-screen flex flex-col bg-canvas text-ink">
         <LocaleProvider initialLocale={locale}>
         <AuthProvider>

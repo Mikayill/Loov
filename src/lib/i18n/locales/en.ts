@@ -31,6 +31,11 @@ export const en = {
   "topbar.shipping": "Free shipping over {n} ₾",
   "topbar.delivery": "Delivery {min}–{max} days across Georgia",
   "topbar.returns": "Easy 14-day returns",
+  "theme.toggle": "Light / dark theme",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "acct.appearance": "Appearance",
+  "acct.appearanceSub": "Choose how Loov looks on this device",
 
   // ── Footer ──
   "footer.tagline": "Premium organic baby clothing crafted with love. Delivering happiness across Georgia.",

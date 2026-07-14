@@ -484,7 +484,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="text-6xl mb-5">🛒</div>
         <h2 className="text-2xl font-extrabold text-ink mb-3">{t("cart.empty.title")}</h2>
         <p className="text-ink-soft mb-7 text-sm">{t("checkout.emptySubtitle")}</p>
-        <Link href="/products" className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3 rounded-control text-white bg-ink hover:bg-accent transition-colors">
+        <Link href="/products" className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3 rounded-control text-white bg-ink hover:bg-accent">
           {t("checkout.browseProducts")} →
         </Link>
       </div>
@@ -1133,13 +1133,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/products"
-              className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control text-white bg-ink hover:bg-accent transition-colors"
+              className="u-btn font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control text-white bg-ink hover:bg-accent"
             >
               {t("common.continueShopping")} →
             </Link>
             <Link
               href="/"
-              className="font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control border border-ink text-ink hover:bg-ink hover:text-white transition-colors"
+              className="u-btn u-btn-ghost font-semibold uppercase tracking-[0.08em] text-[12px] px-7 py-3.5 rounded-control border border-ink text-ink hover:bg-ink hover:text-white"
             >
               {t("checkout.backToHome")}
             </Link>

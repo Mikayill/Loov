@@ -27,6 +27,11 @@ export const ru: Dictionary = {
   "topbar.shipping": "Бесплатная доставка от {n} ₾",
   "topbar.delivery": "Доставка {min}–{max} дня по всей Грузии",
   "topbar.returns": "Лёгкий возврат в течение 14 дней",
+  "theme.toggle": "Светлая / тёмная тема",
+  "theme.light": "Светлая",
+  "theme.dark": "Тёмная",
+  "acct.appearance": "Оформление",
+  "acct.appearanceSub": "Выберите, как Loov выглядит на этом устройстве",
 
   "footer.tagline": "Премиальная органическая детская одежда, созданная с любовью. Дарим счастье по всей Грузии.",
   "footer.shop": "Магазин",

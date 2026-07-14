@@ -29,6 +29,11 @@ export const ka: Dictionary = {
   "topbar.shipping": "უფასო მიწოდება {n} ₾-დან",
   "topbar.delivery": "მიწოდება {min}–{max} დღეში მთელ საქართველოში",
   "topbar.returns": "მარტივი დაბრუნება 14 დღეში",
+  "theme.toggle": "ღია / მუქი თემა",
+  "theme.light": "ღია",
+  "theme.dark": "მუქი",
+  "acct.appearance": "იერსახე",
+  "acct.appearanceSub": "აირჩიეთ, როგორ გამოჩნდეს Loov ამ მოწყობილობაზე",
 
   "footer.tagline": "პრემიუმ ორგანული ბავშვის ტანსაცმელი, სიყვარულით შექმნილი. ბედნიერების მიწოდება მთელ საქართველოში.",
   "footer.shop": "მაღაზია",
