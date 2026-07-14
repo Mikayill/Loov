@@ -23,6 +23,10 @@ export interface Product {
   discountPercent?: number;
   /** When a timed discount ends (ISO) — past date disables the discount. */
   discountEndsAt?: string | null;
+  /** Optional product video (public Storage URL). */
+  videoUrl?: string | null;
+  /** Gallery photo used as the video poster (null = first photo). */
+  videoPosterUrl?: string | null;
   /** Published-review aggregate for the card star row (absent = no data). */
   rating?: { avg: number; count: number };
   /** Season the item belongs to — drives filtering + seasonal ordering. */

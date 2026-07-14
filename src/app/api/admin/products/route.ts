@@ -82,6 +82,16 @@ function sanitize(body: Record<string, unknown>, partial: boolean): Record<strin
     if (!Number.isInteger(d) || d < 0 || d > 90) return "Discount must be a whole number 0–90";
     set("discount_percent", d);
   }
+  // ── new: product video (run supabase/product-video.sql first) ──
+  if (body.videoUrl !== undefined) {
+    const v = body.videoUrl === null || body.videoUrl === "" ? null : String(body.videoUrl);
+    if (v && !/^https:\/\/.+\.(mp4|webm)(\?.*)?$/i.test(v)) return "Invalid video URL";
+    set("video_url", v);
+  }
+  if (body.videoPosterUrl !== undefined) {
+    const v = body.videoPosterUrl === null || body.videoPosterUrl === "" ? null : String(body.videoPosterUrl);
+    set("video_poster_url", v);
+  }
   // ── new: timed discount end (run supabase/discount-timer.sql first) ──
   if (body.discountEndsAt !== undefined) {
     if (body.discountEndsAt === null || body.discountEndsAt === "") set("discount_ends_at", null);
@@ -251,6 +261,12 @@ export async function PATCH(req: NextRequest) {
   let { error } = await admin.from("products").update(clean).eq("id", String(id));
   // supabase/discount-timer.sql not run yet → say exactly that instead of the
   // raw PostgREST schema-cache message.
+  if (error && /video_url|video_poster_url/i.test(error.message)) {
+    return NextResponse.json(
+      { error: "The product-video columns are missing. Run supabase/product-video.sql in the Supabase SQL editor, then try again." },
+      { status: 400 }
+    );
+  }
   if (error && /discount_ends_at/i.test(error.message)) {
     return NextResponse.json(
       { error: "The discount end-date column is missing. Run supabase/discount-timer.sql in the Supabase SQL editor, then try again." },

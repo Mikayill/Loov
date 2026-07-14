@@ -157,11 +157,21 @@ export default function ProductDetailClient({
   const images = product.imageUrls && product.imageUrls.length
     ? product.imageUrls
     : product.imageUrl ? [product.imageUrl] : [];
+  /* Gallery media: photos + (optionally) the product video as its own slide,
+     shown behind an admin-picked poster with a centered ▶ (Temu-style). */
+  type GalleryMedia = { type: "image"; src: string } | { type: "video"; src: string; poster: string | null };
+  const media: GalleryMedia[] = [
+    ...images.map((src) => ({ type: "image" as const, src })),
+    ...(product.videoUrl
+      ? [{ type: "video" as const, src: product.videoUrl, poster: product.videoPosterUrl ?? images[0] ?? null }]
+      : []),
+  ];
   const [activeImg, setActiveImg] = useState(0);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   /* Crossfade (not a sliding carousel) means wrapping last→first or
      first→last never "jumps" — it's the same fade transition either way. */
-  function prevImg() { setActiveImg((i) => (i - 1 + images.length) % images.length); }
-  function nextImg() { setActiveImg((i) => (i + 1) % images.length); }
+  function prevImg() { setActiveImg((i) => (i - 1 + media.length) % media.length); }
+  function nextImg() { setActiveImg((i) => (i + 1) % media.length); }
 
 
   /* ── Image zoom ──────────────────────────────────────────────────────
@@ -185,6 +195,7 @@ export default function ProductDetailClient({
   });
 
   function zoomClick(e: React.MouseEvent) {
+    if (media[activeImg]?.type === "video") return; // the video has its own controls
     if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return; // touch → pinch instead
     const rect = galleryRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -282,11 +293,12 @@ export default function ProductDetailClient({
       el.removeEventListener("touchend", onEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [images.length]);
+  }, [media.length]);
 
-  /* Changing photo resets both zooms. */
+  /* Changing slide resets both zooms and stops the video. */
   useEffect(() => {
     setZoomStep(0);
+    setVideoPlaying(false);
     setPinch({ scale: 1, tx: 0, ty: 0 });
     pinchRef.current.scale = 1; pinchRef.current.tx = 0; pinchRef.current.ty = 0;
   }, [activeImg]);
@@ -419,18 +431,57 @@ export default function ProductDetailClient({
                 transition: pinching ? "none" : "transform 0.25s var(--ease-smooth)",
               }}
             >
-            {images.length > 0 ? (
-              images.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={src}
-                  src={src}
-                  alt={product.name}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-                    i === activeImg ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              ))
+            {media.length > 0 ? (
+              media.map((m, i) =>
+                m.type === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={m.src}
+                    src={m.src}
+                    alt={product.name}
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                      i === activeImg ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                ) : (
+                  /* Video slide — poster + centered ▶, swaps to the native player */
+                  <div
+                    key="__video"
+                    className={`absolute inset-0 transition-opacity duration-500 ${
+                      i === activeImg ? "opacity-100" : "opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    {videoPlaying && i === activeImg ? (
+                      <video
+                        src={m.src}
+                        poster={m.poster ?? undefined}
+                        controls
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-contain bg-black"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <>
+                        {m.poster ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={m.poster} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+                        ) : (
+                          <div className="absolute inset-0 bg-panel" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setVideoPlaying(true); }}
+                          aria-label="Play product video"
+                          className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-ink/75 text-white flex items-center justify-center hover:bg-ink hover:scale-105 transition-all"
+                        >
+                          <svg className="w-7 h-7 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )
+              )
             ) : (
               <span className="text-[130px] sm:text-[160px] select-none drop-shadow-sm">
                 {product.emoji}
@@ -447,7 +498,7 @@ export default function ProductDetailClient({
                 {t("pdp.save").replace("{n}", String(off))}
               </span>
             )}
-            {images.length > 1 && (
+            {media.length > 1 && (
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); prevImg(); }}
@@ -471,19 +522,33 @@ export default function ProductDetailClient({
             )}
           </div>
 
-          {/* Photo thumbnails — smooth crossfade on click */}
-          {images.length > 1 && (
+          {/* Thumbnails — photos + a ▶-badged poster for the video */}
+          {media.length > 1 && (
             <div className="grid grid-cols-5 gap-3">
-              {images.slice(0, 5).map((src, i) => (
+              {media.slice(0, 5).map((m, i) => (
                 <button
-                  key={src}
+                  key={m.type === "image" ? m.src : "__video"}
                   onClick={() => setActiveImg(i)}
-                  className={`aspect-square rounded-card border-2 overflow-hidden transition-all duration-200 ${
+                  className={`relative aspect-square rounded-card border-2 overflow-hidden transition-all duration-200 ${
                     i === activeImg ? "border-accent scale-95 shadow-md" : "border-line hover:border-ink-muted"
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  {m.type === "image" ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={m.src} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      {m.poster ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={m.poster} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="absolute inset-0 bg-panel" />
+                      )}
+                      <span className="absolute inset-0 m-auto w-7 h-7 rounded-full bg-ink/75 text-white flex items-center justify-center" aria-hidden>
+                        <svg className="w-3.5 h-3.5 translate-x-px" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                      </span>
+                    </>
+                  )}
                 </button>
               ))}
             </div>

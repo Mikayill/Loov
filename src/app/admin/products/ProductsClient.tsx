@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   CATEGORY_TEMPLATES as CATEGORY_TEMPLATES_SHARED,
   CANONICAL_COLORS,
@@ -24,6 +25,8 @@ interface Row {
   is_new: boolean | null;
   image_url: string | null;
   image_urls: string[] | null;
+  video_url: string | null;
+  video_poster_url: string | null;
   discount_percent: number | null;
   discount_ends_at: string | null;
   season: string | null;
@@ -317,6 +320,43 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
   const fileRef = useRef<HTMLInputElement>(null);
   const gallery = draft.image_urls ?? (draft.image_url ? [draft.image_url] : []);
 
+  /* ── Product video: signed DIRECT-to-Storage upload (Vercel caps route
+     bodies at ~4.5MB, so the file never passes through our API). ── */
+  const videoRef = useRef<HTMLInputElement>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [videoError, setVideoError] = useState("");
+
+  async function uploadVideo(file: File) {
+    setVideoError("");
+    if (file.size > 100 * 1024 * 1024) { setVideoError("Video must be under 100MB."); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext !== "mp4" && ext !== "webm") { setVideoError("Only .mp4 / .webm files."); return; }
+    setVideoBusy(true);
+    try {
+      const res = await fetch("/api/admin/video-upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: draft.id, ext }),
+      });
+      const slot = await res.json();
+      if (!slot.ok) throw new Error(slot.error || "Could not start the upload");
+      const supabase = createSupabaseBrowserClient();
+      const { error: upErr } = await supabase.storage
+        .from("product-images")
+        .uploadToSignedUrl(slot.path, slot.token, file, { contentType: file.type || `video/${ext}` });
+      if (upErr) throw new Error(upErr.message);
+      const poster = draft.video_poster_url ?? gallery[0] ?? null;
+      setDraft({ ...draft, video_url: slot.publicUrl, video_poster_url: poster });
+      await save({ video_url: slot.publicUrl, video_poster_url: poster });
+    } catch (e) {
+      setVideoError((e as Error).message);
+    } finally {
+      setVideoBusy(false);
+      if (videoRef.current) videoRef.current.value = "";
+    }
+  }
+
+
   function removePhoto(url: string) {
     const next = gallery.filter((u) => u !== url);
     setDraft({ ...draft, image_urls: next, image_url: next[0] ?? null });
@@ -372,6 +412,61 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
               </div>
               <p className="text-[10px] text-ink-muted mt-1.5">JPG/PNG/WEBP, max 5MB. First photo is the thumbnail.</p>
+            </div>
+
+            {/* Video — Temu-style: poster frame from the gallery + native player */}
+            <div>
+              <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">🎬 Product video</label>
+              {draft.video_url ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <a href={draft.video_url} target="_blank" rel="noreferrer" className="text-xs font-semibold text-accent hover:underline">
+                      ▶ Preview video
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraft({ ...draft, video_url: null, video_poster_url: null });
+                        save({ video_url: null, video_poster_url: null });
+                      }}
+                      className="text-xs font-semibold text-danger hover:underline"
+                    >
+                      Remove video
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-ink-muted">Cover photo (shown with a ▶ button — pick one of the gallery photos):</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {gallery.map((url) => (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => { setDraft({ ...draft, video_poster_url: url }); save({ video_poster_url: url }); }}
+                        className={`w-12 h-12 rounded-control overflow-hidden border-2 transition-all ${
+                          (draft.video_poster_url ?? gallery[0]) === url ? "border-accent" : "border-line opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                    {gallery.length === 0 && <p className="text-[10px] text-ink-muted">Upload photos first — the cover comes from the gallery.</p>}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={videoBusy}
+                    onClick={() => videoRef.current?.click()}
+                    className="h-9 px-3 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-ink hover:text-ink transition-colors disabled:opacity-50"
+                  >
+                    {videoBusy ? "Uploading…" : "⬆ Upload video (mp4/webm, max 100MB)"}
+                  </button>
+                  <input ref={videoRef} type="file" accept="video/mp4,video/webm" hidden onChange={(e) => e.target.files?.[0] && uploadVideo(e.target.files[0])} />
+                  {videoError && <p className="text-[10px] text-danger font-semibold mt-1">{videoError}</p>}
+                  <p className="text-[10px] text-ink-muted mt-1">Uploads go straight to Storage (bypasses the server size limit). Run <code className="font-mono">supabase/product-video.sql</code> once before first use.</p>
+                </>
+              )}
             </div>
 
             {/* Discount + Season */}
@@ -616,6 +711,8 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     if ("origin" in patch) payload.origin = next.origin ?? "";
     if ("care_instructions" in patch) payload.careInstructions = next.care_instructions ?? [];
     if ("image_urls" in patch) payload.imageUrls = next.image_urls;
+    if ("video_url" in patch) payload.videoUrl = next.video_url ?? null;
+    if ("video_poster_url" in patch) payload.videoPosterUrl = next.video_poster_url ?? null;
     const res = await api("PATCH", payload);
     setBusy(false);
     if (res.ok) { setSaved(true); onChanged(next); setTimeout(() => setSaved(false), 1500); }
