@@ -1,6 +1,6 @@
 export default function CheckoutLoading() {
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-pulse">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 u-skeleton">
       {/* Breadcrumb */}
       <div className="flex gap-2 mb-6">
         {[1, 2, 3].map((i) => (

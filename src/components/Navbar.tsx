@@ -59,7 +59,7 @@ export default function Navbar() {
 
   useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
 
-  const { results: queryMatches } = useProductSearch(query, 50);
+  const { results: queryMatches, loading: searchLoading } = useProductSearch(query, 50);
   const searchResults = useMemo(
     () => (activeCat === "all" ? queryMatches : queryMatches.filter((p) => p.category === activeCat)),
     [queryMatches, activeCat]
@@ -218,7 +218,7 @@ export default function Navbar() {
                         query={query} setQuery={setQuery}
                         activeCat={activeCat} setActiveCat={setActiveCat}
                         results={searchResults} recentSearches={recentSearches}
-                        onClearRecent={clearRecent} onNavigate={navigateFromSearch}
+                        onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading}
                       />
                     </div>
                   )}
@@ -398,7 +398,7 @@ export default function Navbar() {
                 query={query} setQuery={setQuery}
                 activeCat={activeCat} setActiveCat={setActiveCat}
                 results={searchResults} recentSearches={recentSearches}
-                onClearRecent={clearRecent} onNavigate={navigateFromSearch}
+                onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading}
               />
             </div>
           )}

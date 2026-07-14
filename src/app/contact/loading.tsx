@@ -1,6 +1,6 @@
 export default function ContactLoading() {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 u-skeleton">
       <div className="text-center mb-12">
         <div className="h-3 w-28 bg-sage rounded mx-auto mb-3" />
         <div className="h-10 w-48 bg-line rounded-control mx-auto mb-3" />

@@ -18,7 +18,7 @@ export default function NotFound() {
 
   useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
 
-  const { results: queryMatches } = useProductSearch(query, 50);
+  const { results: queryMatches, loading: searchLoading } = useProductSearch(query, 50);
   const results = useMemo(
     () => (activeCat === "all" ? queryMatches : queryMatches.filter((p) => p.category === activeCat)),
     [queryMatches, activeCat]
@@ -92,6 +92,7 @@ export default function NotFound() {
                 results={results} recentSearches={recentSearches}
                 onClearRecent={() => { clearRecentSearches(); setRecentSearches([]); }}
                 onNavigate={() => { setRecentSearches((prev) => saveRecentSearch(query, prev)); setSearchOpen(false); }}
+                searching={searchLoading}
               />
             </div>
           )}

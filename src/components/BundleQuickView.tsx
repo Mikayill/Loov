@@ -44,7 +44,7 @@ export default function BundleQuickView({
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<"idle" | "added" | "blocked">("idle");
-  const shouldRenderModal = useDelayedUnmount(open, 160);
+  const shouldRenderModal = useDelayedUnmount(open, 200);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -112,7 +112,7 @@ export default function BundleQuickView({
         <div
           className={`fixed inset-0 z-[500] flex items-center justify-center p-4 ${open ? "animate-fade-in" : "animate-fade-out"}`}
           style={{ backgroundColor: "rgba(42,35,32,0.55)", backdropFilter: "blur(4px)" }}
-          onClick={close}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); close(); }}
         >
           <div
             role="dialog"
@@ -125,7 +125,7 @@ export default function BundleQuickView({
             <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-canvas flex-shrink-0">
               <span className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">{t("quick.view")}</span>
               <button
-                onClick={close}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); close(); }}
                 aria-label="Close quick view"
                 className="w-7 h-7 rounded-full bg-canvas flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90 text-xs font-bold"
               >

@@ -457,7 +457,7 @@ export default function ProductDetailClient({
             </div>
           ) : stock !== null && stock <= 5 ? (
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse flex-shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-orange-400 u-skeleton flex-shrink-0" />
               <span className="text-sm font-bold text-orange-500">{t("pdp.onlyLeft").replace("{n}", String(stock))}</span>
             </div>
           ) : stock !== null ? (

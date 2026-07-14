@@ -327,7 +327,8 @@ export const tr: Dictionary = {
   "search.popular": "Şu an popüler",
   "search.viewAll": "Tümünü gör ({n})",
   "search.noResults": "Sonuç bulunamadı",
-  "search.noResultsHint": "“Body”, “battaniye” deneyin ya da başka kategori seçin.",
+  "search.searching": "Aranıyor…",
+  "search.noResultsHint": "Doğru yazdığınızdan emin olun ya da “body” / “battaniye” deneyin.",
   "search.all": "Tümü",
 
   "drawer.addMore": "Ücretsiz kargo için {amount} daha ekleyin!",

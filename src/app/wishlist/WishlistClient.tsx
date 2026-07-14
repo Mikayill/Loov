@@ -123,7 +123,7 @@ export default function WishlistClient() {
           </p>
           {lowStockCount > 0 && (
             <p className="text-xs font-bold text-orange-600 mt-1 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse inline-block" />
+              <span className="w-2 h-2 rounded-full bg-orange-400 u-skeleton inline-block" />
               {t("wl.lowStockNote").replace("{n}", String(lowStockCount))}
             </p>
           )}

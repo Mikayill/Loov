@@ -12,6 +12,7 @@ import type { Product } from "@/types";
  *  logic lives in src/lib/search.ts. */
 export default function SearchResultsPanel({
   query, setQuery, activeCat, setActiveCat, results, recentSearches, onClearRecent, onNavigate,
+  searching = false,
 }: {
   query: string;
   setQuery: (q: string) => void;
@@ -21,6 +22,9 @@ export default function SearchResultsPanel({
   recentSearches: string[];
   onClearRecent: () => void;
   onNavigate: () => void;
+  /** True while the server round-trip is in flight — shows "Searching…" and
+   *  keeps "no results" from flashing before the answer arrives. */
+  searching?: boolean;
 }) {
   const { t } = useLocale();
   const hasQuery = query.trim().length > 0;
@@ -39,10 +43,10 @@ export default function SearchResultsPanel({
               type="button"
               onClick={() => setActiveCat(c.key)}
               aria-pressed={active}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border-2 transition-colors flex-shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-control text-xs font-semibold whitespace-nowrap border transition-colors flex-shrink-0 ${
                 active
-                  ? "border-accent bg-accent text-white"
-                  : "border-line text-ink-soft hover:border-accent hover:text-accent"
+                  ? "border-ink bg-ink text-white"
+                  : "border-line text-ink-soft hover:border-ink hover:text-ink"
               }`}
             >
               <span className="leading-none">{c.emoji}</span>
@@ -107,6 +111,14 @@ export default function SearchResultsPanel({
           )}
         </div>
 
+        {/* In-flight indicator — old results stay visible underneath */}
+        {hasQuery && searching && (
+          <div className="flex items-center gap-2 mb-2 text-[11px] font-semibold text-ink-muted">
+            <span className="w-3.5 h-3.5 rounded-full border-2 border-line border-t-ink animate-spin" aria-hidden />
+            {t("search.searching")}
+          </div>
+        )}
+
         {shown.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {shown.map((p) => (
@@ -114,7 +126,7 @@ export default function SearchResultsPanel({
                 key={p.id}
                 href={`/products/${p.slug}`}
                 onClick={onNavigate}
-                className="group flex items-center gap-2.5 p-2 rounded-control border border-line hover:border-accent hover:shadow-sm transition-all"
+                className="group flex items-center gap-2.5 p-2 rounded-control border border-line hover:border-ink hover:bg-panel/60 transition-all"
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden" style={{ backgroundColor: p.cardColor }}>
                   {p.imageUrl ? (
@@ -124,15 +136,15 @@ export default function SearchResultsPanel({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-bold text-ink group-hover:text-accent transition-colors leading-tight truncate">{p.name}</p>
-                    {p.isNew && <span className="flex-shrink-0 text-[8px] font-bold bg-accent text-white px-1 py-0.5 rounded-full uppercase">{t("product.new")}</span>}
+                    <p className="text-xs font-bold text-ink group-hover:underline underline-offset-2 transition-colors leading-tight truncate">{p.name}</p>
+                    {p.isNew && <span className="flex-shrink-0 text-[8px] font-bold text-accent px-1 py-0.5 uppercase tracking-[0.1em]">{t("product.new")}</span>}
                   </div>
                   <p className="text-[10px] text-ink-muted mt-0.5 truncate">{categoryLabel(p.category, t)} · {formatPrice(p.price)}</p>
                 </div>
               </Link>
             ))}
           </div>
-        ) : (
+        ) : hasQuery && searching ? null : (
           <div className="py-8 text-center">
             <div className="text-4xl mb-2">🔍</div>
             <p className="font-bold text-ink text-sm mb-1">{t("search.noResults")}</p>

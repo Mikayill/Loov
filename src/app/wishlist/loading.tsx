@@ -1,6 +1,6 @@
 export default function WishlistLoading() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-pulse">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 u-skeleton">
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="h-8 w-36 bg-line rounded-control mb-2" />

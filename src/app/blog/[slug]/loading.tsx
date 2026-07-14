@@ -1,6 +1,6 @@
 export default function BlogPostLoading() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 u-skeleton">
       {/* Breadcrumb */}
       <div className="flex gap-2 mb-8">
         <div className="h-3 w-10 bg-panel rounded" />

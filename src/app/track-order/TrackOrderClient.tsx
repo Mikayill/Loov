@@ -196,7 +196,7 @@ export default function TrackOrderClient() {
                               </svg>
                             )}
                             {step.active && !step.done && (
-                              <div className="w-2 h-2 rounded-full bg-canvas animate-pulse" />
+                              <div className="w-2 h-2 rounded-full bg-canvas u-skeleton" />
                             )}
                           </div>
                           {!isLast && (

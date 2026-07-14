@@ -187,6 +187,44 @@ html[data-theme="dark"]:not(.route-admin) .u-btn:hover {
   .u-btn, .u-btn:hover, .u-btn:active { transform: none; }
 }
 
+/* ── Skeleton shimmer — a slanted light band sweeping left→right (not the
+   old opacity pulse). Angle ~100deg so the band leans like "/" without
+   being a full 45°. ── */
+@layer components {
+  .u-skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-panel);
+  }
+  .u-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.55) 50%,
+      transparent 70%
+    );
+    animation: loov-shimmer 1.8s ease-in-out infinite;
+  }
+}
+html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.09) 50%,
+    transparent 70%
+  );
+}
+@keyframes loov-shimmer {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .u-skeleton::after { animation: none; }
+}
+
 /* Adidas-style search panel: slide down from the header, dim the rest */
 @keyframes loov-slide-down {
   from { transform: translateY(-16px); opacity: 0; }

@@ -166,7 +166,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
       <div className="mb-8">
         {loading ? (
           /* Don't flash "sign in" / "only buyers" while eligibility is still loading */
-          <div className="h-11 w-56 rounded-full bg-panel animate-pulse" />
+          <div className="h-11 w-56 rounded-full bg-panel u-skeleton" />
         ) : loadFailed ? (
           <div className="flex items-center gap-3 text-sm text-ink-muted font-medium">
             <span>{t("rev.loadFailed")}</span>

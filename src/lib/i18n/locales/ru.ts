@@ -327,7 +327,8 @@ export const ru: Dictionary = {
   "search.popular": "Популярно сейчас",
   "search.viewAll": "Показать все {n}",
   "search.noResults": "Ничего не найдено",
-  "search.noResultsHint": "Попробуйте «боди», «одеяло» или выберите другую категорию.",
+  "search.searching": "Ищем…",
+  "search.noResultsHint": "Проверьте, правильно ли всё написано, или попробуйте «боди» / «одеяло».",
   "search.all": "Все",
 
   "drawer.addMore": "Добавьте ещё {amount} — и доставка бесплатно!",

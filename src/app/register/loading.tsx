@@ -1,6 +1,6 @@
 export default function RegisterLoading() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 animate-pulse">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 u-skeleton">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-12 h-12 rounded-full bg-sage mx-auto mb-4" />

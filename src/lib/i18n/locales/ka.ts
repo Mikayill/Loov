@@ -329,7 +329,8 @@ export const ka: Dictionary = {
   "search.popular": "ახლა პოპულარული",
   "search.viewAll": "ყველას ნახვა ({n})",
   "search.noResults": "შედეგები ვერ მოიძებნა",
-  "search.noResultsHint": "სცადე „ბოდი“, „საბანი“ ან აირჩიე სხვა კატეგორია.",
+  "search.searching": "ვეძებთ…",
+  "search.noResultsHint": "დარწმუნდით, რომ ყველაფერი სწორად დაწერეთ, ან სცადეთ „ბოდი“ / „საბანი“.",
   "search.all": "ყველა",
 
   "drawer.addMore": "დაამატე კიდევ {amount} და მიწოდება უფასო იქნება!",

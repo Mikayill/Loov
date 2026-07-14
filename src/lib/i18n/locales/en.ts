@@ -350,7 +350,8 @@ export const en = {
   "search.popular": "Popular right now",
   "search.viewAll": "View all {n}",
   "search.noResults": "No results found",
-  "search.noResultsHint": "Try “bodysuit”, “blanket”, or pick another category.",
+  "search.searching": "Searching…",
+  "search.noResultsHint": "Make sure everything is spelled correctly, or try “bodysuit” / “blanket”.",
   "search.all": "All",
 
   // ── Cart drawer ──
