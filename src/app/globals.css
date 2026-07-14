@@ -40,18 +40,18 @@
 /* ── Dark theme — same semantic tokens, night values.
    Unlayered on purpose: must beat the @layer theme defaults. ── */
 html[data-theme="dark"] {
-  --color-canvas: #161614;
-  --color-surface: #1B1B19;
-  --color-panel: #232321;
-  --color-line: #2E2E2B;
-  --color-ink: #F1F1ED;
-  --color-ink-soft: #C4C4BC;
-  --color-ink-muted: #8F8F87;
-  --color-accent: #7FB79D;       /* lighter pine — keeps contrast on dark ground */
-  --color-accent-deep: #A8CDBA;
-  --color-accent-soft: #22312A;
-  --color-danger: #E08484;
-  --color-danger-soft: #342222;
+  --color-canvas: #151513;
+  --color-surface: #1E1E1B;
+  --color-panel: #282824;
+  --color-line: #3D3D37;         /* strong enough that card/button edges stay visible */
+  --color-ink: #FBFBF8;          /* near-white — primary text must read as white */
+  --color-ink-soft: #D6D6CF;
+  --color-ink-muted: #A3A39A;
+  --color-accent: #8AC3A8;       /* lighter pine — keeps contrast on dark ground */
+  --color-accent-deep: #B2D6C4;
+  --color-accent-soft: #24352C;
+  --color-danger: #E58C8C;
+  --color-danger-soft: #362323;
   color-scheme: dark;
 }
 /* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.

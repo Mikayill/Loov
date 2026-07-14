@@ -319,13 +319,15 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Category tab strip — Nordic structural navigation */}
-          <div className="border-t border-line overflow-x-auto no-scrollbar">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-5 md:gap-7 whitespace-nowrap">
+          {/* Category strip — tactile chip buttons */}
+          <div className="border-t border-line overflow-x-auto no-scrollbar bg-surface">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 whitespace-nowrap py-2.5">
               <Link
                 href="/products"
-                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-semibold border-b-2 -mb-px transition-colors ${
-                  pathname === "/products" ? "text-ink border-ink" : "text-ink-muted border-transparent hover:text-ink"
+                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                  pathname === "/products"
+                    ? "bg-ink text-white border-ink"
+                    : "bg-canvas text-ink-soft border-line hover:border-ink hover:text-ink"
                 }`}
               >
                 {t("nav.products")}
@@ -334,23 +336,27 @@ export default function Navbar() {
                 <Link
                   key={cat}
                   href={`/products?cat=${cat}`}
-                  className="py-3 text-[11.5px] uppercase tracking-[0.08em] font-medium text-ink-muted border-b-2 border-transparent hover:text-ink transition-colors"
+                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
                 >
                   {categoryPlural(cat, t)}
                 </Link>
               ))}
               <Link
                 href="/blog"
-                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-medium border-b-2 -mb-px transition-colors ${
-                  isActive("/blog") ? "text-ink border-ink" : "text-ink-muted border-transparent hover:text-ink"
+                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                  isActive("/blog")
+                    ? "bg-ink text-white border-ink"
+                    : "bg-canvas text-ink-soft border-line hover:border-ink hover:text-ink"
                 }`}
               >
                 {t("nav.blog")}
               </Link>
               <Link
                 href="/bundles"
-                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-bold border-b-2 -mb-px transition-colors ${
-                  isActive("/bundles") ? "text-accent border-accent" : "text-accent border-transparent hover:border-accent"
+                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-bold ${
+                  isActive("/bundles")
+                    ? "bg-accent text-white border-accent"
+                    : "bg-accent-soft text-accent-deep border-accent/30 hover:border-accent"
                 }`}
               >
                 {t("nav.bundles")}

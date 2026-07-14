@@ -232,7 +232,7 @@ export default function CategoryFilter({
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-control text-[11.5px] uppercase tracking-[0.06em] font-semibold border transition-colors duration-200 ${
+                className={`u-btn flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-control text-[11.5px] uppercase tracking-[0.06em] font-semibold border ${
                   isActive
                     ? "border-ink bg-ink text-white"
                     : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
