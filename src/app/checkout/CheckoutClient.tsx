@@ -275,7 +275,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     return () => { cancelled = true; };
   }, [user]);
 
-  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice, loyaltyMaxRedeemPercent, pointsPerGel, deliveryMinDays, deliveryMaxDays, giftWrapPrice } = useSettings();
+  const { freeShippingThreshold, standardShippingPrice, expressEnabled, expressPrice, loyaltyMaxRedeemPercent, loyaltyRedeemValue, pointsPerGel, deliveryMinDays, deliveryMaxDays, giftWrapPrice } = useSettings();
 
   /* Bundle-aware subtotal — same rule the server uses for the real charge
      (src/lib/bundlePricing.ts): a bundle-tagged group only gets the flat
@@ -321,9 +321,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   const giftWrapCost = giftWrap ? giftWrapPrice : 0;
 
   /* ── Loov Rewards ── */
-  const redeemablePoints = maxRedeemablePoints(loyalty.balance, postPromoSubtotal, loyaltyMaxRedeemPercent / 100);
+  const redeemablePoints = maxRedeemablePoints(loyalty.balance, postPromoSubtotal, loyaltyMaxRedeemPercent / 100, loyaltyRedeemValue);
   const redeemPts = usePoints ? redeemablePoints : 0;
-  const pointsDiscount = discountForPoints(redeemPts);
+  const pointsDiscount = discountForPoints(redeemPts, loyaltyRedeemValue);
 
   const total = Math.max(0, postPromoSubtotal + shippingCost + giftWrapCost - pointsDiscount);
 
@@ -927,7 +927,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         <strong>{t("checkout.youHavePoints").replace("{n}", loyalty.balance.toLocaleString())}</strong>
                         {redeemablePoints > 0 ? (
                           <> {t("checkout.redeemFor").replace("{n}", redeemablePoints.toLocaleString()).split("{amount}")[0]}
-                          <strong>{formatPrice(discountForPoints(redeemablePoints))}</strong>
+                          <strong>{formatPrice(discountForPoints(redeemablePoints, loyaltyRedeemValue))}</strong>
                           {t("checkout.redeemFor").split("{amount}")[1]}</>
                         ) : (
                           <> {t("checkout.notEnoughPoints")}</>
@@ -1056,13 +1056,23 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   <span>{t("cart.total")}</span><span>{formatPrice(total)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-2">
-                <span className="text-sm">⭐</span>
-                <span className="text-[11px] font-bold text-[#8B6914]">
-                  {/* Same earn base as the server: merchandise after discounts — shipping/gift wrap never earn. */}
-                  {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(Math.max(0, postPromoSubtotal - pointsDiscount), pointsPerGel, loyalty.tier)))}
-                </span>
-              </div>
+              {redeemPts > 0 ? (
+                /* Spending points on this order → it earns none (server enforces the same). */
+                <div className="flex items-center gap-1.5 justify-center bg-panel border border-line rounded-control px-3 py-2">
+                  <span className="text-sm">⭐</span>
+                  <span className="text-[11px] font-semibold text-ink-muted">
+                    {t("checkout.noEarnWithRedeem")}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-2">
+                  <span className="text-sm">⭐</span>
+                  <span className="text-[11px] font-bold text-[#8B6914]">
+                    {/* Same earn base as the server: merchandise after discounts — shipping/gift wrap never earn. */}
+                    {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(Math.max(0, postPromoSubtotal - pointsDiscount), pointsPerGel, loyalty.tier)))}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-around pt-2">
                 {[`🔒 ${t("cart.trustSecure")}`, `🔄 ${t("cart.trustReturns")}`, `🌿 ${t("cart.trustOrganic")}`].map((label) => (
                   <span key={label} className="text-[10px] text-ink-muted font-semibold">{label}</span>

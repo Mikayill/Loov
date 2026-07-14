@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLoyalty } from "@/context/LoyaltyContext";
 import { useLocale } from "@/context/LocaleContext";
 import { useProductSearch } from "@/lib/db/useProductSearch";
 import { useSettings } from "@/lib/db/useSettings";
@@ -32,7 +33,8 @@ const tabCategories: Product["category"][] = ["body", "blanket", "set", "towel",
 
 export default function Navbar() {
   const { t } = useLocale();
-  const { freeShippingThreshold, deliveryMinDays, deliveryMaxDays } = useSettings();
+  const { freeShippingThreshold, deliveryMinDays, deliveryMaxDays, loyaltyRedeemValue } = useSettings();
+  const { balance: pointsBalance } = useLoyalty();
   const { totalItems }   = useCart();
   const { count: wCount, hasUrgency } = useWishlist();
   const pathname         = usePathname();
@@ -43,6 +45,8 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef  = useRef<HTMLButtonElement>(null);
   const prevTotalItems = useRef(totalItems);
+  const [pointsBump, setPointsBump] = useState(false);
+  const prevPoints = useRef(pointsBalance);
 
   /* ── Search — inline bar (desktop) / expanding row (mobile), no popup ──
      Matching now happens server-side (GET /api/products/search) instead of
@@ -126,6 +130,17 @@ export default function Navbar() {
     }
     prevTotalItems.current = totalItems;
   }, [totalItems]);
+
+  /* Bump the points chip when the balance grows (gamification feedback) */
+  useEffect(() => {
+    if (pointsBalance > prevPoints.current) {
+      setPointsBump(true);
+      const id = setTimeout(() => setPointsBump(false), 400);
+      prevPoints.current = pointsBalance;
+      return () => clearTimeout(id);
+    }
+    prevPoints.current = pointsBalance;
+  }, [pointsBalance]);
 
   /* Close mobile menu on any outside click (except the menu / hamburger) */
   useEffect(() => {
@@ -254,6 +269,18 @@ export default function Navbar() {
                     <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white animate-pulse" aria-label="A wishlist item needs attention" />
                   )}
                 </Link>
+
+                {/* Loov points — the shopper's running score, one tap from Rewards */}
+                {user && (
+                  <Link
+                    href="/account/rewards"
+                    title={t("nav.pointsTip").replace("{n}", String(loyaltyRedeemValue))}
+                    className={`hidden sm:flex items-center gap-1 px-2.5 h-9 rounded-control bg-accent-soft text-accent-deep text-[12px] font-bold tabular-nums hover:bg-accent hover:text-white transition-colors ${pointsBump ? "animate-bump" : ""}`}
+                  >
+                    <span aria-hidden>⭐</span>
+                    {pointsBalance.toLocaleString()}
+                  </Link>
+                )}
 
                 {/* Theme toggle */}
                 <ThemeToggle />

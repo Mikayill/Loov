@@ -302,7 +302,7 @@ export async function POST(req: NextRequest) {
     return bad("Invalid points amount");
   }
   const maxByOrder =
-    Math.floor((postPromoSubtotal * (settings.loyaltyMaxRedeemPercent / 100)) / GEL_PER_BLOCK) * REDEEM_BLOCK;
+    Math.floor((postPromoSubtotal * (settings.loyaltyMaxRedeemPercent / 100)) / settings.loyaltyRedeemValue) * REDEEM_BLOCK;
   redeemPoints = Math.min(redeemPoints, maxByOrder);
 
   // Points can ONLY be redeemed by a signed-in user whose DB balance covers it.
@@ -370,7 +370,7 @@ export async function POST(req: NextRequest) {
     }
   };
 
-  const pointsDiscount = (redeemPoints / REDEEM_BLOCK) * GEL_PER_BLOCK;
+  const pointsDiscount = (redeemPoints / REDEEM_BLOCK) * settings.loyaltyRedeemValue;
   const total = Math.max(0, postPromoSubtotal + shippingCost + giftWrapCost - pointsDiscount);
 
   // "LOOV-" prefix since the rebrand (12 Jul 2026) — older orders keep their
@@ -541,11 +541,15 @@ export async function POST(req: NextRequest) {
   const earnBase = Math.max(0, postPromoSubtotal - pointsDiscount);
   let pointsEarned = 0;
   if (userId && admin && ledger === "db") {
-    pointsEarned = pointsForAmountAt(
-      earnBase,
-      settings.pointsPerGel,
-      tierForAt(lifetimeEarned, tiersFromSettings(settings))
-    );
+    // An order that SPENDS points earns none — no double-dipping on the same
+    // purchase (keeps the program's cost sane; CheckoutClient mirrors this).
+    pointsEarned = redeemPoints > 0
+      ? 0
+      : pointsForAmountAt(
+          earnBase,
+          settings.pointsPerGel,
+          tierForAt(lifetimeEarned, tiersFromSettings(settings))
+        );
     // The "redeem" row was already claimed atomically above (claim_redeem_points)
     // — just attach it to the now-existing order. Only write it here as a
     // fallback when the atomic claim wasn't available (redeemLegacy / no migration).

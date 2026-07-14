@@ -35,7 +35,7 @@ export default function RewardsClient() {
     );
   }
 
-  const redeemableNow = discountForPoints(balance);
+  const redeemableNow = discountForPoints(balance, settings.loyaltyRedeemValue);
   const tierProgress = nextTier
     ? Math.min(
         100,
@@ -82,7 +82,7 @@ export default function RewardsClient() {
               {redeemableNow > 0 ? (
                 <>{t("acct.rewards.worthOff").split("{amount}")[0]}<strong>{formatPrice(redeemableNow)}</strong>{t("acct.rewards.worthOff").split("{amount}")[1]}</>
               ) : (
-                <>{t("acct.rewards.collectMore").replace("{n}", String(REDEEM_BLOCK - (balance % REDEEM_BLOCK))).replace("{amount}", formatPrice(GEL_PER_BLOCK))}</>
+                <>{t("acct.rewards.collectMore").replace("{n}", String(REDEEM_BLOCK - (balance % REDEEM_BLOCK))).replace("{amount}", formatPrice(settings.loyaltyRedeemValue))}</>
               )}
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function RewardsClient() {
           {
             icon: "💸",
             title: t("acct.rewards.redeemTitle"),
-            text: t("acct.rewards.redeemBody").replace("{n}", String(REDEEM_BLOCK)).replace("{amount}", formatPrice(GEL_PER_BLOCK)),
+            text: t("acct.rewards.redeemBody").replace("{n}", String(REDEEM_BLOCK)).replace("{amount}", formatPrice(settings.loyaltyRedeemValue)),
           },
           {
             icon: "🚀",

@@ -32,6 +32,8 @@ export const ka: Dictionary = {
   "theme.toggle": "ღია / მუქი თემა",
   "deal.daysLeft": "დარჩა {n} დღე",
   "deal.lastDay": "ბოლო დღეა!",
+  "checkout.noEarnWithRedeem": "შეკვეთაზე, სადაც ქულებს ხარჯავთ, ქულები არ გროვდება.",
+  "nav.pointsTip": "თქვენი Loov ქულები — 100 ქულა = {n} ₾ ფასდაკლება",
   "theme.light": "ღია",
   "theme.dark": "მუქი",
   "acct.appearance": "იერსახე",

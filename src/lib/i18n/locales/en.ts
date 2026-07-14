@@ -34,6 +34,8 @@ export const en = {
   "theme.toggle": "Light / dark theme",
   "deal.daysLeft": "{n} days left",
   "deal.lastDay": "Last day!",
+  "checkout.noEarnWithRedeem": "Points are not earned on orders where you spend points.",
+  "nav.pointsTip": "Your Loov points — 100 points = {n} ₾ off",
   "theme.light": "Light",
   "theme.dark": "Dark",
   "acct.appearance": "Appearance",

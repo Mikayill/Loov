@@ -30,6 +30,8 @@ export const tr: Dictionary = {
   "theme.toggle": "Açık / koyu tema",
   "deal.daysLeft": "{n} gün kaldı",
   "deal.lastDay": "Son gün!",
+  "checkout.noEarnWithRedeem": "Puan harcadığın siparişten puan kazanılmaz.",
+  "nav.pointsTip": "Loov puanların — 100 puan = {n} ₾ indirim",
   "theme.light": "Açık",
   "theme.dark": "Koyu",
   "acct.appearance": "Görünüm",

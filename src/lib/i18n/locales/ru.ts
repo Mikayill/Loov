@@ -30,6 +30,8 @@ export const ru: Dictionary = {
   "theme.toggle": "Светлая / тёмная тема",
   "deal.daysLeft": "Осталось {n} дн.",
   "deal.lastDay": "Последний день!",
+  "checkout.noEarnWithRedeem": "За заказы, в которых вы тратите баллы, баллы не начисляются.",
+  "nav.pointsTip": "Ваши баллы Loov — 100 баллов = скидка {n} ₾",
   "theme.light": "Светлая",
   "theme.dark": "Тёмная",
   "acct.appearance": "Оформление",
