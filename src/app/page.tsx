@@ -28,79 +28,99 @@ export default async function HomePage() {
     ...seasonSorted.filter((p) => p.isNew),
     ...seasonSorted.filter((p) => !p.isNew),
   ];
+  const heroProduct = featuredProducts[0];
+
   return (
     <>
-      {/* ── Hero ── */}
-      <section
-        className="relative overflow-hidden py-5 sm:py-12 px-4"
-        style={{ background: "linear-gradient(135deg, #F5F0EB 0%, #E8F0EE 55%, #EAE8F0 100%)" }}
-      >
-        <div className="absolute top-4 left-6 w-16 h-16 rounded-full opacity-35" style={{ backgroundColor: "#C8DDD8" }} />
-        <div className="absolute bottom-4 right-8 w-24 h-24 rounded-full opacity-20" style={{ backgroundColor: "#C4D4E4" }} />
-        <div className="absolute top-1/2 right-16 w-10 h-10 rounded-full opacity-30" style={{ backgroundColor: "#D4CAE4" }} />
-
-        <div className="relative max-w-5xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-12">
-            {/* Text */}
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-1.5 mb-1.5 sm:mb-2">
-                <span className="text-xl sm:text-3xl">🌿</span>
-                <span className="text-[10px] sm:text-xs font-bold text-accent uppercase tracking-widest">
-                  {t("home.hero.badge")}
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-4xl font-extrabold text-ink mb-1.5 sm:mb-3 leading-tight">
-                {t("home.hero.titleA")}{" "}
-                <span style={{ color: "#5E9E8C" }}>{t("home.hero.titleB")}</span>
+      {/* ── Hero — Nordic split: sober copy left, tinted visual right ── */}
+      <section className="border-b border-line">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2">
+            {/* Copy */}
+            <div className="py-10 md:py-20 md:pr-14 flex flex-col justify-center items-start">
+              <p className="text-[11px] font-semibold text-accent uppercase tracking-[0.14em] mb-4">
+                {t("home.hero.badge")}
+              </p>
+              <h1 className="text-3xl sm:text-5xl font-bold text-ink leading-[1.06] tracking-tight text-balance">
+                {t("home.hero.titleA")} {t("home.hero.titleB")}
               </h1>
-              <p className="text-[13px] sm:text-base text-ink-soft mb-3 sm:mb-5 max-w-md mx-auto sm:mx-0 leading-snug sm:leading-relaxed">
+              <p className="text-[15px] text-ink-soft mt-4 mb-8 max-w-[46ch] leading-relaxed">
                 {t("home.hero.subtitle")}
               </p>
-              <div className="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Link
                   href="/products"
-                  className="inline-flex items-center gap-2 font-bold px-7 py-3 rounded-full text-white transition-all shadow-sm hover:shadow-md hover:opacity-90 text-sm"
-                  style={{ backgroundColor: "#5E9E8C" }}
+                  className="inline-flex items-center justify-center h-12 px-7 bg-ink text-white text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-accent transition-colors active:scale-[0.98]"
                 >
-                  {t("home.hero.shopCta")} →
+                  {t("home.hero.shopCta")}
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 font-semibold px-5 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm bg-white"
+                  className="inline-flex items-center justify-center h-12 px-6 border border-ink text-ink text-[12px] font-semibold uppercase tracking-[0.1em] rounded-control hover:bg-ink hover:text-white transition-colors active:scale-[0.98]"
                 >
                   {t("home.hero.ourStory")}
                 </Link>
               </div>
             </div>
 
-            {/* Stat badges — desktop only */}
-            <div className="hidden sm:flex flex-col gap-3 flex-shrink-0">
-              {[
-                { value: "100%", label: t("home.hero.statOrganic") },
-                // Threshold follows the admin setting; values are localized too.
-                { value: t("home.hero.statFreeValue"), label: t("home.hero.statFreeShip").replace("{n}", String(settings.freeShippingThreshold)) },
-                { value: t("home.hero.statReturnsValue"), label: t("home.hero.statReturns") },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-white rounded-card border border-line px-5 py-3 text-center w-40 shadow-sm"
+            {/* Visual — flat tinted well with the lead product */}
+            <div className="relative hidden md:flex items-center justify-center border-l border-line min-h-[380px]"
+              style={{ background: "linear-gradient(150deg, var(--color-accent-soft), var(--color-panel))" }}>
+              {heroProduct?.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={heroProduct.imageUrl} alt={heroProduct.name} className="absolute inset-0 w-full h-full object-cover" />
+              ) : (
+                <span className="text-[110px] select-none">{heroProduct?.emoji ?? "🧸"}</span>
+              )}
+              {heroProduct && (
+                <Link
+                  href={`/products/${heroProduct.slug}`}
+                  className="absolute bottom-5 left-5 bg-canvas border border-line px-4 py-2.5 rounded-control hover:border-ink transition-colors"
                 >
-                  <p className="text-xl font-extrabold" style={{ color: "#5E9E8C" }}>{s.value}</p>
-                  <p className="text-[11px] text-ink-muted font-semibold mt-0.5">{s.label}</p>
-                </div>
-              ))}
+                  <span className="block text-[10px] uppercase tracking-[0.14em] text-ink-muted font-semibold">
+                    {t("home.featured.title")}
+                  </span>
+                  <span className="block text-[13px] font-bold text-ink mt-0.5">
+                    {heroProduct.name} — {formatPrice(heroProduct.price)}
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Shop by Category (compact) ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="flex items-baseline justify-between gap-3 mb-3">
-          <h2 className="text-base sm:text-xl font-extrabold text-ink">{t("home.category.title")}</h2>
+      {/* ── Trust row — information-dense strip, Nordic ── */}
+      <section className="border-b border-line">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: "✓", head: `100% ${t("home.hero.statOrganic")}` , sub: t("home.hero.badge") },
+              { icon: "⇄", head: `${t("home.hero.statReturnsValue")} ${t("home.hero.statReturns")}`, sub: t("topbar.returns") },
+              { icon: "◷", head: t("topbar.delivery").replace("{min}", String(settings.deliveryMinDays)).replace("{max}", String(settings.deliveryMaxDays)), sub: "" },
+              { icon: "₾", head: t("checkout.paymentOnDelivery"), sub: t("topbar.shipping").replace("{n}", String(settings.freeShippingThreshold)) },
+            ].map((item, i) => (
+              <div key={i} className={`flex items-center gap-3 py-4 pr-4 ${i > 0 ? "lg:border-l lg:border-line lg:pl-5" : ""} ${i % 2 === 1 ? "border-l border-line pl-4 lg:pl-5" : ""} ${i > 1 ? "border-t border-line lg:border-t-0" : ""}`}>
+                <span className="w-9 h-9 flex-shrink-0 rounded-control bg-accent-soft text-accent-deep flex items-center justify-center text-[15px] font-bold" aria-hidden>
+                  {item.icon}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[12.5px] font-bold text-ink leading-tight">{item.head}</span>
+                  {item.sub && <span className="block text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Shop by Category — flat tinted tiles ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="flex items-baseline justify-between gap-3 mb-4">
+          <h2 className="text-lg sm:text-2xl font-bold text-ink tracking-tight">{t("home.category.title")}</h2>
           <span className="hidden sm:block text-ink-muted text-xs">{t("home.category.subtitle")}</span>
         </div>
-        <Reveal className="grid grid-cols-6 sm:grid-cols-6 gap-2 sm:gap-4">
+        <Reveal className="grid grid-cols-3 sm:grid-cols-6 gap-px bg-line border border-line">
           {[
             { cat: "body",    emoji: "👶", label: t("category.body"),    bg: "#C8DDD8", href: "/products?cat=body" },
             { cat: "blanket", emoji: "☁️", label: t("category.blanket"), bg: "#C4D4E4", href: "/products?cat=blanket" },
@@ -112,13 +132,15 @@ export default async function HomePage() {
             <Link
               key={item.cat}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-control sm:rounded-card border border-line hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
-              style={{ backgroundColor: item.bg + "80" }}
+              className="flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 py-4 sm:py-6 transition-colors cursor-pointer group bg-canvas hover:bg-panel"
             >
-              <span className="text-xl sm:text-3xl group-hover:scale-110 transition-transform duration-200">
+              <span
+                className="w-11 h-11 sm:w-14 sm:h-14 rounded-control flex items-center justify-center text-xl sm:text-3xl group-hover:scale-105 transition-transform duration-200"
+                style={{ backgroundColor: item.bg + "66" }}
+              >
                 {item.emoji}
               </span>
-              <span className="text-[9px] sm:text-xs font-bold text-ink text-center leading-tight">
+              <span className="text-[9.5px] sm:text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft group-hover:text-ink text-center leading-tight transition-colors">
                 {item.label}
               </span>
             </Link>
@@ -130,17 +152,19 @@ export default async function HomePage() {
       <BabyPicksSection />
 
       {/* ── Featured Products ── */}
-      <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         <div className="flex items-end justify-between flex-wrap gap-3 mb-8">
           <div>
-            <h2 className="text-3xl font-extrabold text-ink">{t("home.featured.title")}</h2>
-            <p className="text-ink-soft text-sm mt-1">{t("home.featured.subtitle")}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight">
+              {t("home.featured.title")}
+              <span className="text-ink-muted font-normal text-[0.55em] align-middle ml-3">{products.length} · {t("home.featured.subtitle")}</span>
+            </h2>
           </div>
           <Link
             href="/products"
-            className="text-sm font-bold text-accent hover:underline flex items-center gap-1"
+            className="text-[12px] font-semibold uppercase tracking-[0.1em] text-ink border-b border-ink pb-0.5 hover:text-accent hover:border-accent transition-colors"
           >
-            {t("home.featured.viewAll")} →
+            {t("home.featured.viewAll")}
           </Link>
         </div>
         <Reveal>
@@ -148,69 +172,69 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
-      {/* ── Bundle Deals Banner ── */}
+      {/* ── Bundle Deals — ledger rows, Nordic ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-end justify-between mb-6 gap-3 flex-wrap">
           <div>
-            <p className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">{t("home.bundles.eyebrow")}</p>
-            <h2 className="text-2xl font-extrabold text-ink">{t("home.bundles.title")}</h2>
+            <p className="text-[11px] font-semibold text-accent uppercase tracking-[0.14em] mb-1">{t("home.bundles.eyebrow")}</p>
+            <h2 className="text-2xl font-bold text-ink tracking-tight">{t("home.bundles.title")}</h2>
           </div>
           <Link
             href="/bundles"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-bold text-accent hover:underline"
+            className="hidden sm:inline text-[12px] font-semibold uppercase tracking-[0.1em] text-ink border-b border-ink pb-0.5 hover:text-accent hover:border-accent transition-colors"
           >
-            {t("home.bundles.viewAll")} →
+            {t("home.bundles.viewAll")}
           </Link>
         </div>
-        <Reveal className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Reveal className="border border-line rounded-card overflow-hidden divide-y divide-line">
           {bundles.slice(0, 4).map((bundle) => {
             const savings = bundle.originalPrice - bundle.bundlePrice;
             return (
               <Link
                 key={bundle.slug}
                 href={`/bundles/${bundle.slug}`}
-                className="group bg-white rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                className="group relative grid grid-cols-[56px_1fr_auto] sm:grid-cols-[64px_1.6fr_auto_auto] items-center gap-3 sm:gap-6 px-3 sm:px-5 py-3.5 bg-canvas hover:bg-accent-soft/60 transition-colors"
               >
-                {/* Fixed aspect ratio — cards stay the same size with or without a photo */}
-                <div
-                  className="relative flex items-center justify-center overflow-hidden aspect-[4/3]"
+                <span
+                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-control flex items-center justify-center text-2xl sm:text-3xl overflow-hidden"
                   style={{ backgroundColor: bundle.cardColor }}
                 >
                   {bundle.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bundle.imageUrl} alt={bundle.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    <img src={bundle.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
-                    <span className="text-4xl group-hover:scale-110 transition-transform duration-200 block">
-                      {bundle.emoji}
-                    </span>
+                    bundle.emoji
                   )}
-                  <span className="absolute top-2 right-2 bg-ink text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[14px] sm:text-[15px] font-bold text-ink leading-snug line-clamp-1 group-hover:underline underline-offset-4">
+                    {bundle.name}
+                  </span>
+                  <span className="sm:hidden block text-[11px] font-semibold text-accent-deep mt-1">
                     {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
                   </span>
-                  <BundleQuickView
-                    bundle={bundle}
-                    itemProducts={bundle.items.map((config) => ({
-                      config,
-                      product: productBySlug.get(config.slug) ?? null,
-                    }))}
-                  />
-                </div>
-                <div className="p-3">
-                  <p className="font-bold text-ink text-xs leading-snug mb-1 line-clamp-1 group-hover:text-accent transition-colors">
-                    {bundle.name}
-                  </p>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-extrabold text-ink text-sm">{formatPrice(bundle.bundlePrice)}</span>
-                    <span className="text-[10px] text-ink-muted line-through">{formatPrice(bundle.originalPrice)}</span>
-                  </div>
-                </div>
+                </span>
+                <span className="hidden sm:inline-block text-[10.5px] font-bold uppercase tracking-[0.1em] text-accent-deep bg-accent-soft px-3 py-1.5 rounded-control whitespace-nowrap">
+                  {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
+                </span>
+                <span className="text-right">
+                  <span className="block text-[11px] text-ink-muted line-through tabular-nums">{formatPrice(bundle.originalPrice)}</span>
+                  <span className="block text-[16px] font-bold text-ink tabular-nums">{formatPrice(bundle.bundlePrice)}</span>
+                </span>
+                <BundleQuickView
+                  bundle={bundle}
+                  itemProducts={bundle.items.map((config) => ({
+                    config,
+                    product: productBySlug.get(config.slug) ?? null,
+                  }))}
+                />
               </Link>
             );
           })}
         </Reveal>
         <div className="mt-4 text-center sm:hidden">
-          <Link href="/bundles" className="text-sm font-bold text-accent hover:underline">
-            {t("home.bundles.viewAll")} →
+          <Link href="/bundles" className="text-[12px] font-semibold uppercase tracking-[0.1em] text-ink border-b border-ink pb-0.5">
+            {t("home.bundles.viewAll")}
           </Link>
         </div>
       </section>
@@ -221,59 +245,52 @@ export default async function HomePage() {
       {/* ── What Parents Say — REAL published reviews only (fabricated
              testimonials removed 12 Jul 2026). Hidden until reviews exist. ── */}
       {homeReviews.featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="text-center mb-8">
-            <p className="text-xs font-bold text-accent uppercase tracking-widest mb-2">{t("home.reviews.eyebrow")}</p>
-            <h2 className="text-2xl font-extrabold text-ink">{t("home.reviews.title")}</h2>
-          </div>
+        <section className="border-t border-line">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14">
+            <div className="mb-8">
+              <p className="text-[11px] font-semibold text-accent uppercase tracking-[0.14em] mb-1">{t("home.reviews.eyebrow")}</p>
+              <h2 className="text-2xl font-bold text-ink tracking-tight">{t("home.reviews.title")}</h2>
+            </div>
 
-          {/* Stats row — computed from the real review data */}
-          <div className="flex items-center justify-center gap-8 mb-8 flex-wrap">
-            {[
-              { value: String(homeReviews.count), label: t("home.reviews.statReviews") },
-              { value: homeReviews.average.toFixed(1), label: t("home.reviews.statRating"), star: true },
-              { value: t("home.hero.statReturnsValue"), label: t("home.reviews.statReturns") },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-2xl font-extrabold text-ink flex items-center gap-1 justify-center">
-                  {s.value}
-                  {s.star && <span className="text-xl text-[#F0B840]">★</span>}
-                </p>
-                <p className="text-xs text-ink-muted font-semibold mt-0.5">{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Review cards */}
-          <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {homeReviews.featured.map((r, i) => {
-              const name = r.authorName || t("rev.anon");
-              return (
-                <div key={`${r.createdAt}-${i}`} className="bg-white rounded-card border border-line p-5 hover:shadow-sm transition-shadow">
-                  <div className="flex items-center gap-0.5 mb-3">
-                    {[1,2,3,4,5].map((s) => (
-                      <svg key={s} className="w-4 h-4" viewBox="0 0 20 20" fill={s <= r.rating ? "#F0B840" : "#DDD5CC"}>
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-sm text-ink-soft leading-relaxed mb-4">&ldquo;{r.body}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0"
-                      style={{ backgroundColor: "#5E9E8C" }}
-                    >
-                      {name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-bold text-ink text-sm">{name}</p>
-                      <p className="text-[11px] text-ink-muted">{fmtDate(r.createdAt, locale, "short")} · {t("home.reviews.verified")}</p>
-                    </div>
-                  </div>
+            <div className="grid md:grid-cols-[auto_1fr] gap-8 md:gap-14 items-start">
+              {/* Score block — computed from real review data */}
+              <div className="border border-line rounded-card px-8 py-6 text-center md:min-w-[180px]">
+                <p className="text-5xl font-extrabold text-ink tracking-tight tabular-nums">{homeReviews.average.toFixed(1)}</p>
+                <div className="flex items-center justify-center gap-0.5 my-2" aria-hidden>
+                  {[1,2,3,4,5].map((s) => (
+                    <svg key={s} className={`w-3.5 h-3.5 ${s <= Math.round(homeReviews.average) ? "fill-accent" : "fill-line"}`} viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
                 </div>
-              );
-            })}
-          </Reveal>
+                <p className="text-[10.5px] uppercase tracking-[0.12em] text-ink-muted font-semibold">
+                  {homeReviews.count} {t("home.reviews.statReviews")}
+                </p>
+              </div>
+
+              {/* Review quotes */}
+              <Reveal className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+                {homeReviews.featured.map((r, i) => {
+                  const name = r.authorName || t("rev.anon");
+                  return (
+                    <div key={`${r.createdAt}-${i}`} className="border-t-2 border-ink pt-4">
+                      <div className="flex items-center gap-0.5 mb-3" aria-label={`${r.rating}/5`}>
+                        {[1,2,3,4,5].map((s) => (
+                          <svg key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "fill-accent" : "fill-line"}`} viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <p className="text-[14px] text-ink leading-relaxed mb-4">&ldquo;{r.body}&rdquo;</p>
+                      <p className="text-[11px] uppercase tracking-[0.1em] text-ink-muted font-semibold">
+                        <span className="text-ink">{name}</span> · {fmtDate(r.createdAt, locale, "short")} · {t("home.reviews.verified")}
+                      </p>
+                    </div>
+                  );
+                })}
+              </Reveal>
+            </div>
+          </div>
         </section>
       )}
     </>

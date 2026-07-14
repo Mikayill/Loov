@@ -24,6 +24,10 @@ export const tr: Dictionary = {
   "announce.giftWrap": "🎁 Kişisel mesajlı hediye paketi — ödeme adımında ekleyin",
   "announce.returns": "🔄 Kolay 14 günlük iade · Sorusuz sualsiz",
 
+  "topbar.shipping": "{n} ₾ üzeri ücretsiz kargo",
+  "topbar.delivery": "Gürcistan geneli {min}–{max} günde teslimat",
+  "topbar.returns": "14 gün kolay iade",
+
   "footer.tagline": "Sevgiyle üretilmiş premium organik bebek giyimi. Gürcistan geneline mutluluk taşıyoruz.",
   "footer.shop": "Mağaza",
   "footer.help": "Yardım",

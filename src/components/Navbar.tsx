@@ -13,13 +13,8 @@ import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey 
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SearchResultsPanel from "./SearchResultsPanel";
-
-const announcementKeys: TranslationKey[] = [
-  "announce.freeShipping",
-  "announce.organic",
-  "announce.giftWrap",
-  "announce.returns",
-];
+import { categoryPlural } from "@/lib/i18n/labels";
+import type { Product } from "@/types";
 
 const navLinks: { href: string; key: TranslationKey }[] = [
   { href: "/",         key: "nav.home" },
@@ -30,17 +25,18 @@ const navLinks: { href: string; key: TranslationKey }[] = [
   { href: "/contact",  key: "nav.contact" },
 ];
 
+/* Nordic category tab strip under the nav row */
+const tabCategories: Product["category"][] = ["body", "blanket", "set", "towel", "romper", "bag"];
+
 export default function Navbar() {
   const { t } = useLocale();
-  const { freeShippingThreshold } = useSettings();
+  const { freeShippingThreshold, deliveryMinDays, deliveryMaxDays } = useSettings();
   const { totalItems }   = useCart();
   const { count: wCount, hasUrgency } = useWishlist();
   const pathname         = usePathname();
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [searchOpen,  setSearchOpen]  = useState(false);
   const { user, signOut } = useAuth();
-  const [annoIdx,     setAnnoIdx]     = useState(0);
-  const [annoVisible, setAnnoVisible] = useState(true);
   const [cartBump,    setCartBump]    = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef  = useRef<HTMLButtonElement>(null);
@@ -129,17 +125,6 @@ export default function Navbar() {
     prevTotalItems.current = totalItems;
   }, [totalItems]);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setAnnoVisible(false);
-      setTimeout(() => {
-        setAnnoIdx((i) => (i + 1) % announcementKeys.length);
-        setAnnoVisible(true);
-      }, 300);
-    }, 3500);
-    return () => clearInterval(t);
-  }, []);
-
   /* Close mobile menu on any outside click (except the menu / hamburger) */
   useEffect(() => {
     if (!menuOpen) return;
@@ -183,23 +168,16 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50">
-        {/* Rotating announcement bar */}
-        <div
-          className="text-white text-center text-xs sm:text-sm py-2 px-4 font-semibold overflow-hidden min-h-[32px] flex items-center justify-center"
-          style={{ backgroundColor: "#5E9E8C" }}
-        >
-          <span
-            className="transition-opacity duration-300"
-            style={{ opacity: annoVisible ? 1 : 0 }}
-          >
-            {/* {n} = admin-set free-shipping threshold — never hardcode it here */}
-            {t(announcementKeys[annoIdx]).replace("{n}", String(freeShippingThreshold))}
-          </span>
+        {/* Utility top bar — static store facts (admin-driven values) */}
+        <div className="bg-ink text-white text-[11px] tracking-[0.08em] uppercase font-medium py-2 px-4 flex items-center justify-center gap-8 whitespace-nowrap overflow-hidden">
+          <span>{t("topbar.shipping").replace("{n}", String(freeShippingThreshold))}</span>
+          <span className="hidden sm:inline opacity-90">{t("topbar.delivery").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays))}</span>
+          <span className="hidden md:inline opacity-90">{t("topbar.returns")}</span>
         </div>
 
-        <nav className="bg-white border-b border-line shadow-sm">
+        <nav className="bg-canvas border-b border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between py-3 gap-3">
+            <div className="flex items-center py-3 gap-3 md:gap-6">
 
               {/* Logo — the LOOV wordmark (warm-white variant, ink extracted) */}
               <Link href="/" className="flex items-center flex-shrink-0" aria-label="Loov — home">
@@ -207,29 +185,9 @@ export default function Navbar() {
                 <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
               </Link>
 
-              {/* Desktop nav links */}
-              <div className="hidden md:flex items-center gap-5 flex-1 justify-center">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`text-sm font-semibold transition-colors whitespace-nowrap ${
-                      isActive(link.href)
-                        ? "text-accent"
-                        : "text-ink-soft hover:text-ink"
-                    }`}
-                  >
-                    {t(link.key)}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Right group */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-
-                {/* Desktop search — real input, live dropdown, no popup */}
-                <div ref={desktopSearchRef} className="hidden md:block relative">
-                  <div className="flex items-center gap-2.5 w-52 lg:w-64 h-9 px-3.5 rounded-control border-2 border-line bg-surface">
+              {/* Desktop search — Nordic: full-width functional bar in the center */}
+              <div ref={desktopSearchRef} className="hidden md:block relative flex-1 max-w-xl">
+                <div className="flex items-center gap-2.5 h-10 px-4 rounded-control border border-line bg-panel focus-within:border-ink transition-colors">
                     <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -241,7 +199,7 @@ export default function Navbar() {
                       onFocus={() => setSearchOpen(true)}
                       placeholder={t("search.placeholder")}
                       aria-label="Search products"
-                      className="flex-1 min-w-0 text-[13px] text-ink placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                      className="flex-1 min-w-0 text-[13px] text-ink placeholder-ink-muted bg-transparent outline-none focus-visible:outline-none"
                     />
                     {query && (
                       <button type="button" onClick={() => { setQuery(""); desktopInputRef.current?.focus(); }} aria-label="Clear search" className="text-ink-muted hover:text-ink flex-shrink-0">
@@ -250,7 +208,7 @@ export default function Navbar() {
                     )}
                   </div>
                   {searchOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[90vw] bg-white rounded-card border border-line shadow-2xl p-4 z-[200] animate-pop-in">
+                    <div className="absolute left-0 right-0 top-full mt-2 bg-canvas rounded-card border border-line shadow-2xl p-4 z-[200] animate-pop-in">
                       <SearchResultsPanel
                         query={query} setQuery={setQuery}
                         activeCat={activeCat} setActiveCat={setActiveCat}
@@ -260,6 +218,9 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
+
+              {/* Right group */}
+              <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
 
                 {/* Mobile search icon — expands an inline row below the nav, no popup */}
                 <button
@@ -300,8 +261,7 @@ export default function Navbar() {
                     href="/account"
                     aria-label="My account"
                     title={user.name}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-extrabold text-sm transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden"
-                    style={{ backgroundColor: "#5E9E8C" }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-white font-extrabold text-sm transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden bg-accent"
                   >
                     {user.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -323,18 +283,17 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Cart */}
+                {/* Cart — Nordic: solid ink block, count inline */}
                 <Link
                   href="/cart"
-                  className="relative flex items-center gap-1.5 font-bold px-4 py-2 rounded-full text-white text-sm transition-all active:scale-95 hover:opacity-90"
-                  style={{ backgroundColor: "#5E9E8C" }}
+                  className="flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] transition-colors active:scale-95 hover:bg-accent"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span className="hidden sm:inline">Cart</span>
+                  <span className="hidden sm:inline">{t("nav.cart")}</span>
                   {totalItems > 0 && (
-                    <span className={`absolute -top-1.5 -right-1.5 bg-ink text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center leading-none ${cartBump ? "animate-bump" : ""}`}>
+                    <span className={`text-[11px] font-extrabold text-[#9FC7B5] leading-none ${cartBump ? "animate-bump" : ""}`}>
                       {totalItems > 9 ? "9+" : totalItems}
                     </span>
                   )}
@@ -356,6 +315,45 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Category tab strip — Nordic structural navigation */}
+          <div className="border-t border-line overflow-x-auto no-scrollbar">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-5 md:gap-7 whitespace-nowrap">
+              <Link
+                href="/products"
+                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-semibold border-b-2 -mb-px transition-colors ${
+                  pathname === "/products" ? "text-ink border-ink" : "text-ink-muted border-transparent hover:text-ink"
+                }`}
+              >
+                {t("nav.products")}
+              </Link>
+              {tabCategories.map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/products?cat=${cat}`}
+                  className="py-3 text-[11.5px] uppercase tracking-[0.08em] font-medium text-ink-muted border-b-2 border-transparent hover:text-ink transition-colors"
+                >
+                  {categoryPlural(cat, t)}
+                </Link>
+              ))}
+              <Link
+                href="/blog"
+                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-medium border-b-2 -mb-px transition-colors ${
+                  isActive("/blog") ? "text-ink border-ink" : "text-ink-muted border-transparent hover:text-ink"
+                }`}
+              >
+                {t("nav.blog")}
+              </Link>
+              <Link
+                href="/bundles"
+                className={`py-3 text-[11.5px] uppercase tracking-[0.08em] font-bold border-b-2 -mb-px transition-colors ${
+                  isActive("/bundles") ? "text-accent border-accent" : "text-accent border-transparent hover:border-accent"
+                }`}
+              >
+                {t("nav.bundles")}
+              </Link>
+            </div>
+          </div>
+
           {/* Mobile search — expanding row, not a full-screen popup */}
           {searchOpen && (
             <div ref={mobileSearchRowRef} className="md:hidden border-t border-line bg-white px-4 py-3 animate-fade-up">
@@ -370,7 +368,7 @@ export default function Navbar() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("search.placeholder")}
                   aria-label="Search products"
-                  className="flex-1 min-w-0 text-sm text-ink placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                  className="flex-1 min-w-0 text-sm text-ink placeholder-ink-muted bg-transparent outline-none focus-visible:outline-none"
                 />
                 {query && (
                   <button type="button" onClick={() => { setQuery(""); mobileInputRef.current?.focus(); }} aria-label="Clear search" className="text-ink-muted hover:text-ink flex-shrink-0">
@@ -414,7 +412,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 min-w-0"
                   >
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 overflow-hidden" style={{ backgroundColor: "#5E9E8C" }}>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0 overflow-hidden bg-accent">
                       {user.avatar ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={user.avatar} alt="" className="w-full h-full object-cover" />
@@ -429,8 +427,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors"
-                  style={{ backgroundColor: "#5E9E8C" }}>
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors bg-accent">
                   {t("nav.signInRegister")}
                 </Link>
               )}

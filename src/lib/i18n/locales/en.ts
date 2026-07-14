@@ -27,6 +27,11 @@ export const en = {
   "announce.giftWrap": "🎁 Gift wrapping with a personal message — add it at checkout",
   "announce.returns": "🔄 Easy 14-day returns · No questions asked",
 
+  // ── Utility top bar (Nordic) ──
+  "topbar.shipping": "Free shipping over {n} ₾",
+  "topbar.delivery": "Delivery {min}–{max} days across Georgia",
+  "topbar.returns": "Easy 14-day returns",
+
   // ── Footer ──
   "footer.tagline": "Premium organic baby clothing crafted with love. Delivering happiness across Georgia.",
   "footer.shop": "Shop",

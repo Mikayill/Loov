@@ -18,10 +18,11 @@ export default function ProductCard({ product }: { product: Product }) {
   const price = variable ? minEffectivePrice(product) : effectivePrice(product);
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="bg-white rounded-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-snappy hover:-translate-y-1 active:scale-[0.98] border border-line">
-        {/* Image area */}
+      {/* Nordic: frameless card — flat tinted image well + typographic info block */}
+      <div className="bg-canvas transition-colors">
+        {/* Image well */}
         <div
-          className="relative flex items-center justify-center h-44 text-6xl select-none overflow-hidden"
+          className="relative flex items-center justify-center aspect-square text-6xl select-none overflow-hidden rounded-control"
           style={{ backgroundColor: product.cardColor }}
         >
           {product.imageUrl ? (
@@ -29,22 +30,22 @@ export default function ProductCard({ product }: { product: Product }) {
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               loading="lazy"
             />
           ) : (
-            <span className="group-hover:scale-110 transition-transform duration-300 inline-block">
+            <span className="group-hover:scale-105 transition-transform duration-300 inline-block">
               {product.emoji}
             </span>
           )}
 
           {product.isNew && (
-            <span className="absolute top-3 left-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shadow-sm">
+            <span className="absolute top-3 left-3 bg-canvas/90 text-accent text-[10px] font-bold px-2 py-1 rounded-control uppercase tracking-[0.14em]">
               {t("product.new")}
             </span>
           )}
           {off > 0 && (
-            <span className={`absolute ${product.isNew ? "top-11" : "top-3"} left-3 bg-[#D9534F] text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-sm`}>
+            <span className={`absolute ${product.isNew ? "top-11" : "top-3"} left-3 bg-canvas/90 text-danger text-[10px] font-extrabold px-2 py-1 rounded-control tracking-[0.08em]`}>
               −{off}%
             </span>
           )}
@@ -53,12 +54,12 @@ export default function ProductCard({ product }: { product: Product }) {
           <QuickViewButton product={product} />
         </div>
 
-        {/* Info */}
-        <div className="p-4">
-          <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
+        {/* Info — typographic, no chrome */}
+        <div className="pt-3 pb-4 px-1">
+          <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-[0.12em] mb-1">
             {categoryLabel(product.category, t)}
           </p>
-          <h3 className="font-bold text-ink text-sm mb-3 group-hover:text-accent transition-colors leading-snug line-clamp-2">
+          <h3 className="font-semibold text-ink text-[13.5px] mb-2 leading-snug line-clamp-2 group-hover:underline underline-offset-4 decoration-ink/70">
             {product.name}
           </h3>
           <div className="flex items-center justify-between">
@@ -66,11 +67,11 @@ export default function ProductCard({ product }: { product: Product }) {
               {variable && (
                 <span className="text-[10px] font-semibold text-ink-muted">{t("common.from")}</span>
               )}
-              <span className={`text-lg font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-ink"}`}>
+              <span className={`text-[15px] font-bold tabular-nums ${off > 0 ? "text-danger" : "text-ink"}`}>
                 {formatPrice(price)}
               </span>
               {off > 0 && (
-                <span className="text-xs text-ink-muted line-through">{formatPrice(product.price)}</span>
+                <span className="text-xs text-ink-muted line-through tabular-nums">{formatPrice(product.price)}</span>
               )}
             </span>
             <QuickAddButton product={product} />

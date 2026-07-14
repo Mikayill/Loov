@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Semantic design tokens ─────────────────────────────────────────
+  /* ── Semantic design tokens — NORDIC UTILITY identity ───────────────
      Components consume ONLY these (bg-canvas, text-ink, border-line…).
      Re-theming the site = changing the values here, nothing else. */
-  --color-canvas: #F5F0EB;       /* page background */
-  --color-surface: #FAFAF8;      /* near-white raised card background */
-  --color-panel: #EDE5D8;        /* filled panels / hover fills */
-  --color-line: #DDD5CC;         /* borders & hairlines */
-  --color-ink: #2A2320;          /* primary text */
-  --color-ink-soft: #5E5450;     /* secondary text */
-  --color-ink-muted: #9A8E88;    /* tertiary text, labels, dates */
-  --color-accent: #5E9E8C;       /* brand/CTA */
-  --color-accent-deep: #3A7A68;  /* text on accent-soft, darker hovers */
-  --color-accent-soft: #EAF2F0;  /* tinted success/info backgrounds */
+  --color-canvas: #FFFFFF;       /* page background */
+  --color-surface: #FCFCFB;      /* near-white raised card background */
+  --color-panel: #F4F4F1;        /* filled panels / hover fills / image wells */
+  --color-line: #E6E6E1;         /* borders & hairlines */
+  --color-ink: #141412;          /* primary text */
+  --color-ink-soft: #52524C;     /* secondary text */
+  --color-ink-muted: #73736D;    /* tertiary text, labels, dates (AA on white) */
+  --color-accent: #2E5E4E;       /* brand/CTA — pine green */
+  --color-accent-deep: #24493D;  /* text on accent-soft, darker hovers */
+  --color-accent-soft: #E8EFEB;  /* tinted success/info backgrounds */
   --color-danger: #B03A3A;       /* errors, destructive actions */
-  --color-danger-soft: #FEF2F2;  /* error backgrounds */
+  --color-danger-soft: #FDF3F3;  /* error backgrounds */
 
   /* Pastel category/imagery tints (display layer only) */
   --color-sage: #C8DDD8;
@@ -26,11 +26,11 @@
   --color-lavender: #D4CAE4;
   --color-warm-peach: #EED4BC;
 
-  /* Radii — card (large containers), control (inputs/tiles) */
-  --radius-card: 1rem;
-  --radius-control: 0.75rem;
+  /* Radii — Nordic: near-sharp corners */
+  --radius-card: 6px;
+  --radius-control: 3px;
 
-  --font-nunito: var(--font-nunito);
+  --font-nunito: var(--font-sans);
 
   /* Easing tokens — snappy (slight overshoot) for taps/hovers, smooth for modals/drawers */
   --ease-snappy: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -45,7 +45,7 @@ html {
 body {
   background-color: var(--color-canvas);
   color: var(--color-ink);
-  font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Helvetica Neue", Arial, Helvetica, sans-serif;
   /* Guard against horizontal overflow at any viewport (320px → 4K).
      `clip` (not `hidden`) so it never turns into an x-scroll container
      and never breaks the sticky navbar. */
