@@ -126,14 +126,14 @@ export default function BundlesListClient() {
   }
 
   if (error) return <p className="text-red-500 font-semibold">{error}</p>;
-  if (!rows) return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" /></div>;
+  if (!rows) return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>;
 
   return (
     <div className="max-w-4xl">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-1">
-        <h1 className="text-2xl font-extrabold text-[#2A2320]">Bundles</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Bundles</h1>
         {!creating ? (
-          <button onClick={() => setCreating(true)} className="px-4 py-2 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+          <button onClick={() => setCreating(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
             + New bundle
           </button>
         ) : (
@@ -144,19 +144,19 @@ export default function BundlesListClient() {
               onKeyDown={(e) => { if (e.key === "Enter") createBundle(); if (e.key === "Escape") setCreating(false); }}
               placeholder="Bundle name, e.g. Kış Paketi"
               autoFocus
-              className="h-10 px-3 rounded-xl border-2 border-[#5E9E8C] text-sm outline-none w-56"
+              className="h-10 px-3 rounded-control border-2 border-accent text-sm outline-none w-56"
             />
-            <button onClick={createBundle} disabled={busySlug === "__new__" || !newName.trim()} className="h-10 px-4 rounded-xl font-bold text-white text-sm disabled:opacity-50" style={{ backgroundColor: "#5E9E8C" }}>
+            <button onClick={createBundle} disabled={busySlug === "__new__" || !newName.trim()} className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-50" style={{ backgroundColor: "#5E9E8C" }}>
               {busySlug === "__new__" ? "…" : "Create →"}
             </button>
-            <button onClick={() => { setCreating(false); setNewName(""); }} className="h-10 px-3 rounded-xl font-bold text-[#5E5450] text-sm border border-[#DDD5CC]">✕</button>
+            <button onClick={() => { setCreating(false); setNewName(""); }} className="h-10 px-3 rounded-control font-bold text-ink-soft text-sm border border-line">✕</button>
           </div>
         )}
       </div>
-      <p className="text-[#9A8E88] text-sm mb-5">A bundle opens in its own editor. New bundles start <strong>hidden</strong> and can only go live once they have a photo, a description, a price and at least 2 products.</p>
+      <p className="text-ink-muted text-sm mb-5">A bundle opens in its own editor. New bundles start <strong>hidden</strong> and can only go live once they have a photo, a description, a price and at least 2 products.</p>
 
       {!ready && (
-        <div className="mb-5 rounded-xl bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
           ⚠️ The <code className="font-mono">bundles</code> table isn&apos;t set up yet — run <code className="font-mono">supabase/bundles.sql</code> in the SQL Editor.
         </div>
       )}
@@ -168,30 +168,30 @@ export default function BundlesListClient() {
           const itemCount = (b.items ?? []).length;
           const busy = busySlug === b.slug;
           return (
-            <div key={b.slug} className={`bg-white rounded-2xl border border-[#DDD5CC] p-3 flex items-center gap-3 flex-wrap ${busy ? "opacity-60" : ""}`}>
+            <div key={b.slug} className={`bg-white rounded-card border border-line p-3 flex items-center gap-3 flex-wrap ${busy ? "opacity-60" : ""}`}>
               {/* Reorder */}
               <div className="flex flex-col flex-shrink-0">
-                <button onClick={() => move(i, -1)} disabled={i === 0} className="text-[#9A8E88] hover:text-[#2A2320] disabled:opacity-20 text-xs leading-none p-0.5" title="Move up">▲</button>
-                <button onClick={() => move(i, 1)} disabled={i === rows.length - 1} className="text-[#9A8E88] hover:text-[#2A2320] disabled:opacity-20 text-xs leading-none p-0.5" title="Move down">▼</button>
+                <button onClick={() => move(i, -1)} disabled={i === 0} className="text-ink-muted hover:text-ink disabled:opacity-20 text-xs leading-none p-0.5" title="Move up">▲</button>
+                <button onClick={() => move(i, 1)} disabled={i === rows.length - 1} className="text-ink-muted hover:text-ink disabled:opacity-20 text-xs leading-none p-0.5" title="Move down">▼</button>
               </div>
 
               {/* Card body → editor */}
               <Link href={`/admin/bundles/${b.slug}`} className="flex items-center gap-3 flex-1 min-w-0 group">
-                <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden border border-[#EDE5D8]" style={{ backgroundColor: b.card_color ?? "#EDE5D8" }}>
+                <div className="w-16 h-16 rounded-control flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden border border-panel" style={{ backgroundColor: b.card_color ?? "#EDE5D8" }}>
                   {b.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={b.image_url} alt={b.name} className="w-full h-full object-cover" />
                   ) : <span title="No photo yet">📷</span>}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-extrabold text-[#2A2320] group-hover:text-[#5E9E8C] transition-colors truncate">
+                  <p className="font-extrabold text-ink group-hover:text-accent transition-colors truncate">
                     {b.name}
-                    {b.is_new && <span className="ml-2 text-[9px] font-bold bg-[#5E9E8C] text-white px-1.5 py-0.5 rounded-full uppercase align-middle">New</span>}
+                    {b.is_new && <span className="ml-2 text-[9px] font-bold bg-accent text-white px-1.5 py-0.5 rounded-full uppercase align-middle">New</span>}
                   </p>
-                  <p className="text-xs text-[#9A8E88] truncate">
+                  <p className="text-xs text-ink-muted truncate">
                     {itemCount} {itemCount === 1 ? "product" : "products"}
                     {b.original_price > 0 && <> · <span className="line-through">{formatPrice(b.original_price)}</span></>}
-                    {" "}<strong className="text-[#2A2320]">{formatPrice(b.bundle_price)}</strong>
+                    {" "}<strong className="text-ink">{formatPrice(b.bundle_price)}</strong>
                     {savings > 0 && <span className="text-[#B85C38] font-bold"> · save {formatPrice(savings)}</span>}
                   </p>
                 </div>
@@ -203,19 +203,19 @@ export default function BundlesListClient() {
                   onClick={() => toggleLive(b)}
                   title={live ? "Visible on the site — click to hide" : "Hidden — click to publish (requires a complete bundle)"}
                   className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide transition-colors ${
-                    live ? "bg-[#EAF2F0] text-[#3A7A68] hover:bg-[#D8EDE9]" : "bg-[#F5F0EB] text-[#9A8E88] hover:bg-[#EDE5D8]"
+                    live ? "bg-accent-soft text-accent-deep hover:bg-[#D8EDE9]" : "bg-canvas text-ink-muted hover:bg-panel"
                   }`}
                 >
                   {live ? "● Live" : "○ Hidden"}
                 </button>
-                <Link href={`/admin/bundles/${b.slug}`} className="text-xs font-bold text-[#5E9E8C] hover:underline">Edit →</Link>
-                <button onClick={() => remove(b)} className="text-xs font-bold text-[#B03A3A] hover:underline">Delete</button>
+                <Link href={`/admin/bundles/${b.slug}`} className="text-xs font-bold text-accent hover:underline">Edit →</Link>
+                <button onClick={() => remove(b)} className="text-xs font-bold text-danger hover:underline">Delete</button>
               </div>
             </div>
           );
         })}
         {rows.length === 0 && ready && (
-          <p className="text-sm text-[#9A8E88] py-10 text-center bg-white rounded-2xl border border-dashed border-[#DDD5CC]">No bundles yet — create your first one with <strong>+ New bundle</strong>.</p>
+          <p className="text-sm text-ink-muted py-10 text-center bg-white rounded-card border border-dashed border-line">No bundles yet — create your first one with <strong>+ New bundle</strong>.</p>
         )}
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function FooterPhone() {
   if (!whatsappNumber) return null;
   return (
     <div className="min-w-0">
-      <a href={`tel:+${whatsappNumber}`} className="flex items-start gap-1.5 hover:text-[#5E9E8C] transition-colors">
+      <a href={`tel:+${whatsappNumber}`} className="flex items-start gap-1.5 hover:text-accent transition-colors">
         <span className="flex-shrink-0">📞</span> +{whatsappNumber}
       </a>
     </div>

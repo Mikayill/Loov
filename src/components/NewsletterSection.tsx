@@ -26,21 +26,21 @@ export default function NewsletterSection() {
     >
       <div className="max-w-xl mx-auto text-center">
         <div className="text-4xl mb-4">💌</div>
-        <h2 className="text-2xl font-extrabold text-[#2A2320] mb-2">
+        <h2 className="text-2xl font-extrabold text-ink mb-2">
           Stay in the Loop
         </h2>
-        <p className="text-[#5E5450] text-sm leading-relaxed mb-6">
+        <p className="text-ink-soft text-sm leading-relaxed mb-6">
           Get early access to new arrivals, exclusive discounts, and gentle
           parenting tips — delivered to your inbox.
         </p>
 
         {submitted ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-full bg-[#5E9E8C] flex items-center justify-center text-white text-2xl shadow-md">
+            <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center text-white text-2xl shadow-md">
               ✓
             </div>
-            <p className="font-bold text-[#2A2320]">You&apos;re on the list!</p>
-            <p className="text-sm text-[#5E5450]">
+            <p className="font-bold text-ink">You&apos;re on the list!</p>
+            <p className="text-sm text-ink-soft">
               Welcome to the Loov family. Check your inbox for a little
               surprise. 🌿
             </p>
@@ -52,7 +52,7 @@ export default function NewsletterSection() {
               value={email}
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
               placeholder="your@email.com"
-              className="flex-1 h-12 px-4 rounded-xl border-2 border-[#DDD5CC] bg-white text-[#2A2320] text-sm font-medium outline-none focus:border-[#5E9E8C] transition-colors placeholder:text-[#9A8E88]"
+              className="flex-1 h-12 px-4 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-ink-muted"
             />
             <Button type="submit" size="lg" className="whitespace-nowrap">
               Subscribe 🌿
@@ -65,7 +65,7 @@ export default function NewsletterSection() {
         )}
 
         {!submitted && (
-          <p className="text-[10px] text-[#9A8E88] mt-3">
+          <p className="text-[10px] text-ink-muted mt-3">
             No spam, ever. Unsubscribe anytime.
           </p>
         )}

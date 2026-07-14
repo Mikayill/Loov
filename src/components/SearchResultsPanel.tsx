@@ -41,8 +41,8 @@ export default function SearchResultsPanel({
               aria-pressed={active}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border-2 transition-colors flex-shrink-0 ${
                 active
-                  ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
-                  : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                  ? "border-accent bg-accent text-white"
+                  : "border-line text-ink-soft hover:border-accent hover:text-accent"
               }`}
             >
               <span className="leading-none">{c.emoji}</span>
@@ -56,13 +56,13 @@ export default function SearchResultsPanel({
       {!hasQuery && (
         <div className="mt-3 flex flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest mr-1">{t("search.trending")}</span>
+            <span className="text-[9px] font-bold text-ink-muted uppercase tracking-widest mr-1">{t("search.trending")}</span>
             {TRENDING.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setQuery(s)}
-                className="px-2.5 py-1 bg-[#F5F0EB] hover:bg-[#EDE5D8] rounded-full text-[11px] font-semibold text-[#5E5450] hover:text-[#2A2320] transition-colors"
+                className="px-2.5 py-1 bg-canvas hover:bg-panel rounded-full text-[11px] font-semibold text-ink-soft hover:text-ink transition-colors"
               >
                 {s}
               </button>
@@ -70,21 +70,21 @@ export default function SearchResultsPanel({
           </div>
           {recentSearches.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest mr-1">{t("search.recent")}</span>
+              <span className="text-[9px] font-bold text-ink-muted uppercase tracking-widest mr-1">{t("search.recent")}</span>
               {recentSearches.map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setQuery(s)}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-[#F5F0EB] hover:bg-[#EDE5D8] rounded-full text-[11px] font-semibold text-[#5E5450] hover:text-[#2A2320] transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-canvas hover:bg-panel rounded-full text-[11px] font-semibold text-ink-soft hover:text-ink transition-colors"
                 >
-                  <svg className="w-3 h-3 text-[#9A8E88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-3 h-3 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {s}
                 </button>
               ))}
-              <button type="button" onClick={onClearRecent} className="text-[9px] font-bold text-[#9A8E88] hover:text-[#5E9E8C] transition-colors ml-1">
+              <button type="button" onClick={onClearRecent} className="text-[9px] font-bold text-ink-muted hover:text-accent transition-colors ml-1">
                 {t("search.clear")}
               </button>
             </div>
@@ -95,13 +95,13 @@ export default function SearchResultsPanel({
       {/* Results */}
       <div className="mt-3 max-h-[60vh] overflow-y-auto -mx-1 px-1">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest">
+          <p className="text-[9px] font-bold text-ink-muted uppercase tracking-widest">
             {hasQuery
               ? results.length === 1 ? t("search.result1") : t("search.results").replace("{n}", String(results.length))
               : t("search.popular")}
           </p>
           {results.length > MAX_RESULTS && (
-            <Link href={viewAllHref} onClick={onNavigate} className="text-xs font-bold text-[#5E9E8C] hover:underline">
+            <Link href={viewAllHref} onClick={onNavigate} className="text-xs font-bold text-accent hover:underline">
               {t("search.viewAll").replace("{n}", String(results.length))} →
             </Link>
           )}
@@ -114,7 +114,7 @@ export default function SearchResultsPanel({
                 key={p.id}
                 href={`/products/${p.slug}`}
                 onClick={onNavigate}
-                className="group flex items-center gap-2.5 p-2 rounded-xl border border-[#DDD5CC] hover:border-[#5E9E8C] hover:shadow-sm transition-all"
+                className="group flex items-center gap-2.5 p-2 rounded-control border border-line hover:border-accent hover:shadow-sm transition-all"
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0 overflow-hidden" style={{ backgroundColor: p.cardColor }}>
                   {p.imageUrl ? (
@@ -124,10 +124,10 @@ export default function SearchResultsPanel({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-bold text-[#2A2320] group-hover:text-[#5E9E8C] transition-colors leading-tight truncate">{p.name}</p>
-                    {p.isNew && <span className="flex-shrink-0 text-[8px] font-bold bg-[#5E9E8C] text-white px-1 py-0.5 rounded-full uppercase">{t("product.new")}</span>}
+                    <p className="text-xs font-bold text-ink group-hover:text-accent transition-colors leading-tight truncate">{p.name}</p>
+                    {p.isNew && <span className="flex-shrink-0 text-[8px] font-bold bg-accent text-white px-1 py-0.5 rounded-full uppercase">{t("product.new")}</span>}
                   </div>
-                  <p className="text-[10px] text-[#9A8E88] mt-0.5 truncate">{categoryLabel(p.category, t)} · {formatPrice(p.price)}</p>
+                  <p className="text-[10px] text-ink-muted mt-0.5 truncate">{categoryLabel(p.category, t)} · {formatPrice(p.price)}</p>
                 </div>
               </Link>
             ))}
@@ -135,8 +135,8 @@ export default function SearchResultsPanel({
         ) : (
           <div className="py-8 text-center">
             <div className="text-4xl mb-2">🔍</div>
-            <p className="font-bold text-[#2A2320] text-sm mb-1">{t("search.noResults")}</p>
-            <p className="text-xs text-[#9A8E88]">{t("search.noResultsHint")}</p>
+            <p className="font-bold text-ink text-sm mb-1">{t("search.noResults")}</p>
+            <p className="text-xs text-ink-muted">{t("search.noResultsHint")}</p>
           </div>
         )}
       </div>

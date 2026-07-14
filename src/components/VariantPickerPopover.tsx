@@ -85,15 +85,15 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
         role="dialog"
         aria-modal="true"
         aria-labelledby="variant-picker-title"
-        className={`bg-white rounded-2xl w-full max-w-xs shadow-2xl overflow-hidden p-5 ${open ? "animate-pop-in" : "animate-pop-out"}`}
+        className={`bg-white rounded-card w-full max-w-xs shadow-2xl overflow-hidden p-5 ${open ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3 gap-2">
-          <h3 id="variant-picker-title" className="font-bold text-sm text-[#2A2320] line-clamp-1">{product.name}</h3>
+          <h3 id="variant-picker-title" className="font-bold text-sm text-ink line-clamp-1">{product.name}</h3>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); close(); }}
             aria-label="Close"
-            className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] active:scale-90 transition-all text-xs font-bold flex-shrink-0"
+            className="w-7 h-7 rounded-full bg-canvas flex items-center justify-center text-ink-soft hover:bg-panel active:scale-90 transition-all text-xs font-bold flex-shrink-0"
           >
             ✕
           </button>
@@ -101,8 +101,8 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
 
         {product.colors.length > 1 && (
           <div className="mb-3">
-            <p className="text-[11px] font-bold text-[#2A2320] mb-1.5">
-              {t("product.color")}: <span className="text-[#5E9E8C] font-semibold">{colorLabel(selectedColor, t)}</span>
+            <p className="text-[11px] font-bold text-ink mb-1.5">
+              {t("product.color")}: <span className="text-accent font-semibold">{colorLabel(selectedColor, t)}</span>
             </p>
             <div className="flex flex-wrap gap-1.5">
               {product.colors.map((c) => (
@@ -112,8 +112,8 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
                   title={colorLabel(c, t)}
                   className={`w-7 h-7 rounded-full border-2 transition-all ${
                     selectedColor === c
-                      ? "border-[#5E9E8C] ring-2 ring-[#5E9E8C] ring-offset-1 scale-110"
-                      : "border-[#DDD5CC] hover:border-[#9A8E88] hover:scale-105"
+                      ? "border-accent ring-2 ring-accent ring-offset-1 scale-110"
+                      : "border-line hover:border-ink-muted hover:scale-105"
                   }`}
                   style={{ backgroundColor: hex(c) }}
                 />
@@ -124,8 +124,8 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
 
         {product.sizes.length > 1 && product.sizes[0] !== "One Size" && (
           <div className="mb-3">
-            <p className="text-[11px] font-bold text-[#2A2320] mb-1.5">
-              {t("product.size")}: <span className="text-[#5E9E8C] font-semibold">{sizeLabel(selectedSize, t)}</span>
+            <p className="text-[11px] font-bold text-ink mb-1.5">
+              {t("product.size")}: <span className="text-accent font-semibold">{sizeLabel(selectedSize, t)}</span>
             </p>
             <div className="flex flex-wrap gap-1">
               {product.sizes.map((s) => (
@@ -134,8 +134,8 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSize(s); }}
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border-2 transition-all ${
                     selectedSize === s
-                      ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#5E9E8C]"
-                      : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C]"
+                      ? "border-accent bg-accent-soft text-accent"
+                      : "border-line text-ink-soft hover:border-accent"
                   }`}
                 >
                   {sizeLabel(s, t)}
@@ -146,19 +146,19 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
         )}
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden flex-shrink-0">
+          <div className="flex items-center border-2 border-line rounded-control overflow-hidden flex-shrink-0">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQty((q) => Math.max(1, q - 1)); }}
               disabled={qty <= 1}
-              className="w-9 h-10 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] active:scale-90 transition-all disabled:opacity-30 text-base"
+              className="w-9 h-10 flex items-center justify-center font-bold text-ink hover:bg-panel active:scale-90 transition-all disabled:opacity-30 text-base"
             >
               −
             </button>
-            <span className="w-8 text-center font-extrabold text-[#2A2320] text-sm select-none">{qty}</span>
+            <span className="w-8 text-center font-extrabold text-ink text-sm select-none">{qty}</span>
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQty((q) => Math.min(qtyMax, q + 1)); }}
               disabled={qty >= qtyMax}
-              className="w-9 h-10 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] active:scale-90 transition-all text-base disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-9 h-10 flex items-center justify-center font-bold text-ink hover:bg-panel active:scale-90 transition-all text-base disabled:opacity-30 disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -167,7 +167,7 @@ export default function VariantPickerPopover({ product, open, onClose }: { produ
           <button
             onClick={handleAdd}
             disabled={soldOut}
-            className={`flex-1 h-10 rounded-xl font-bold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
+            className={`flex-1 h-10 rounded-control font-bold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
               status === "added" ? "bg-green-500" :
               status === "blocked" || soldOut ? "bg-red-500" :
               "hover:opacity-90 active:scale-95"

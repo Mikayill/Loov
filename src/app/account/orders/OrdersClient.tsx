@@ -47,7 +47,7 @@ export default function OrdersClient() {
   if (loading || !user || fetching) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -55,23 +55,23 @@ export default function OrdersClient() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-[#5E9E8C] transition-colors">{t("acct.title")}</Link>
+        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("acct.orders.title")}</span>
+        <span className="text-ink font-semibold">{t("acct.orders.title")}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("acct.orders.title")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-0.5">{orders.length === 1 ? t("acct.orders.total1") : t("acct.orders.totalN").replace("{n}", String(orders.length))}</p>
+          <h1 className="text-2xl font-extrabold text-ink">{t("acct.orders.title")}</h1>
+          <p className="text-ink-muted text-sm mt-0.5">{orders.length === 1 ? t("acct.orders.total1") : t("acct.orders.totalN").replace("{n}", String(orders.length))}</p>
         </div>
         <Link
           href="/account"
-          className="flex items-center gap-1.5 text-sm font-semibold text-[#5E9E8C] hover:underline"
+          className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -82,10 +82,10 @@ export default function OrdersClient() {
 
       {/* Empty state */}
       {orders.length === 0 && (
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] p-12 text-center">
+        <div className="bg-white rounded-card border border-line p-12 text-center">
           <span className="text-5xl block mb-4">📦</span>
-          <p className="font-extrabold text-[#2A2320] text-lg mb-1">{t("acct.orders.empty")}</p>
-          <p className="text-sm text-[#5E5450] mb-6">
+          <p className="font-extrabold text-ink text-lg mb-1">{t("acct.orders.empty")}</p>
+          <p className="text-sm text-ink-soft mb-6">
             {t("acct.orders.emptyBody")}
           </p>
           <Link
@@ -107,29 +107,29 @@ export default function OrdersClient() {
           const shipping = order.shippingCost ?? (itemTotal >= 100 ? 0 : order.shipping === "express" ? 25 : 15);
 
           return (
-            <div key={order.id} className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden hover:shadow-md transition-shadow">
+            <div key={order.id} className="bg-white rounded-card border border-line overflow-hidden hover:shadow-md transition-shadow">
 
               {/* Order header */}
-              <div className="flex items-center justify-between p-5 border-b border-[#F5F0EB] flex-wrap gap-4 bg-[#FAFAF8]">
+              <div className="flex items-center justify-between p-5 border-b border-canvas flex-wrap gap-4 bg-surface">
                 <div className="flex items-center gap-6 flex-wrap">
                   <div>
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{t("acct.orders.orderLabel")}</p>
-                    <p className="font-extrabold text-[#2A2320] font-mono tracking-wide">{order.id}</p>
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{t("acct.orders.orderLabel")}</p>
+                    <p className="font-extrabold text-ink font-mono tracking-wide">{order.id}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{t("acct.orders.placedLabel")}</p>
-                    <p className="font-semibold text-[#2A2320] text-sm">
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{t("acct.orders.placedLabel")}</p>
+                    <p className="font-semibold text-ink text-sm">
                       {fmtDate(order.date, locale, "short")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{t("acct.orders.totalLabel")}</p>
-                    <p className="font-extrabold text-[#2A2320]">{formatPrice(order.total)}</p>
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{t("acct.orders.totalLabel")}</p>
+                    <p className="font-extrabold text-ink">{formatPrice(order.total)}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{t("acct.orders.shippingLabel")}</p>
-                    <p className="font-semibold text-[#2A2320] text-sm">
-                      {shipping === 0 ? <span className="text-[#5E9E8C]">{t("cart.free")} 🎉</span> : formatPrice(shipping)}
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{t("acct.orders.shippingLabel")}</p>
+                    <p className="font-semibold text-ink text-sm">
+                      {shipping === 0 ? <span className="text-accent">{t("cart.free")} 🎉</span> : formatPrice(shipping)}
                     </p>
                   </div>
                 </div>
@@ -143,28 +143,28 @@ export default function OrdersClient() {
               </div>
 
               {/* Items */}
-              <div className="divide-y divide-[#F5F0EB]">
+              <div className="divide-y divide-canvas">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-5">
                     <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                      className="w-14 h-14 rounded-control flex items-center justify-center text-2xl flex-shrink-0"
                       style={{ backgroundColor: item.cardColor }}
                     >
                       {item.emoji}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-[#2A2320] text-sm leading-tight">{item.name}</p>
-                      <p className="text-xs text-[#9A8E88] mt-0.5">
+                      <p className="font-bold text-ink text-sm leading-tight">{item.name}</p>
+                      <p className="text-xs text-ink-muted mt-0.5">
                         {colorLabel(item.color, t)} · {sizeLabel(item.size, t)} · {t("acct.orders.qty").replace("{n}", String(item.qty))}
                       </p>
                       {order.status === "Delivered" && (
                         <div className="flex items-center gap-1 mt-1.5">
                           <Stars count={5} />
-                          <span className="text-[10px] text-[#9A8E88]">{t("acct.orders.leaveReview")}</span>
+                          <span className="text-[10px] text-ink-muted">{t("acct.orders.leaveReview")}</span>
                         </div>
                       )}
                     </div>
-                    <p className="font-extrabold text-[#2A2320] text-sm flex-shrink-0">
+                    <p className="font-extrabold text-ink text-sm flex-shrink-0">
                       {formatPrice(item.price * item.qty)}
                     </p>
                   </div>
@@ -172,8 +172,8 @@ export default function OrdersClient() {
               </div>
 
               {/* Footer */}
-              <div className="px-5 py-4 bg-[#F8F7F5] border-t border-[#F5F0EB] flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-4 text-xs text-[#9A8E88] flex-wrap">
+              <div className="px-5 py-4 bg-[#F8F7F5] border-t border-canvas flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-4 text-xs text-ink-muted flex-wrap">
                   <span className="flex items-center gap-1">
                     <span>📍</span>
                     <span>{order.address}, {order.city}</span>
@@ -186,7 +186,7 @@ export default function OrdersClient() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/account/orders/${order.id}`}
-                    className="text-xs font-bold text-[#5E9E8C] border border-[#5E9E8C] px-3 py-1.5 rounded-full hover:bg-[#EAF2F0] transition-colors"
+                    className="text-xs font-bold text-accent border border-accent px-3 py-1.5 rounded-full hover:bg-accent-soft transition-colors"
                   >
                     {t("acct.orders.viewDetails")}
                   </Link>
@@ -207,9 +207,9 @@ export default function OrdersClient() {
       </div>
 
       {/* CTA */}
-      <div className="mt-10 p-6 rounded-2xl text-center" style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EEF4 100%)" }}>
-        <p className="font-bold text-[#2A2320] mb-1">{t("acct.orders.lookingForNew")}</p>
-        <p className="text-sm text-[#5E5450] mb-4">{t("acct.orders.browseLatest")}</p>
+      <div className="mt-10 p-6 rounded-card text-center" style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EEF4 100%)" }}>
+        <p className="font-bold text-ink mb-1">{t("acct.orders.lookingForNew")}</p>
+        <p className="text-sm text-ink-soft mb-4">{t("acct.orders.browseLatest")}</p>
         <Link
           href="/products"
           className="inline-flex items-center gap-2 font-bold text-sm text-white px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-sm"

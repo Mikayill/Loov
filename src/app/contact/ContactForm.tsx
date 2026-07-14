@@ -71,19 +71,19 @@ export default function ContactForm() {
 
   if (sent) {
     return (
-      <div className="bg-[#EAF2F0] border-2 border-[#C8DDD8] rounded-3xl p-10 text-center h-full flex flex-col items-center justify-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-[#5E9E8C] flex items-center justify-center text-3xl text-white shadow">
+      <div className="bg-accent-soft border-2 border-sage rounded-3xl p-10 text-center h-full flex flex-col items-center justify-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-3xl text-white shadow">
           ✓
         </div>
-        <h3 className="text-xl font-extrabold text-[#2A2320]">{t("contact.form.sentTitle")}</h3>
-        <p className="text-[#5E5450] text-sm leading-relaxed max-w-xs">
+        <h3 className="text-xl font-extrabold text-ink">{t("contact.form.sentTitle")}</h3>
+        <p className="text-ink-soft text-sm leading-relaxed max-w-xs">
           {t("contact.form.sentBody").split("{name}")[0]}<strong>{form.name}</strong>
           {t("contact.form.sentBody").split("{name}")[1].split("{email}")[0]}<strong>{form.email}</strong>
           {t("contact.form.sentBody").split("{name}")[1].split("{email}")[1]}
         </p>
         <button
           onClick={() => { setForm(empty); setSent(false); }}
-          className="text-sm font-bold text-[#5E9E8C] hover:underline mt-2"
+          className="text-sm font-bold text-accent hover:underline mt-2"
         >
           {t("contact.form.sendAnother")}
         </button>
@@ -92,15 +92,15 @@ export default function ContactForm() {
   }
 
   const inputBase =
-    "w-full border-2 rounded-xl px-4 py-3 text-sm font-medium text-[#2A2320] placeholder-[#C8B8B0] focus:outline-none transition-colors bg-white";
-  const inputOk  = "border-[#DDD5CC] focus:border-[#5E9E8C]";
+    "w-full border-2 rounded-control px-4 py-3 text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none transition-colors bg-white";
+  const inputOk  = "border-line focus:border-accent";
   const inputErr = "border-red-300 focus:border-red-400 bg-red-50";
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {/* Name */}
       <div>
-        <label className="block text-xs font-bold text-[#5E5450] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs font-bold text-ink-soft uppercase tracking-widest mb-1.5">
           {t("contact.form.fullName")} <span className="text-red-400">*</span>
         </label>
         <input
@@ -119,7 +119,7 @@ export default function ContactForm() {
 
       {/* Email */}
       <div>
-        <label className="block text-xs font-bold text-[#5E5450] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs font-bold text-ink-soft uppercase tracking-widest mb-1.5">
           {t("contact.form.emailAddress")} <span className="text-red-400">*</span>
         </label>
         <input
@@ -140,7 +140,7 @@ export default function ContactForm() {
 
       {/* Subject */}
       <div>
-        <label className="block text-xs font-bold text-[#5E5450] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs font-bold text-ink-soft uppercase tracking-widest mb-1.5">
           {t("contact.form.subject")} <span className="text-red-400">*</span>
         </label>
         <select
@@ -159,7 +159,7 @@ export default function ContactForm() {
 
       {/* Message */}
       <div>
-        <label className="block text-xs font-bold text-[#5E5450] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs font-bold text-ink-soft uppercase tracking-widest mb-1.5">
           {t("contact.form.message")} <span className="text-red-400">*</span>
         </label>
         <textarea
@@ -174,7 +174,7 @@ export default function ContactForm() {
           {errors.message
             ? <p className="text-xs text-red-400 font-semibold">{errors.message}</p>
             : <span />}
-          <span className="text-xs text-[#9A8E88]">{form.message.length} / 500</span>
+          <span className="text-xs text-ink-muted">{form.message.length} / 500</span>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ export default function ContactForm() {
       />
 
       {sendError && (
-        <p className="text-sm text-red-500 font-semibold bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <p className="text-sm text-red-500 font-semibold bg-red-50 border border-red-200 rounded-control px-4 py-3">
           {sendError}
         </p>
       )}
@@ -205,7 +205,7 @@ export default function ContactForm() {
         loading={loading}
         loadingText={t("contact.form.sending")}
         fullWidth
-        className="!rounded-2xl !h-auto py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
+        className="!rounded-card !h-auto py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         {t("contact.form.sendMessage")} →
       </Button>

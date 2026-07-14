@@ -40,13 +40,13 @@ export default function RecentlyViewedSection({ excludeId }: { excludeId?: strin
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-extrabold text-[#2A2320]">{t("widget.recentlyViewed")}</h2>
+        <h2 className="text-xl font-extrabold text-ink">{t("widget.recentlyViewed")}</h2>
         <button
           onClick={() => {
             localStorage.removeItem(STORAGE_KEY);
             setIds([]);
           }}
-          className="text-xs text-[#9A8E88] hover:text-red-400 transition-colors font-semibold"
+          className="text-xs text-ink-muted hover:text-red-400 transition-colors font-semibold"
         >
           {t("widget.clearHistory")}
         </button>
@@ -56,7 +56,7 @@ export default function RecentlyViewedSection({ excludeId }: { excludeId?: strin
           <Link
             key={product.id}
             href={`/products/${product.slug}`}
-            className="group bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+            className="group bg-white rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
           >
             <div
               className="flex items-center justify-center h-28 text-5xl"
@@ -67,13 +67,13 @@ export default function RecentlyViewedSection({ excludeId }: { excludeId?: strin
               </span>
             </div>
             <div className="p-3">
-              <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">
+              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">
                 {categoryLabel(product.category, t)}
               </p>
-              <p className="text-xs font-bold text-[#2A2320] group-hover:text-[#5E9E8C] transition-colors leading-snug line-clamp-2 mb-1">
+              <p className="text-xs font-bold text-ink group-hover:text-accent transition-colors leading-snug line-clamp-2 mb-1">
                 {product.name}
               </p>
-              <p className="text-sm font-extrabold text-[#2A2320]">{formatPrice(effectivePrice(product))}</p>
+              <p className="text-sm font-extrabold text-ink">{formatPrice(effectivePrice(product))}</p>
             </div>
           </Link>
         ))}

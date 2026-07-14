@@ -39,34 +39,34 @@ export default function ForgotPasswordClient() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.resetPassword")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-1">
+          <h1 className="text-2xl font-extrabold text-ink">{t("auth.resetPassword")}</h1>
+          <p className="text-ink-muted text-sm mt-1">
             {submitted
               ? t("auth.checkInbox")
               : t("auth.enterEmailReset")}
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7">
+        <div className="bg-white rounded-3xl border border-line shadow-sm p-7">
           {submitted ? (
             <div className="text-center py-4 space-y-5">
-              <div className="w-16 h-16 rounded-full bg-[#EAF2F0] flex items-center justify-center text-3xl mx-auto shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-accent-soft flex items-center justify-center text-3xl mx-auto shadow-sm">
                 📧
               </div>
               <div>
-                <p className="font-extrabold text-[#2A2320] mb-2">{t("auth.emailSent")}</p>
-                <p className="text-sm text-[#5E5450] leading-relaxed">
+                <p className="font-extrabold text-ink mb-2">{t("auth.emailSent")}</p>
+                <p className="text-sm text-ink-soft leading-relaxed">
                   {t("auth.resetSentTo").split("{email}")[0]}
-                  <span className="font-bold text-[#2A2320]">{email}</span>
+                  <span className="font-bold text-ink">{email}</span>
                   {t("auth.resetSentTo").split("{email}")[1]}
                 </p>
               </div>
               <div className="pt-2 space-y-3">
-                <p className="text-xs text-[#9A8E88]">
+                <p className="text-xs text-ink-muted">
                   {t("auth.didntReceive")}{" "}
                   <button
                     onClick={() => { setSubmitted(false); setEmail(""); }}
-                    className="font-bold text-[#5E9E8C] hover:underline"
+                    className="font-bold text-accent hover:underline"
                   >
                     {t("auth.tryAgain")}
                   </button>
@@ -79,7 +79,7 @@ export default function ForgotPasswordClient() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-[#2A2320] mb-1.5">
+                <label className="block text-xs font-bold text-ink mb-1.5">
                   {t("auth.emailAddress")}
                 </label>
                 <input
@@ -88,7 +88,7 @@ export default function ForgotPasswordClient() {
                   onChange={(e) => { setEmail(e.target.value); setError(""); }}
                   placeholder="you@example.com"
                   required
-                  className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors"
+                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
                 />
                 {error && (
                   <p className="text-red-400 text-xs font-semibold mt-1.5">{error}</p>
@@ -102,9 +102,9 @@ export default function ForgotPasswordClient() {
           )}
         </div>
 
-        <p className="text-center text-sm text-[#9A8E88] mt-5">
+        <p className="text-center text-sm text-ink-muted mt-5">
           {t("auth.rememberPassword")}{" "}
-          <Link href="/login" className="font-bold text-[#5E9E8C] hover:underline">
+          <Link href="/login" className="font-bold text-accent hover:underline">
             {t("auth.signIn")} →
           </Link>
         </p>

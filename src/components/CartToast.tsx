@@ -69,11 +69,11 @@ export default function CartToast() {
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
       }`}
     >
-      <div className={`rounded-2xl shadow-2xl px-4 py-3.5 flex items-center gap-3 ${isWarn ? "bg-[#B03A3A] text-white" : "bg-[#2A2320] text-white"}`}>
+      <div className={`rounded-card shadow-2xl px-4 py-3.5 flex items-center gap-3 ${isWarn ? "bg-danger text-white" : "bg-ink text-white"}`}>
         {toast?.kind === "added" && (
           <>
             <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+              className="w-11 h-11 rounded-control flex items-center justify-center text-2xl flex-shrink-0"
               style={{ backgroundColor: "#5E9E8C" }}
             >
               {toast.emoji}
@@ -85,7 +85,7 @@ export default function CartToast() {
             <Link
               href="/cart"
               onClick={() => setVisible(false)}
-              className="flex-shrink-0 bg-[#5E9E8C] text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap"
+              className="flex-shrink-0 bg-accent text-white text-xs font-bold px-3 py-2 rounded-control hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               {t("toast.viewCart")} →
             </Link>

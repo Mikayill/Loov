@@ -87,30 +87,30 @@ export default function PromosClient() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>;
   }
 
-  const inputCls = "h-10 px-3 rounded-xl border border-[#DDD5CC] text-sm font-semibold text-[#2A2320] outline-none focus:border-[#5E9E8C] bg-white";
+  const inputCls = "h-10 px-3 rounded-control border border-line text-sm font-semibold text-ink outline-none focus:border-accent bg-white";
 
   return (
     <div className="max-w-4xl">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-1">
-        <h1 className="text-2xl font-extrabold text-[#2A2320]">Promo codes</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Promo codes</h1>
         <button
           onClick={() => { setShowForm((v) => !v); setError(""); }}
-          className="px-4 h-10 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-opacity"
+          className="px-4 h-10 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity"
           style={{ backgroundColor: "#5E9E8C" }}
         >
           {showForm ? "Close" : "+ New code"}
         </button>
       </div>
-      <p className="text-[#9A8E88] text-sm mb-6">
+      <p className="text-ink-muted text-sm mb-6">
         Codes are <strong>members only</strong> (guests can&apos;t apply them) and each customer can use a code <strong>once</strong>.
         The usage limit below is the TOTAL across all customers.
       </p>
 
       {!ready && (
-        <div className="mb-5 rounded-xl bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
           ⚠️ The <code className="font-mono">promo_codes</code> table isn&apos;t set up yet. Run <code className="font-mono">supabase/promos.sql</code> in the SQL Editor.
         </div>
       )}
@@ -118,9 +118,9 @@ export default function PromosClient() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={create} className="bg-white rounded-2xl border-2 border-[#5E9E8C] p-5 mb-5 flex flex-wrap items-end gap-3">
+        <form onSubmit={create} className="bg-white rounded-card border-2 border-accent p-5 mb-5 flex flex-wrap items-end gap-3">
           <div>
-            <label className="block text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Code</label>
+            <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Code</label>
             <input
               value={form.code}
               onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20) }))}
@@ -130,7 +130,7 @@ export default function PromosClient() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Type</label>
+            <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Type</label>
             <select
               value={form.type}
               onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as "percent" | "shipping" }))}
@@ -142,7 +142,7 @@ export default function PromosClient() {
           </div>
           {form.type === "percent" && (
             <div>
-              <label className="block text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Percent</label>
+              <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Percent</label>
               <input
                 type="number" min={1} max={90} step={1}
                 value={form.value}
@@ -153,7 +153,7 @@ export default function PromosClient() {
             </div>
           )}
           <div>
-            <label className="block text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Expires (optional)</label>
+            <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Expires (optional)</label>
             <input
               type="date"
               value={form.expiresAt}
@@ -162,7 +162,7 @@ export default function PromosClient() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Usage limit (optional)</label>
+            <label className="block text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-1">Usage limit (optional)</label>
             <input
               type="number" min={1} step={1}
               value={form.usageLimit}
@@ -174,7 +174,7 @@ export default function PromosClient() {
           <button
             type="submit"
             disabled={creating || !form.code}
-            className="h-10 px-5 rounded-xl font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
+            className="h-10 px-5 rounded-control font-bold text-white text-sm disabled:opacity-50 hover:opacity-90 transition-opacity"
             style={{ backgroundColor: "#5E9E8C" }}
           >
             {creating ? "…" : "Create"}
@@ -184,10 +184,10 @@ export default function PromosClient() {
 
       {/* List */}
       {promos.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-[#DDD5CC]">
+        <div className="text-center py-16 bg-white rounded-card border border-line">
           <div className="text-4xl mb-3">🎟️</div>
-          <p className="font-bold text-[#2A2320] mb-1">No promo codes yet</p>
-          <p className="text-sm text-[#9A8E88]">Create one with “+ New code”.</p>
+          <p className="font-bold text-ink mb-1">No promo codes yet</p>
+          <p className="text-sm text-ink-muted">Create one with “+ New code”.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -196,42 +196,42 @@ export default function PromosClient() {
             const limitHit = p.usage_limit !== null && p.times_used >= p.usage_limit;
             const live = p.active && !expired && !limitHit;
             return (
-              <div key={p.id} className={`bg-white rounded-2xl border p-4 flex flex-wrap items-center gap-x-5 gap-y-3 ${live ? "border-[#DDD5CC]" : "border-[#EDE5D8] opacity-80"}`}>
+              <div key={p.id} className={`bg-white rounded-card border p-4 flex flex-wrap items-center gap-x-5 gap-y-3 ${live ? "border-line" : "border-panel opacity-80"}`}>
                 {/* Code + type */}
                 <div className="min-w-[160px]">
-                  <p className="font-mono font-extrabold text-[#2A2320] tracking-wider">{p.code}</p>
+                  <p className="font-mono font-extrabold text-ink tracking-wider">{p.code}</p>
                   <p className="text-xs font-bold mt-0.5">
                     {p.type === "shipping"
                       ? <span className="text-[#4A7AC0]">🚀 Free shipping</span>
-                      : <span className="text-[#5E9E8C]">−{p.value}%</span>}
+                      : <span className="text-accent">−{p.value}%</span>}
                   </p>
                 </div>
 
                 {/* Usage */}
-                <div className="text-xs text-[#5E5450]">
-                  <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">Used</p>
-                  <p className={`font-bold ${limitHit ? "text-red-500" : "text-[#2A2320]"}`}>
+                <div className="text-xs text-ink-soft">
+                  <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Used</p>
+                  <p className={`font-bold ${limitHit ? "text-red-500" : "text-ink"}`}>
                     {p.times_used} / {p.usage_limit ?? "∞"}
                   </p>
                 </div>
 
                 {/* Expiry — editable */}
-                <div className="text-xs text-[#5E5450]">
-                  <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">Expires</p>
+                <div className="text-xs text-ink-soft">
+                  <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Expires</p>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="date"
                       value={p.expires_at ? p.expires_at.slice(0, 10) : ""}
                       onChange={(e) => patch(p.id, { expiresAt: e.target.value })}
-                      className="h-8 px-2 rounded-lg border border-[#DDD5CC] text-xs font-semibold outline-none focus:border-[#5E9E8C] bg-white"
+                      className="h-8 px-2 rounded-lg border border-line text-xs font-semibold outline-none focus:border-accent bg-white"
                     />
                     {expired && <span className="text-[10px] font-bold text-red-500 uppercase">Expired {fmtDate(p.expires_at)}</span>}
                   </div>
                 </div>
 
                 {/* Limit — editable */}
-                <div className="text-xs text-[#5E5450]">
-                  <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">Limit</p>
+                <div className="text-xs text-ink-soft">
+                  <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Limit</p>
                   <input
                     type="number" min={1} step={1}
                     defaultValue={p.usage_limit ?? ""}
@@ -241,7 +241,7 @@ export default function PromosClient() {
                       if ((p.usage_limit === null && v === "") || Number(v) === p.usage_limit) return;
                       patch(p.id, { usageLimit: v });
                     }}
-                    className="h-8 w-20 px-2 rounded-lg border border-[#DDD5CC] text-xs font-semibold text-right outline-none focus:border-[#5E9E8C] bg-white"
+                    className="h-8 w-20 px-2 rounded-lg border border-line text-xs font-semibold text-right outline-none focus:border-accent bg-white"
                   />
                 </div>
 
@@ -251,7 +251,7 @@ export default function PromosClient() {
                 <button
                   type="button"
                   onClick={() => patch(p.id, { active: !p.active })}
-                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${p.active ? "" : "bg-[#DDD5CC]"}`}
+                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${p.active ? "" : "bg-line"}`}
                   style={p.active ? { backgroundColor: "#5E9E8C" } : {}}
                   title={p.active ? "Active — click to pause" : "Paused — click to activate"}
                 >
@@ -260,7 +260,7 @@ export default function PromosClient() {
 
                 <button
                   onClick={() => remove(p)}
-                  className="text-xs font-bold text-red-400 border-2 border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
+                  className="text-xs font-bold text-red-400 border-2 border-red-200 px-3 py-1.5 rounded-control hover:bg-red-50 transition-colors"
                 >
                   Delete
                 </button>

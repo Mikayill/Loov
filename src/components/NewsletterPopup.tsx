@@ -84,13 +84,13 @@ export default function NewsletterPopup() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="newsletter-popup-title"
-        className={`relative bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-xl border border-[#EDE5D8] ${show ? "animate-pop-in" : "animate-pop-out"}`}
+        className={`relative bg-white rounded-card max-w-sm w-full overflow-hidden shadow-xl border border-panel ${show ? "animate-pop-in" : "animate-pop-out"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
         <button
           onClick={close}
-          className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#9A8E88] hover:text-[#2A2320] hover:bg-[#EDE5D8] transition-all"
+          className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-canvas flex items-center justify-center text-ink-muted hover:text-ink hover:bg-panel transition-all"
           aria-label="Close popup"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -99,12 +99,12 @@ export default function NewsletterPopup() {
         </button>
 
         {/* Hero */}
-        <div className="px-6 pt-8 pb-5 text-center bg-[#F5F0EB]">
+        <div className="px-6 pt-8 pb-5 text-center bg-canvas">
           <div className="text-4xl mb-2.5">🌿</div>
-          <h2 id="newsletter-popup-title" className="text-lg font-extrabold text-[#2A2320] mb-1.5 leading-tight">
+          <h2 id="newsletter-popup-title" className="text-lg font-extrabold text-ink mb-1.5 leading-tight">
             {t("news.title")}
           </h2>
-          <p className="text-[#5E5450] text-xs leading-relaxed">
+          <p className="text-ink-soft text-xs leading-relaxed">
             {t("news.body")}
           </p>
         </div>
@@ -112,30 +112,30 @@ export default function NewsletterPopup() {
         {/* Content */}
         <div className="px-6 pb-6 pt-4 text-center">
           <button
-            className="bg-[#EAF2F0] border-2 border-dashed border-[#5E9E8C] rounded-xl py-2.5 px-4 font-mono font-extrabold text-[#5E9E8C] text-lg tracking-[0.2em] mb-1 w-full hover:bg-[#D8EDE9] transition-colors"
+            className="bg-accent-soft border-2 border-dashed border-accent rounded-control py-2.5 px-4 font-mono font-extrabold text-accent text-lg tracking-[0.2em] mb-1 w-full hover:bg-[#D8EDE9] transition-colors"
             onClick={copyCode}
             title={t("news.copyHint")}
           >
             {copied ? "✓" : PROMO_CODE}
           </button>
-          <p className="text-[10px] text-[#9A8E88] mb-3.5">{t("news.copyHint")}</p>
+          <p className="text-[10px] text-ink-muted mb-3.5">{t("news.copyHint")}</p>
 
           <Link
             href="/register"
             onClick={close}
-            className="block w-full h-10 rounded-xl font-extrabold text-white text-sm leading-[40px] hover:opacity-90 active:scale-95 transition-all"
+            className="block w-full h-10 rounded-control font-extrabold text-white text-sm leading-[40px] hover:opacity-90 active:scale-95 transition-all"
             style={{ backgroundColor: "#5E9E8C" }}
           >
             {t("news.cta")} →
           </Link>
-          <p className="text-xs text-[#9A8E88] mt-2.5">
-            <Link href="/login" onClick={close} className="font-bold text-[#5E9E8C] hover:underline">
+          <p className="text-xs text-ink-muted mt-2.5">
+            <Link href="/login" onClick={close} className="font-bold text-accent hover:underline">
               {t("news.signin")}
             </Link>
           </p>
           <button
             onClick={close}
-            className="w-full text-center text-[11px] text-[#C8B8B0] hover:text-[#9A8E88] transition-colors mt-1.5 py-1"
+            className="w-full text-center text-[11px] text-[#C8B8B0] hover:text-ink-muted transition-colors mt-1.5 py-1"
           >
             {t("news.noThanks")}
           </button>

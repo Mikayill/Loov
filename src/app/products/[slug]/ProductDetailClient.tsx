@@ -275,7 +275,7 @@ export default function ProductDetailClient({
         <div className="space-y-4">
           {/* Main image — colour selection does NOT change the photo */}
           <div
-            className="relative w-full aspect-square rounded-3xl flex items-center justify-center overflow-hidden border border-[#DDD5CC] touch-pan-y select-none"
+            className="relative w-full aspect-square rounded-3xl flex items-center justify-center overflow-hidden border border-line touch-pan-y select-none"
             style={{ backgroundColor: product.cardColor }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
@@ -298,7 +298,7 @@ export default function ProductDetailClient({
               </span>
             )}
             {product.isNew && (
-              <span className="absolute top-5 left-5 bg-[#5E9E8C] text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow">
+              <span className="absolute top-5 left-5 bg-accent text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow">
                 New
               </span>
             )}
@@ -312,7 +312,7 @@ export default function ProductDetailClient({
                 <button
                   onClick={prevImg}
                   aria-label="Previous photo"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-[#DDD5CC] flex items-center justify-center text-[#2A2320] shadow-md hover:bg-[#5E9E8C] hover:text-white hover:border-[#5E9E8C] active:scale-90 transition-all"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-accent hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -321,7 +321,7 @@ export default function ProductDetailClient({
                 <button
                   onClick={nextImg}
                   aria-label="Next photo"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-[#DDD5CC] flex items-center justify-center text-[#2A2320] shadow-md hover:bg-[#5E9E8C] hover:text-white hover:border-[#5E9E8C] active:scale-90 transition-all"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-accent hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -338,8 +338,8 @@ export default function ProductDetailClient({
                 <button
                   key={src}
                   onClick={() => setActiveImg(i)}
-                  className={`aspect-square rounded-2xl border-2 overflow-hidden transition-all duration-200 ${
-                    i === activeImg ? "border-[#5E9E8C] scale-95 shadow-md" : "border-[#DDD5CC] hover:border-[#9A8E88]"
+                  className={`aspect-square rounded-card border-2 overflow-hidden transition-all duration-200 ${
+                    i === activeImg ? "border-accent scale-95 shadow-md" : "border-line hover:border-ink-muted"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -353,12 +353,12 @@ export default function ProductDetailClient({
         {/* ── RIGHT: Info ── */}
         <div className="flex flex-col">
           {/* Category tag */}
-          <span className="inline-block self-start bg-[#EDE5D8] text-[#5E5450] text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
+          <span className="inline-block self-start bg-panel text-ink-soft text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3">
             {categoryLabel(product.category, t)}
           </span>
 
           {/* Name */}
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2A2320] leading-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-ink leading-tight mb-3">
             {product.name}
           </h1>
 
@@ -366,7 +366,7 @@ export default function ProductDetailClient({
           {reviewStats.count > 0 && (
             <div className="flex items-center gap-2 mb-5">
               <Stars rating={reviewStats.avg} />
-              <span className="text-sm text-[#9A8E88] font-medium">
+              <span className="text-sm text-ink-muted font-medium">
                 {reviewStats.avg} · {t("pdp.reviewsCount").replace("{n}", String(reviewStats.count))}
               </span>
             </div>
@@ -375,19 +375,19 @@ export default function ProductDetailClient({
           {/* Price + stock + share */}
           <div className="flex items-end justify-between mb-5 flex-wrap gap-3">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <p className={`text-4xl font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-[#2A2320]"}`}>
+              <p className={`text-4xl font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-ink"}`}>
                 {formatAmount(unitPrice)} <span className="text-2xl">₾</span>
               </p>
               {off > 0 && (
-                <p className="text-xl text-[#9A8E88] line-through">{formatAmount(baseForSize)} ₾</p>
+                <p className="text-xl text-ink-muted line-through">{formatAmount(baseForSize)} ₾</p>
               )}
             </div>
             <button
               onClick={handleShare}
               className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 text-sm font-bold transition-all ${
                 copied
-                  ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#5E9E8C]"
-                  : "border-[#DDD5CC] bg-white text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] hover:shadow-sm"
+                  ? "border-accent bg-accent-soft text-accent"
+                  : "border-line bg-white text-ink-soft hover:border-accent hover:text-accent hover:shadow-sm"
               }`}
             >
               {copied ? (
@@ -417,34 +417,34 @@ export default function ProductDetailClient({
               </div>
               {/* Back-in-stock waitlist */}
               {notifyStatus === "done" ? (
-                <p className="mt-2 text-xs font-semibold text-[#5E9E8C]">✓ {t("pdp.notifyDone")}</p>
+                <p className="mt-2 text-xs font-semibold text-accent">✓ {t("pdp.notifyDone")}</p>
               ) : user?.email ? (
                 /* Signed in → we already have the email, one tap is enough. */
                 <div className="mt-2.5">
                   <button
                     onClick={handleNotifyAccount}
                     disabled={notifyStatus === "sending"}
-                    className="h-10 px-4 rounded-xl font-bold text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
+                    className="h-10 px-4 rounded-control font-bold text-white text-sm disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
                     style={{ backgroundColor: "#5E9E8C" }}
                   >
                     {notifyStatus === "sending" ? "…" : `🔔 ${t("pdp.notifyBtn")}`}
                   </button>
-                  <p className="text-[11px] text-[#9A8E88] mt-1.5">{t("pdp.notifyAccount").replace("{email}", user.email)}</p>
+                  <p className="text-[11px] text-ink-muted mt-1.5">{t("pdp.notifyAccount").replace("{email}", user.email)}</p>
                   {notifyError && <p className="text-xs text-red-400 font-semibold mt-1">{notifyError}</p>}
                 </div>
               ) : (
                 /* Guest → collect an email. */
                 <form onSubmit={handleNotifyGuest} className="mt-2.5">
-                  <p className="text-xs text-[#5E5450] mb-1.5">{t("pdp.notifyPrompt")}</p>
+                  <p className="text-xs text-ink-soft mb-1.5">{t("pdp.notifyPrompt")}</p>
                   <div className="flex items-stretch gap-2 max-w-sm">
                     <input
                       type="email" value={notifyEmail} onChange={(e) => setNotifyEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="flex-1 min-w-0 h-10 px-3 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium outline-none focus:border-[#5E9E8C]"
+                      className="flex-1 min-w-0 h-10 px-3 rounded-control border-2 border-line text-sm font-medium outline-none focus:border-accent"
                     />
                     <button
                       type="submit" disabled={notifyStatus === "sending"}
-                      className="h-10 px-4 rounded-xl font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
+                      className="h-10 px-4 rounded-control font-bold text-white text-sm whitespace-nowrap disabled:opacity-60 hover:opacity-90 active:scale-95 transition-all"
                       style={{ backgroundColor: "#5E9E8C" }}
                     >
                       {notifyStatus === "sending" ? "…" : t("pdp.notifyBtn")}
@@ -461,8 +461,8 @@ export default function ProductDetailClient({
             </div>
           ) : stock !== null ? (
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-[#5E9E8C] flex-shrink-0" />
-              <span className="text-sm font-semibold text-[#5E9E8C]">{t("pdp.inStock").replace("{n}", String(stock))}</span>
+              <span className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+              <span className="text-sm font-semibold text-accent">{t("pdp.inStock").replace("{n}", String(stock))}</span>
             </div>
           ) : null}
 
@@ -470,8 +470,8 @@ export default function ProductDetailClient({
           {deliveryRange && (
             <div className="flex items-center gap-2 mb-3">
               <span className="text-sm">🚀</span>
-              <span className="text-sm text-[#5E5450]">
-                {t("pdp.deliveryEst")} <strong className="text-[#2A2320]">{deliveryRange}</strong>
+              <span className="text-sm text-ink-soft">
+                {t("pdp.deliveryEst")} <strong className="text-ink">{deliveryRange}</strong>
               </span>
             </div>
           )}
@@ -491,13 +491,13 @@ export default function ProductDetailClient({
             </span>
           </Link>
 
-          <div className="h-px bg-[#DDD5CC] mb-6" />
+          <div className="h-px bg-line mb-6" />
 
           {/* ── Colour selector (photo stays fixed) ── */}
           <div className="mb-6">
-            <p className="text-sm font-bold text-[#2A2320] mb-3">
+            <p className="text-sm font-bold text-ink mb-3">
               {t("product.color")}:{" "}
-              <span className="text-[#5E9E8C] font-extrabold">{colorLabel(selectedColor, t)}</span>
+              <span className="text-accent font-extrabold">{colorLabel(selectedColor, t)}</span>
             </p>
             <div className="flex flex-wrap gap-2.5">
               {product.colors.map((color) => {
@@ -510,15 +510,15 @@ export default function ProductDetailClient({
                     disabled={disabled}
                     className={`w-9 h-9 rounded-full border-2 transition-all duration-200 relative ${
                       selectedColor === color
-                        ? "border-[#5E9E8C] ring-2 ring-[#5E9E8C] ring-offset-2 scale-110 shadow"
+                        ? "border-accent ring-2 ring-accent ring-offset-2 scale-110 shadow"
                         : disabled
                         ? "border-[#E8E0D8] opacity-40 cursor-not-allowed"
-                        : "border-[#DDD5CC] hover:scale-110 hover:border-[#9A8E88]"
+                        : "border-line hover:scale-110 hover:border-ink-muted"
                     }`}
                     style={{ backgroundColor: hex(color) }}
                   >
                     {disabled && (
-                      <span className="absolute inset-0 flex items-center justify-center text-[#9A8E88] text-xs font-bold">/</span>
+                      <span className="absolute inset-0 flex items-center justify-center text-ink-muted text-xs font-bold">/</span>
                     )}
                   </button>
                 );
@@ -529,13 +529,13 @@ export default function ProductDetailClient({
           {/* ── Size selector ── */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold text-[#2A2320]">
+              <p className="text-sm font-bold text-ink">
                 {t("product.size")}:{" "}
-                <span className="text-[#5E9E8C] font-extrabold">{sizeLabel(selectedSize, t)}</span>
+                <span className="text-accent font-extrabold">{sizeLabel(selectedSize, t)}</span>
               </p>
               <button
                 onClick={() => setSizeGuide(true)}
-                className="text-xs font-bold text-[#5E9E8C] hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-accent hover:underline flex items-center gap-1"
               >
                 {t("pdp.sizeGuide")}
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -552,10 +552,10 @@ export default function ProductDetailClient({
                   <button
                     key={size}
                     onClick={() => pickSize(size)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-control text-sm font-semibold border-2 transition-all duration-200 ${
                       selectedSize === size
-                        ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#5E9E8C] shadow-sm"
-                        : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:bg-[#F5F8F7]"
+                        ? "border-accent bg-accent-soft text-accent shadow-sm"
+                        : "border-line text-ink-soft hover:border-accent hover:bg-[#F5F8F7]"
                     }`}
                   >
                     {sizeLabel(size, t)}
@@ -573,22 +573,22 @@ export default function ProductDetailClient({
             )}
           </div>
 
-          <div className="h-px bg-[#DDD5CC] mb-6" />
+          <div className="h-px bg-line mb-6" />
 
           {/* ── Quantity + Add to cart ── */}
           <div ref={ctaRef} className="flex items-center gap-3 mb-4">
-            <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden flex-shrink-0">
+            <div className="flex items-center border-2 border-line rounded-control overflow-hidden flex-shrink-0">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-all active:scale-90"
+                className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90"
               >
                 −
               </button>
-              <span className="w-10 text-center font-extrabold text-[#2A2320] text-base">{quantity}</span>
+              <span className="w-10 text-center font-extrabold text-ink text-base">{quantity}</span>
               <button
                 onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))}
                 disabled={atMax || outOfStock}
-                className="w-11 h-12 flex items-center justify-center text-[#2A2320] font-bold text-xl hover:bg-[#EDE5D8] transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
+                className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
               >
                 +
               </button>
@@ -597,7 +597,7 @@ export default function ProductDetailClient({
             <button
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className={`flex-1 h-12 rounded-xl font-extrabold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-sm text-sm ${
+              className={`flex-1 h-12 rounded-control font-extrabold text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-sm text-sm ${
                 cartStatus === "added"
                   ? "scale-95 bg-green-500"
                   : cartStatus === "blocked" || outOfStock
@@ -624,7 +624,7 @@ export default function ProductDetailClient({
           </div>
 
           {atMax && !outOfStock && (
-            <p className="text-sm font-bold text-orange-600 mb-3 -mt-1 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2 inline-block">
+            <p className="text-sm font-bold text-orange-600 mb-3 -mt-1 bg-orange-50 border border-orange-200 rounded-control px-3 py-2 inline-block">
               {t("pdp.thatsAll").replace("{n}", String(stock))}
             </p>
           )}
@@ -632,10 +632,10 @@ export default function ProductDetailClient({
           {/* Wishlist */}
           <button
             onClick={() => toggle(product.id, product.price)}
-            className={`w-full h-12 rounded-xl border-2 font-semibold transition-all duration-200 mb-7 flex items-center justify-center gap-2 text-sm ${
+            className={`w-full h-12 rounded-control border-2 font-semibold transition-all duration-200 mb-7 flex items-center justify-center gap-2 text-sm ${
               has(product.id)
                 ? "border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] hover:bg-[#F5F8F7]"
+                : "border-line text-ink-soft hover:border-accent hover:text-accent hover:bg-[#F5F8F7]"
             }`}
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill={has(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
@@ -645,7 +645,7 @@ export default function ProductDetailClient({
           </button>
 
           {/* Trust bar */}
-          <div className="bg-[#F5F0EB] rounded-2xl p-5 space-y-3">
+          <div className="bg-canvas rounded-card p-5 space-y-3">
             {[
               { icon: "🌿", text: t("pdp.trustOrganic") },
               { icon: "🚀", text: t("pdp.trustShipping").replace("{n}", String(freeShippingThreshold)) },
@@ -654,7 +654,7 @@ export default function ProductDetailClient({
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-3">
                 <span className="text-base">{item.icon}</span>
-                <span className="text-sm text-[#5E5450] font-medium">{item.text}</span>
+                <span className="text-sm text-ink-soft font-medium">{item.text}</span>
               </div>
             ))}
           </div>
@@ -663,7 +663,7 @@ export default function ProductDetailClient({
 
       {/* ══ TABS ══ */}
       <div className="mt-16">
-        <div className="flex border-b-2 border-[#DDD5CC] mb-8 overflow-x-auto overflow-y-hidden">
+        <div className="flex border-b-2 border-line mb-8 overflow-x-auto overflow-y-hidden">
           {(
             [
               { id: "description", label: t("pdp.tabDescription") },
@@ -676,8 +676,8 @@ export default function ProductDetailClient({
               onClick={() => setActiveTab(tab.id)}
               className={`px-5 py-3 font-bold text-sm whitespace-nowrap transition-all duration-200 border-b-2 -mb-0.5 ${
                 activeTab === tab.id
-                  ? "border-[#5E9E8C] text-[#5E9E8C]"
-                  : "border-transparent text-[#9A8E88] hover:text-[#5E5450]"
+                  ? "border-accent text-accent"
+                  : "border-transparent text-ink-muted hover:text-ink-soft"
               }`}
             >
               {tab.label}
@@ -688,12 +688,12 @@ export default function ProductDetailClient({
         <div className="max-w-2xl">
           {activeTab === "description" && (
             <div className="space-y-6 transition-opacity">
-              <p className="text-[#5E5450] leading-relaxed whitespace-pre-line">{product.description}</p>
+              <p className="text-ink-soft leading-relaxed whitespace-pre-line">{product.description}</p>
               <ul className="space-y-2.5">
                 {features.map((point) => (
                   <li key={point} className="flex items-start gap-3">
-                    <span className="mt-0.5 w-5 h-5 rounded-full bg-[#EAF2F0] text-[#5E9E8C] flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>
-                    <span className="text-sm text-[#5E5450]">{point}</span>
+                    <span className="mt-0.5 w-5 h-5 rounded-full bg-accent-soft text-accent flex items-center justify-center text-xs font-bold flex-shrink-0">✓</span>
+                    <span className="text-sm text-ink-soft">{point}</span>
                   </li>
                 ))}
               </ul>
@@ -712,21 +712,21 @@ export default function ProductDetailClient({
                   { label: t("pdp.specCertification"), value: product.certification || "" },
                   { label: t("pdp.specOrigin"),        value: product.origin || "" },
                 ].filter((item) => item.value).map((item) => (
-                  <div key={item.label} className="bg-[#F5F0EB] rounded-2xl p-4 border border-[#DDD5CC]">
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">{item.label}</p>
-                    <p className="font-bold text-[#2A2320] text-sm">{item.value}</p>
+                  <div key={item.label} className="bg-canvas rounded-card p-4 border border-line">
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">{item.label}</p>
+                    <p className="font-bold text-ink text-sm">{item.value}</p>
                   </div>
                 ))}
               </div>
               <div>
-                <h4 className="font-bold text-[#2A2320] mb-3">{t("pdp.careTitle")}</h4>
+                <h4 className="font-bold text-ink mb-3">{t("pdp.careTitle")}</h4>
                 <ul className="space-y-2">
                   {(product.careInstructions && product.careInstructions.length
                     ? product.careInstructions
                     : [t("pdp.care1"), t("pdp.care2"), t("pdp.care3"), t("pdp.care4"), t("pdp.care5")]
                   ).map((care) => (
-                    <li key={care} className="flex items-start gap-2 text-sm text-[#5E5450]">
-                      <span className="text-[#9A8E88] font-bold mt-0.5">·</span>
+                    <li key={care} className="flex items-start gap-2 text-sm text-ink-soft">
+                      <span className="text-ink-muted font-bold mt-0.5">·</span>
                       {care}
                     </li>
                   ))}
@@ -746,11 +746,11 @@ export default function ProductDetailClient({
                 // Gift wrap price follows the admin setting (0 ⇒ "free") — never claim "free" while checkout charges.
                 { icon: "🎁", title: t("pdp.delivGiftTitle"), desc: t("pdp.delivGiftDesc").replace("{price}", giftWrapPrice > 0 ? `${giftWrapPrice} ₾` : t("cart.free").toLowerCase()), bg: "#F0EDE8" },
               ].map((item) => (
-                <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl border border-[#DDD5CC]" style={{ backgroundColor: item.bg }}>
+                <div key={item.title} className="flex items-start gap-4 p-5 rounded-card border border-line" style={{ backgroundColor: item.bg }}>
                   <span className="text-2xl flex-shrink-0">{item.icon}</span>
                   <div>
-                    <p className="font-bold text-[#2A2320] mb-1">{item.title}</p>
-                    <p className="text-sm text-[#5E5450] leading-relaxed">{item.desc}</p>
+                    <p className="font-bold text-ink mb-1">{item.title}</p>
+                    <p className="text-sm text-ink-soft leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -774,25 +774,25 @@ export default function ProductDetailClient({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 id="size-guide-title" className="text-xl font-extrabold text-[#2A2320]">{t("pdp.sizeGuide")}</h3>
-              <button onClick={() => setSizeGuide(false)} aria-label="Close size guide" className="w-9 h-9 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-colors font-bold">✕</button>
+              <h3 id="size-guide-title" className="text-xl font-extrabold text-ink">{t("pdp.sizeGuide")}</h3>
+              <button onClick={() => setSizeGuide(false)} aria-label="Close size guide" className="w-9 h-9 rounded-full bg-canvas flex items-center justify-center text-ink-soft hover:bg-panel transition-colors font-bold">✕</button>
             </div>
-            <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+            <div className="overflow-x-auto rounded-card border border-line">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ backgroundColor: "#EDE5D8" }}>
                     {[t("sg.colSize"), t("sg.colAge"), t("sg.colHeight"), t("sg.colWeight")].map((h) => (
-                      <th key={h} className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{h}</th>
+                      <th key={h} className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {sizeGuideRows.map((row, i) => (
-                    <tr key={row.size} className={`border-t border-[#DDD5CC] transition-colors ${selectedSize === row.size ? "bg-[#EAF2F0]" : i % 2 === 0 ? "bg-white" : "bg-[#FAF7F4]"}`}>
-                      <td className="px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{row.size}</td>
-                      <td className="px-4 py-3 text-[#5E5450]">{row.age}</td>
-                      <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.height}</td>
-                      <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.weight}</td>
+                    <tr key={row.size} className={`border-t border-line transition-colors ${selectedSize === row.size ? "bg-accent-soft" : i % 2 === 0 ? "bg-white" : "bg-[#FAF7F4]"}`}>
+                      <td className="px-4 py-3 font-bold text-ink whitespace-nowrap">{row.size}</td>
+                      <td className="px-4 py-3 text-ink-soft">{row.age}</td>
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.height}</td>
+                      <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.weight}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -803,17 +803,17 @@ export default function ProductDetailClient({
       )}
 
       {/* ══ MOBILE STICKY CTA ══ */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-[#DDD5CC] px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
+      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden">
-            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-all active:scale-90">−</button>
-            <span className="w-8 text-center font-extrabold text-[#2A2320]">{quantity}</span>
-            <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-[#EDE5D8] transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
+          <div className="flex items-center border-2 border-line rounded-control overflow-hidden">
+            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90">−</button>
+            <span className="w-8 text-center font-extrabold text-ink">{quantity}</span>
+            <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
           </div>
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`flex-1 h-11 rounded-xl font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
+            className={`flex-1 h-11 rounded-control font-extrabold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
               cartStatus === "added" ? "bg-green-500 scale-95" :
               cartStatus === "blocked" || outOfStock ? "bg-red-500" :
               "hover:opacity-90 active:scale-95"

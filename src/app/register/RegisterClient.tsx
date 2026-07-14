@@ -118,19 +118,19 @@ export default function RegisterClient() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.createAccount")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-1">{t("auth.joinFamily")}</p>
+          <h1 className="text-2xl font-extrabold text-ink">{t("auth.createAccount")}</h1>
+          <p className="text-ink-muted text-sm mt-1">{t("auth.joinFamily")}</p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
+        <div className="bg-white rounded-3xl border border-line shadow-sm p-7 space-y-5">
 
           {pendingConfirm ? (
             /* Email confirmation pending — type the code we emailed (or click the link in it) */
             <form onSubmit={handleVerifySignupCode} className="space-y-4">
               <div className="text-center">
                 <div className="text-4xl mb-2">📬</div>
-                <p className="font-extrabold text-[#2A2320]">{t("auth.confirmEmailTitle")}</p>
-                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.confirmEmailBody").replace("{email}", email)}</p>
+                <p className="font-extrabold text-ink">{t("auth.confirmEmailTitle")}</p>
+                <p className="text-sm text-ink-muted mt-1">{t("auth.confirmEmailBody").replace("{email}", email)}</p>
               </div>
               <input
                 value={signupCode}
@@ -138,7 +138,7 @@ export default function RegisterClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
               {codeError && <p className="text-red-400 text-xs font-semibold text-center">{codeError}</p>}
               <Button type="submit" disabled={signupCode.length < 6} loading={codeBusy} loadingText={t("auth.verifying")} fullWidth>
@@ -148,7 +148,7 @@ export default function RegisterClient() {
                 type="button"
                 onClick={handleResendSignupCode}
                 disabled={resendLeft > 0 || codeBusy}
-                className="w-full text-center text-xs font-semibold text-[#5E9E8C] hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+                className="w-full text-center text-xs font-semibold text-accent hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
               >
                 {resendLeft > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendLeft)) : t("auth.emailOtpResend")}
               </button>
@@ -158,7 +158,7 @@ export default function RegisterClient() {
           {/* Social buttons */}
           <div>
             <button onClick={() => handleSocial("google")} disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60">
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border-2 border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60">
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
             </button>
@@ -166,34 +166,34 @@ export default function RegisterClient() {
 
           {/* Divider */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#DDD5CC]" />
-            <span className="text-xs font-bold text-[#9A8E88]">{t("auth.or")}</span>
-            <div className="flex-1 h-px bg-[#DDD5CC]" />
+            <div className="flex-1 h-px bg-line" />
+            <span className="text-xs font-bold text-ink-muted">{t("auth.or")}</span>
+            <div className="flex-1 h-px bg-line" />
           </div>
 
           {/* Form */}
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.fullName")}</label>
+              <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.fullName")}</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)}
                 placeholder="Ana Beridze" required
-                className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors" />
+                className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.emailAddress")}</label>
+              <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.emailAddress")}</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors" />
+                className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.password")}</label>
+              <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.password")}</label>
               <div className="relative">
                 <input type={showPass ? "text" : "password"} value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t("auth.minChars")} required
-                  className="w-full h-11 px-4 pr-11 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors" />
+                  className="w-full h-11 px-4 pr-11 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors" />
                 <button type="button" onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8E88] hover:text-[#5E5450] transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     {showPass
                       ? <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" />
@@ -205,12 +205,12 @@ export default function RegisterClient() {
               <PasswordStrength password={password} t={t} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.confirmPassword")}</label>
+              <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.confirmPassword")}</label>
               <input type={showPass ? "text" : "password"} value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder={t("auth.repeatPassword")} required
-                className={`w-full h-11 px-4 rounded-xl border-2 text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] outline-none transition-colors ${
-                  confirm && confirm !== password ? "border-red-300 focus:border-red-400" : "border-[#DDD5CC] focus:border-[#5E9E8C]"
+                className={`w-full h-11 px-4 rounded-control border-2 text-sm font-medium text-ink placeholder:text-[#C8B8B0] outline-none transition-colors ${
+                  confirm && confirm !== password ? "border-red-300 focus:border-red-400" : "border-line focus:border-accent"
                 }`} />
               {confirm && confirm !== password && (
                 <p className="text-red-400 text-[10px] font-semibold mt-1">{t("auth.passwordsNoMatch")}</p>
@@ -220,12 +220,12 @@ export default function RegisterClient() {
             {/* Terms */}
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded accent-[#5E9E8C] flex-shrink-0" />
-              <span className="text-xs text-[#5E5450] leading-relaxed">
+                className="mt-0.5 w-4 h-4 rounded accent-accent flex-shrink-0" />
+              <span className="text-xs text-ink-soft leading-relaxed">
                 {t("auth.agreeTerms")}{" "}
-                <a href="/terms" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.terms")}</a>{" "}
+                <a href="/terms" className="text-accent font-semibold hover:underline">{t("footer.terms")}</a>{" "}
                 {t("auth.and")}{" "}
-                <a href="/privacy" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.privacy")}</a>
+                <a href="/privacy" className="text-accent font-semibold hover:underline">{t("footer.privacy")}</a>
               </span>
             </label>
 
@@ -251,9 +251,9 @@ export default function RegisterClient() {
           )}
         </div>
 
-        <p className="text-center text-sm text-[#9A8E88] mt-5">
+        <p className="text-center text-sm text-ink-muted mt-5">
           {t("auth.alreadyHaveAccount")}{" "}
-          <Link href="/login" className="font-bold text-[#5E9E8C] hover:underline">{t("auth.signIn")} →</Link>
+          <Link href="/login" className="font-bold text-accent hover:underline">{t("auth.signIn")} →</Link>
         </p>
       </div>
     </div>

@@ -33,7 +33,7 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
 
   if (soldOut) {
     return (
-      <button disabled className="w-full py-2.5 rounded-xl text-sm font-bold bg-red-500 text-white cursor-not-allowed">
+      <button disabled className="w-full py-2.5 rounded-control text-sm font-bold bg-red-500 text-white cursor-not-allowed">
         {t("product.outOfStock")}
       </button>
     );
@@ -42,7 +42,7 @@ function AddToCartInline({ product, t }: { product: Product; t: (key: Translatio
   return (
     <button
       onClick={handle}
-      className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+      className={`w-full py-2.5 rounded-control text-sm font-bold transition-all duration-200 ${
         status === "added" ? "bg-green-500 text-white" :
         status === "blocked" ? "bg-red-500 text-white" :
         "text-white hover:opacity-90 active:scale-95"
@@ -93,13 +93,13 @@ export default function WishlistClient() {
   if (saved.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-        <div className="w-28 h-28 rounded-full bg-[#EDE5D8] flex items-center justify-center text-5xl mb-6">
+        <div className="w-28 h-28 rounded-full bg-panel flex items-center justify-center text-5xl mb-6">
           🤍
         </div>
-        <h2 className="text-2xl font-extrabold text-[#2A2320] mb-3">
+        <h2 className="text-2xl font-extrabold text-ink mb-3">
           {t("wl.emptyTitle")}
         </h2>
-        <p className="text-[#5E5450] mb-8 max-w-sm text-sm leading-relaxed">
+        <p className="text-ink-soft mb-8 max-w-sm text-sm leading-relaxed">
           {t("wl.emptySubtitle")}
         </p>
         <Link
@@ -118,8 +118,8 @@ export default function WishlistClient() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#2A2320]">{t("wl.title")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-1">
+          <h1 className="text-3xl font-extrabold text-ink">{t("wl.title")}</h1>
+          <p className="text-ink-muted text-sm mt-1">
             {saved.length === 1 ? t("wl.saved1") : t("wl.saved").replace("{n}", String(saved.length))}
           </p>
           {lowStockCount > 0 && (
@@ -145,14 +145,14 @@ export default function WishlistClient() {
           )}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-sm font-bold text-[#9A8E88] hover:text-[#5E9E8C] border border-[#DDD5CC] hover:border-[#5E9E8C] px-3 py-1.5 rounded-full transition-all active:scale-95"
+            className="flex items-center gap-1.5 text-sm font-bold text-ink-muted hover:text-accent border border-line hover:border-accent px-3 py-1.5 rounded-full transition-all active:scale-95"
           >
             {copied ? (
               <>
-                <svg className="w-3.5 h-3.5 text-[#5E9E8C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-[#5E9E8C]">{t("wl.copied")}</span>
+                <span className="text-accent">{t("wl.copied")}</span>
               </>
             ) : (
               <>
@@ -165,7 +165,7 @@ export default function WishlistClient() {
           </button>
           <Link
             href="/"
-            className="text-sm font-semibold text-[#5E9E8C] hover:underline flex items-center gap-1"
+            className="text-sm font-semibold text-accent hover:underline flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -180,7 +180,7 @@ export default function WishlistClient() {
         {saved.map((product) => (
           <div
             key={product.id}
-            className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white rounded-card border border-line overflow-hidden shadow-sm hover:shadow-md transition-shadow"
           >
             {/* Image */}
             <Link href={`/products/${product.slug}`}>
@@ -208,11 +208,11 @@ export default function WishlistClient() {
 
             {/* Info */}
             <div className="p-3.5">
-              <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">
+              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
                 {categoryLabel(product.category, t)}
               </p>
               <Link href={`/products/${product.slug}`}>
-                <h3 className="font-bold text-[#2A2320] text-sm mb-2 hover:text-[#5E9E8C] transition-colors line-clamp-2 leading-snug">
+                <h3 className="font-bold text-ink text-sm mb-2 hover:text-accent transition-colors line-clamp-2 leading-snug">
                   {product.name}
                 </h3>
               </Link>
@@ -228,15 +228,15 @@ export default function WishlistClient() {
                 const oldPrice = priceDrop(product.id);
                 return (
                   <div className="mb-3 flex items-center gap-2 flex-wrap">
-                    <span className="font-extrabold text-[#2A2320]">
+                    <span className="font-extrabold text-ink">
                       {formatPrice(effectivePrice(product))}
                       {discountPercent(product) > 0 && (
-                        <span className="ml-1.5 text-xs text-[#9A8E88] line-through">{formatPrice(product.price)}</span>
+                        <span className="ml-1.5 text-xs text-ink-muted line-through">{formatPrice(product.price)}</span>
                       )}
                     </span>
                     {oldPrice !== null && (
                       <>
-                        <span className="text-xs text-[#9A8E88] line-through">{formatPrice(oldPrice)}</span>
+                        <span className="text-xs text-ink-muted line-through">{formatPrice(oldPrice)}</span>
                         <span className="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                           {t("wl.priceDrop")}
                         </span>

@@ -85,7 +85,7 @@ function CartItemCard({
   const atMax = stock !== null && item.quantity >= stock;
   return (
     <div
-      className="bg-white rounded-2xl border-2 p-4 sm:p-5 flex gap-3 sm:gap-4 hover:shadow-sm transition-all"
+      className="bg-white rounded-card border-2 p-4 sm:p-5 flex gap-3 sm:gap-4 hover:shadow-sm transition-all"
       style={{ borderColor: selected ? "#5E9E8C" : "#DDD5CC" }}
     >
       {/* Checkbox */}
@@ -96,7 +96,7 @@ function CartItemCard({
       {/* Thumbnail */}
       <Link href={`/products/${item.product.slug}`} className="flex-shrink-0">
         <div
-          className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center text-4xl sm:text-5xl transition-opacity overflow-hidden"
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-control flex items-center justify-center text-4xl sm:text-5xl transition-opacity overflow-hidden"
           style={{ backgroundColor: item.product.cardColor, opacity: selected ? 1 : 0.5 }}
         >
           {item.product.imageUrl ? (
@@ -115,19 +115,19 @@ function CartItemCard({
           <div className="min-w-0">
             <Link href={`/products/${item.product.slug}`}>
               <h3
-                className="font-bold text-sm sm:text-base leading-tight hover:text-[#5E9E8C] transition-colors line-clamp-2"
+                className="font-bold text-sm sm:text-base leading-tight hover:text-accent transition-colors line-clamp-2"
                 style={{ color: selected ? "#2A2320" : "#9A8E88" }}
               >
                 {item.product.name}
               </h3>
             </Link>
-            <p className="text-xs sm:text-sm text-[#9A8E88] mt-0.5">
+            <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
               {colorLabel(item.selectedColor, t)}
               {item.selectedSize !== "One Size" && ` · ${sizeLabel(item.selectedSize, t)}`}
             </p>
             {bundleName && (
               bundleMatched ? (
-                <span className="inline-block mt-1 text-[10px] font-bold text-[#5E9E8C] bg-[#EAF2F0] px-2 py-0.5 rounded-full">
+                <span className="inline-block mt-1 text-[10px] font-bold text-accent bg-accent-soft px-2 py-0.5 rounded-full">
                   🎀 {t("cart.partOfSet").replace("{name}", bundleName)}
                 </span>
               ) : (
@@ -141,7 +141,7 @@ function CartItemCard({
             type="button"
             onClick={onRemove}
             aria-label={`Remove ${item.product.name}`}
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-[#F5F0EB] text-[#9A8E88] hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-sm font-bold transition-colors"
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-canvas text-ink-muted hover:bg-red-50 hover:text-red-400 flex items-center justify-center text-sm font-bold transition-colors"
           >
             ✕
           </button>
@@ -149,17 +149,17 @@ function CartItemCard({
 
         {/* Qty + price */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden">
+          <div className="flex items-center border-2 border-line rounded-control overflow-hidden">
             <button
               type="button"
               onClick={() => onQty(item.quantity - 1)}
               aria-label="Decrease quantity"
-              className="w-9 h-9 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] transition-colors disabled:opacity-30"
+              className="w-9 h-9 flex items-center justify-center font-bold text-ink hover:bg-panel transition-colors disabled:opacity-30"
               disabled={item.quantity <= 1}
             >
               −
             </button>
-            <span className="w-9 text-center font-extrabold text-[#2A2320] text-sm select-none" aria-live="polite">
+            <span className="w-9 text-center font-extrabold text-ink text-sm select-none" aria-live="polite">
               {item.quantity}
             </span>
             <button
@@ -167,7 +167,7 @@ function CartItemCard({
               onClick={() => onQty(item.quantity + 1)}
               aria-label="Increase quantity"
               disabled={atMax}
-              className="w-9 h-9 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-9 h-9 flex items-center justify-center font-bold text-ink hover:bg-panel transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               +
             </button>
@@ -175,9 +175,9 @@ function CartItemCard({
 
           <div className="text-right">
             {bundleMatched ? (
-              <p className="text-[11px] text-[#5E9E8C] font-semibold">{t("cart.setShare")}</p>
+              <p className="text-[11px] text-accent font-semibold">{t("cart.setShare")}</p>
             ) : (
-              <p className="text-[11px] text-[#9A8E88] flex items-center justify-end gap-1">
+              <p className="text-[11px] text-ink-muted flex items-center justify-end gap-1">
                 {discountPercent(item.product) > 0 && (
                   <span className="line-through">{formatPrice(item.product.price)}</span>
                 )}
@@ -203,13 +203,13 @@ function CartItemCard({
 function EmptyCart({ t }: { t: (key: TranslationKey) => string }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-      <div className="w-28 h-28 rounded-full bg-[#EDE5D8] flex items-center justify-center text-5xl mb-6">
+      <div className="w-28 h-28 rounded-full bg-panel flex items-center justify-center text-5xl mb-6">
         🛒
       </div>
-      <h2 className="text-2xl font-extrabold text-[#2A2320] mb-3">
+      <h2 className="text-2xl font-extrabold text-ink mb-3">
         {t("cart.empty.title")}
       </h2>
-      <p className="text-[#5E5450] mb-8 max-w-sm leading-relaxed text-sm">
+      <p className="text-ink-soft mb-8 max-w-sm leading-relaxed text-sm">
         {t("cart.empty.subtitle")}
       </p>
       <Link
@@ -231,8 +231,8 @@ function CartSuggestions({ cartIds, t }: { cartIds: string[]; t: (key: Translati
   if (suggestions.length === 0) return null;
 
   return (
-    <section className="mt-20 pt-12 border-t border-[#DDD5CC]">
-      <h2 className="text-2xl font-extrabold text-[#2A2320] mb-8">
+    <section className="mt-20 pt-12 border-t border-line">
+      <h2 className="text-2xl font-extrabold text-ink mb-8">
         {t("product.youMightLike")}
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
@@ -395,14 +395,14 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#2A2320]">{t("cart.title")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-1">
+          <h1 className="text-3xl font-extrabold text-ink">{t("cart.title")}</h1>
+          <p className="text-ink-muted text-sm mt-1">
             {items.length === 1 ? t("cart.item1") : t("cart.items").replace("{n}", String(items.length))}
           </p>
         </div>
         <Link
           href="/products"
-          className="flex items-center gap-1.5 text-sm font-semibold text-[#5E9E8C] hover:underline"
+          className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -417,7 +417,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
         <div className="lg:col-span-2 space-y-4">
 
           {/* Select-all bar */}
-          <div className="flex items-center justify-between bg-white rounded-2xl border border-[#DDD5CC] px-5 py-3">
+          <div className="flex items-center justify-between bg-white rounded-card border border-line px-5 py-3">
             <button
               type="button"
               onClick={toggleAll}
@@ -441,12 +441,12 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                   <div className="w-2.5 h-0.5 rounded-full" style={{ backgroundColor: "#5E9E8C" }} />
                 )}
               </div>
-              <span className="text-sm font-bold text-[#2A2320] group-hover:text-[#5E9E8C] transition-colors">
+              <span className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
                 {allChecked ? t("cart.deselectAll") : t("cart.selectAll")}
               </span>
             </button>
 
-            <span className="text-xs text-[#9A8E88] font-semibold">
+            <span className="text-xs text-ink-muted font-semibold">
               {t("cart.selectedOf").replace("{n}", String(validSelected.size)).replace("{total}", String(items.length))}
             </span>
           </div>
@@ -478,7 +478,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
             <div className="flex justify-end pt-1">
               <button
                 onClick={clearCart}
-                className="text-xs text-[#9A8E88] hover:text-red-400 transition-colors font-semibold underline underline-offset-2"
+                className="text-xs text-ink-muted hover:text-red-400 transition-colors font-semibold underline underline-offset-2"
               >
                 {t("cart.removeAll")}
               </button>
@@ -488,9 +488,9 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
 
         {/* ── Order summary (1/3) ── */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 bg-white rounded-3xl border border-[#DDD5CC] p-6 space-y-5">
+          <div className="sticky top-24 bg-white rounded-3xl border border-line p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-extrabold text-[#2A2320]">{t("cart.orderSummary")}</h2>
+              <h2 className="text-lg font-extrabold text-ink">{t("cart.orderSummary")}</h2>
               {validSelected.size > 0 && (
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#EAF2F0", color: "#5E9E8C" }}>
                   {selectedCount === 1 ? t("cart.item1") : t("cart.items").replace("{n}", String(selectedCount))}
@@ -500,15 +500,15 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
 
             {/* Shipping progress */}
             {selectedSubtotal > 0 ? (
-              <div className="p-4 rounded-2xl" style={{ backgroundColor: "#EAF2F0" }}>
+              <div className="p-4 rounded-card" style={{ backgroundColor: "#EAF2F0" }}>
                 {toFree > 0 ? (
                   <>
-                    <p className="text-sm font-semibold text-[#5E5450] mb-2">
+                    <p className="text-sm font-semibold text-ink-soft mb-2">
                       {t("cart.addMoreForFree").split("{amount}")[0]}
-                      <span className="font-extrabold text-[#5E9E8C]">{formatPrice(toFree)}</span>
+                      <span className="font-extrabold text-accent">{formatPrice(toFree)}</span>
                       {t("cart.addMoreForFree").split("{amount}")[1]}
                     </p>
-                    <div className="h-2.5 bg-[#C8DDD8] rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-sage rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{ width: `${progressPct}%`, backgroundColor: "#5E9E8C" }}
@@ -516,62 +516,62 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center gap-2 font-bold text-[#5E9E8C]">
+                  <div className="flex items-center gap-2 font-bold text-accent">
                     <span className="text-xl">🎉</span>
                     <span>{t("drawer.freeUnlocked")}</span>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="p-4 rounded-2xl bg-[#F5F0EB] text-center">
-                <p className="text-sm text-[#9A8E88] font-medium">{t("cart.selectToSeeTotal")}</p>
+              <div className="p-4 rounded-card bg-canvas text-center">
+                <p className="text-sm text-ink-muted font-medium">{t("cart.selectToSeeTotal")}</p>
               </div>
             )}
 
             {/* Prices */}
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-[#5E5450] font-medium">
+                <span className="text-ink-soft font-medium">
                   {t("cart.subtotal")}
                   {validSelected.size > 0 && (
-                    <span className="text-[#9A8E88] ml-1">
+                    <span className="text-ink-muted ml-1">
                       ({validSelected.size === 1 ? t("cart.item1") : t("cart.items").replace("{n}", String(validSelected.size))})
                     </span>
                   )}
                 </span>
-                <span className="font-bold text-[#2A2320]">{formatPrice(selectedSubtotal)}</span>
+                <span className="font-bold text-ink">{formatPrice(selectedSubtotal)}</span>
               </div>
               {appliedPromo?.type === "percent" && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#5E9E8C] font-medium">{t("cart.discount").replace("{n}", String(appliedPromo.value))}</span>
-                  <span className="font-bold text-[#5E9E8C]">−{formatPrice(selectedSubtotal - discountedSubtotal)}</span>
+                  <span className="text-accent font-medium">{t("cart.discount").replace("{n}", String(appliedPromo.value))}</span>
+                  <span className="font-bold text-accent">−{formatPrice(selectedSubtotal - discountedSubtotal)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-[#5E5450] font-medium">{t("cart.shipping")}</span>
+                <span className="text-ink-soft font-medium">{t("cart.shipping")}</span>
                 {selectedSubtotal === 0 ? (
-                  <span className="font-bold text-[#9A8E88]">—</span>
+                  <span className="font-bold text-ink-muted">—</span>
                 ) : shipping === 0 ? (
-                  <span className="font-bold text-[#5E9E8C]">{t("cart.free")} 🎉</span>
+                  <span className="font-bold text-accent">{t("cart.free")} 🎉</span>
                 ) : (
-                  <span className="font-bold text-[#2A2320]">{formatPrice(shipping)}</span>
+                  <span className="font-bold text-ink">{formatPrice(shipping)}</span>
                 )}
               </div>
-              <div className="h-px bg-[#DDD5CC]" />
+              <div className="h-px bg-line" />
               <div className="flex justify-between">
-                <span className="font-extrabold text-[#2A2320]">{t("cart.total")}</span>
-                <span className="font-extrabold text-[#2A2320] text-xl">{formatPrice(total)}</span>
+                <span className="font-extrabold text-ink">{t("cart.total")}</span>
+                <span className="font-extrabold text-ink text-xl">{formatPrice(total)}</span>
               </div>
             </div>
 
             {/* Promo */}
             <div>
               {appliedPromo ? (
-                <div className="flex items-center justify-between bg-[#EAF2F0] rounded-xl px-4 py-3">
+                <div className="flex items-center justify-between bg-accent-soft rounded-control px-4 py-3">
                   <div>
-                    <p className="text-xs font-bold text-[#5E9E8C]">{promoMsg}</p>
+                    <p className="text-xs font-bold text-accent">{promoMsg}</p>
                   </div>
-                  <button onClick={removePromo} className="text-xs text-[#9A8E88] hover:text-red-400 font-bold transition-colors ml-3">
+                  <button onClick={removePromo} className="text-xs text-ink-muted hover:text-red-400 font-bold transition-colors ml-3">
                     {t("common.remove")}
                   </button>
                 </div>
@@ -584,12 +584,12 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                       onChange={(e) => { setPromoCode(e.target.value); setPromoMsg(""); }}
                       onKeyDown={(e) => e.key === "Enter" && handlePromo()}
                       placeholder={t("cart.promoPlaceholder")}
-                      className="flex-1 border-2 border-[#DDD5CC] rounded-xl px-3 py-2.5 text-sm font-medium text-[#2A2320] placeholder-[#C8B8B0] focus:outline-none focus:border-[#5E9E8C] transition-colors bg-white"
+                      className="flex-1 border-2 border-line rounded-control px-3 py-2.5 text-sm font-medium text-ink placeholder-[#C8B8B0] focus:outline-none focus:border-accent transition-colors bg-white"
                     />
                     <button
                       onClick={handlePromo}
                       disabled={promoBusy}
-                      className="px-4 py-2.5 rounded-xl border-2 border-[#DDD5CC] text-sm font-bold text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors disabled:opacity-50"
+                      className="px-4 py-2.5 rounded-control border-2 border-line text-sm font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors disabled:opacity-50"
                     >
                       {promoBusy ? "…" : t("common.apply")}
                     </button>
@@ -600,7 +600,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                       {promoSignin && (
                         <>
                           {" "}
-                          <Link href="/login" className="text-[#5E9E8C] underline font-bold">
+                          <Link href="/login" className="text-accent underline font-bold">
                             {t("cart.promoSignIn")}
                           </Link>
                         </>
@@ -625,7 +625,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
                    never trusts the stored discount amount. */
                 localStorage.setItem("loov_checkout_promo", appliedPromoCode);
               }}
-              className="w-full py-3.5 rounded-2xl font-extrabold text-white text-base transition-all flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3.5 rounded-card font-extrabold text-white text-base transition-all flex items-center justify-center gap-2 shadow-sm"
               style={{
                 backgroundColor: validSelected.size > 0 ? "#5E9E8C" : "#C8B8B0",
                 cursor: validSelected.size > 0 ? "pointer" : "not-allowed",
@@ -645,7 +645,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
               ].map((trust) => (
                 <div key={trust.label} className="flex flex-col items-center gap-1 text-center">
                   <span className="text-lg">{trust.icon}</span>
-                  <span className="text-[10px] text-[#9A8E88] font-semibold">{trust.label}</span>
+                  <span className="text-[10px] text-ink-muted font-semibold">{trust.label}</span>
                 </div>
               ))}
             </div>

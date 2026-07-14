@@ -23,7 +23,7 @@ function unitPrice(p: CatalogProduct): number {
 
 function Thumb({ p, size = "w-12 h-12", text = "text-2xl" }: { p?: CatalogProduct; size?: string; text?: string }) {
   return (
-    <div className={`${size} rounded-lg flex items-center justify-center ${text} flex-shrink-0 overflow-hidden border border-[#EDE5D8]`} style={{ backgroundColor: p?.cardColor ?? "#F5F0EB" }}>
+    <div className={`${size} rounded-lg flex items-center justify-center ${text} flex-shrink-0 overflow-hidden border border-panel`} style={{ backgroundColor: p?.cardColor ?? "#F5F0EB" }}>
       {p?.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
@@ -50,9 +50,9 @@ function normalize(r: BundleRow) {
   };
 }
 
-const SECTION = "bg-white rounded-2xl border border-[#DDD5CC] p-5";
-const LABEL = "block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5";
-const INPUT = "w-full h-10 px-3 rounded-xl border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]";
+const SECTION = "bg-white rounded-card border border-line p-5";
+const LABEL = "block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5";
+const INPUT = "w-full h-10 px-3 rounded-control border border-line text-sm outline-none focus:border-accent";
 
 export default function BundleEditorClient({ slug }: { slug: string }) {
   const [loaded, setLoaded] = useState<BundleRow | null>(null);
@@ -115,14 +115,14 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
     return (
       <div className="max-w-xl py-20 text-center">
         <p className="text-4xl mb-3">🤔</p>
-        <p className="font-extrabold text-[#2A2320] mb-2">Bundle not found</p>
-        <p className="text-sm text-[#9A8E88] mb-5">It may have been deleted, or the bundles table isn&apos;t set up (supabase/bundles.sql).</p>
-        <Link href="/admin/bundles" className="font-bold text-[#5E9E8C] hover:underline">← Back to bundles</Link>
+        <p className="font-extrabold text-ink mb-2">Bundle not found</p>
+        <p className="text-sm text-ink-muted mb-5">It may have been deleted, or the bundles table isn&apos;t set up (supabase/bundles.sql).</p>
+        <Link href="/admin/bundles" className="font-bold text-accent hover:underline">← Back to bundles</Link>
       </div>
     );
   }
   if (!draft) {
-    return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>;
   }
 
   const items = draft.items ?? [];
@@ -225,22 +225,22 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
       {/* ── Top bar ── */}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <Link href="/admin/bundles" className="text-sm font-bold text-[#5E9E8C] hover:underline whitespace-nowrap">← Bundles</Link>
-          <h1 className="text-xl font-extrabold text-[#2A2320] truncate">{draft.name}</h1>
-          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase ${draft.active ? "bg-[#EAF2F0] text-[#3A7A68]" : "bg-[#F5F0EB] text-[#9A8E88]"}`}>
+          <Link href="/admin/bundles" className="text-sm font-bold text-accent hover:underline whitespace-nowrap">← Bundles</Link>
+          <h1 className="text-xl font-extrabold text-ink truncate">{draft.name}</h1>
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase ${draft.active ? "bg-accent-soft text-accent-deep" : "bg-canvas text-ink-muted"}`}>
             {draft.active ? "● Live" : "○ Hidden"}
           </span>
         </div>
         <div className="flex items-center gap-2">
           {draft.active && (
-            <a href={`/bundles/${slug}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#5E9E8C] border border-[#C8DDD8] rounded-full px-3 py-1.5 hover:bg-[#EAF2F0] transition-colors">
+            <a href={`/bundles/${slug}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-accent border border-sage rounded-full px-3 py-1.5 hover:bg-accent-soft transition-colors">
               View on site ↗
             </a>
           )}
           <button
             onClick={save}
             disabled={saving || !dirty}
-            className="h-10 px-5 rounded-xl font-bold text-white text-sm disabled:opacity-40 hover:opacity-90 transition-opacity"
+            className="h-10 px-5 rounded-control font-bold text-white text-sm disabled:opacity-40 hover:opacity-90 transition-opacity"
             style={{ backgroundColor: "#5E9E8C" }}
           >
             {saving ? "Saving…" : savedFlash ? "✓ Saved" : "💾 Save changes"}
@@ -249,7 +249,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
       </div>
 
       {saveError && (
-        <div className="mb-5 rounded-xl bg-[#FEF2F2] border border-[#E5B0B0] px-4 py-3 text-sm font-semibold text-[#B03A3A]">
+        <div className="mb-5 rounded-control bg-danger-soft border border-[#E5B0B0] px-4 py-3 text-sm font-semibold text-danger">
           {saveError}{missing.length > 0 && " See the Publish panel for what's missing."}
         </div>
       )}
@@ -261,13 +261,13 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
           {/* ── Photo ── */}
           <div className={SECTION}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-extrabold text-[#2A2320] text-sm">📷 Bundle photo</h2>
-              <span className="text-[10px] text-[#9A8E88] font-semibold">Photos save instantly (no Save needed)</span>
+              <h2 className="font-extrabold text-ink text-sm">📷 Bundle photo</h2>
+              <span className="text-[10px] text-ink-muted font-semibold">Photos save instantly (no Save needed)</span>
             </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => fileRef.current?.click()}
-                className="w-32 h-32 rounded-2xl border-2 border-dashed border-[#DDD5CC] flex flex-col items-center justify-center overflow-hidden hover:border-[#5E9E8C] transition-colors flex-shrink-0"
+                className="w-32 h-32 rounded-card border-2 border-dashed border-line flex flex-col items-center justify-center overflow-hidden hover:border-accent transition-colors flex-shrink-0"
                 style={{ backgroundColor: draft.card_color ?? "#EDE5D8" }}
               >
                 {draft.image_url ? (
@@ -276,28 +276,28 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                 ) : (
                   <>
                     <span className="text-3xl mb-1">📷</span>
-                    <span className="text-[10px] font-bold text-[#9A8E88]">Click to upload</span>
+                    <span className="text-[10px] font-bold text-ink-muted">Click to upload</span>
                   </>
                 )}
               </button>
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
-              <div className="text-xs text-[#9A8E88] space-y-2">
+              <div className="text-xs text-ink-muted space-y-2">
                 <p>JPG / PNG / WEBP · max 5MB.<br />Shown on /bundles, the detail page and the homepage.</p>
                 {draft.image_url && (
                   <button
                     onClick={() => { set({ image_url: null }); }}
-                    className="text-[#B03A3A] font-bold hover:underline"
+                    className="text-danger font-bold hover:underline"
                   >
                     Remove photo (takes effect on Save)
                   </button>
                 )}
                 <div>
-                  <span className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Background (shown behind transparent photos / while empty)</span>
+                  <span className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Background (shown behind transparent photos / while empty)</span>
                   <input
                     type="color"
                     value={draft.card_color ?? "#EDE5D8"}
                     onChange={(e) => set({ card_color: e.target.value })}
-                    className="w-9 h-8 rounded-lg border border-[#DDD5CC] cursor-pointer align-middle"
+                    className="w-9 h-8 rounded-lg border border-line cursor-pointer align-middle"
                   />
                   <span className="ml-2 text-[11px] font-mono">{draft.card_color}</span>
                 </div>
@@ -307,7 +307,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
           {/* ── Texts ── */}
           <div className={SECTION}>
-            <h2 className="font-extrabold text-[#2A2320] text-sm mb-4">✏️ Texts</h2>
+            <h2 className="font-extrabold text-ink text-sm mb-4">✏️ Texts</h2>
             <div className="space-y-4">
               <div>
                 <label className={LABEL}>Name</label>
@@ -329,7 +329,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                   value={draft.description ?? ""}
                   onChange={(e) => set({ description: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 rounded-xl border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+                  className="w-full px-3 py-2 rounded-control border border-line text-sm outline-none focus:border-accent resize-y"
                 />
               </div>
               <div>
@@ -338,7 +338,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                   value={(draft.features ?? []).join("\n")}
                   onChange={(e) => set({ features: e.target.value.split("\n") })}
                   rows={4}
-                  className="w-full px-3 py-2 rounded-xl border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+                  className="w-full px-3 py-2 rounded-control border border-line text-sm outline-none focus:border-accent resize-y"
                   placeholder={"Complete 5-piece coming-home outfit\nGift box packaging available"}
                 />
               </div>
@@ -347,45 +347,45 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
           {/* ── Products ── */}
           <div className={SECTION}>
-            <h2 className="font-extrabold text-[#2A2320] text-sm mb-1">🛍️ Products in this bundle ({items.length})</h2>
-            <p className="text-xs text-[#9A8E88] mb-4">Click a product below to add it. Changes are applied on <strong>Save</strong>.</p>
+            <h2 className="font-extrabold text-ink text-sm mb-1">🛍️ Products in this bundle ({items.length})</h2>
+            <p className="text-xs text-ink-muted mb-4">Click a product below to add it. Changes are applied on <strong>Save</strong>.</p>
 
             {/* current items */}
             <div className="space-y-2 mb-4">
               {items.map((it, i) => {
                 const p = bySlug.get(it.slug);
                 return (
-                  <div key={`${it.slug}-${i}`} className={`flex items-center gap-3 flex-wrap rounded-xl border p-2.5 ${p ? "bg-[#FAFAF8] border-[#EDE5D8]" : "bg-[#FEF2F2] border-[#E5B0B0]"}`}>
+                  <div key={`${it.slug}-${i}`} className={`flex items-center gap-3 flex-wrap rounded-control border p-2.5 ${p ? "bg-surface border-panel" : "bg-danger-soft border-[#E5B0B0]"}`}>
                     <Thumb p={p} />
                     <div className="flex-1 min-w-[140px]">
                       {p ? (
-                        <p className="font-bold text-[#2A2320] text-sm leading-snug truncate">
+                        <p className="font-bold text-ink text-sm leading-snug truncate">
                           {p.name}
-                          <span className="ml-2 text-xs font-semibold text-[#9A8E88]">{formatPrice(unitPrice(p))}</span>
+                          <span className="ml-2 text-xs font-semibold text-ink-muted">{formatPrice(unitPrice(p))}</span>
                         </p>
                       ) : (
-                        <p className="font-bold text-[#B03A3A] text-sm">⚠ &ldquo;{it.slug}&rdquo; is no longer in the catalog — remove it</p>
+                        <p className="font-bold text-danger text-sm">⚠ &ldquo;{it.slug}&rdquo; is no longer in the catalog — remove it</p>
                       )}
                       <input
                         value={it.label}
                         onChange={(e) => set({ items: items.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })}
                         placeholder="Label shown to customer"
                         title="Label shown to the customer on the bundle page"
-                        className="w-full text-xs text-[#9A8E88] bg-transparent border-b border-transparent hover:border-[#DDD5CC] focus:border-[#5E9E8C] outline-none py-0.5"
+                        className="w-full text-xs text-ink-muted bg-transparent border-b border-transparent hover:border-line focus:border-accent outline-none py-0.5"
                       />
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-shrink-0">
-                      <div className="flex items-center border border-[#DDD5CC] rounded-lg overflow-hidden bg-white">
-                        <button onClick={() => setQty(i, (it.quantity ?? 1) - 1)} disabled={(it.quantity ?? 1) <= 1} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-[#F5F0EB] disabled:opacity-30 transition-colors">−</button>
+                      <div className="flex items-center border border-line rounded-lg overflow-hidden bg-white">
+                        <button onClick={() => setQty(i, (it.quantity ?? 1) - 1)} disabled={(it.quantity ?? 1) <= 1} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-canvas disabled:opacity-30 transition-colors">−</button>
                         <span className="w-7 text-center text-sm font-extrabold select-none">{it.quantity ?? 1}</span>
-                        <button onClick={() => setQty(i, (it.quantity ?? 1) + 1)} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-[#F5F0EB] transition-colors">+</button>
+                        <button onClick={() => setQty(i, (it.quantity ?? 1) + 1)} className="w-7 h-8 flex items-center justify-center font-bold hover:bg-canvas transition-colors">+</button>
                       </div>
-                      <span className="font-extrabold text-[#2A2320] text-sm w-16 text-right">
+                      <span className="font-extrabold text-ink text-sm w-16 text-right">
                         {p ? formatPrice(unitPrice(p) * (it.quantity ?? 1)) : "—"}
                       </span>
                       <button
                         onClick={() => set({ items: items.filter((_, j) => j !== i) })}
-                        className="w-7 h-7 rounded-full bg-[#FEF2F2] text-[#B03A3A] font-bold flex-shrink-0 hover:bg-red-100 transition-colors"
+                        className="w-7 h-7 rounded-full bg-danger-soft text-danger font-bold flex-shrink-0 hover:bg-red-100 transition-colors"
                         title="Remove from bundle"
                       >×</button>
                     </div>
@@ -393,27 +393,27 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                 );
               })}
               {items.length === 0 && (
-                <p className="text-xs text-[#9A8E88] rounded-xl border border-dashed border-[#DDD5CC] p-4 text-center">Empty — pick products below 👇</p>
+                <p className="text-xs text-ink-muted rounded-control border border-dashed border-line p-4 text-center">Empty — pick products below 👇</p>
               )}
             </div>
 
             {/* picker */}
-            <div className="rounded-xl border-2 border-[#5E9E8C] overflow-hidden">
-              <div className="p-2 bg-[#F5FBF9] border-b border-[#EDE5D8]">
+            <div className="rounded-control border-2 border-accent overflow-hidden">
+              <div className="p-2 bg-[#F5FBF9] border-b border-panel">
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="🔍 Search the catalog…"
-                  className="w-full h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
+                  className="w-full h-9 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent"
                 />
               </div>
-              <div className="max-h-56 overflow-y-auto divide-y divide-[#F5F0EB]">
+              <div className="max-h-56 overflow-y-auto divide-y divide-canvas">
                 {productsError && <p className="p-4 text-xs font-semibold text-red-500">⚠️ {productsError} — refresh and try again.</p>}
                 {!productsError && products.length === 0 && (
-                  <div className="flex items-center justify-center p-6"><div className="w-5 h-5 rounded-full border-3 border-[#5E9E8C] border-t-transparent animate-spin" /></div>
+                  <div className="flex items-center justify-center p-6"><div className="w-5 h-5 rounded-full border-3 border-accent border-t-transparent animate-spin" /></div>
                 )}
                 {!productsError && products.length > 0 && filtered.length === 0 && (
-                  <p className="p-4 text-xs text-[#9A8E88] text-center">No products match &ldquo;{search}&rdquo;.</p>
+                  <p className="p-4 text-xs text-ink-muted text-center">No products match &ldquo;{search}&rdquo;.</p>
                 )}
                 {filtered.map((p) => {
                   const inBundle = items.find((it) => it.slug === p.slug);
@@ -422,18 +422,18 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                     <button
                       key={p.slug}
                       onClick={() => addProduct(p)}
-                      className={`w-full flex items-center gap-3 p-2.5 text-left transition-colors ${justAdded ? "bg-[#EAF2F0]" : "hover:bg-[#FAF7F4]"}`}
+                      className={`w-full flex items-center gap-3 p-2.5 text-left transition-colors ${justAdded ? "bg-accent-soft" : "hover:bg-[#FAF7F4]"}`}
                     >
                       <Thumb p={p} size="w-10 h-10" text="text-xl" />
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[#2A2320] text-sm truncate">{p.name}</p>
-                        <p className="text-xs text-[#9A8E88]">
+                        <p className="font-semibold text-ink text-sm truncate">{p.name}</p>
+                        <p className="text-xs text-ink-muted">
                           {formatPrice(unitPrice(p))}
                           {p.discountPercent > 0 && <span className="ml-1 text-[#B85C38] font-bold">−{p.discountPercent}%</span>}
                         </p>
                       </div>
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
-                        justAdded ? "bg-[#5E9E8C] text-white" : inBundle ? "bg-[#EAF2F0] text-[#3A6B5E]" : "bg-[#F5F0EB] text-[#5E5450]"
+                        justAdded ? "bg-accent text-white" : inBundle ? "bg-accent-soft text-accent-deep" : "bg-canvas text-ink-soft"
                       }`}>
                         {justAdded ? "✓ Added" : inBundle ? `×${inBundle.quantity ?? 1} · +1` : "+ Add"}
                       </span>
@@ -450,8 +450,8 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
           {/* ── Live customer preview ── */}
           <div className="lg:sticky lg:top-4 space-y-5">
             <div className={SECTION}>
-              <h2 className="font-extrabold text-[#2A2320] text-sm mb-3">👁 Customer preview <span className="font-normal text-[10px] text-[#9A8E88]">(live — exactly like /bundles)</span></h2>
-              <div className="max-w-[260px] mx-auto rounded-2xl border border-[#DDD5CC] overflow-hidden shadow-sm bg-white">
+              <h2 className="font-extrabold text-ink text-sm mb-3">👁 Customer preview <span className="font-normal text-[10px] text-ink-muted">(live — exactly like /bundles)</span></h2>
+              <div className="max-w-[260px] mx-auto rounded-card border border-line overflow-hidden shadow-sm bg-white">
                 <div
                   className={`relative flex items-center justify-center overflow-hidden ${draft.image_url ? "aspect-[4/3]" : "py-8"}`}
                   style={{ backgroundColor: draft.card_color ?? "#EDE5D8" }}
@@ -463,23 +463,23 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                     <span className="text-5xl">📷</span>
                   )}
                   {draft.is_new && (
-                    <span className="absolute top-2.5 left-2.5 bg-[#5E9E8C] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">New</span>
+                    <span className="absolute top-2.5 left-2.5 bg-accent text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">New</span>
                   )}
                   {savings > 0 && (
-                    <span className="absolute top-2.5 right-2.5 bg-[#2A2320] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Save {formatPrice(savings)}</span>
+                    <span className="absolute top-2.5 right-2.5 bg-ink text-white text-[9px] font-bold px-2 py-0.5 rounded-full">Save {formatPrice(savings)}</span>
                   )}
                 </div>
                 <div className="p-3.5">
-                  <p className="text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{draft.subtitle || "—"}</p>
-                  <p className="font-extrabold text-[#2A2320] text-sm leading-snug mb-0.5">{draft.name}</p>
-                  <p className="text-[11px] text-[#5E5450] mb-2 line-clamp-2">{draft.tagline || <span className="text-[#C8B8B0]">tagline…</span>}</p>
+                  <p className="text-[9px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{draft.subtitle || "—"}</p>
+                  <p className="font-extrabold text-ink text-sm leading-snug mb-0.5">{draft.name}</p>
+                  <p className="text-[11px] text-ink-soft mb-2 line-clamp-2">{draft.tagline || <span className="text-[#C8B8B0]">tagline…</span>}</p>
                   <div className="flex items-end justify-between">
                     <div>
-                      {separately > 0 && <p className="text-[9px] text-[#9A8E88] line-through">{formatPrice(separately)}</p>}
-                      <p className="text-lg font-extrabold text-[#2A2320]">{formatPrice(draft.bundle_price)}</p>
+                      {separately > 0 && <p className="text-[9px] text-ink-muted line-through">{formatPrice(separately)}</p>}
+                      <p className="text-lg font-extrabold text-ink">{formatPrice(draft.bundle_price)}</p>
                     </div>
                     {savingsPct > 0 && (
-                      <span className="text-[9px] font-bold text-[#5E9E8C] bg-[#EAF2F0] px-2 py-0.5 rounded-full">{savingsPct}% off</span>
+                      <span className="text-[9px] font-bold text-accent bg-accent-soft px-2 py-0.5 rounded-full">{savingsPct}% off</span>
                     )}
                   </div>
                 </div>
@@ -488,11 +488,11 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
             {/* ── Pricing ── */}
             <div className={SECTION}>
-              <h2 className="font-extrabold text-[#2A2320] text-sm mb-3">💰 Pricing</h2>
+              <h2 className="font-extrabold text-ink text-sm mb-3">💰 Pricing</h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#5E5450]">Bought separately <span className="text-[10px] text-[#9A8E88]">(live from catalog)</span></span>
-                  <strong className="text-[#2A2320]">{formatPrice(separately)}</strong>
+                  <span className="text-ink-soft">Bought separately <span className="text-[10px] text-ink-muted">(live from catalog)</span></span>
+                  <strong className="text-ink">{formatPrice(separately)}</strong>
                 </div>
                 <div>
                   <label className={LABEL}>Bundle price (what the customer pays)</label>
@@ -501,17 +501,17 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                       type="number" min={0}
                       value={draft.bundle_price}
                       onChange={(e) => set({ bundle_price: Number(e.target.value) })}
-                      className="w-28 h-11 px-3 rounded-xl border border-[#DDD5CC] text-lg font-extrabold outline-none focus:border-[#5E9E8C] text-right"
+                      className="w-28 h-11 px-3 rounded-control border border-line text-lg font-extrabold outline-none focus:border-accent text-right"
                     />
-                    <span className="text-sm font-bold text-[#9A8E88]">₾</span>
+                    <span className="text-sm font-bold text-ink-muted">₾</span>
                   </div>
                   {separately > 0 && (
-                    <p className="text-[11px] text-[#9A8E88] mt-1.5">
+                    <p className="text-[11px] text-ink-muted mt-1.5">
                       💡 Suggested: {formatPrice(Math.round(separately * 0.85))}–{formatPrice(Math.round(separately * 0.75))} (15–25% off)
                     </p>
                   )}
                 </div>
-                <div className={`rounded-xl p-3 text-sm font-bold text-center ${savings > 0 ? "bg-[#EAF2F0] text-[#3A6B5E]" : "bg-[#FFF8E8] text-[#A06820]"}`}>
+                <div className={`rounded-control p-3 text-sm font-bold text-center ${savings > 0 ? "bg-accent-soft text-accent-deep" : "bg-[#FFF8E8] text-[#A06820]"}`}>
                   {savings > 0
                     ? <>Customer saves {formatPrice(savings)} ({savingsPct}%) 🎉</>
                     : "No savings vs buying separately yet"}
@@ -523,12 +523,12 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                       type="number" min={0}
                       value={draft.original_price}
                       onChange={(e) => set({ original_price: Number(e.target.value) })}
-                      className="w-28 h-10 px-3 rounded-xl border border-[#DDD5CC] text-sm font-bold outline-none focus:border-[#5E9E8C] text-right"
+                      className="w-28 h-10 px-3 rounded-control border border-line text-sm font-bold outline-none focus:border-accent text-right"
                     />
                     {separately > 0 && Math.abs(separately - draft.original_price) > 0.009 && (
                       <button
                         onClick={() => set({ original_price: Math.round(separately * 100) / 100 })}
-                        className="text-[11px] font-bold text-[#5E9E8C] border border-[#C8DDD8] rounded-full px-2.5 py-1 hover:bg-[#EAF2F0] transition-colors"
+                        className="text-[11px] font-bold text-accent border border-sage rounded-full px-2.5 py-1 hover:bg-accent-soft transition-colors"
                       >
                         ⟳ Use {formatPrice(separately)}
                       </button>
@@ -540,10 +540,10 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
             {/* ── Publish ── */}
             <div className={SECTION}>
-              <h2 className="font-extrabold text-[#2A2320] text-sm mb-3">🚀 Publish</h2>
+              <h2 className="font-extrabold text-ink text-sm mb-3">🚀 Publish</h2>
               <ul className="space-y-1.5 mb-4">
                 {checklist.map((c) => (
-                  <li key={c.label} className={`flex items-center gap-2 text-xs font-semibold ${c.ok ? "text-[#3A7A68]" : missing.length > 0 ? "text-[#B03A3A]" : "text-[#9A8E88]"}`}>
+                  <li key={c.label} className={`flex items-center gap-2 text-xs font-semibold ${c.ok ? "text-accent-deep" : missing.length > 0 ? "text-danger" : "text-ink-muted"}`}>
                     <span>{c.ok ? "✓" : "✗"}</span>{c.label}
                   </li>
                 ))}
@@ -551,13 +551,13 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-[#2A2320]">Live on the site</p>
-                  <p className="text-[10px] text-[#9A8E88]">{complete ? "Ready to publish" : "Locked until the checklist is complete 🔒"}</p>
+                  <p className="text-sm font-bold text-ink">Live on the site</p>
+                  <p className="text-[10px] text-ink-muted">{complete ? "Ready to publish" : "Locked until the checklist is complete 🔒"}</p>
                 </div>
                 <button
                   onClick={() => { if (draft.active || complete) set({ active: !draft.active }); }}
                   disabled={!draft.active && !complete}
-                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:cursor-not-allowed ${draft.active ? "" : "bg-[#DDD5CC]"} ${!draft.active && !complete ? "opacity-50" : ""}`}
+                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 disabled:cursor-not-allowed ${draft.active ? "" : "bg-line"} ${!draft.active && !complete ? "opacity-50" : ""}`}
                   style={draft.active ? { backgroundColor: "#5E9E8C" } : {}}
                   aria-label="Toggle live"
                 >
@@ -565,14 +565,14 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#F5F0EB]">
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-canvas">
                 <div>
-                  <p className="text-sm font-bold text-[#2A2320]">&ldquo;New&rdquo; badge</p>
-                  <p className="text-[10px] text-[#9A8E88]">Pin the NEW ribbon on this bundle</p>
+                  <p className="text-sm font-bold text-ink">&ldquo;New&rdquo; badge</p>
+                  <p className="text-[10px] text-ink-muted">Pin the NEW ribbon on this bundle</p>
                 </div>
                 <button
                   onClick={() => set({ is_new: !draft.is_new })}
-                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${draft.is_new ? "" : "bg-[#DDD5CC]"}`}
+                  className={`relative w-12 h-7 rounded-full transition-colors flex-shrink-0 ${draft.is_new ? "" : "bg-line"}`}
                   style={draft.is_new ? { backgroundColor: "#5E9E8C" } : {}}
                   aria-label="Toggle new badge"
                 >
@@ -586,15 +586,15 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
 
       {/* ── Sticky unsaved-changes bar ── */}
       {dirty && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#2A2320] text-white px-4 py-3 shadow-2xl">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink text-white px-4 py-3 shadow-2xl">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <p className="text-sm font-semibold">⚠ Unsaved changes</p>
             <div className="flex items-center gap-2">
-              <button onClick={discard} className="h-9 px-4 rounded-xl text-xs font-bold border border-white/30 hover:bg-white/10 transition-colors">Discard</button>
+              <button onClick={discard} className="h-9 px-4 rounded-control text-xs font-bold border border-white/30 hover:bg-white/10 transition-colors">Discard</button>
               <button
                 onClick={save}
                 disabled={saving}
-                className="h-9 px-5 rounded-xl text-xs font-bold text-white disabled:opacity-60 hover:opacity-90 transition-opacity"
+                className="h-9 px-5 rounded-control text-xs font-bold text-white disabled:opacity-60 hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: "#5E9E8C" }}
               >
                 {saving ? "Saving…" : "💾 Save changes"}

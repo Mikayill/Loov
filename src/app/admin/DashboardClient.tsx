@@ -22,8 +22,8 @@ const STATUS_STYLE: Record<string, string> = {
   pending: "bg-[#FFF8E8] text-[#A06820]",
   processing: "bg-[#EAF0F8] text-[#2A5A8E]",
   shipped: "bg-[#EAF0F8] text-[#2A5A8E]",
-  delivered: "bg-[#EAF2F0] text-[#3A7A68]",
-  cancelled: "bg-[#FEF2F2] text-[#B03A3A]",
+  delivered: "bg-accent-soft text-accent-deep",
+  cancelled: "bg-danger-soft text-danger",
 };
 
 export default function DashboardClient() {
@@ -41,7 +41,7 @@ export default function DashboardClient() {
   if (!stats) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -59,8 +59,8 @@ export default function DashboardClient() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="text-2xl font-extrabold text-[#2A2320] mb-1">Dashboard</h1>
-      <p className="text-[#9A8E88] text-sm mb-6">Store overview at a glance</p>
+      <h1 className="text-2xl font-extrabold text-ink mb-1">Dashboard</h1>
+      <p className="text-ink-muted text-sm mb-6">Store overview at a glance</p>
 
       {/* Revenue chart — hero */}
       <div className="mb-6">
@@ -75,38 +75,38 @@ export default function DashboardClient() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">{c.icon}</span>
               </div>
-              <p className="text-2xl font-extrabold text-[#2A2320] leading-none">{c.value}</p>
-              <p className="text-xs text-[#9A8E88] font-semibold mt-1">{c.label} · {c.sub}</p>
+              <p className="text-2xl font-extrabold text-ink leading-none">{c.value}</p>
+              <p className="text-xs text-ink-muted font-semibold mt-1">{c.label} · {c.sub}</p>
             </>
           );
           return c.href ? (
-            <Link key={c.label} href={c.href} className="bg-white rounded-2xl border border-[#DDD5CC] p-5 hover:shadow-md transition-shadow">{inner}</Link>
+            <Link key={c.label} href={c.href} className="bg-white rounded-card border border-line p-5 hover:shadow-md transition-shadow">{inner}</Link>
           ) : (
-            <div key={c.label} className="bg-white rounded-2xl border border-[#DDD5CC] p-5">{inner}</div>
+            <div key={c.label} className="bg-white rounded-card border border-line p-5">{inner}</div>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent orders */}
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F5F0EB]">
-            <h2 className="font-extrabold text-[#2A2320]">Recent orders</h2>
-            <Link href="/admin/orders" className="text-xs font-bold text-[#5E9E8C] hover:underline">View all →</Link>
+        <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-canvas">
+            <h2 className="font-extrabold text-ink">Recent orders</h2>
+            <Link href="/admin/orders" className="text-xs font-bold text-accent hover:underline">View all →</Link>
           </div>
           {stats.recentOrders.length === 0 ? (
-            <p className="p-5 text-sm text-[#9A8E88]">No orders yet.</p>
+            <p className="p-5 text-sm text-ink-muted">No orders yet.</p>
           ) : (
-            <div className="divide-y divide-[#F5F0EB]">
+            <div className="divide-y divide-canvas">
               {stats.recentOrders.map((o) => (
                 <div key={o.orderNumber} className="flex items-center justify-between px-5 py-3">
                   <div className="min-w-0">
-                    <p className="font-bold text-[#2A2320] text-sm font-mono">{o.orderNumber}</p>
-                    <p className="text-xs text-[#9A8E88] truncate">{o.customer || "Guest"}</p>
+                    <p className="font-bold text-ink text-sm font-mono">{o.orderNumber}</p>
+                    <p className="text-xs text-ink-muted truncate">{o.customer || "Guest"}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[o.status] ?? ""}`}>{o.status}</span>
-                    <span className="font-extrabold text-[#2A2320] text-sm">{formatPrice(o.total)}</span>
+                    <span className="font-extrabold text-ink text-sm">{formatPrice(o.total)}</span>
                   </div>
                 </div>
               ))}
@@ -115,20 +115,20 @@ export default function DashboardClient() {
         </div>
 
         {/* Low stock */}
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F5F0EB]">
-            <h2 className="font-extrabold text-[#2A2320]">Low stock ⚠️</h2>
-            <Link href="/admin/products" className="text-xs font-bold text-[#5E9E8C] hover:underline">Manage →</Link>
+        <div className="bg-white rounded-card border border-line overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-canvas">
+            <h2 className="font-extrabold text-ink">Low stock ⚠️</h2>
+            <Link href="/admin/products" className="text-xs font-bold text-accent hover:underline">Manage →</Link>
           </div>
           {stats.lowStock.length === 0 ? (
-            <p className="p-5 text-sm text-[#9A8E88]">Everything is well stocked 🎉</p>
+            <p className="p-5 text-sm text-ink-muted">Everything is well stocked 🎉</p>
           ) : (
-            <div className="divide-y divide-[#F5F0EB]">
+            <div className="divide-y divide-canvas">
               {stats.lowStock.map((p) => (
                 <div key={p.id} className="flex items-center gap-3 px-5 py-3">
                   <span className="text-xl">{p.emoji}</span>
-                  <p className="flex-1 text-sm font-bold text-[#2A2320] truncate">{p.name}</p>
-                  <span className={`text-xs font-extrabold px-2 py-1 rounded-lg ${p.stock <= 0 ? "bg-[#FEF2F2] text-[#B03A3A]" : "bg-[#FFF4E8] text-[#A06820]"}`}>
+                  <p className="flex-1 text-sm font-bold text-ink truncate">{p.name}</p>
+                  <span className={`text-xs font-extrabold px-2 py-1 rounded-lg ${p.stock <= 0 ? "bg-danger-soft text-danger" : "bg-[#FFF4E8] text-[#A06820]"}`}>
                     {p.stock <= 0 ? "Out" : `${p.stock} left`}
                   </span>
                 </div>

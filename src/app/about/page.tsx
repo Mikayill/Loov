@@ -22,18 +22,18 @@ export default async function AboutPage() {
 
       {/* ── Hero ── */}
       <section
-        className="text-center rounded-2xl sm:rounded-3xl px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
+        className="text-center rounded-card sm:rounded-3xl px-5 sm:px-6 py-8 sm:py-14 mb-8 sm:mb-16 relative overflow-hidden"
         style={{ background: "linear-gradient(135deg, #F5F0EB 0%, #E8F0EE 60%, #EAE8F0 100%)" }}
       >
         <div className="absolute top-6 left-8 w-20 h-20 rounded-full opacity-30" style={{ backgroundColor: "#C8DDD8" }} />
         <div className="absolute bottom-6 right-8 w-28 h-28 rounded-full opacity-20" style={{ backgroundColor: "#D4CAE4" }} />
         <div className="relative">
           <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🌿</div>
-          <h1 className="text-2xl sm:text-5xl font-extrabold text-[#2A2320] mb-3 sm:mb-5 leading-tight">
+          <h1 className="text-2xl sm:text-5xl font-extrabold text-ink mb-3 sm:mb-5 leading-tight">
             {t("about.heroTitleA")}<br />
             <span style={{ color: "#5E9E8C" }}>{t("about.heroTitleB")}</span>
           </h1>
-          <p className="text-sm sm:text-lg text-[#5E5450] max-w-2xl mx-auto leading-snug sm:leading-relaxed">
+          <p className="text-sm sm:text-lg text-ink-soft max-w-2xl mx-auto leading-snug sm:leading-relaxed">
             {t("about.heroSubtitle")}
           </p>
         </div>
@@ -42,11 +42,11 @@ export default async function AboutPage() {
       {/* ── Story ── */}
       <section className="mb-8 sm:mb-16 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 items-center">
         <div>
-          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.storyEyebrow")}</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2 mb-5 leading-tight">
+          <span className="text-xs font-bold text-accent uppercase tracking-widest">{t("about.storyEyebrow")}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink mt-2 mb-5 leading-tight">
             {t("about.storyTitleA")}<br />{t("about.storyTitleB")}
           </h2>
-          <div className="space-y-4 text-[#5E5450] leading-relaxed text-sm sm:text-base">
+          <div className="space-y-4 text-ink-soft leading-relaxed text-sm sm:text-base">
             <p>{t("about.storyP1")}</p>
             <p>{t("about.storyP2")}</p>
             <p>{t("about.storyP3")}</p>
@@ -63,11 +63,11 @@ export default async function AboutPage() {
           ].map((card) => (
             <div
               key={card.caption}
-              className="rounded-2xl flex flex-col items-center justify-center gap-2 py-6 sm:py-8 border border-[#DDD5CC]"
+              className="rounded-card flex flex-col items-center justify-center gap-2 py-6 sm:py-8 border border-line"
               style={{ backgroundColor: card.bg }}
             >
               <span className="text-4xl">{card.emoji}</span>
-              <span className="text-xs font-bold text-[#5E5450]">{card.caption}</span>
+              <span className="text-xs font-bold text-ink-soft">{card.caption}</span>
             </div>
           ))}
         </div>
@@ -76,20 +76,20 @@ export default async function AboutPage() {
       {/* ── Values ── */}
       <section className="mb-8 sm:mb-16">
         <div className="text-center mb-5 sm:mb-10">
-          <span className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">{t("about.valuesEyebrow")}</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mt-2">{t("about.valuesTitle")}</h2>
+          <span className="text-xs font-bold text-accent uppercase tracking-widest">{t("about.valuesEyebrow")}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink mt-2">{t("about.valuesTitle")}</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
           {values.map((v) => (
             <div
               key={v.title}
-              className="rounded-2xl p-4 sm:p-6 border border-[#DDD5CC] flex gap-3 sm:gap-5 items-start"
+              className="rounded-card p-4 sm:p-6 border border-line flex gap-3 sm:gap-5 items-start"
               style={{ backgroundColor: v.bg }}
             >
               <span className="text-3xl flex-shrink-0">{v.emoji}</span>
               <div>
-                <h3 className="font-bold text-[#2A2320] mb-1.5">{v.title}</h3>
-                <p className="text-sm text-[#5E5450] leading-relaxed">{v.desc}</p>
+                <h3 className="font-bold text-ink mb-1.5">{v.title}</h3>
+                <p className="text-sm text-ink-soft leading-relaxed">{v.desc}</p>
               </div>
             </div>
           ))}
@@ -98,14 +98,14 @@ export default async function AboutPage() {
 
       {/* ── CTA ── */}
       <section
-        className="rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center"
+        className="rounded-card sm:rounded-3xl p-6 sm:p-10 text-center"
         style={{ background: "linear-gradient(135deg, #EAF2F0 0%, #E8EDF5 100%)" }}
       >
         <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🌸</div>
-        <h2 className="text-2xl font-extrabold text-[#2A2320] mb-3">
+        <h2 className="text-2xl font-extrabold text-ink mb-3">
           {t("about.ctaTitle")}
         </h2>
-        <p className="text-[#5E5450] mb-6 max-w-md mx-auto text-sm leading-relaxed">
+        <p className="text-ink-soft mb-6 max-w-md mx-auto text-sm leading-relaxed">
           {t("about.ctaBody")}
         </p>
         <Link

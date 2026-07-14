@@ -22,36 +22,36 @@ export default async function PrivacyPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-8">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors font-medium">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-8">
+        <Link href="/" className="hover:text-accent transition-colors font-medium">{t("nav.home")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("legal.privacy.breadcrumb")}</span>
+        <span className="text-ink font-semibold">{t("legal.privacy.breadcrumb")}</span>
       </nav>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-[#2A2320] mb-2">{t("legal.privacy.title")}</h1>
-        <p className="text-xs text-[#9A8E88]">{t("legal.privacy.lastUpdated")}</p>
+        <h1 className="text-3xl font-extrabold text-ink mb-2">{t("legal.privacy.title")}</h1>
+        <p className="text-xs text-ink-muted">{t("legal.privacy.lastUpdated")}</p>
       </div>
 
-      <p className="text-[#5E5450] leading-relaxed mb-8 text-sm">
+      <p className="text-ink-soft leading-relaxed mb-8 text-sm">
         {t("legal.privacy.intro")}
       </p>
 
       <div className="space-y-8">
         {sections.map((s, i) => (
           <div key={s.title}>
-            <h2 className="font-extrabold text-[#2A2320] mb-2 flex items-center gap-2">
+            <h2 className="font-extrabold text-ink mb-2 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: "#5E9E8C" }}>{i + 1}</span>
               {s.title}
             </h2>
-            <p className="text-[#5E5450] text-sm leading-relaxed pl-8">{s.body}</p>
+            <p className="text-ink-soft text-sm leading-relaxed pl-8">{s.body}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-10 p-5 bg-[#EAF2F0] rounded-2xl border border-[#C8DDD8] text-center">
-        <p className="text-sm font-bold text-[#2A2320] mb-1">{t("legal.privacy.questionsTitle")}</p>
-        <p className="text-xs text-[#5E5450] mb-3">{t("legal.privacy.questionsBody")}</p>
+      <div className="mt-10 p-5 bg-accent-soft rounded-card border border-sage text-center">
+        <p className="text-sm font-bold text-ink mb-1">{t("legal.privacy.questionsTitle")}</p>
+        <p className="text-xs text-ink-soft mb-3">{t("legal.privacy.questionsBody")}</p>
         <Link href="/contact" className="inline-flex items-center gap-1.5 font-bold text-sm text-white px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
           {t("legal.privacy.contactBtn")} →
         </Link>

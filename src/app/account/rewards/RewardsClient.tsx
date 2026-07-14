@@ -30,7 +30,7 @@ export default function RewardsClient() {
   if (!hydrated) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -48,19 +48,19 @@ export default function RewardsClient() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-[#5E9E8C] transition-colors">{t("acct.title")}</Link>
+        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("acct.rewards.breadcrumb")}</span>
+        <span className="text-ink font-semibold">{t("acct.rewards.breadcrumb")}</span>
       </nav>
 
       <div className="flex items-center gap-3 mb-8">
         <span className="text-3xl">⭐</span>
         <div>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("acct.rewards.title")}</h1>
-          <p className="text-sm text-[#5E5450]">{t("acct.rewards.subtitle")}</p>
+          <h1 className="text-2xl font-extrabold text-ink">{t("acct.rewards.title")}</h1>
+          <p className="text-sm text-ink-soft">{t("acct.rewards.subtitle")}</p>
         </div>
       </div>
 
@@ -136,45 +136,45 @@ export default function RewardsClient() {
             text: t("acct.rewards.levelUpBody").replace("{n}", String(Math.round((settings.loyaltyGoldMultiplier - 1) * 100))),
           },
         ].map((c) => (
-          <div key={c.title} className="bg-white rounded-2xl border border-[#DDD5CC] p-5">
+          <div key={c.title} className="bg-white rounded-card border border-line p-5">
             <span className="text-2xl block mb-2">{c.icon}</span>
-            <p className="font-extrabold text-[#2A2320] text-sm mb-1">{c.title}</p>
-            <p className="text-xs text-[#5E5450] leading-relaxed">{c.text}</p>
+            <p className="font-extrabold text-ink text-sm mb-1">{c.title}</p>
+            <p className="text-xs text-ink-soft leading-relaxed">{c.text}</p>
           </div>
         ))}
       </div>
 
       {/* ── Tiers ── */}
-      <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6 mb-6">
-        <h2 className="font-extrabold text-[#2A2320] mb-5">{t("acct.rewards.membershipTiers")}</h2>
+      <div className="bg-white rounded-card border border-line p-6 mb-6">
+        <h2 className="font-extrabold text-ink mb-5">{t("acct.rewards.membershipTiers")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {tiersFromSettings(settings).map((tr) => {
             const active = tr.id === tier.id;
             return (
               <div
                 key={tr.id}
-                className={`rounded-2xl border-2 p-5 transition-colors ${
-                  active ? "border-[#5E9E8C] bg-[#EAF2F0]" : "border-[#DDD5CC]"
+                className={`rounded-card border-2 p-5 transition-colors ${
+                  active ? "border-accent bg-accent-soft" : "border-line"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-2xl">{tr.emoji}</span>
                   {active && (
-                    <span className="text-[10px] font-bold text-white bg-[#5E9E8C] px-2 py-0.5 rounded-full uppercase">
+                    <span className="text-[10px] font-bold text-white bg-accent px-2 py-0.5 rounded-full uppercase">
                       {t("acct.rewards.yourTier")}
                     </span>
                   )}
                 </div>
-                <p className="font-extrabold text-[#2A2320]">{tierName(tr.id, t)}</p>
-                <p className="text-[11px] text-[#9A8E88] font-semibold mb-3">
+                <p className="font-extrabold text-ink">{tierName(tr.id, t)}</p>
+                <p className="text-[11px] text-ink-muted font-semibold mb-3">
                   {tr.threshold === 0
                     ? t("acct.rewards.everyoneStarts")
                     : t("acct.rewards.lifetimePointsPlus").replace("{n}", tr.threshold.toLocaleString())}
                 </p>
                 <ul className="space-y-1.5">
                   {tr.perks.map((perk) => (
-                    <li key={perk} className="flex items-start gap-1.5 text-xs text-[#5E5450]">
-                      <span className="text-[#5E9E8C] font-bold flex-shrink-0">✓</span>
+                    <li key={perk} className="flex items-start gap-1.5 text-xs text-ink-soft">
+                      <span className="text-accent font-bold flex-shrink-0">✓</span>
                       {perkLabel(perk, t)}
                     </li>
                   ))}
@@ -186,13 +186,13 @@ export default function RewardsClient() {
       </div>
 
       {/* ── History ── */}
-      <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
-        <h2 className="font-extrabold text-[#2A2320] mb-5">{t("acct.rewards.pointsHistory")}</h2>
+      <div className="bg-white rounded-card border border-line p-6">
+        <h2 className="font-extrabold text-ink mb-5">{t("acct.rewards.pointsHistory")}</h2>
         {transactions.length === 0 ? (
           <div className="text-center py-10">
             <span className="text-4xl block mb-3">🐣</span>
-            <p className="font-bold text-[#2A2320] mb-1">{t("acct.rewards.noPointsYet")}</p>
-            <p className="text-sm text-[#5E5450] mb-5">
+            <p className="font-bold text-ink mb-1">{t("acct.rewards.noPointsYet")}</p>
+            <p className="text-sm text-ink-soft mb-5">
               {t("acct.rewards.placeFirstOrder")}
             </p>
             <Link
@@ -204,32 +204,32 @@ export default function RewardsClient() {
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-[#F5F0EB]">
+          <div className="divide-y divide-canvas">
             {transactions.map((tx) => (
               <div key={tx.id} className="flex items-center gap-3 py-3">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${
-                    tx.reason === "return" ? "bg-[#FDEDE8]" : tx.delta > 0 ? "bg-[#EAF2F0]" : "bg-[#FFF4E8]"
+                    tx.reason === "return" ? "bg-[#FDEDE8]" : tx.delta > 0 ? "bg-accent-soft" : "bg-[#FFF4E8]"
                   }`}
                 >
                   {tx.reason === "return" ? "↩️" : tx.delta > 0 ? "⭐" : "💸"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-[#2A2320]">
+                  <p className="text-sm font-bold text-ink">
                     {tx.reason === "return"
                       ? t("acct.rewards.returnAdjustment")
                       : tx.delta > 0 ? t("acct.rewards.pointsEarned") : t("acct.rewards.pointsRedeemed")}
                     {tx.orderNumber && (
-                      <span className="text-[#9A8E88] font-semibold"> · {tx.orderNumber}</span>
+                      <span className="text-ink-muted font-semibold"> · {tx.orderNumber}</span>
                     )}
                   </p>
-                  <p className="text-[11px] text-[#9A8E88]">
+                  <p className="text-[11px] text-ink-muted">
                     {fmtDate(tx.date, locale, "short")}
                   </p>
                 </div>
                 <span
                   className={`font-extrabold text-sm flex-shrink-0 ${
-                    tx.delta > 0 ? "text-[#5E9E8C]" : "text-[#D97706]"
+                    tx.delta > 0 ? "text-accent" : "text-[#D97706]"
                   }`}
                 >
                   {tx.delta > 0 ? "+" : ""}{tx.delta.toLocaleString()} {t("acct.rewards.pts")}

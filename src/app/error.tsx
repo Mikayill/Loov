@@ -33,10 +33,10 @@ export default function GlobalError({
         </div>
       </div>
 
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2A2320] mb-3">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-ink mb-3">
         {t("err.somethingWrong")}
       </h1>
-      <p className="text-[#5E5450] mb-8 max-w-sm leading-relaxed text-sm">
+      <p className="text-ink-soft mb-8 max-w-sm leading-relaxed text-sm">
         {t("err.unexpectedIssue")}
       </p>
 
@@ -50,7 +50,7 @@ export default function GlobalError({
         </button>
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-all"
+          className="inline-flex items-center justify-center gap-2 font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
         >
           {t("err.backToHome")}
         </Link>

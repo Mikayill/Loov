@@ -62,38 +62,38 @@ export default async function SizeGuidePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("sg.breadcrumb")}</span>
+        <span className="text-ink font-semibold">{t("sg.breadcrumb")}</span>
       </nav>
 
       {/* Header */}
       <div className="text-center mb-10">
         <div className="text-4xl mb-3">📏</div>
-        <h1 className="text-3xl font-extrabold text-[#2A2320] mb-2">{t("sg.title")}</h1>
-        <p className="text-[#5E5450] text-sm max-w-md mx-auto leading-relaxed">
+        <h1 className="text-3xl font-extrabold text-ink mb-2">{t("sg.title")}</h1>
+        <p className="text-ink-soft text-sm max-w-md mx-auto leading-relaxed">
           {t("sg.subtitle")}
         </p>
       </div>
 
       {/* Tip banner */}
-      <div className="flex items-start gap-3 bg-[#EAF2F0] border border-[#C8DDD8] rounded-2xl p-4 mb-8">
+      <div className="flex items-start gap-3 bg-accent-soft border border-sage rounded-card p-4 mb-8">
         <span className="text-xl flex-shrink-0">💡</span>
-        <p className="text-sm text-[#3A7A68] font-medium leading-relaxed">
+        <p className="text-sm text-accent-deep font-medium leading-relaxed">
           <strong>{t("sg.proTip")}</strong> {t("sg.proTipBody")}
         </p>
       </div>
 
       {/* Clothing size chart */}
       <section className="mb-10">
-        <h2 className="text-xl font-extrabold text-[#2A2320] mb-4">👶 {t("sg.clothingTitle")}</h2>
-        <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+        <h2 className="text-xl font-extrabold text-ink mb-4">👶 {t("sg.clothingTitle")}</h2>
+        <div className="overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "#EDE5D8" }}>
                 {[t("sg.colSizeLabel"), t("sg.colAge"), t("sg.colHeight"), t("sg.colWeight"), t("sg.colChest")].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap first:rounded-tl-2xl last:rounded-tr-2xl">
+                  <th key={h} className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap first:rounded-tl-card last:rounded-tr-card">
                     {h}
                   </th>
                 ))}
@@ -101,12 +101,12 @@ export default async function SizeGuidePage() {
             </thead>
             <tbody>
               {sizeRows.map((row, i) => (
-                <tr key={row.size} className={`border-t border-[#DDD5CC] ${i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}`}>
-                  <td className="px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{row.size}</td>
-                  <td className="px-4 py-3 text-[#5E5450]">{localizeAge(row.age, t)}</td>
-                  <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.height}</td>
-                  <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.weight}</td>
-                  <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.chest}</td>
+                <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                  <td className="px-4 py-3 font-bold text-ink whitespace-nowrap">{row.size}</td>
+                  <td className="px-4 py-3 text-ink-soft">{localizeAge(row.age, t)}</td>
+                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.height}</td>
+                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.weight}</td>
+                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.chest}</td>
                 </tr>
               ))}
             </tbody>
@@ -117,20 +117,20 @@ export default async function SizeGuidePage() {
       {/* Blankets + Towels side by side */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
         <section>
-          <h2 className="text-xl font-extrabold text-[#2A2320] mb-4">☁️ {t("sg.blanketsTitle")}</h2>
-          <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+          <h2 className="text-xl font-extrabold text-ink mb-4">☁️ {t("sg.blanketsTitle")}</h2>
+          <div className="overflow-x-auto rounded-card border border-line">
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ backgroundColor: "#EDE5D8" }}>
-                  <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.colSize")}</th>
-                  <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.colBestFor")}</th>
+                  <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colSize")}</th>
+                  <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colBestFor")}</th>
                 </tr>
               </thead>
               <tbody>
                 {blanketSizes.map((row, i) => (
-                  <tr key={row.size} className={`border-t border-[#DDD5CC] ${i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}`}>
-                    <td className="px-4 py-3 font-semibold text-[#2A2320] whitespace-nowrap">{row.size}</td>
-                    <td className="px-4 py-3 text-[#5E5450] text-xs">{row.use}</td>
+                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                    <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.size}</td>
+                    <td className="px-4 py-3 text-ink-soft text-xs">{row.use}</td>
                   </tr>
                 ))}
               </tbody>
@@ -139,20 +139,20 @@ export default async function SizeGuidePage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-extrabold text-[#2A2320] mb-4">🛁 {t("sg.towelsTitle")}</h2>
-          <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+          <h2 className="text-xl font-extrabold text-ink mb-4">🛁 {t("sg.towelsTitle")}</h2>
+          <div className="overflow-x-auto rounded-card border border-line">
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ backgroundColor: "#EDE5D8" }}>
-                  <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.colSize")}</th>
-                  <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.colBestFor")}</th>
+                  <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colSize")}</th>
+                  <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.colBestFor")}</th>
                 </tr>
               </thead>
               <tbody>
                 {towelSizes.map((row, i) => (
-                  <tr key={row.size} className={`border-t border-[#DDD5CC] ${i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}`}>
-                    <td className="px-4 py-3 font-semibold text-[#2A2320] whitespace-nowrap">{row.size}</td>
-                    <td className="px-4 py-3 text-[#5E5450] text-xs">{row.use}</td>
+                  <tr key={row.size} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                    <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.size}</td>
+                    <td className="px-4 py-3 text-ink-soft text-xs">{row.use}</td>
                   </tr>
                 ))}
               </tbody>
@@ -163,12 +163,12 @@ export default async function SizeGuidePage() {
 
       {/* How to measure */}
       <section className="mb-10">
-        <h2 className="text-xl font-extrabold text-[#2A2320] mb-4">📐 {t("sg.howToMeasure")}</h2>
+        <h2 className="text-xl font-extrabold text-ink mb-4">📐 {t("sg.howToMeasure")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {howToMeasure.map((item) => (
-            <div key={item.label} className="bg-white rounded-2xl border border-[#DDD5CC] p-5">
-              <p className="font-bold text-[#2A2320] mb-2">{item.label}</p>
-              <p className="text-sm text-[#5E5450] leading-relaxed">{item.desc}</p>
+            <div key={item.label} className="bg-white rounded-card border border-line p-5">
+              <p className="font-bold text-ink mb-2">{item.label}</p>
+              <p className="text-sm text-ink-soft leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -176,45 +176,45 @@ export default async function SizeGuidePage() {
 
       {/* Sleep & TOG guide — we sell sleep sacks/pajamas, so parents need this */}
       <section className="mb-10">
-        <h2 className="text-xl font-extrabold text-[#2A2320] mb-2">🌙 {t("sg.togTitle")}</h2>
-        <p className="text-sm text-[#5E5450] leading-relaxed mb-4 max-w-2xl">{t("sg.togIntro")}</p>
-        <div className="overflow-x-auto rounded-2xl border border-[#DDD5CC]">
+        <h2 className="text-xl font-extrabold text-ink mb-2">🌙 {t("sg.togTitle")}</h2>
+        <p className="text-sm text-ink-soft leading-relaxed mb-4 max-w-2xl">{t("sg.togIntro")}</p>
+        <div className="overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "#EDE5D8" }}>
-                <th className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{t("sg.togColRoom")}</th>
-                <th className="text-left px-4 py-3 font-bold text-[#2A2320] whitespace-nowrap">{t("sg.togColTog")}</th>
-                <th className="text-left px-4 py-3 font-bold text-[#2A2320]">{t("sg.togColDress")}</th>
+                <th className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{t("sg.togColRoom")}</th>
+                <th className="text-left px-4 py-3 font-bold text-ink whitespace-nowrap">{t("sg.togColTog")}</th>
+                <th className="text-left px-4 py-3 font-bold text-ink">{t("sg.togColDress")}</th>
               </tr>
             </thead>
             <tbody>
               {togRows.map((row, i) => (
-                <tr key={row.tog} className={`border-t border-[#DDD5CC] ${i % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]"}`}>
-                  <td className="px-4 py-3 font-semibold text-[#2A2320] whitespace-nowrap">{row.room}</td>
-                  <td className="px-4 py-3 text-[#5E5450] whitespace-nowrap">{row.tog} TOG</td>
-                  <td className="px-4 py-3 text-[#5E5450] text-xs">{row.dress}</td>
+                <tr key={row.tog} className={`border-t border-line ${i % 2 === 0 ? "bg-white" : "bg-surface"}`}>
+                  <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.room}</td>
+                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap">{row.tog} TOG</td>
+                  <td className="px-4 py-3 text-ink-soft text-xs">{row.dress}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="flex items-start gap-3 bg-[#FFF8E8] border border-[#F0C85A] rounded-2xl p-4 mt-4">
+        <div className="flex items-start gap-3 bg-[#FFF8E8] border border-[#F0C85A] rounded-card p-4 mt-4">
           <span className="text-xl flex-shrink-0">🛡️</span>
           <p className="text-sm text-[#8B6914] font-medium leading-relaxed">{t("sg.togNote")}</p>
         </div>
       </section>
 
       {/* Certifications note */}
-      <div className="bg-[#F5F0EB] rounded-2xl p-6 text-center">
-        <p className="text-sm text-[#5E5450] leading-relaxed mb-4">
+      <div className="bg-canvas rounded-card p-6 text-center">
+        <p className="text-sm text-ink-soft leading-relaxed mb-4">
           {t("sg.certNote")}
         </p>
         <div className="flex items-center justify-center gap-3 flex-wrap">
-          <Link href="/contact" className="font-bold text-[#5E9E8C] hover:underline text-sm">
+          <Link href="/contact" className="font-bold text-accent hover:underline text-sm">
             {t("sg.askWhatsApp")} →
           </Link>
-          <span className="text-[#DDD5CC]">|</span>
-          <Link href="/products" className="font-bold text-[#5E9E8C] hover:underline text-sm">
+          <span className="text-line">|</span>
+          <Link href="/products" className="font-bold text-accent hover:underline text-sm">
             {t("sg.browseCollection")} →
           </Link>
         </div>

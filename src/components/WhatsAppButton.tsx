@@ -30,7 +30,7 @@ export default function WhatsAppButton() {
     >
       {/* Tooltip — desktop only, so it never shifts the button off the corner on mobile */}
       <div
-        className={`hidden sm:block bg-white text-[#2A2320] text-xs font-bold px-3 py-2 rounded-xl shadow-lg border border-[#DDD5CC] whitespace-nowrap transition-all duration-200 ${
+        className={`hidden sm:block bg-white text-ink text-xs font-bold px-3 py-2 rounded-control shadow-lg border border-line whitespace-nowrap transition-all duration-200 ${
           hovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"
         }`}
       >

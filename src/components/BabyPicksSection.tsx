@@ -50,17 +50,17 @@ export default function BabyPicksSection() {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex items-end justify-between flex-wrap gap-3 mb-6">
         <div>
-          <p className="text-[11px] font-bold text-[#5E9E8C] uppercase tracking-widest mb-1">
+          <p className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">
             ✨ Picked for your little one
           </p>
-          <h2 className="text-2xl font-extrabold text-[#2A2320]">
+          <h2 className="text-2xl font-extrabold text-ink">
             For {babyName || "your little one"} · {ageLabel(months)}
           </h2>
-          <p className="text-sm text-[#9A8E88] mt-1">
+          <p className="text-sm text-ink-muted mt-1">
             Only styles available in the right size today.
           </p>
         </div>
-        <Link href="/products" className="text-sm font-bold text-[#5E9E8C] hover:underline">
+        <Link href="/products" className="text-sm font-bold text-accent hover:underline">
           Browse all →
         </Link>
       </div>

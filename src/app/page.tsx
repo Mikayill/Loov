@@ -45,15 +45,15 @@ export default async function HomePage() {
             <div className="flex-1 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start gap-1.5 mb-1.5 sm:mb-2">
                 <span className="text-xl sm:text-3xl">🌿</span>
-                <span className="text-[10px] sm:text-xs font-bold text-[#5E9E8C] uppercase tracking-widest">
+                <span className="text-[10px] sm:text-xs font-bold text-accent uppercase tracking-widest">
                   {t("home.hero.badge")}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-4xl font-extrabold text-[#2A2320] mb-1.5 sm:mb-3 leading-tight">
+              <h1 className="text-xl sm:text-4xl font-extrabold text-ink mb-1.5 sm:mb-3 leading-tight">
                 {t("home.hero.titleA")}{" "}
                 <span style={{ color: "#5E9E8C" }}>{t("home.hero.titleB")}</span>
               </h1>
-              <p className="text-[13px] sm:text-base text-[#5E5450] mb-3 sm:mb-5 max-w-md mx-auto sm:mx-0 leading-snug sm:leading-relaxed">
+              <p className="text-[13px] sm:text-base text-ink-soft mb-3 sm:mb-5 max-w-md mx-auto sm:mx-0 leading-snug sm:leading-relaxed">
                 {t("home.hero.subtitle")}
               </p>
               <div className="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 flex-wrap">
@@ -66,7 +66,7 @@ export default async function HomePage() {
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center gap-2 font-semibold px-5 py-3 rounded-full border-2 border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-all text-sm bg-white"
+                  className="inline-flex items-center gap-2 font-semibold px-5 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all text-sm bg-white"
                 >
                   {t("home.hero.ourStory")}
                 </Link>
@@ -83,10 +83,10 @@ export default async function HomePage() {
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="bg-white rounded-2xl border border-[#DDD5CC] px-5 py-3 text-center w-40 shadow-sm"
+                  className="bg-white rounded-card border border-line px-5 py-3 text-center w-40 shadow-sm"
                 >
                   <p className="text-xl font-extrabold" style={{ color: "#5E9E8C" }}>{s.value}</p>
-                  <p className="text-[11px] text-[#9A8E88] font-semibold mt-0.5">{s.label}</p>
+                  <p className="text-[11px] text-ink-muted font-semibold mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -97,8 +97,8 @@ export default async function HomePage() {
       {/* ── Shop by Category (compact) ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="flex items-baseline justify-between gap-3 mb-3">
-          <h2 className="text-base sm:text-xl font-extrabold text-[#2A2320]">{t("home.category.title")}</h2>
-          <span className="hidden sm:block text-[#9A8E88] text-xs">{t("home.category.subtitle")}</span>
+          <h2 className="text-base sm:text-xl font-extrabold text-ink">{t("home.category.title")}</h2>
+          <span className="hidden sm:block text-ink-muted text-xs">{t("home.category.subtitle")}</span>
         </div>
         <Reveal className="grid grid-cols-6 sm:grid-cols-6 gap-2 sm:gap-4">
           {[
@@ -112,13 +112,13 @@ export default async function HomePage() {
             <Link
               key={item.cat}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-xl sm:rounded-2xl border border-[#DDD5CC] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
+              className="flex flex-col items-center justify-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-control sm:rounded-card border border-line hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
               style={{ backgroundColor: item.bg + "80" }}
             >
               <span className="text-xl sm:text-3xl group-hover:scale-110 transition-transform duration-200">
                 {item.emoji}
               </span>
-              <span className="text-[9px] sm:text-xs font-bold text-[#2A2320] text-center leading-tight">
+              <span className="text-[9px] sm:text-xs font-bold text-ink text-center leading-tight">
                 {item.label}
               </span>
             </Link>
@@ -133,12 +133,12 @@ export default async function HomePage() {
       <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex items-end justify-between flex-wrap gap-3 mb-8">
           <div>
-            <h2 className="text-3xl font-extrabold text-[#2A2320]">{t("home.featured.title")}</h2>
-            <p className="text-[#5E5450] text-sm mt-1">{t("home.featured.subtitle")}</p>
+            <h2 className="text-3xl font-extrabold text-ink">{t("home.featured.title")}</h2>
+            <p className="text-ink-soft text-sm mt-1">{t("home.featured.subtitle")}</p>
           </div>
           <Link
             href="/products"
-            className="text-sm font-bold text-[#5E9E8C] hover:underline flex items-center gap-1"
+            className="text-sm font-bold text-accent hover:underline flex items-center gap-1"
           >
             {t("home.featured.viewAll")} →
           </Link>
@@ -152,12 +152,12 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="text-[11px] font-bold text-[#5E9E8C] uppercase tracking-widest mb-1">{t("home.bundles.eyebrow")}</p>
-            <h2 className="text-2xl font-extrabold text-[#2A2320]">{t("home.bundles.title")}</h2>
+            <p className="text-[11px] font-bold text-accent uppercase tracking-widest mb-1">{t("home.bundles.eyebrow")}</p>
+            <h2 className="text-2xl font-extrabold text-ink">{t("home.bundles.title")}</h2>
           </div>
           <Link
             href="/bundles"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-bold text-[#5E9E8C] hover:underline"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-bold text-accent hover:underline"
           >
             {t("home.bundles.viewAll")} →
           </Link>
@@ -169,7 +169,7 @@ export default async function HomePage() {
               <Link
                 key={bundle.slug}
                 href={`/bundles/${bundle.slug}`}
-                className="group bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                className="group bg-white rounded-card border border-line overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
                 {/* Fixed aspect ratio — cards stay the same size with or without a photo */}
                 <div
@@ -184,7 +184,7 @@ export default async function HomePage() {
                       {bundle.emoji}
                     </span>
                   )}
-                  <span className="absolute top-2 right-2 bg-[#2A2320] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  <span className="absolute top-2 right-2 bg-ink text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
                     {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
                   </span>
                   <BundleQuickView
@@ -196,12 +196,12 @@ export default async function HomePage() {
                   />
                 </div>
                 <div className="p-3">
-                  <p className="font-bold text-[#2A2320] text-xs leading-snug mb-1 line-clamp-1 group-hover:text-[#5E9E8C] transition-colors">
+                  <p className="font-bold text-ink text-xs leading-snug mb-1 line-clamp-1 group-hover:text-accent transition-colors">
                     {bundle.name}
                   </p>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-extrabold text-[#2A2320] text-sm">{formatPrice(bundle.bundlePrice)}</span>
-                    <span className="text-[10px] text-[#9A8E88] line-through">{formatPrice(bundle.originalPrice)}</span>
+                    <span className="font-extrabold text-ink text-sm">{formatPrice(bundle.bundlePrice)}</span>
+                    <span className="text-[10px] text-ink-muted line-through">{formatPrice(bundle.originalPrice)}</span>
                   </div>
                 </div>
               </Link>
@@ -209,7 +209,7 @@ export default async function HomePage() {
           })}
         </Reveal>
         <div className="mt-4 text-center sm:hidden">
-          <Link href="/bundles" className="text-sm font-bold text-[#5E9E8C] hover:underline">
+          <Link href="/bundles" className="text-sm font-bold text-accent hover:underline">
             {t("home.bundles.viewAll")} →
           </Link>
         </div>
@@ -223,8 +223,8 @@ export default async function HomePage() {
       {homeReviews.featured.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="text-center mb-8">
-            <p className="text-xs font-bold text-[#5E9E8C] uppercase tracking-widest mb-2">{t("home.reviews.eyebrow")}</p>
-            <h2 className="text-2xl font-extrabold text-[#2A2320]">{t("home.reviews.title")}</h2>
+            <p className="text-xs font-bold text-accent uppercase tracking-widest mb-2">{t("home.reviews.eyebrow")}</p>
+            <h2 className="text-2xl font-extrabold text-ink">{t("home.reviews.title")}</h2>
           </div>
 
           {/* Stats row — computed from the real review data */}
@@ -235,11 +235,11 @@ export default async function HomePage() {
               { value: t("home.hero.statReturnsValue"), label: t("home.reviews.statReturns") },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-2xl font-extrabold text-[#2A2320] flex items-center gap-1 justify-center">
+                <p className="text-2xl font-extrabold text-ink flex items-center gap-1 justify-center">
                   {s.value}
                   {s.star && <span className="text-xl text-[#F0B840]">★</span>}
                 </p>
-                <p className="text-xs text-[#9A8E88] font-semibold mt-0.5">{s.label}</p>
+                <p className="text-xs text-ink-muted font-semibold mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
@@ -249,7 +249,7 @@ export default async function HomePage() {
             {homeReviews.featured.map((r, i) => {
               const name = r.authorName || t("rev.anon");
               return (
-                <div key={`${r.createdAt}-${i}`} className="bg-white rounded-2xl border border-[#DDD5CC] p-5 hover:shadow-sm transition-shadow">
+                <div key={`${r.createdAt}-${i}`} className="bg-white rounded-card border border-line p-5 hover:shadow-sm transition-shadow">
                   <div className="flex items-center gap-0.5 mb-3">
                     {[1,2,3,4,5].map((s) => (
                       <svg key={s} className="w-4 h-4" viewBox="0 0 20 20" fill={s <= r.rating ? "#F0B840" : "#DDD5CC"}>
@@ -257,7 +257,7 @@ export default async function HomePage() {
                       </svg>
                     ))}
                   </div>
-                  <p className="text-sm text-[#5E5450] leading-relaxed mb-4">&ldquo;{r.body}&rdquo;</p>
+                  <p className="text-sm text-ink-soft leading-relaxed mb-4">&ldquo;{r.body}&rdquo;</p>
                   <div className="flex items-center gap-3">
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-extrabold flex-shrink-0"
@@ -266,8 +266,8 @@ export default async function HomePage() {
                       {name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-bold text-[#2A2320] text-sm">{name}</p>
-                      <p className="text-[11px] text-[#9A8E88]">{fmtDate(r.createdAt, locale, "short")} · {t("home.reviews.verified")}</p>
+                      <p className="font-bold text-ink text-sm">{name}</p>
+                      <p className="text-[11px] text-ink-muted">{fmtDate(r.createdAt, locale, "short")} · {t("home.reviews.verified")}</p>
                     </div>
                   </div>
                 </div>

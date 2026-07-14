@@ -38,7 +38,7 @@ export default function QuickAddButton({ product }: { product: Product }) {
       <span
         aria-label="Out of stock"
         title="Out of stock"
-        className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 bg-[#EDE5D8] text-[#C8B8B0] cursor-not-allowed"
+        className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 bg-panel text-[#C8B8B0] cursor-not-allowed"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -55,10 +55,10 @@ export default function QuickAddButton({ product }: { product: Product }) {
         title={status === "blocked" ? "Can't add more" : undefined}
         className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 flex-shrink-0 ${
           status === "added"
-            ? "bg-[#5E9E8C] text-white scale-110"
+            ? "bg-accent text-white scale-110"
             : status === "blocked"
             ? "bg-red-500 text-white"
-            : "bg-[#EDE5D8] text-[#5E5450] hover:bg-[#5E9E8C] hover:text-white hover:scale-110"
+            : "bg-panel text-ink-soft hover:bg-accent hover:text-white hover:scale-110"
         }`}
       >
         {status === "added" ? (

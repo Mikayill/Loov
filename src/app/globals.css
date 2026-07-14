@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #F5F0EB;
-  --color-cream-dark: #EDE5D8;
+  /* ── Semantic design tokens ─────────────────────────────────────────
+     Components consume ONLY these (bg-canvas, text-ink, border-line…).
+     Re-theming the site = changing the values here, nothing else. */
+  --color-canvas: #F5F0EB;       /* page background */
+  --color-surface: #FAFAF8;      /* near-white raised card background */
+  --color-panel: #EDE5D8;        /* filled panels / hover fills */
+  --color-line: #DDD5CC;         /* borders & hairlines */
+  --color-ink: #2A2320;          /* primary text */
+  --color-ink-soft: #5E5450;     /* secondary text */
+  --color-ink-muted: #9A8E88;    /* tertiary text, labels, dates */
+  --color-accent: #5E9E8C;       /* brand/CTA */
+  --color-accent-deep: #3A7A68;  /* text on accent-soft, darker hovers */
+  --color-accent-soft: #EAF2F0;  /* tinted success/info backgrounds */
+  --color-danger: #B03A3A;       /* errors, destructive actions */
+  --color-danger-soft: #FEF2F2;  /* error backgrounds */
+
+  /* Pastel category/imagery tints (display layer only) */
   --color-sage: #C8DDD8;
   --color-sage-dark: #A8C8C0;
   --color-dusty-blue: #C4D4E4;
@@ -10,12 +25,11 @@
   --color-warm-sand: #E4D8C4;
   --color-lavender: #D4CAE4;
   --color-warm-peach: #EED4BC;
-  --color-border: #DDD5CC;
-  --color-text-primary: #2A2320;
-  --color-text-secondary: #5E5450;
-  --color-text-muted: #9A8E88;
-  --color-teal: #5E9E8C;
-  --color-teal-dark: #4D8A78;
+
+  /* Radii — card (large containers), control (inputs/tiles) */
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+
   --font-nunito: var(--font-nunito);
 
   /* Easing tokens — snappy (slight overshoot) for taps/hovers, smooth for modals/drawers */
@@ -29,8 +43,8 @@ html {
 }
 
 body {
-  background-color: #F5F0EB;
-  color: #2A2320;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
   /* Guard against horizontal overflow at any viewport (320px → 4K).
      `clip` (not `hidden`) so it never turns into an x-scroll container
@@ -58,7 +72,7 @@ svg {
    which is what silently blocked those overrides before. */
 @layer base {
   :focus-visible {
-    outline: 2px solid #5E9E8C;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 4px;
   }

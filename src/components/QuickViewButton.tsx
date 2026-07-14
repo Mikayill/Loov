@@ -92,7 +92,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
       <button
         onClick={handleOpen}
         aria-label="Quick view"
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-[#2A2320] text-[11px] font-bold shadow-md opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap border border-[#DDD5CC] hover:bg-[#5E9E8C] hover:text-white hover:border-[#5E9E8C]"
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-ink text-[11px] font-bold shadow-md opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap border border-line hover:bg-accent hover:text-white hover:border-accent"
       >
         👁 {t("quick.view")}
       </button>
@@ -108,16 +108,16 @@ export default function QuickViewButton({ product }: { product: Product }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="quick-view-title"
-            className={`bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
+            className={`bg-white rounded-card w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[#F5F0EB]">
-              <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("quick.view")}</span>
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-canvas">
+              <span className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">{t("quick.view")}</span>
               <button
                 onClick={close}
                 aria-label="Close quick view"
-                className="w-7 h-7 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90 text-xs font-bold"
+                className="w-7 h-7 rounded-full bg-canvas flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90 text-xs font-bold"
               >
                 ✕
               </button>
@@ -127,7 +127,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
               {/* Product header */}
               <div className="flex gap-4 mb-4">
                 <div
-                  className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
+                  className="w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
                   style={{ backgroundColor: hex(selectedColor) === "#C8C8C8" ? product.cardColor : hex(selectedColor) + "55" }}
                 >
                   {product.imageUrl ? (
@@ -139,14 +139,14 @@ export default function QuickViewButton({ product }: { product: Product }) {
                 </div>
                 <div className="flex-1 min-w-0 py-1">
                   {product.isNew && (
-                    <span className="inline-block bg-[#5E9E8C] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide mb-1">
+                    <span className="inline-block bg-accent text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide mb-1">
                       {t("product.new")}
                     </span>
                   )}
-                  <h3 id="quick-view-title" className="font-bold text-[#2A2320] text-sm leading-snug mb-1 line-clamp-2">
+                  <h3 id="quick-view-title" className="font-bold text-ink text-sm leading-snug mb-1 line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-lg font-extrabold text-[#2A2320]">
+                  <p className="text-lg font-extrabold text-ink">
                     {formatAmount(effectivePrice(product, selectedSize) * qty)} <span className="text-sm font-bold">₾</span>
                   </p>
                 </div>
@@ -154,8 +154,8 @@ export default function QuickViewButton({ product }: { product: Product }) {
 
               {/* Color */}
               <div className="mb-3">
-                <p className="text-[11px] font-bold text-[#2A2320] mb-1.5">
-                  {t("product.color")}: <span className="text-[#5E9E8C] font-semibold">{colorLabel(selectedColor, t)}</span>
+                <p className="text-[11px] font-bold text-ink mb-1.5">
+                  {t("product.color")}: <span className="text-accent font-semibold">{colorLabel(selectedColor, t)}</span>
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {product.colors.map((c) => (
@@ -165,8 +165,8 @@ export default function QuickViewButton({ product }: { product: Product }) {
                       title={colorLabel(c, t)}
                       className={`w-7 h-7 rounded-full border-2 transition-all ${
                         selectedColor === c
-                          ? "border-[#5E9E8C] ring-2 ring-[#5E9E8C] ring-offset-1 scale-110"
-                          : "border-[#DDD5CC] hover:border-[#9A8E88] hover:scale-105"
+                          ? "border-accent ring-2 ring-accent ring-offset-1 scale-110"
+                          : "border-line hover:border-ink-muted hover:scale-105"
                       }`}
                       style={{ backgroundColor: hex(c) }}
                     />
@@ -177,8 +177,8 @@ export default function QuickViewButton({ product }: { product: Product }) {
               {/* Size */}
               {product.sizes[0] !== "One Size" && (
                 <div className="mb-3">
-                  <p className="text-[11px] font-bold text-[#2A2320] mb-1.5">
-                    {t("product.size")}: <span className="text-[#5E9E8C] font-semibold">{sizeLabel(selectedSize, t)}</span>
+                  <p className="text-[11px] font-bold text-ink mb-1.5">
+                    {t("product.size")}: <span className="text-accent font-semibold">{sizeLabel(selectedSize, t)}</span>
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {product.sizes.map((s) => (
@@ -187,8 +187,8 @@ export default function QuickViewButton({ product }: { product: Product }) {
                         onClick={(e) => { e.stopPropagation(); setSize(s); }}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border-2 transition-all ${
                           selectedSize === s
-                            ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#5E9E8C]"
-                            : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C]"
+                            ? "border-accent bg-accent-soft text-accent"
+                            : "border-line text-ink-soft hover:border-accent"
                         }`}
                       >
                         {sizeLabel(s, t)}
@@ -200,19 +200,19 @@ export default function QuickViewButton({ product }: { product: Product }) {
 
               {/* Qty + Add to cart */}
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden flex-shrink-0">
+                <div className="flex items-center border-2 border-line rounded-control overflow-hidden flex-shrink-0">
                   <button
                     onClick={(e) => { e.stopPropagation(); setQty((q) => Math.max(1, q - 1)); }}
-                    className="w-9 h-10 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] transition-colors disabled:opacity-30 text-base"
+                    className="w-9 h-10 flex items-center justify-center font-bold text-ink hover:bg-panel transition-colors disabled:opacity-30 text-base"
                     disabled={qty <= 1}
                   >
                     −
                   </button>
-                  <span className="w-8 text-center font-extrabold text-[#2A2320] text-sm select-none">{qty}</span>
+                  <span className="w-8 text-center font-extrabold text-ink text-sm select-none">{qty}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); setQty((q) => Math.min(qtyMax, q + 1)); }}
                     disabled={qty >= qtyMax}
-                    className="w-9 h-10 flex items-center justify-center font-bold text-[#2A2320] hover:bg-[#EDE5D8] transition-colors text-base disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="w-9 h-10 flex items-center justify-center font-bold text-ink hover:bg-panel transition-colors text-base disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
@@ -221,7 +221,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
                 <button
                   onClick={handleAdd}
                   disabled={soldOut}
-                  className={`flex-1 h-10 rounded-xl font-bold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 h-10 rounded-control font-bold text-white text-sm transition-all duration-300 flex items-center justify-center gap-1.5 ${
                     status === "added" ? "bg-green-500" :
                     status === "blocked" || soldOut ? "bg-red-500" :
                     "hover:opacity-90 active:scale-95"
@@ -243,10 +243,10 @@ export default function QuickViewButton({ product }: { product: Product }) {
               <div className="flex gap-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); toggle(product.id, product.price); }}
-                  className={`flex-1 h-9 rounded-xl border-2 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 h-9 rounded-control border-2 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
                     has(product.id)
                       ? "border-red-400 bg-red-50 text-red-500"
-                      : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                      : "border-line text-ink-soft hover:border-accent hover:text-accent"
                   }`}
                 >
                   <svg className="w-3 h-3" viewBox="0 0 24 24" fill={has(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
@@ -256,7 +256,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); close(); router.push(`/products/${product.slug}`); }}
-                  className="flex-1 h-9 rounded-xl border-2 border-[#DDD5CC] font-semibold text-xs text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors flex items-center justify-center"
+                  className="flex-1 h-9 rounded-control border-2 border-line font-semibold text-xs text-ink-soft hover:border-accent hover:text-accent transition-colors flex items-center justify-center"
                 >
                   {t("quick.viewDetails")} →
                 </button>

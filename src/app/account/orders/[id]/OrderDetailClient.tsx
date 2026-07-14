@@ -124,7 +124,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
   if (loading || !user || fetching) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -134,8 +134,8 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
         <span className="text-5xl block mb-4">🔍</span>
-        <h1 className="text-xl font-extrabold text-[#2A2320] mb-2">{t("acct.orders.notFound")}</h1>
-        <p className="text-sm text-[#5E5450] mb-6">
+        <h1 className="text-xl font-extrabold text-ink mb-2">{t("acct.orders.notFound")}</h1>
+        <p className="text-sm text-ink-soft mb-6">
           {t("acct.orders.notFoundBody").split("{id}")[0]}
           <span className="font-mono font-bold">{orderNumber}</span>
           {t("acct.orders.notFoundBody").split("{id}")[1]}
@@ -169,21 +169,21 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6 flex-wrap">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6 flex-wrap">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-[#5E9E8C] transition-colors">{t("acct.title")}</Link>
+        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
         <span>›</span>
-        <Link href="/account/orders" className="hover:text-[#5E9E8C] transition-colors">{t("acct.orders.title")}</Link>
+        <Link href="/account/orders" className="hover:text-accent transition-colors">{t("acct.orders.title")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold font-mono">{order.id}</span>
+        <span className="text-ink font-semibold font-mono">{order.id}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#2A2320] font-mono">{order.id}</h1>
-          <p className="text-[#9A8E88] text-sm mt-0.5">
+          <h1 className="text-2xl font-extrabold text-ink font-mono">{order.id}</h1>
+          <p className="text-ink-muted text-sm mt-0.5">
             {t("acct.orders.placedOn").replace("{date}", fmtDate(order.date, locale, "long"))}
           </p>
         </div>
@@ -192,7 +192,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cfg.dot }} />
             {orderStatusLabel(order.status, t)}
           </div>
-          <Link href="/account/orders" className="flex items-center gap-1.5 text-sm font-semibold text-[#5E9E8C] hover:underline">
+          <Link href="/account/orders" className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
@@ -206,42 +206,42 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         <div className="lg:col-span-2 space-y-5">
 
           {/* Items */}
-          <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#F5F0EB] font-bold text-[#2A2320] flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
+          <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>🛍️</span> {t("acct.orders.orderItems")}
             </div>
-            <div className="divide-y divide-[#F5F0EB]">
+            <div className="divide-y divide-canvas">
               {order.items.map((item, i) => (
                 <div key={i} className="flex items-center gap-4 p-5">
                   <Link href={`/products/${item.slug}`}>
-                    <div className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 hover:opacity-80 transition-opacity" style={{ backgroundColor: item.cardColor }}>
+                    <div className="w-16 h-16 rounded-control flex items-center justify-center text-2xl flex-shrink-0 hover:opacity-80 transition-opacity" style={{ backgroundColor: item.cardColor }}>
                       {item.emoji}
                     </div>
                   </Link>
                   <div className="flex-1 min-w-0">
                     <Link href={`/products/${item.slug}`}>
-                      <p className="font-bold text-[#2A2320] text-sm leading-snug hover:text-[#5E9E8C] transition-colors">{item.name}</p>
+                      <p className="font-bold text-ink text-sm leading-snug hover:text-accent transition-colors">{item.name}</p>
                     </Link>
-                    <p className="text-xs text-[#9A8E88] mt-0.5">{colorLabel(item.color, t)} · {sizeLabel(item.size, t)}</p>
-                    <p className="text-xs text-[#5E5450] mt-0.5">{t("acct.orders.qtyPrice").replace("{n}", String(item.qty)).replace("{price}", formatPrice(item.price))}</p>
+                    <p className="text-xs text-ink-muted mt-0.5">{colorLabel(item.color, t)} · {sizeLabel(item.size, t)}</p>
+                    <p className="text-xs text-ink-soft mt-0.5">{t("acct.orders.qtyPrice").replace("{n}", String(item.qty)).replace("{price}", formatPrice(item.price))}</p>
                   </div>
-                  <p className="font-extrabold text-[#2A2320] flex-shrink-0">{formatPrice(item.price * item.qty)}</p>
+                  <p className="font-extrabold text-ink flex-shrink-0">{formatPrice(item.price * item.qty)}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Delivery timeline */}
-          <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#F5F0EB] font-bold text-[#2A2320] flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
+          <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>📦</span> {t("acct.orders.deliveryTimeline")}
             </div>
             <div className="p-5">
               {order.trackingNumber && (
-                <div className="flex items-center gap-2 mb-5 p-3 bg-[#EAF2F0] rounded-xl">
+                <div className="flex items-center gap-2 mb-5 p-3 bg-accent-soft rounded-control">
                   <span className="text-sm">🔢</span>
-                  <span className="text-xs text-[#5E5450]">{t("acct.orders.tracking")}</span>
-                  <span className="font-bold text-[#2A2320] text-xs font-mono">{order.trackingNumber}</span>
+                  <span className="text-xs text-ink-soft">{t("acct.orders.tracking")}</span>
+                  <span className="font-bold text-ink text-xs font-mono">{order.trackingNumber}</span>
                 </div>
               )}
               <div className="space-y-0">
@@ -251,7 +251,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
                     <div key={step.label} className="flex items-start gap-4">
                       <div className="flex flex-col items-center flex-shrink-0">
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          step.done ? "border-[#5E9E8C] bg-[#5E9E8C]" : "border-[#DDD5CC] bg-white"
+                          step.done ? "border-accent bg-accent" : "border-line bg-white"
                         }`}>
                           {step.done && (
                             <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -259,11 +259,11 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
                             </svg>
                           )}
                         </div>
-                        {!isLast && <div className={`w-0.5 h-8 mt-1 ${step.done ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"}`} />}
+                        {!isLast && <div className={`w-0.5 h-8 mt-1 ${step.done ? "bg-accent" : "bg-line"}`} />}
                       </div>
                       <div className="pb-4">
-                        <p className={`text-sm font-bold ${step.done ? "text-[#2A2320]" : "text-[#9A8E88]"}`}>{step.label}</p>
-                        {step.date && <p className="text-[11px] text-[#9A8E88] mt-0.5">{step.date}</p>}
+                        <p className={`text-sm font-bold ${step.done ? "text-ink" : "text-ink-muted"}`}>{step.label}</p>
+                        {step.date && <p className="text-[11px] text-ink-muted mt-0.5">{step.date}</p>}
                       </div>
                     </div>
                   );
@@ -276,44 +276,44 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
         {/* Right: Summary + Delivery info */}
         <div className="space-y-5">
           {/* Order summary */}
-          <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#F5F0EB] font-bold text-[#2A2320] flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
+          <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>💰</span> {t("acct.orders.summary")}
             </div>
             <div className="p-5 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-[#5E5450]">{t("cart.subtotal")}</span>
-                <span className="font-bold text-[#2A2320]">{formatPrice(itemSubtotal)}</span>
+                <span className="text-ink-soft">{t("cart.subtotal")}</span>
+                <span className="font-bold text-ink">{formatPrice(itemSubtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-[#5E5450]">{t("cart.shipping")}</span>
+                <span className="text-ink-soft">{t("cart.shipping")}</span>
                 {shippingCost === 0
-                  ? <span className="font-bold text-[#5E9E8C]">{t("cart.free")} 🎉</span>
-                  : <span className="font-bold text-[#2A2320]">{formatPrice(shippingCost)}</span>}
+                  ? <span className="font-bold text-accent">{t("cart.free")} 🎉</span>
+                  : <span className="font-bold text-ink">{formatPrice(shippingCost)}</span>}
               </div>
-              <div className="h-px bg-[#DDD5CC]" />
-              <div className="flex justify-between font-extrabold text-[#2A2320]">
+              <div className="h-px bg-line" />
+              <div className="flex justify-between font-extrabold text-ink">
                 <span>{t("cart.total")}</span>
                 <span className="text-lg">{formatPrice(order.total)}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-[#9A8E88]">{t("acct.orders.payment")}</span>
-                <span className="font-semibold text-[#5E5450]">{order.payment}</span>
+                <span className="text-ink-muted">{t("acct.orders.payment")}</span>
+                <span className="font-semibold text-ink-soft">{order.payment}</span>
               </div>
             </div>
           </div>
 
           {/* Delivery address */}
-          <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#F5F0EB] font-bold text-[#2A2320] flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
+          <div className="bg-white rounded-card border border-line overflow-hidden">
+            <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
               <span>📍</span> {t("acct.orders.deliveryAddressHeading")}
             </div>
             <div className="p-5">
-              <p className="text-sm text-[#2A2320] font-semibold">{user.name}</p>
-              <p className="text-sm text-[#5E5450] mt-1">{order.address}</p>
-              <p className="text-sm text-[#5E5450]">{order.city}, {t("acct.orders.countryGeorgia")}</p>
-              <p className="text-sm text-[#5E5450] mt-1">{order.phone}</p>
-              <div className="mt-3 flex items-center gap-1.5 text-xs text-[#5E5450]">
+              <p className="text-sm text-ink font-semibold">{user.name}</p>
+              <p className="text-sm text-ink-soft mt-1">{order.address}</p>
+              <p className="text-sm text-ink-soft">{order.city}, {t("acct.orders.countryGeorgia")}</p>
+              <p className="text-sm text-ink-soft mt-1">{order.phone}</p>
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-ink-soft">
                 {order.shipping === "express" ? <span>⚡</span> : <span>🚀</span>}
                 <span className="font-semibold">{order.shipping === "express" ? t("acct.orders.expressDelivery") : t("acct.orders.standardDelivery")}</span>
               </div>
@@ -322,13 +322,13 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
 
           {/* Return status card */}
           {latestReturn && (
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-              <div className="px-5 py-4 border-b border-[#F5F0EB] font-bold text-[#2A2320] flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
+            <div className="bg-white rounded-card border border-line overflow-hidden">
+              <div className="px-5 py-4 border-b border-canvas font-bold text-ink flex items-center gap-2" style={{ backgroundColor: "#FAFAF8" }}>
                 <span>↩️</span> {t("acct.return.title")}
               </div>
               <div className="p-5">
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="font-mono font-bold text-xs text-[#2A2320]">{latestReturn.return_number}</span>
+                  <span className="font-mono font-bold text-xs text-ink">{latestReturn.return_number}</span>
                   {(() => {
                     const rc = returnStatusConfig[latestReturn.status];
                     return (
@@ -346,8 +346,8 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
                       const reached = arr.indexOf(latestReturn.status) >= i;
                       return (
                         <div key={s} className="flex-1 flex flex-col items-center gap-1">
-                          <div className={`w-full h-1 rounded-full ${reached ? "bg-[#5E9E8C]" : "bg-[#EAE4DC]"}`} />
-                          <span className={`text-[9px] font-semibold ${reached ? "text-[#3A7A68]" : "text-[#9A8E88]"}`}>
+                          <div className={`w-full h-1 rounded-full ${reached ? "bg-accent" : "bg-[#EAE4DC]"}`} />
+                          <span className={`text-[9px] font-semibold ${reached ? "text-accent-deep" : "text-ink-muted"}`}>
                             {returnStatusLabel(s, t)}
                           </span>
                         </div>
@@ -355,27 +355,27 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
                     })}
                   </div>
                 )}
-                <div className="text-xs text-[#5E5450] space-y-1">
+                <div className="text-xs text-ink-soft space-y-1">
                   <p>
                     {t("acct.return.itemsCount").replace("{n}", String(latestReturn.items.reduce((s, it) => s + it.quantity, 0)))}{" "}
-                    <span className="font-bold text-[#2A2320]">{formatPrice(Number(latestReturn.refund_amount))}</span> {t("acct.return.refundLabel")}
+                    <span className="font-bold text-ink">{formatPrice(Number(latestReturn.refund_amount))}</span> {t("acct.return.refundLabel")}
                   </p>
-                  <p className="text-[#9A8E88]">{t("acct.return.reasonLabel").replace("{reason}", returnReasonLabel(latestReturn.reason, t))}</p>
+                  <p className="text-ink-muted">{t("acct.return.reasonLabel").replace("{reason}", returnReasonLabel(latestReturn.reason, t))}</p>
                   {latestReturn.status === "approved" && (
                     <p className="text-[#2A5A8E]">{t("acct.return.packItems")}</p>
                   )}
                   {latestReturn.status === "refunded" && (
-                    <p className="text-[#3A7A68]">{t("acct.return.transferred")}</p>
+                    <p className="text-accent-deep">{t("acct.return.transferred")}</p>
                   )}
                   {latestReturn.status === "rejected" && latestReturn.admin_note && (
-                    <p className="text-[#B03A3A]">{t("acct.return.reasonLabel").replace("{reason}", latestReturn.admin_note)}</p>
+                    <p className="text-danger">{t("acct.return.reasonLabel").replace("{reason}", latestReturn.admin_note)}</p>
                   )}
                 </div>
                 {latestReturn.status === "requested" && (
                   <button
                     onClick={() => cancelReturn(latestReturn.id)}
                     disabled={cancelling}
-                    className="mt-3 w-full py-2 rounded-xl text-xs font-bold border border-[#DDD5CC] text-[#5E5450] hover:border-[#DC4A4A] hover:text-[#B03A3A] transition-colors disabled:opacity-50"
+                    className="mt-3 w-full py-2 rounded-control text-xs font-bold border border-line text-ink-soft hover:border-[#DC4A4A] hover:text-danger transition-colors disabled:opacity-50"
                   >
                     {cancelling ? t("acct.return.cancelling") : t("acct.return.cancelRequest")}
                   </button>
@@ -390,35 +390,35 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
               <button
                 onClick={cancelOrder}
                 disabled={cancellingOrder}
-                className="w-full py-3 rounded-2xl font-bold text-sm border-2 border-[#DDD5CC] text-[#5E5450] flex items-center justify-center gap-2 hover:border-[#DC4A4A] hover:text-[#B03A3A] transition-colors disabled:opacity-50"
+                className="w-full py-3 rounded-card font-bold text-sm border-2 border-line text-ink-soft flex items-center justify-center gap-2 hover:border-[#DC4A4A] hover:text-danger transition-colors disabled:opacity-50"
               >
                 {cancellingOrder ? t("acct.orders.cancelling") : `✕ ${t("acct.orders.cancelOrder")}`}
               </button>
-              <p className="text-[11px] text-[#9A8E88] text-center mt-1.5">{t("acct.orders.cancelHint")}</p>
+              <p className="text-[11px] text-ink-muted text-center mt-1.5">{t("acct.orders.cancelHint")}</p>
             </div>
           )}
           {canRequestReturn && (
             <div>
               <Link
                 href={`/account/orders/${order.id}/return`}
-                className="w-full py-3 rounded-2xl font-bold text-sm border-2 border-[#5E9E8C] text-[#5E9E8C] flex items-center justify-center gap-2 hover:bg-[#EAF2F0] transition-colors"
+                className="w-full py-3 rounded-card font-bold text-sm border-2 border-accent text-accent flex items-center justify-center gap-2 hover:bg-accent-soft transition-colors"
               >
                 ↩️ {t("acct.return.requestReturn")}
               </Link>
-              <p className="text-[11px] text-[#9A8E88] text-center mt-1.5">
+              <p className="text-[11px] text-ink-muted text-center mt-1.5">
                 {daysLeft === 1 ? t("acct.return.windowLeft1") : t("acct.return.windowLeftN").replace("{n}", String(daysLeft))}
               </p>
             </div>
           )}
           {order.status === "Delivered" && !windowOpen && !activeReturn && (
-            <p className="text-[11px] text-[#9A8E88] text-center">
+            <p className="text-[11px] text-ink-muted text-center">
               {t("acct.return.windowClosed").replace("{n}", String(RETURN_WINDOW_DAYS))}
             </p>
           )}
           {order.status === "Delivered" && (
             <Link
               href="/products"
-              className="w-full py-3 rounded-2xl font-extrabold text-white text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
+              className="w-full py-3 rounded-card font-extrabold text-white text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
               style={{ backgroundColor: "#5E9E8C" }}
             >
               {t("acct.orders.buyAgain")} →
@@ -426,7 +426,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
           )}
           <Link
             href="/contact"
-            className="w-full py-3 rounded-2xl font-bold text-sm border-2 border-[#DDD5CC] text-[#5E5450] flex items-center justify-center hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors"
+            className="w-full py-3 rounded-card font-bold text-sm border-2 border-line text-ink-soft flex items-center justify-center hover:border-accent hover:text-accent transition-colors"
           >
             {t("acct.orders.needHelp")}
           </Link>

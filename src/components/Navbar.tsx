@@ -197,7 +197,7 @@ export default function Navbar() {
           </span>
         </div>
 
-        <nav className="bg-white border-b border-[#DDD5CC] shadow-sm">
+        <nav className="bg-white border-b border-line shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-3 gap-3">
 
@@ -215,8 +215,8 @@ export default function Navbar() {
                     href={link.href}
                     className={`text-sm font-semibold transition-colors whitespace-nowrap ${
                       isActive(link.href)
-                        ? "text-[#5E9E8C]"
-                        : "text-[#5E5450] hover:text-[#2A2320]"
+                        ? "text-accent"
+                        : "text-ink-soft hover:text-ink"
                     }`}
                   >
                     {t(link.key)}
@@ -229,8 +229,8 @@ export default function Navbar() {
 
                 {/* Desktop search — real input, live dropdown, no popup */}
                 <div ref={desktopSearchRef} className="hidden md:block relative">
-                  <div className="flex items-center gap-2.5 w-52 lg:w-64 h-9 px-3.5 rounded-xl border-2 border-[#DDD5CC] bg-[#FAFAF8]">
-                    <svg className="w-4 h-4 flex-shrink-0 text-[#9A8E88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <div className="flex items-center gap-2.5 w-52 lg:w-64 h-9 px-3.5 rounded-control border-2 border-line bg-surface">
+                    <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
@@ -241,16 +241,16 @@ export default function Navbar() {
                       onFocus={() => setSearchOpen(true)}
                       placeholder={t("search.placeholder")}
                       aria-label="Search products"
-                      className="flex-1 min-w-0 text-[13px] text-[#2A2320] placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                      className="flex-1 min-w-0 text-[13px] text-ink placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
                     />
                     {query && (
-                      <button type="button" onClick={() => { setQuery(""); desktopInputRef.current?.focus(); }} aria-label="Clear search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0">
+                      <button type="button" onClick={() => { setQuery(""); desktopInputRef.current?.focus(); }} aria-label="Clear search" className="text-ink-muted hover:text-ink flex-shrink-0">
                         <span className="text-xs">✕</span>
                       </button>
                     )}
                   </div>
                   {searchOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[90vw] bg-white rounded-2xl border border-[#DDD5CC] shadow-2xl p-4 z-[200] animate-pop-in">
+                    <div className="absolute right-0 top-full mt-2 w-[420px] max-w-[90vw] bg-white rounded-card border border-line shadow-2xl p-4 z-[200] animate-pop-in">
                       <SearchResultsPanel
                         query={query} setQuery={setQuery}
                         activeCat={activeCat} setActiveCat={setActiveCat}
@@ -267,7 +267,7 @@ export default function Navbar() {
                   onClick={() => (searchOpen ? closeSearch() : openSearch(true))}
                   aria-label="Search"
                   aria-expanded={searchOpen}
-                  className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90"
+                  className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -278,7 +278,7 @@ export default function Navbar() {
                 <Link
                   href="/wishlist"
                   aria-label="Wishlist"
-                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-[#5E5450] hover:bg-[#EDE5D8] transition-all active:scale-90"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill={wCount > 0 ? "#E8789A" : "none"} viewBox="0 0 24 24" stroke={wCount > 0 ? "#E8789A" : "currentColor"} strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -314,7 +314,7 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     aria-label="Sign in or register"
-                    className="flex items-center gap-1.5 text-sm font-bold text-[#5E5450] hover:text-[#5E9E8C] transition-colors px-2.5 md:px-3 py-2 rounded-xl hover:bg-[#EDE5D8] flex-shrink-0"
+                    className="flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-accent transition-colors px-2.5 md:px-3 py-2 rounded-control hover:bg-panel flex-shrink-0"
                   >
                     <svg className="w-[18px] h-[18px] md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -334,7 +334,7 @@ export default function Navbar() {
                   </svg>
                   <span className="hidden sm:inline">Cart</span>
                   {totalItems > 0 && (
-                    <span className={`absolute -top-1.5 -right-1.5 bg-[#2A2320] text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center leading-none ${cartBump ? "animate-bump" : ""}`}>
+                    <span className={`absolute -top-1.5 -right-1.5 bg-ink text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center leading-none ${cartBump ? "animate-bump" : ""}`}>
                       {totalItems > 9 ? "9+" : totalItems}
                     </span>
                   )}
@@ -343,14 +343,14 @@ export default function Navbar() {
                 {/* Hamburger — mobile */}
                 <button
                   ref={hamburgerRef}
-                  className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-[#EDE5D8] transition-all active:scale-90 gap-1.5"
+                  className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-panel transition-all active:scale-90 gap-1.5"
                   onClick={() => { setSearchOpen(false); setMenuOpen((v) => !v); }}
                   aria-label="Toggle menu"
                   aria-expanded={menuOpen}
                 >
-                  <span className={`block w-5 h-0.5 bg-[#2A2320] transition-all duration-200 origin-center ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-                  <span className={`block w-5 h-0.5 bg-[#2A2320] transition-all duration-200 ${menuOpen ? "opacity-0 scale-x-0" : ""}`} />
-                  <span className={`block w-5 h-0.5 bg-[#2A2320] transition-all duration-200 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+                  <span className={`block w-5 h-0.5 bg-ink transition-all duration-200 origin-center ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+                  <span className={`block w-5 h-0.5 bg-ink transition-all duration-200 ${menuOpen ? "opacity-0 scale-x-0" : ""}`} />
+                  <span className={`block w-5 h-0.5 bg-ink transition-all duration-200 origin-center ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
                 </button>
               </div>
             </div>
@@ -358,9 +358,9 @@ export default function Navbar() {
 
           {/* Mobile search — expanding row, not a full-screen popup */}
           {searchOpen && (
-            <div ref={mobileSearchRowRef} className="md:hidden border-t border-[#DDD5CC] bg-white px-4 py-3 animate-fade-up">
-              <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-xl border-2 border-[#DDD5CC] bg-[#FAFAF8] mb-3">
-                <svg className="w-4 h-4 flex-shrink-0 text-[#9A8E88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div ref={mobileSearchRowRef} className="md:hidden border-t border-line bg-white px-4 py-3 animate-fade-up">
+              <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-control border-2 border-line bg-surface mb-3">
+                <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -370,14 +370,14 @@ export default function Navbar() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("search.placeholder")}
                   aria-label="Search products"
-                  className="flex-1 min-w-0 text-sm text-[#2A2320] placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
+                  className="flex-1 min-w-0 text-sm text-ink placeholder-[#B0A89E] bg-transparent outline-none focus-visible:outline-none"
                 />
                 {query && (
-                  <button type="button" onClick={() => { setQuery(""); mobileInputRef.current?.focus(); }} aria-label="Clear search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0">
+                  <button type="button" onClick={() => { setQuery(""); mobileInputRef.current?.focus(); }} aria-label="Clear search" className="text-ink-muted hover:text-ink flex-shrink-0">
                     <span className="text-xs">✕</span>
                   </button>
                 )}
-                <button type="button" onClick={closeSearch} aria-label="Close search" className="text-[#9A8E88] hover:text-[#2A2320] flex-shrink-0 text-xs font-bold">
+                <button type="button" onClick={closeSearch} aria-label="Close search" className="text-ink-muted hover:text-ink flex-shrink-0 text-xs font-bold">
                   {t("search.close")}
                 </button>
               </div>
@@ -392,23 +392,23 @@ export default function Navbar() {
 
           {/* Mobile dropdown */}
           {menuOpen && (
-            <div ref={mobileMenuRef} className="md:hidden border-t border-[#DDD5CC] bg-white px-4 py-4 space-y-1">
+            <div ref={mobileMenuRef} className="md:hidden border-t border-line bg-white px-4 py-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                  className={`flex items-center px-3 py-2.5 rounded-control text-sm font-semibold transition-colors ${
                     isActive(link.href)
-                      ? "bg-[#EAF2F0] text-[#5E9E8C]"
-                      : "text-[#2A2320] hover:bg-[#F5F0EB]"
+                      ? "bg-accent-soft text-accent"
+                      : "text-ink hover:bg-canvas"
                   }`}
                 >
                   {t(link.key)}
                 </Link>
               ))}
               {user ? (
-                <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#EAF2F0]">
+                <div className="flex items-center justify-between px-3 py-2.5 rounded-control bg-accent-soft">
                   <Link
                     href="/account"
                     onClick={() => setMenuOpen(false)}
@@ -422,20 +422,20 @@ export default function Navbar() {
                         user.name[0]?.toUpperCase()
                       )}
                     </div>
-                    <span className="text-sm font-semibold text-[#2A2320] truncate">{user.name}</span>
+                    <span className="text-sm font-semibold text-ink truncate">{user.name}</span>
                   </Link>
                   <button onClick={() => { signOut(); setMenuOpen(false); }}
                     className="text-xs font-bold text-red-400 flex-shrink-0 ml-2">{t("nav.signOut")}</button>
                 </div>
               ) : (
                 <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors"
                   style={{ backgroundColor: "#5E9E8C" }}>
                   {t("nav.signInRegister")}
                 </Link>
               )}
-              <div className="pt-2 border-t border-[#DDD5CC] mt-1">
-                <p className="text-[10px] text-[#9A8E88] font-bold uppercase tracking-widest px-3 mb-2">Language</p>
+              <div className="pt-2 border-t border-line mt-1">
+                <p className="text-[10px] text-ink-muted font-bold uppercase tracking-widest px-3 mb-2">Language</p>
                 <div className="px-2"><LanguageSwitcher /></div>
               </div>
             </div>

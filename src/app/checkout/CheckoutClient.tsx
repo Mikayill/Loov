@@ -78,20 +78,20 @@ function StepIndicator({ step, t }: { step: Step; t: (key: TranslationKey) => st
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-extrabold transition-colors ${
                 i < idx
-                  ? "bg-[#5E9E8C] text-white"
+                  ? "bg-accent text-white"
                   : i === idx
-                  ? "bg-[#2A2320] text-white"
-                  : "bg-[#EDE5D8] text-[#9A8E88]"
+                  ? "bg-ink text-white"
+                  : "bg-panel text-ink-muted"
               }`}
             >
               {i < idx ? "✓" : i + 1}
             </div>
-            <span className={`text-[10px] font-bold mt-1 whitespace-nowrap ${i === idx ? "text-[#2A2320]" : "text-[#9A8E88]"}`}>
+            <span className={`text-[10px] font-bold mt-1 whitespace-nowrap ${i === idx ? "text-ink" : "text-ink-muted"}`}>
               {s.label}
             </span>
           </div>
           {i < steps.length - 1 && (
-            <div className={`h-0.5 w-12 sm:w-20 mx-1 mb-4 transition-colors ${i < idx ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"}`} />
+            <div className={`h-0.5 w-12 sm:w-20 mx-1 mb-4 transition-colors ${i < idx ? "bg-accent" : "bg-line"}`} />
           )}
         </div>
       ))}
@@ -114,16 +114,16 @@ function Field({
   const invalid = !!error;
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-bold text-[#2A2320] mb-1.5">
+      <label htmlFor={id} className="block text-xs font-bold text-ink mb-1.5">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       <div
-        className={`flex items-stretch h-11 rounded-xl border-2 bg-white overflow-hidden transition-colors focus-within:border-[#5E9E8C] ${
-          invalid ? "border-red-400 focus-within:border-red-400" : "border-[#DDD5CC]"
+        className={`flex items-stretch h-11 rounded-control border-2 bg-white overflow-hidden transition-colors focus-within:border-accent ${
+          invalid ? "border-red-400 focus-within:border-red-400" : "border-line"
         }`}
       >
         {prefix && (
-          <span className="flex items-center pl-4 pr-2 text-sm font-bold text-[#5E5450] bg-[#F5F0EB] border-r-2 border-[#DDD5CC] select-none">
+          <span className="flex items-center pl-4 pr-2 text-sm font-bold text-ink-soft bg-canvas border-r-2 border-line select-none">
             {prefix}
           </span>
         )}
@@ -139,7 +139,7 @@ function Field({
           autoComplete={autoComplete}
           aria-invalid={invalid}
           aria-describedby={invalid ? `${id}-error` : undefined}
-          className="flex-1 min-w-0 h-full px-4 bg-transparent text-[#2A2320] text-sm font-medium outline-none placeholder:text-[#C8B8B0]"
+          className="flex-1 min-w-0 h-full px-4 bg-transparent text-ink text-sm font-medium outline-none placeholder:text-[#C8B8B0]"
         />
       </div>
       {invalid && (
@@ -482,8 +482,8 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
         <div className="text-6xl mb-5">🛒</div>
-        <h2 className="text-2xl font-extrabold text-[#2A2320] mb-3">{t("cart.empty.title")}</h2>
-        <p className="text-[#5E5450] mb-7 text-sm">{t("checkout.emptySubtitle")}</p>
+        <h2 className="text-2xl font-extrabold text-ink mb-3">{t("cart.empty.title")}</h2>
+        <p className="text-ink-soft mb-7 text-sm">{t("checkout.emptySubtitle")}</p>
         <Link href="/products" className="font-bold px-7 py-3 rounded-full text-white hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
           {t("checkout.browseProducts")} →
         </Link>
@@ -500,7 +500,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           addressToast.visible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="rounded-2xl shadow-2xl px-4 py-3.5 flex items-center gap-3 bg-[#B03A3A] text-white">
+        <div className="rounded-card shadow-2xl px-4 py-3.5 flex items-center gap-3 bg-danger text-white">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold leading-snug">{addressToast.text}</p>
           </div>
@@ -515,15 +515,15 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
       </div>
 
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/cart" className="hover:text-[#5E9E8C] transition-colors">{t("nav.cart")}</Link>
+        <Link href="/cart" className="hover:text-accent transition-colors">{t("nav.cart")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("checkout.title")}</span>
+        <span className="text-ink font-semibold">{t("checkout.title")}</span>
       </nav>
 
-      <h1 className="text-2xl font-extrabold text-[#2A2320] mb-6">{t("checkout.title")}</h1>
+      <h1 className="text-2xl font-extrabold text-ink mb-6">{t("checkout.title")}</h1>
       <StepIndicator step={step} t={t} />
 
       {/* ══ STEP 1: Address ══ */}
@@ -531,9 +531,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Contact */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
-              <h2 className="font-extrabold text-[#2A2320] mb-5 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#5E9E8C] text-white text-xs flex items-center justify-center font-bold">1</span>
+            <div className="bg-white rounded-card border border-line p-6">
+              <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">1</span>
                 {t("checkout.contact")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -548,21 +548,21 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             </div>
 
             {/* Shipping address */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
-              <h2 className="font-extrabold text-[#2A2320] mb-5 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#5E9E8C] text-white text-xs flex items-center justify-center font-bold">2</span>
+            <div className="bg-white rounded-card border border-line p-6">
+              <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">2</span>
                 {t("checkout.shippingAddress")}
               </h2>
 
               {/* Saved addresses — pick one instead of retyping */}
               {user && savedAddresses.length > 0 && (
                 <div className="mb-5 space-y-2">
-                  <p className="text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("checkout.savedAddresses")}</p>
+                  <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest">{t("checkout.savedAddresses")}</p>
                   {savedAddresses.map((a) => (
                     <label
                       key={a.id}
-                      className={`flex items-start gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                        selectedAddrId === a.id ? "border-[#5E9E8C] bg-[#EAF2F0]" : "border-[#DDD5CC] hover:border-[#9A8E88]"
+                      className={`flex items-start gap-3 p-3.5 rounded-control border-2 cursor-pointer transition-all ${
+                        selectedAddrId === a.id ? "border-accent bg-accent-soft" : "border-line hover:border-ink-muted"
                       }`}
                     >
                       <input
@@ -570,27 +570,27 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         name="savedAddress"
                         checked={selectedAddrId === a.id}
                         onChange={() => { setSelectedAddrId(a.id); applyAddress(a); }}
-                        className="accent-[#5E9E8C] mt-1"
+                        className="accent-accent mt-1"
                       />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-[#2A2320] flex items-center gap-2">
+                        <p className="text-sm font-bold text-ink flex items-center gap-2">
                           {a.label === "Home" ? t("addr.labelHome") : a.label === "Work" ? t("addr.labelWork") : t("addr.labelOther")}
                           {a.isDefault && (
-                            <span className="text-[9px] font-bold bg-white text-[#5E9E8C] border border-[#5E9E8C] px-1.5 py-0.5 rounded-full uppercase">
+                            <span className="text-[9px] font-bold bg-white text-accent border border-accent px-1.5 py-0.5 rounded-full uppercase">
                               {t("addr.default")}
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-[#5E5450] mt-0.5">
+                        <p className="text-xs text-ink-soft mt-0.5">
                           {a.firstName} {a.lastName} · {a.street}{a.district ? `, ${a.district}` : ""}{a.city ? `, ${a.city}` : ""}{a.zip ? `, ${a.zip}` : ""}
                         </p>
-                        {a.phone && <p className="text-xs text-[#9A8E88]">{a.phone}</p>}
+                        {a.phone && <p className="text-xs text-ink-muted">{a.phone}</p>}
                       </div>
                     </label>
                   ))}
                   <label
-                    className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                      selectedAddrId === "new" ? "border-[#5E9E8C] bg-[#EAF2F0]" : "border-dashed border-[#DDD5CC] hover:border-[#9A8E88]"
+                    className={`flex items-center gap-3 p-3.5 rounded-control border-2 cursor-pointer transition-all ${
+                      selectedAddrId === "new" ? "border-accent bg-accent-soft" : "border-dashed border-line hover:border-ink-muted"
                     }`}
                   >
                     <input
@@ -601,9 +601,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         setSelectedAddrId("new");
                         setForm((f) => ({ ...f, address: "", region: "", district: "", city: "", zip: "" }));
                       }}
-                      className="accent-[#5E9E8C]"
+                      className="accent-accent"
                     />
-                    <span className="text-sm font-bold text-[#5E9E8C]">＋ {t("checkout.useDifferent")}</span>
+                    <span className="text-sm font-bold text-accent">＋ {t("checkout.useDifferent")}</span>
                   </label>
                 </div>
               )}
@@ -617,7 +617,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Region (mkhare) */}
                   <div>
-                    <label htmlFor="region" className="block text-xs font-bold text-[#2A2320] mb-1.5">
+                    <label htmlFor="region" className="block text-xs font-bold text-ink mb-1.5">
                       {t("checkout.region")}<span className="text-red-400 ml-0.5">*</span>
                     </label>
                     <select
@@ -627,13 +627,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                       required
                       aria-invalid={!!errors.region}
                       aria-describedby={errors.region ? "region-error" : undefined}
-                      className={`w-full h-11 px-4 rounded-xl border-2 bg-white text-sm font-medium outline-none transition-colors focus:border-[#5E9E8C] ${
-                        errors.region ? "border-red-400" : "border-[#DDD5CC]"
-                      } ${form.region ? "text-[#2A2320]" : "text-[#C8B8B0]"}`}
+                      className={`w-full h-11 px-4 rounded-control border-2 bg-white text-sm font-medium outline-none transition-colors focus:border-accent ${
+                        errors.region ? "border-red-400" : "border-line"
+                      } ${form.region ? "text-ink" : "text-[#C8B8B0]"}`}
                     >
                       <option value="" disabled>{t("checkout.selectRegion")}</option>
                       {GEORGIA_REGIONS.map((r) => (
-                        <option key={r.code} value={r.en} className="text-[#2A2320]">
+                        <option key={r.code} value={r.en} className="text-ink">
                           {r.en} · {r.ka}
                         </option>
                       ))}
@@ -646,18 +646,18 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   {/* District — Tbilisi only */}
                   {form.region === "Tbilisi" ? (
                     <div>
-                      <label htmlFor="district" className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("checkout.district")}</label>
+                      <label htmlFor="district" className="block text-xs font-bold text-ink mb-1.5">{t("checkout.district")}</label>
                       <select
                         id="district"
                         value={form.district}
                         onChange={(e) => set("district", e.target.value)}
-                        className={`w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] bg-white text-sm font-medium outline-none transition-colors focus:border-[#5E9E8C] ${
-                          form.district ? "text-[#2A2320]" : "text-[#C8B8B0]"
+                        className={`w-full h-11 px-4 rounded-control border-2 border-line bg-white text-sm font-medium outline-none transition-colors focus:border-accent ${
+                          form.district ? "text-ink" : "text-[#C8B8B0]"
                         }`}
                       >
                         <option value="">{t("checkout.selectDistrict")}</option>
                         {TBILISI_DISTRICTS.map((d) => (
-                          <option key={d} value={d} className="text-[#2A2320]">{d}</option>
+                          <option key={d} value={d} className="text-ink">{d}</option>
                         ))}
                       </select>
                     </div>
@@ -674,33 +674,33 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 </>
                 )}
                 {showManualFields && user && addrBookReady && (
-                  <label className="flex items-center gap-2 text-sm text-[#5E5450] cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-ink-soft cursor-pointer">
                     <input
                       type="checkbox"
                       checked={saveNewAddress}
                       onChange={(e) => setSaveNewAddress(e.target.checked)}
-                      className="w-4 h-4 accent-[#5E9E8C]"
+                      className="w-4 h-4 accent-accent"
                     />
                     {t("checkout.saveAddress")}
                   </label>
                 )}
                 <div>
-                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("checkout.orderNotes")} <span className="font-normal text-[#9A8E88]">{t("checkout.optional")}</span></label>
+                  <label className="block text-xs font-bold text-ink mb-1.5">{t("checkout.orderNotes")} <span className="font-normal text-ink-muted">{t("checkout.optional")}</span></label>
                   <textarea
                     value={form.notes}
                     onChange={(e) => set("notes", e.target.value)}
                     placeholder={t("checkout.notesPlaceholder")}
                     rows={3}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[#DDD5CC] bg-white text-[#2A2320] text-sm font-medium outline-none focus:border-[#5E9E8C] transition-colors placeholder:text-[#C8B8B0] resize-none"
+                    className="w-full px-4 py-3 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-[#C8B8B0] resize-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Shipping method */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
-              <h2 className="font-extrabold text-[#2A2320] mb-5 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#5E9E8C] text-white text-xs flex items-center justify-center font-bold">3</span>
+            <div className="bg-white rounded-card border border-line p-6">
+              <h2 className="font-extrabold text-ink mb-5 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center font-bold">3</span>
                 {t("checkout.shippingMethod")}
               </h2>
               <div className="space-y-3">
@@ -712,10 +712,10 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 ].map((opt) => (
                   <label
                     key={opt.id}
-                    className={`flex items-center justify-between gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`flex items-center justify-between gap-4 p-4 rounded-control border-2 cursor-pointer transition-all ${
                       form.shipping === opt.id
-                        ? "border-[#5E9E8C] bg-[#EAF2F0]"
-                        : "border-[#DDD5CC] hover:border-[#9A8E88]"
+                        ? "border-accent bg-accent-soft"
+                        : "border-line hover:border-ink-muted"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -725,27 +725,27 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         value={opt.id}
                         checked={form.shipping === opt.id as "standard" | "express"}
                         onChange={() => set("shipping", opt.id)}
-                        className="accent-[#5E9E8C]"
+                        className="accent-accent"
                       />
                       <div>
-                        <p className="text-sm font-bold text-[#2A2320]">{opt.label}</p>
-                        <p className="text-xs text-[#9A8E88]">{opt.sub}</p>
+                        <p className="text-sm font-bold text-ink">{opt.label}</p>
+                        <p className="text-xs text-ink-muted">{opt.sub}</p>
                       </div>
                     </div>
-                    <span className="font-extrabold text-[#2A2320] text-sm whitespace-nowrap">{opt.price}</span>
+                    <span className="font-extrabold text-ink text-sm whitespace-nowrap">{opt.price}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* Gift wrap */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-6">
+            <div className="bg-white rounded-card border border-line p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🎁</span>
                   <div>
-                    <p className="font-extrabold text-[#2A2320] text-sm">{t("checkout.addGiftWrap")}</p>
-                    <p className="text-xs text-[#9A8E88]">{t("checkout.giftWrapSub").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
+                    <p className="font-extrabold text-ink text-sm">{t("checkout.addGiftWrap")}</p>
+                    <p className="text-xs text-ink-muted">{t("checkout.giftWrapSub").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
                   </div>
                 </div>
                 <button
@@ -754,7 +754,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   aria-checked={giftWrap}
                   onClick={() => setGiftWrap((v) => !v)}
                   className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors duration-200 ${
-                    giftWrap ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"
+                    giftWrap ? "bg-accent" : "bg-line"
                   }`}
                 >
                   <span
@@ -765,9 +765,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 </button>
               </div>
               {giftWrap && (
-                <div className="mt-4 border-t border-[#F5F0EB] pt-4">
-                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">
-                    {t("checkout.giftMessage")} <span className="font-normal text-[#9A8E88]">{t("checkout.optional")}</span>
+                <div className="mt-4 border-t border-canvas pt-4">
+                  <label className="block text-xs font-bold text-ink mb-1.5">
+                    {t("checkout.giftMessage")} <span className="font-normal text-ink-muted">{t("checkout.optional")}</span>
                   </label>
                   <textarea
                     value={giftMessage}
@@ -775,9 +775,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                     placeholder={t("checkout.giftMessagePlaceholder")}
                     rows={3}
                     maxLength={200}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-[#DDD5CC] bg-white text-[#2A2320] text-sm font-medium outline-none focus:border-[#5E9E8C] transition-colors placeholder:text-[#C8B8B0] resize-none"
+                    className="w-full px-4 py-3 rounded-control border-2 border-line bg-white text-ink text-sm font-medium outline-none focus:border-accent transition-colors placeholder:text-[#C8B8B0] resize-none"
                   />
-                  <p className="text-[10px] text-[#9A8E88] text-right mt-1">{giftMessage.length}/200</p>
+                  <p className="text-[10px] text-ink-muted text-right mt-1">{giftMessage.length}/200</p>
                 </div>
               )}
             </div>
@@ -789,7 +789,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               onClick={handleContinueToReview}
               size="lg"
               fullWidth
-              className="!rounded-2xl !h-auto py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
+              className="!rounded-card !h-auto py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               {t("checkout.continueReview")} →
             </Button>
@@ -797,8 +797,8 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
           {/* Order mini-summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-2xl border border-[#DDD5CC] p-5">
-              <h3 className="font-extrabold text-[#2A2320] text-sm mb-4">
+            <div className="sticky top-24 bg-white rounded-card border border-line p-5">
+              <h3 className="font-extrabold text-ink text-sm mb-4">
                 {items.length === 1 ? t("checkout.yourOrder1") : t("checkout.yourOrder").replace("{n}", String(items.length))}
                 {items.length < allItems.length && ` (${t("checkout.ofInCart").replace("{total}", String(allItems.length))})`}
               </h3>
@@ -818,24 +818,24 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-[#2A2320] leading-tight line-clamp-1">{item.product.name}</p>
-                        <p className="text-[10px] text-[#9A8E88]">{colorLabel(item.selectedColor, t)} · {sizeLabel(item.selectedSize, t)} × {item.quantity}</p>
+                        <p className="text-xs font-bold text-ink leading-tight line-clamp-1">{item.product.name}</p>
+                        <p className="text-[10px] text-ink-muted">{colorLabel(item.selectedColor, t)} · {sizeLabel(item.selectedSize, t)} × {item.quantity}</p>
                       </div>
-                      <span className="text-xs font-extrabold text-[#2A2320] flex-shrink-0">{formatPrice(linePrice)}</span>
+                      <span className="text-xs font-extrabold text-ink flex-shrink-0">{formatPrice(linePrice)}</span>
                     </div>
                   );
                 })}
               </div>
-              <div className="border-t border-[#DDD5CC] pt-3 space-y-2 text-xs">
-                <div className="flex justify-between text-[#5E5450]"><span>{t("cart.subtotal")}</span><span className="font-bold">{formatPrice(checkoutTotal)}</span></div>
+              <div className="border-t border-line pt-3 space-y-2 text-xs">
+                <div className="flex justify-between text-ink-soft"><span>{t("cart.subtotal")}</span><span className="font-bold">{formatPrice(checkoutTotal)}</span></div>
                 {promoDiscount > 0 && (
-                  <div className="flex justify-between text-[#5E9E8C]"><span>{appliedPromoCode}</span><span className="font-bold">−{formatPrice(promoDiscount)}</span></div>
+                  <div className="flex justify-between text-accent"><span>{appliedPromoCode}</span><span className="font-bold">−{formatPrice(promoDiscount)}</span></div>
                 )}
-                <div className="flex justify-between text-[#5E5450]"><span>{t("cart.shipping")}</span><span className="font-bold">{shippingCost === 0 ? t("cart.free") : formatPrice(shippingCost)}</span></div>
+                <div className="flex justify-between text-ink-soft"><span>{t("cart.shipping")}</span><span className="font-bold">{shippingCost === 0 ? t("cart.free") : formatPrice(shippingCost)}</span></div>
                 {giftWrap && (
-                  <div className="flex justify-between text-[#5E5450]"><span>🎁 {t("checkout.addGiftWrap")}</span><span className="font-bold">{formatPrice(5)}</span></div>
+                  <div className="flex justify-between text-ink-soft"><span>🎁 {t("checkout.addGiftWrap")}</span><span className="font-bold">{formatPrice(5)}</span></div>
                 )}
-                <div className="flex justify-between font-extrabold text-[#2A2320] text-sm pt-1 border-t border-[#DDD5CC]">
+                <div className="flex justify-between font-extrabold text-ink text-sm pt-1 border-t border-line">
                   <span>{t("cart.total")}</span><span>{formatPrice(total)}</span>
                 </div>
               </div>
@@ -849,10 +849,10 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-5">
             {/* Shipping summary */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-5">
+            <div className="bg-white rounded-card border border-line p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-extrabold text-[#2A2320]">{t("checkout.shippingDetails")}</h2>
-                <button onClick={() => setStep("address")} className="text-xs font-bold text-[#5E9E8C] hover:underline">{t("common.edit")}</button>
+                <h2 className="font-extrabold text-ink">{t("checkout.shippingDetails")}</h2>
+                <button onClick={() => setStep("address")} className="text-xs font-bold text-accent hover:underline">{t("common.edit")}</button>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {[
@@ -863,39 +863,39 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   { label: t("checkout.delivery"),value: form.shipping === "express" ? t("checkout.expressNextDay") : t("checkout.standardDays").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)) },
                 ].map((row) => (
                   <div key={row.label}>
-                    <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{row.label}</p>
-                    <p className="font-semibold text-[#2A2320] text-xs">{row.value}</p>
+                    <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{row.label}</p>
+                    <p className="font-semibold text-ink text-xs">{row.value}</p>
                   </div>
                 ))}
               </div>
               {form.notes && (
-                <div className="mt-3 p-3 bg-[#F5F0EB] rounded-xl">
-                  <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-0.5">{t("checkout.notes")}</p>
-                  <p className="text-xs text-[#5E5450]">{form.notes}</p>
+                <div className="mt-3 p-3 bg-canvas rounded-control">
+                  <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-0.5">{t("checkout.notes")}</p>
+                  <p className="text-xs text-ink-soft">{form.notes}</p>
                 </div>
               )}
               {giftWrap && (
-                <div className="mt-3 p-3 bg-[#EAF2F0] rounded-xl flex items-start gap-2">
+                <div className="mt-3 p-3 bg-accent-soft rounded-control flex items-start gap-2">
                   <span className="text-base flex-shrink-0">🎁</span>
                   <div>
-                    <p className="text-xs font-bold text-[#2A2320]">{t("checkout.giftWrapAdded").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
-                    {giftMessage && <p className="text-xs text-[#5E5450] mt-0.5 italic">&ldquo;{giftMessage}&rdquo;</p>}
+                    <p className="text-xs font-bold text-ink">{t("checkout.giftWrapAdded").replace("{price}", giftWrapPrice > 0 ? formatPrice(giftWrapPrice) : t("cart.free"))}</p>
+                    {giftMessage && <p className="text-xs text-ink-soft mt-0.5 italic">&ldquo;{giftMessage}&rdquo;</p>}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Items */}
-            <div className="bg-white rounded-2xl border border-[#DDD5CC] p-5">
-              <h2 className="font-extrabold text-[#2A2320] mb-4">{t("checkout.orderItems")}</h2>
+            <div className="bg-white rounded-card border border-line p-5">
+              <h2 className="font-extrabold text-ink mb-4">{t("checkout.orderItems")}</h2>
               <div className="space-y-3">
                 {items.map((item) => {
                   const key = checkoutItemKey(item);
                   const matched = !!item.bundleSlug && bundleResult.matchedBundles.has(item.bundleSlug);
                   const linePrice = matched ? (bundleResult.lineTotals.get(key) ?? 0) : effectivePrice(item.product, item.selectedSize) * item.quantity;
                   return (
-                    <div key={key} className="flex items-center gap-3 py-2 border-b border-[#F5F0EB] last:border-0">
-                      <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden" style={{ backgroundColor: item.product.cardColor }}>
+                    <div key={key} className="flex items-center gap-3 py-2 border-b border-canvas last:border-0">
+                      <div className="w-14 h-14 rounded-control flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden" style={{ backgroundColor: item.product.cardColor }}>
                         {item.product.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-cover" />
@@ -904,11 +904,11 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[#2A2320] text-sm">{item.product.name}</p>
-                        <p className="text-xs text-[#9A8E88]">{colorLabel(item.selectedColor, t)} · {sizeLabel(item.selectedSize, t)}</p>
-                        <p className="text-xs text-[#9A8E88]">{t("checkout.qty").replace("{n}", String(item.quantity))}</p>
+                        <p className="font-bold text-ink text-sm">{item.product.name}</p>
+                        <p className="text-xs text-ink-muted">{colorLabel(item.selectedColor, t)} · {sizeLabel(item.selectedSize, t)}</p>
+                        <p className="text-xs text-ink-muted">{t("checkout.qty").replace("{n}", String(item.quantity))}</p>
                       </div>
-                      <span className="font-extrabold text-[#2A2320]">{formatPrice(linePrice)}</span>
+                      <span className="font-extrabold text-ink">{formatPrice(linePrice)}</span>
                     </div>
                   );
                 })}
@@ -917,12 +917,12 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
             {/* Loov Rewards — redeem points */}
             {loyalty.hydrated && loyalty.balance >= REDEEM_BLOCK && (
-              <div className="bg-[#FFF8E8] border border-[#F0C85A] rounded-2xl p-5">
+              <div className="bg-[#FFF8E8] border border-[#F0C85A] rounded-card p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">⭐</span>
                     <div>
-                      <p className="font-extrabold text-[#2A2320] text-sm">{t("checkout.usePoints")}</p>
+                      <p className="font-extrabold text-ink text-sm">{t("checkout.usePoints")}</p>
                       <p className="text-xs text-[#8B6914]">
                         <strong>{t("checkout.youHavePoints").replace("{n}", loyalty.balance.toLocaleString())}</strong>
                         {redeemablePoints > 0 ? (
@@ -942,7 +942,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                     disabled={redeemablePoints === 0}
                     onClick={() => setUsePoints((v) => !v)}
                     className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-40 ${
-                      usePoints ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"
+                      usePoints ? "bg-accent" : "bg-line"
                     }`}
                   >
                     <span
@@ -955,25 +955,25 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 {usePoints && pointsDiscount > 0 && (
                   <div className="mt-3 pt-3 border-t border-[#F0C85A]/40 flex items-center justify-between text-sm">
                     <span className="font-bold text-[#8B6914]">−{redeemPts.toLocaleString()} points</span>
-                    <span className="font-extrabold text-[#5E9E8C]">−{formatPrice(pointsDiscount)}</span>
+                    <span className="font-extrabold text-accent">−{formatPrice(pointsDiscount)}</span>
                   </div>
                 )}
               </div>
             )}
 
             {/* Payment note */}
-            <div className="bg-[#EAF2F0] border border-[#C8DDD8] rounded-2xl p-5 flex gap-3 items-start">
+            <div className="bg-accent-soft border border-sage rounded-card p-5 flex gap-3 items-start">
               <span className="text-xl flex-shrink-0">🔒</span>
               <div>
-                <p className="font-bold text-[#2A2320] text-sm mb-1">{t("checkout.paymentOnDelivery")}</p>
-                <p className="text-xs text-[#5E5450] leading-relaxed">
+                <p className="font-bold text-ink text-sm mb-1">{t("checkout.paymentOnDelivery")}</p>
+                <p className="text-xs text-ink-soft leading-relaxed">
                   {t("checkout.paymentNote")}
                 </p>
               </div>
             </div>
 
             {placeError && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+              <div className="bg-red-50 border border-red-200 rounded-card p-4 flex items-start gap-3">
                 <span className="text-lg flex-shrink-0">⚠️</span>
                 <p className="text-sm font-semibold text-red-600">{placeError}</p>
               </div>
@@ -985,13 +985,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 type="checkbox"
                 checked={agreedTerms}
                 onChange={(e) => { setAgreedTerms(e.target.checked); if (e.target.checked) setPlaceError(""); }}
-                className="mt-0.5 w-4 h-4 rounded accent-[#5E9E8C] flex-shrink-0"
+                className="mt-0.5 w-4 h-4 rounded accent-accent flex-shrink-0"
               />
-              <span className="text-xs text-[#5E5450] leading-relaxed">
+              <span className="text-xs text-ink-soft leading-relaxed">
                 {t("checkout.agreeTerms.pre")}
-                <Link href="/terms" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.terms")}</Link>
+                <Link href="/terms" className="text-accent font-semibold hover:underline">{t("footer.terms")}</Link>
                 {t("checkout.agreeTerms.mid")}
-                <Link href="/privacy" className="text-[#5E9E8C] font-semibold hover:underline">{t("footer.privacy")}</Link>
+                <Link href="/privacy" className="text-accent font-semibold hover:underline">{t("footer.privacy")}</Link>
                 {t("checkout.agreeTerms.post")}
               </span>
             </label>
@@ -1002,7 +1002,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 disabled={placing}
                 variant="secondary"
                 size="lg"
-                className="flex-1 !rounded-2xl !h-auto py-3.5 !text-sm"
+                className="flex-1 !rounded-card !h-auto py-3.5 !text-sm"
               >
                 ← {t("common.back")}
               </Button>
@@ -1011,7 +1011,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                 loading={placing}
                 loadingText={t("checkout.placingOrder")}
                 size="lg"
-                className="flex-1 !rounded-2xl !h-auto py-3.5"
+                className="flex-1 !rounded-card !h-auto py-3.5"
               >
                 {t("checkout.placeOrderBtn")} →
               </Button>
@@ -1020,43 +1020,43 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
           {/* Price summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white rounded-2xl border border-[#DDD5CC] p-5 space-y-3">
-              <h3 className="font-extrabold text-[#2A2320] text-sm">{t("checkout.priceSummary")}</h3>
+            <div className="sticky top-24 bg-white rounded-card border border-line p-5 space-y-3">
+              <h3 className="font-extrabold text-ink text-sm">{t("checkout.priceSummary")}</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-[#5E5450]"><span>{t("cart.subtotal")}</span><span className="font-bold">{formatPrice(checkoutTotal)}</span></div>
+                <div className="flex justify-between text-ink-soft"><span>{t("cart.subtotal")}</span><span className="font-bold">{formatPrice(checkoutTotal)}</span></div>
                 {promoDiscount > 0 && (
-                  <div className="flex justify-between text-[#5E9E8C]">
+                  <div className="flex justify-between text-accent">
                     <span className="flex items-center gap-1.5">
                       {appliedPromoCode}
-                      <button type="button" onClick={removePromo} className="text-[10px] font-bold text-[#9A8E88] hover:text-red-400 underline underline-offset-2">
+                      <button type="button" onClick={removePromo} className="text-[10px] font-bold text-ink-muted hover:text-red-400 underline underline-offset-2">
                         {t("common.remove")}
                       </button>
                     </span>
                     <span className="font-bold">−{formatPrice(promoDiscount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[#5E5450]">
+                <div className="flex justify-between text-ink-soft">
                   <span>{t("checkout.shippingParen").replace("{method}", form.shipping === "express" ? t("checkout.expressDelivery") : t("checkout.standardDelivery"))}</span>
                   <span className="font-bold">{shippingCost === 0 ? `${t("cart.free")} 🎉` : formatPrice(shippingCost)}</span>
                 </div>
                 {giftWrap && (
-                  <div className="flex justify-between text-[#5E5450]">
+                  <div className="flex justify-between text-ink-soft">
                     <span>🎁 {t("checkout.addGiftWrap")}</span>
                     <span className="font-bold">{formatPrice(5)}</span>
                   </div>
                 )}
                 {pointsDiscount > 0 && (
-                  <div className="flex justify-between text-[#5E9E8C]">
+                  <div className="flex justify-between text-accent">
                     <span>⭐ {t("checkout.pointsParen").replace("{n}", redeemPts.toLocaleString())}</span>
                     <span className="font-bold">−{formatPrice(pointsDiscount)}</span>
                   </div>
                 )}
-                <div className="h-px bg-[#DDD5CC]" />
-                <div className="flex justify-between font-extrabold text-[#2A2320] text-base">
+                <div className="h-px bg-line" />
+                <div className="flex justify-between font-extrabold text-ink text-base">
                   <span>{t("cart.total")}</span><span>{formatPrice(total)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-xl px-3 py-2">
+              <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-2">
                 <span className="text-sm">⭐</span>
                 <span className="text-[11px] font-bold text-[#8B6914]">
                   {/* Same earn base as the server: merchandise after discounts — shipping/gift wrap never earn. */}
@@ -1065,7 +1065,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
               </div>
               <div className="flex items-center justify-around pt-2">
                 {[`🔒 ${t("cart.trustSecure")}`, `🔄 ${t("cart.trustReturns")}`, `🌿 ${t("cart.trustOrganic")}`].map((label) => (
-                  <span key={label} className="text-[10px] text-[#9A8E88] font-semibold">{label}</span>
+                  <span key={label} className="text-[10px] text-ink-muted font-semibold">{label}</span>
                 ))}
               </div>
             </div>
@@ -1079,17 +1079,17 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           <div className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-lg" style={{ backgroundColor: "#EAF2F0" }}>
             🎉
           </div>
-          <h2 className="text-3xl font-extrabold text-[#2A2320] mb-2">{t("checkout.orderPlaced")}</h2>
-          <p className="text-[#5E5450] mb-1">{t("checkout.thankYou").split("{name}")[0]}<strong>{form.firstName}</strong>{t("checkout.thankYou").split("{name}")[1]}</p>
-          <p className="text-[#5E5450] text-sm mb-6">
+          <h2 className="text-3xl font-extrabold text-ink mb-2">{t("checkout.orderPlaced")}</h2>
+          <p className="text-ink-soft mb-1">{t("checkout.thankYou").split("{name}")[0]}<strong>{form.firstName}</strong>{t("checkout.thankYou").split("{name}")[1]}</p>
+          <p className="text-ink-soft text-sm mb-6">
             {t("checkout.orderReceived").split("{num}")[0]}
-            <span className="font-bold text-[#5E9E8C]">{orderNum}</span>
+            <span className="font-bold text-accent">{orderNum}</span>
             {t("checkout.orderReceived").split("{num}")[1].split("{email}")[0]}
             <strong>{form.email}</strong>
             {t("checkout.orderReceived").split("{num}")[1].split("{email}")[1]}
           </p>
 
-          <div className="bg-[#F5F0EB] rounded-2xl p-5 mb-8 text-left space-y-3">
+          <div className="bg-canvas rounded-card p-5 mb-8 text-left space-y-3">
             {[
               { icon: "📦", text: t("checkout.deliveringTo").replace("{address}", `${form.address}, ${form.city}${form.region ? `, ${form.region}` : ""}`) },
               { icon: "🚀", text: form.shipping === "express" ? t("checkout.expressNote") : t("checkout.standardNote").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)) },
@@ -1102,7 +1102,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             ].map((row) => (
               <div key={row.text} className="flex items-start gap-3">
                 <span className="text-base flex-shrink-0">{row.icon}</span>
-                <span className="text-sm text-[#5E5450]">{row.text}</span>
+                <span className="text-sm text-ink-soft">{row.text}</span>
               </div>
             ))}
           </div>
@@ -1112,19 +1112,19 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
           {(() => {
             const msg = buildOrderMessage(locale, { name: form.firstName || "there", orderNum });
             return (
-              <div className="bg-white border border-[#DDD5CC] rounded-2xl p-5 mb-8 text-left">
+              <div className="bg-white border border-line rounded-card p-5 mb-8 text-left">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">📧</span>
-                  <p className="text-sm font-bold text-[#2A2320]">
+                  <p className="text-sm font-bold text-ink">
                     {t("checkout.confirmationSent")}
-                    <span className="ml-1.5 text-[10px] font-bold text-[#5E9E8C] bg-[#EAF2F0] px-1.5 py-0.5 rounded-full uppercase align-middle">{locale}</span>
+                    <span className="ml-1.5 text-[10px] font-bold text-accent bg-accent-soft px-1.5 py-0.5 rounded-full uppercase align-middle">{locale}</span>
                   </p>
                 </div>
-                <p className="text-xs font-bold text-[#2A2320] mb-1.5">{msg.subject}</p>
-                <p className="text-xs text-[#5E5450] whitespace-pre-line leading-relaxed">{msg.email}</p>
-                <div className="mt-3 flex items-center gap-2 bg-[#EAF2F0] rounded-lg px-3 py-2">
-                  <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">{t("checkout.trackingCode")}</span>
-                  <span className="text-sm font-extrabold text-[#5E9E8C]">{orderNum}</span>
+                <p className="text-xs font-bold text-ink mb-1.5">{msg.subject}</p>
+                <p className="text-xs text-ink-soft whitespace-pre-line leading-relaxed">{msg.email}</p>
+                <div className="mt-3 flex items-center gap-2 bg-accent-soft rounded-lg px-3 py-2">
+                  <span className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">{t("checkout.trackingCode")}</span>
+                  <span className="text-sm font-extrabold text-accent">{orderNum}</span>
                 </div>
               </div>
             );
@@ -1140,7 +1140,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             </Link>
             <Link
               href="/"
-              className="font-bold px-7 py-3 rounded-full border-2 border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-all"
+              className="font-bold px-7 py-3 rounded-full border-2 border-line text-ink-soft hover:border-accent hover:text-accent transition-all"
             >
               {t("checkout.backToHome")}
             </Link>

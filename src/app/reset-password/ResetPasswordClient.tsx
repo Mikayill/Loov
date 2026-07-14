@@ -37,35 +37,35 @@ export default function ResetPasswordClient() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.setNewPassword")}</h1>
+          <h1 className="text-2xl font-extrabold text-ink">{t("auth.setNewPassword")}</h1>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7">
+        <div className="bg-white rounded-3xl border border-line shadow-sm p-7">
           {done ? (
             <div className="text-center py-6">
               <div className="text-4xl mb-3">✅</div>
-              <p className="font-bold text-[#2A2320] mb-1">{t("auth.passwordUpdated")}</p>
-              <p className="text-sm text-[#9A8E88]">{t("auth.takingToAccount")}</p>
+              <p className="font-bold text-ink mb-1">{t("auth.passwordUpdated")}</p>
+              <p className="text-sm text-ink-muted">{t("auth.takingToAccount")}</p>
             </div>
           ) : !loading && !user ? (
             <div className="text-center py-6">
               <div className="text-4xl mb-3">⏳</div>
-              <p className="font-bold text-[#2A2320] mb-1">{t("auth.linkInvalid")}</p>
-              <p className="text-sm text-[#9A8E88] mb-4">{t("auth.requestNewOne")}</p>
-              <Link href="/forgot-password" className="font-bold text-[#5E9E8C] hover:underline">{t("auth.requestNewLink")} →</Link>
+              <p className="font-bold text-ink mb-1">{t("auth.linkInvalid")}</p>
+              <p className="text-sm text-ink-muted mb-4">{t("auth.requestNewOne")}</p>
+              <Link href="/forgot-password" className="font-bold text-accent hover:underline">{t("auth.requestNewLink")} →</Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.newPassword")}</label>
+                <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.newPassword")}</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
                   placeholder={t("auth.atLeast6")}
-                  className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] focus:border-[#5E9E8C] outline-none transition-colors" />
+                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.confirmNewPassword")}</label>
+                <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.confirmNewPassword")}</label>
                 <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
-                  className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] focus:border-[#5E9E8C] outline-none transition-colors" />
+                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink focus:border-accent outline-none transition-colors" />
               </div>
               {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
               <Button type="submit" loading={busy} loadingText={t("auth.saving")} fullWidth>

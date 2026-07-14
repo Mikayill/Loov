@@ -2,12 +2,12 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 font-extrabold rounded-xl transition-all duration-200 ease-snappy active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100";
+  "inline-flex items-center justify-center gap-2 font-extrabold rounded-control transition-all duration-200 ease-snappy active:scale-95 disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "text-white hover:opacity-90 shadow-sm",
-  secondary: "border-2 border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]",
-  ghost: "text-[#5E5450] hover:text-[#2A2320] hover:bg-[#F5F0EB]",
+  secondary: "border-2 border-line text-ink-soft hover:border-accent hover:text-accent",
+  ghost: "text-ink-soft hover:text-ink hover:bg-canvas",
   danger: "text-white bg-red-500 hover:bg-red-600",
 };
 

@@ -79,39 +79,39 @@ export default function RevenueChart() {
   const up = (delta ?? 0) >= 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#DDD5CC] p-5 sm:p-6">
+    <div className="bg-white rounded-card border border-line p-5 sm:p-6">
       {/* Header: headline number + delta + range filters */}
       <div className="flex items-start justify-between flex-wrap gap-4 mb-5">
         <div>
-          <p className="text-xs font-bold text-[#9A8E88] uppercase tracking-widest mb-1">
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-1">
             Revenue · {RANGES.find((r) => r.key === range)?.label}
           </p>
           <div className="flex items-end gap-3 flex-wrap">
-            <span className="text-4xl font-extrabold text-[#2A2320] leading-none">
+            <span className="text-4xl font-extrabold text-ink leading-none">
               {data ? formatPrice(data.rangeTotal) : "—"}
             </span>
             {delta !== null && (
-              <span className={`inline-flex items-center gap-1 text-sm font-bold px-2 py-1 rounded-full ${up ? "bg-[#EAF2F0] text-[#3A7A68]" : "bg-[#FEF2F2] text-[#B03A3A]"}`}>
+              <span className={`inline-flex items-center gap-1 text-sm font-bold px-2 py-1 rounded-full ${up ? "bg-accent-soft text-accent-deep" : "bg-danger-soft text-danger"}`}>
                 {up ? "▲" : "▼"} {Math.abs(delta).toFixed(1)}%
                 <span className="font-semibold opacity-70">vs prev</span>
               </span>
             )}
           </div>
           {data && (
-            <p className="text-xs text-[#9A8E88] mt-1.5">
+            <p className="text-xs text-ink-muted mt-1.5">
               {data.rangeOrders} orders · avg {formatPrice(Math.round(data.avgOrder))}
               {data.peak && <> · peak {formatPrice(data.peak.value)} ({data.peak.label})</>}
             </p>
           )}
         </div>
 
-        <div className="flex gap-1 bg-[#F5F0EB] rounded-xl p-1">
+        <div className="flex gap-1 bg-canvas rounded-control p-1">
           {RANGES.map((r) => (
             <button
               key={r.key}
               onClick={() => setRange(r.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                range === r.key ? "bg-white text-[#2A2320] shadow-sm" : "text-[#9A8E88] hover:text-[#5E5450]"
+                range === r.key ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink-soft"
               }`}
             >
               {r.label}
@@ -124,7 +124,7 @@ export default function RevenueChart() {
       <div className="relative">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
-            <div className="w-7 h-7 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+            <div className="w-7 h-7 rounded-full border-4 border-accent border-t-transparent animate-spin" />
           </div>
         )}
 
@@ -180,7 +180,7 @@ export default function RevenueChart() {
         {/* tooltip */}
         {hp && (
           <div
-            className="absolute -translate-x-1/2 -translate-y-full pointer-events-none bg-[#2A2320] text-white rounded-xl px-3 py-2 shadow-lg whitespace-nowrap"
+            className="absolute -translate-x-1/2 -translate-y-full pointer-events-none bg-ink text-white rounded-control px-3 py-2 shadow-lg whitespace-nowrap"
             style={{ left: `${(x(hover!) / W) * 100}%`, top: `${(y(hp.value) / H) * 100}%`, marginTop: -10 }}
           >
             <p className="text-[11px] font-bold opacity-70">{hp.label}</p>

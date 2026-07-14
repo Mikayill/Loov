@@ -64,7 +64,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
   function Badge({ n }: { n: number }) {
     if (n <= 0) return null;
     return (
-      <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-[#B03A3A] text-white text-[10px] font-extrabold leading-none">
+      <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-danger text-white text-[10px] font-extrabold leading-none">
         {n > 99 ? "99+" : n}
       </span>
     );
@@ -77,10 +77,10 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
           key={n.href}
           href={n.href}
           onClick={() => setMobileOpen(false)}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-control text-sm font-bold transition-colors ${
             isActive(n.href, n.exact)
-              ? "bg-[#5E9E8C] text-white"
-              : "text-[#5E5450] hover:bg-[#EAF2F0]"
+              ? "bg-accent text-white"
+              : "text-ink-soft hover:bg-accent-soft"
           }`}
         >
           <span className="text-base">{n.icon}</span>
@@ -92,24 +92,24 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
   );
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-[#F5F0EB]">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-canvas">
       {/* Sidebar (desktop) */}
-      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-white border-r border-[#DDD5CC] p-4 sticky top-0 h-screen">
+      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-white border-r border-line p-4 sticky top-0 h-screen">
         <div className="flex items-center gap-2.5 px-2 mb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
-          <p className="text-[10px] font-bold text-[#5E9E8C] uppercase tracking-widest mt-0.5">Admin</p>
+          <p className="text-[10px] font-bold text-accent uppercase tracking-widest mt-0.5">Admin</p>
         </div>
         {nav}
-        <div className="mt-auto pt-4 border-t border-[#F5F0EB]">
-          <p className="px-3 text-[11px] text-[#9A8E88] truncate mb-2">{admin.email}</p>
+        <div className="mt-auto pt-4 border-t border-canvas">
+          <p className="px-3 text-[11px] text-ink-muted truncate mb-2">{admin.email}</p>
           <div className="flex gap-2 px-1">
-            <Link href="/" className="flex-1 text-center text-xs font-bold text-[#5E9E8C] border border-[#DDD5CC] rounded-lg py-2 hover:bg-[#EAF2F0] transition-colors">
+            <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2 hover:bg-accent-soft transition-colors">
               View site
             </Link>
             <button
               onClick={() => { signOut(); router.push("/"); }}
-              className="flex-1 text-xs font-bold text-[#B03A3A] border border-[#DDD5CC] rounded-lg py-2 hover:bg-red-50 transition-colors"
+              className="flex-1 text-xs font-bold text-danger border border-line rounded-lg py-2 hover:bg-red-50 transition-colors"
             >
               Sign out
             </button>
@@ -118,22 +118,22 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="sm:hidden flex items-center justify-between bg-white border-b border-[#DDD5CC] px-4 py-3 sticky top-0 z-30">
+      <header className="sm:hidden flex items-center justify-between bg-white border-b border-line px-4 py-3 sticky top-0 z-30">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Loov" className="h-4 w-auto" />
-          <span className="font-extrabold text-[#5E9E8C] text-sm">Admin</span>
+          <span className="font-extrabold text-accent text-sm">Admin</span>
         </div>
         <button onClick={() => setMobileOpen((v) => !v)} className="text-2xl leading-none px-2" aria-label="Menu">
           {mobileOpen ? "✕" : "☰"}
         </button>
       </header>
       {mobileOpen && (
-        <div className="sm:hidden bg-white border-b border-[#DDD5CC] px-4 py-3">
+        <div className="sm:hidden bg-white border-b border-line px-4 py-3">
           {nav}
-          <div className="flex gap-2 mt-3 pt-3 border-t border-[#F5F0EB]">
-            <Link href="/" className="flex-1 text-center text-xs font-bold text-[#5E9E8C] border border-[#DDD5CC] rounded-lg py-2">View site</Link>
-            <button onClick={() => { signOut(); router.push("/"); }} className="flex-1 text-xs font-bold text-[#B03A3A] border border-[#DDD5CC] rounded-lg py-2">Sign out</button>
+          <div className="flex gap-2 mt-3 pt-3 border-t border-canvas">
+            <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2">View site</Link>
+            <button onClick={() => { signOut(); router.push("/"); }} className="flex-1 text-xs font-bold text-danger border border-line rounded-lg py-2">Sign out</button>
           </div>
         </div>
       )}

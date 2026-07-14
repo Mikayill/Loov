@@ -77,16 +77,16 @@ export default async function ProductPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-sm text-[#9A8E88]">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors font-medium">
+      <nav className="mb-8 flex items-center gap-2 text-sm text-ink-muted">
+        <Link href="/" className="hover:text-accent transition-colors font-medium">
           Home
         </Link>
         <span>›</span>
-        <Link href="/products" className="hover:text-[#5E9E8C] transition-colors font-medium">
+        <Link href="/products" className="hover:text-accent transition-colors font-medium">
           Products
         </Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{product.name}</span>
+        <span className="text-ink font-semibold">{product.name}</span>
       </nav>
 
       {/* Main product section */}
@@ -97,8 +97,8 @@ export default async function ProductPage({ params }: Props) {
 
       {/* Related products */}
       {related.length > 0 && (
-        <section className="mt-20 pt-12 border-t border-[#DDD5CC]">
-          <h2 className="text-2xl font-extrabold text-[#2A2320] mb-8">
+        <section className="mt-20 pt-12 border-t border-line">
+          <h2 className="text-2xl font-extrabold text-ink mb-8">
             You Might Also Like
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">

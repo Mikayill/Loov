@@ -234,8 +234,8 @@ export default function CategoryFilter({
                 onClick={() => setActive(cat)}
                 className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold border-2 transition-all duration-200 ${
                   isActive
-                    ? "border-[#5E9E8C] bg-[#5E9E8C] text-white shadow-sm scale-105"
-                    : "border-[#DDD5CC] bg-white text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                    ? "border-accent bg-accent text-white shadow-sm scale-105"
+                    : "border-line bg-white text-ink-soft hover:border-accent hover:text-accent"
                 }`}
               >
                 <span className="text-sm sm:text-base leading-none">{catIcons[cat]}</span>
@@ -250,10 +250,10 @@ export default function CategoryFilter({
             <button
               onClick={() => setFiltersOpen((v) => !v)}
               aria-expanded={filtersOpen}
-              className={`sm:hidden flex items-center gap-1.5 h-9 px-3 rounded-xl border-2 text-xs font-bold transition-colors whitespace-nowrap ${
+              className={`sm:hidden flex items-center gap-1.5 h-9 px-3 rounded-control border-2 text-xs font-bold transition-colors whitespace-nowrap ${
                 filtersOpen || activeFilterCount > 0
-                  ? "border-[#5E9E8C] text-[#5E9E8C] bg-[#EAF2F0]"
-                  : "border-[#DDD5CC] text-[#5E5450]"
+                  ? "border-accent text-accent bg-accent-soft"
+                  : "border-line text-ink-soft"
               }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -265,7 +265,7 @@ export default function CategoryFilter({
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="h-9 px-3 pr-8 rounded-xl border-2 border-[#DDD5CC] bg-white text-sm font-semibold text-[#5E5450] focus:border-[#5E9E8C] outline-none cursor-pointer appearance-none"
+            className="h-9 px-3 pr-8 rounded-control border-2 border-line bg-white text-sm font-semibold text-ink-soft focus:border-accent outline-none cursor-pointer appearance-none"
             style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239A8E88'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", backgroundSize: "16px" }}
           >
             {sortOptions.map((o) => (
@@ -274,12 +274,12 @@ export default function CategoryFilter({
           </select>
 
           {/* View mode toggle */}
-          <div className="flex items-center border-2 border-[#DDD5CC] rounded-xl overflow-hidden h-9">
+          <div className="flex items-center border-2 border-line rounded-control overflow-hidden h-9">
             <button
               onClick={() => setViewMode("grid")}
               title={t("filter.gridView")}
               className={`w-9 h-full flex items-center justify-center transition-colors ${
-                viewMode === "grid" ? "bg-[#5E9E8C] text-white" : "text-[#9A8E88] hover:bg-[#F5F0EB]"
+                viewMode === "grid" ? "bg-accent text-white" : "text-ink-muted hover:bg-canvas"
               }`}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -289,8 +289,8 @@ export default function CategoryFilter({
             <button
               onClick={() => setViewMode("list")}
               title={t("filter.listView")}
-              className={`w-9 h-full flex items-center justify-center border-l-2 border-[#DDD5CC] transition-colors ${
-                viewMode === "list" ? "bg-[#5E9E8C] text-white" : "text-[#9A8E88] hover:bg-[#F5F0EB]"
+              className={`w-9 h-full flex items-center justify-center border-l-2 border-line transition-colors ${
+                viewMode === "list" ? "bg-accent text-white" : "text-ink-muted hover:bg-canvas"
               }`}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -302,7 +302,7 @@ export default function CategoryFilter({
           {activeFilterCount > 0 && (
             <button
               onClick={clearAll}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-xl border-2 border-red-200 bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-control border-2 border-red-200 bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors whitespace-nowrap"
             >
               ✕ {t("filter.clear")} ({activeFilterCount})
             </button>
@@ -312,18 +312,18 @@ export default function CategoryFilter({
 
       {/* ── Row 2: Advanced filters (only on /products page) ── */}
       {advanced && (
-        <div className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3 mb-4 py-2.5 sm:py-3 px-3 sm:px-4 bg-white rounded-2xl border border-[#DDD5CC]`}>
+        <div className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3 mb-4 py-2.5 sm:py-3 px-3 sm:px-4 bg-white rounded-card border border-line`}>
           {/* Price range */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.price")}:</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.price")}:</span>
             {priceRanges.map((pr) => (
               <button
                 key={pr.value}
                 onClick={() => setPriceRange(pr.value)}
                 className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
                   priceRange === pr.value
-                    ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
-                    : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                    ? "border-accent bg-accent text-white"
+                    : "border-line text-ink-soft hover:border-accent hover:text-accent"
                 }`}
               >
                 {t(pr.labelKey)}
@@ -332,11 +332,11 @@ export default function CategoryFilter({
           </div>
 
           {/* Divider */}
-          <div className="h-6 w-px bg-[#DDD5CC] hidden sm:block" />
+          <div className="h-6 w-px bg-line hidden sm:block" />
 
           {/* Age filter */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.age")}:</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.age")}:</span>
             {AGE_FILTERS.map((af) => (
               <button
                 key={af.value}
@@ -344,8 +344,8 @@ export default function CategoryFilter({
                 title={t(af.descKey)}
                 className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
                   ageFilter === af.value
-                    ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
-                    : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                    ? "border-accent bg-accent text-white"
+                    : "border-line text-ink-soft hover:border-accent hover:text-accent"
                 }`}
               >
                 {t(af.labelKey)}
@@ -354,12 +354,12 @@ export default function CategoryFilter({
           </div>
 
           {/* Divider */}
-          <div className="h-6 w-px bg-[#DDD5CC] hidden sm:block" />
+          <div className="h-6 w-px bg-line hidden sm:block" />
 
           {/* Color filter — matching stays on the CANONICAL cf.name; only the
               visible label goes through colorLabel(). */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.color")}:</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.color")}:</span>
             {COLOR_FILTERS.map((cf) => {
               const isSelected = selectedColors.includes(cf.name);
               return (
@@ -370,13 +370,13 @@ export default function CategoryFilter({
                   aria-label={t("filter.filterBy").replace("{name}", colorLabel(cf.name, t))}
                   className={`w-7 h-7 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
                     isSelected
-                      ? "border-[#5E9E8C] ring-2 ring-[#5E9E8C] ring-offset-1 scale-110"
-                      : "border-[#DDD5CC] hover:scale-110 hover:border-[#9A8E88]"
+                      ? "border-accent ring-2 ring-accent ring-offset-1 scale-110"
+                      : "border-line hover:scale-110 hover:border-ink-muted"
                   }`}
                   style={{ backgroundColor: cf.hex, borderColor: isSelected ? "#5E9E8C" : (cf.border ?? cf.hex) }}
                 >
                   {isSelected && (
-                    <svg className="w-3.5 h-3.5 text-[#5E9E8C] drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                    <svg className="w-3.5 h-3.5 text-accent drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   )}
@@ -388,17 +388,17 @@ export default function CategoryFilter({
           {/* Fabric filter — only when the catalog declares fabrics */}
           {fabricsPresent.length > 0 && (
             <>
-              <div className="h-6 w-px bg-[#DDD5CC] hidden sm:block" />
+              <div className="h-6 w-px bg-line hidden sm:block" />
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.fabric")}:</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.fabric")}:</span>
                 {fabricsPresent.map((f) => (
                   <button
                     key={f}
                     onClick={() => toggleFabric(f)}
                     className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
                       selectedFabrics.includes(f)
-                        ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
-                        : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                        ? "border-accent bg-accent text-white"
+                        : "border-line text-ink-soft hover:border-accent hover:text-accent"
                     }`}
                   >
                     {FABRIC_EMOJI[f]} {fabricLabel(f, t)}
@@ -411,17 +411,17 @@ export default function CategoryFilter({
           {/* Season filter — only when the catalog has a real (non-"all") season set */}
           {seasonsPresent && (
             <>
-              <div className="h-6 w-px bg-[#DDD5CC] hidden sm:block" />
+              <div className="h-6 w-px bg-line hidden sm:block" />
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest flex-shrink-0">{t("filter.season")}:</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.season")}:</span>
                 {(Object.keys(SEASON_META) as Season[]).map((s) => (
                   <button
                     key={s}
                     onClick={() => setSeasonFilter(s)}
                     className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold border-2 transition-all ${
                       seasonFilter === s
-                        ? "border-[#5E9E8C] bg-[#5E9E8C] text-white"
-                        : "border-[#DDD5CC] text-[#5E5450] hover:border-[#5E9E8C] hover:text-[#5E9E8C]"
+                        ? "border-accent bg-accent text-white"
+                        : "border-line text-ink-soft hover:border-accent hover:text-accent"
                     }`}
                   >
                     {SEASON_META[s].emoji} {seasonLabel(s, t)}
@@ -434,7 +434,7 @@ export default function CategoryFilter({
       )}
 
       {/* Result count */}
-      <p className="text-xs text-[#9A8E88] font-semibold mb-5">
+      <p className="text-xs text-ink-muted font-semibold mb-5">
         {filtered.length === 1 ? t("filter.product1") : t("filter.products").replace("{n}", String(filtered.length))}
         {active !== "All" && ` ${t("filter.inCategory").replace("{category}", categoryPlural(active as Product["category"], t))}`}
         {ageFilter !== "all" && ` · ${t(AGE_FILTERS.find((a) => a.value === ageFilter)!.descKey)}`}
@@ -458,36 +458,36 @@ export default function CategoryFilter({
                 <Link
                   key={p.id}
                   href={`/products/${p.slug}`}
-                  className="flex items-center gap-4 bg-white rounded-2xl border border-[#DDD5CC] p-4 hover:shadow-md hover:border-[#5E9E8C] transition-all group"
+                  className="flex items-center gap-4 bg-white rounded-card border border-line p-4 hover:shadow-md hover:border-accent transition-all group"
                 >
                   <div
-                    className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl flex-shrink-0"
+                    className="w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0"
                     style={{ backgroundColor: p.cardColor }}
                   >
                     {p.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">
+                      <span className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">
                         {categoryLabel(p.category as Product["category"], t)}
                       </span>
                       {p.isNew && (
-                        <span className="text-[9px] font-bold bg-[#5E9E8C] text-white px-1.5 py-0.5 rounded-full uppercase">{t("product.new")}</span>
+                        <span className="text-[9px] font-bold bg-accent text-white px-1.5 py-0.5 rounded-full uppercase">{t("product.new")}</span>
                       )}
                     </div>
-                    <p className="font-bold text-[#2A2320] text-sm group-hover:text-[#5E9E8C] transition-colors leading-snug line-clamp-2">
+                    <p className="font-bold text-ink text-sm group-hover:text-accent transition-colors leading-snug line-clamp-2">
                       {p.name}
                     </p>
-                    <p className="text-xs text-[#9A8E88] mt-1 line-clamp-1">{p.colors.map((c) => colorLabel(c, t)).join(" · ")}</p>
+                    <p className="text-xs text-ink-muted mt-1 line-clamp-1">{p.colors.map((c) => colorLabel(c, t)).join(" · ")}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="font-extrabold text-[#2A2320] text-lg">
-                      {hasVariablePricing(p) && <span className="text-[10px] font-semibold text-[#9A8E88] mr-1">{t("common.from")}</span>}
+                    <p className="font-extrabold text-ink text-lg">
+                      {hasVariablePricing(p) && <span className="text-[10px] font-semibold text-ink-muted mr-1">{t("common.from")}</span>}
                       {formatPrice(minEffectivePrice(p))}
                     </p>
-                    <p className="text-[10px] text-[#9A8E88] mt-0.5">{t("filter.sizesCount").replace("{n}", String(p.sizes.length))}</p>
+                    <p className="text-[10px] text-ink-muted mt-0.5">{t("filter.sizesCount").replace("{n}", String(p.sizes.length))}</p>
                   </div>
-                  <svg className="w-4 h-4 text-[#DDD5CC] group-hover:text-[#5E9E8C] transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="w-4 h-4 text-line group-hover:text-accent transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -500,7 +500,7 @@ export default function CategoryFilter({
             <div className="mt-8 text-center">
               <button
                 onClick={() => setVisibleCount((n) => n + pageSize)}
-                className="font-bold px-8 py-3 rounded-full border-2 border-[#5E9E8C] text-[#5E9E8C] text-sm hover:bg-[#5E9E8C] hover:text-white transition-all"
+                className="font-bold px-8 py-3 rounded-full border-2 border-accent text-accent text-sm hover:bg-accent hover:text-white transition-all"
               >
                 {t("filter.loadMore")}
               </button>
@@ -510,8 +510,8 @@ export default function CategoryFilter({
       ) : (
         <div className="py-20 text-center">
           <div className="text-5xl mb-4">🔍</div>
-          <p className="font-bold text-[#2A2320] mb-2">{t("filter.noMatch")}</p>
-          <p className="text-sm text-[#9A8E88] mb-4">{t("filter.noMatchHint")}</p>
+          <p className="font-bold text-ink mb-2">{t("filter.noMatch")}</p>
+          <p className="text-sm text-ink-muted mb-4">{t("filter.noMatchHint")}</p>
           <button
             onClick={clearAll}
             className="font-bold px-6 py-2.5 rounded-full text-white text-sm hover:opacity-90 transition-opacity"

@@ -110,7 +110,7 @@ export default async function RootLayout({
 
           {/* ── Footer (hidden on checkout) ── */}
           <FooterGate>
-          <footer className="bg-white border-t border-[#DDD5CC]">
+          <footer className="bg-white border-t border-line">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
 
               {/* Brand + social */}
@@ -119,7 +119,7 @@ export default async function RootLayout({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
                 </div>
-                <p className="text-xs text-[#9A8E88] leading-relaxed mb-4">
+                <p className="text-xs text-ink-muted leading-relaxed mb-4">
                   {t("footer.tagline")}
                 </p>
                 <div className="flex items-center gap-2 mb-4">
@@ -138,7 +138,7 @@ export default async function RootLayout({
                 {/* Certifications */}
                 <div className="flex items-center gap-2 flex-wrap">
                   {["🌿 Organic cotton", "✅ Baby-safe", "🔒 Secure"].map((cert) => (
-                    <span key={cert} className="text-[10px] font-bold bg-[#F5F0EB] text-[#5E5450] px-2 py-1 rounded-full">
+                    <span key={cert} className="text-[10px] font-bold bg-canvas text-ink-soft px-2 py-1 rounded-full">
                       {cert}
                     </span>
                   ))}
@@ -147,7 +147,7 @@ export default async function RootLayout({
 
               {/* Shop links */}
               <div>
-                <p className="text-[11px] font-bold text-[#2A2320] uppercase tracking-widest mb-4">{t("footer.shop")}</p>
+                <p className="text-[11px] font-bold text-ink uppercase tracking-widest mb-4">{t("footer.shop")}</p>
                 <ul className="grid grid-cols-3 gap-x-3 gap-y-2 sm:grid-cols-1 sm:gap-y-2.5">
                   {[
                     { label: "All Products",  href: "/products" },
@@ -159,7 +159,7 @@ export default async function RootLayout({
                     { label: "Bags",          href: "/products?cat=bag" },
                   ].map((link) => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-xs text-[#5E5450] hover:text-[#5E9E8C] transition-colors font-medium">
+                      <a href={link.href} className="text-xs text-ink-soft hover:text-accent transition-colors font-medium">
                         {link.label}
                       </a>
                     </li>
@@ -169,7 +169,7 @@ export default async function RootLayout({
 
               {/* Help links */}
               <div>
-                <p className="text-[11px] font-bold text-[#2A2320] uppercase tracking-widest mb-4">{t("footer.help")}</p>
+                <p className="text-[11px] font-bold text-ink uppercase tracking-widest mb-4">{t("footer.help")}</p>
                 <ul className="grid grid-cols-3 gap-x-3 gap-y-2 sm:grid-cols-1 sm:gap-y-2.5">
                   {[
                     { label: "About Us",      href: "/about" },
@@ -180,7 +180,7 @@ export default async function RootLayout({
                     { label: "My Account",    href: "/account" },
                   ].map((link) => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-xs text-[#5E5450] hover:text-[#5E9E8C] transition-colors font-medium">
+                      <a href={link.href} className="text-xs text-ink-soft hover:text-accent transition-colors font-medium">
                         {link.label}
                       </a>
                     </li>
@@ -190,16 +190,16 @@ export default async function RootLayout({
 
               {/* Contact */}
               <div>
-                <p className="text-[11px] font-bold text-[#2A2320] uppercase tracking-widest mb-4">{t("footer.contact")}</p>
-                <div className="grid grid-cols-3 gap-3 text-xs text-[#5E5450] mb-4">
+                <p className="text-[11px] font-bold text-ink uppercase tracking-widest mb-4">{t("footer.contact")}</p>
+                <div className="grid grid-cols-3 gap-3 text-xs text-ink-soft mb-4">
                   {/* Address (+ working hours beneath it) */}
                   <div className="min-w-0">
                     <p className="flex items-start gap-1.5"><span className="flex-shrink-0">📍</span> Tbilisi, Georgia</p>
-                    <p className="flex items-start gap-1.5 mt-1.5 text-[#9A8E88]"><span className="flex-shrink-0">🕐</span> {t("footer.hours")}</p>
+                    <p className="flex items-start gap-1.5 mt-1.5 text-ink-muted"><span className="flex-shrink-0">🕐</span> {t("footer.hours")}</p>
                   </div>
                   {/* Email */}
                   <div className="min-w-0">
-                    <a href="mailto:hello@loov.ge" className="flex items-start gap-1.5 hover:text-[#5E9E8C] transition-colors break-all"><span className="flex-shrink-0">📧</span> hello@loov.ge</a>
+                    <a href="mailto:hello@loov.ge" className="flex items-start gap-1.5 hover:text-accent transition-colors break-all"><span className="flex-shrink-0">📧</span> hello@loov.ge</a>
                   </div>
                   {/* Phone — appears once the business number is set in admin settings */}
                   <FooterPhone />
@@ -207,9 +207,9 @@ export default async function RootLayout({
                 {/* Payment method — cash on delivery is the only one offered today;
                     card badges return when online payments (Faz 3) go live. */}
                 <div>
-                  <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-2">{t("footer.weAccept")}</p>
+                  <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-2">{t("footer.weAccept")}</p>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold bg-[#EAF2F0] border border-[#C8DDD8] text-[#5E9E8C] px-2 py-1 rounded">
+                    <span className="text-[10px] font-bold bg-accent-soft border border-sage text-accent px-2 py-1 rounded">
                       💵 {t("checkout.paymentOnDelivery")}
                     </span>
                   </div>
@@ -218,16 +218,16 @@ export default async function RootLayout({
             </div>
 
             {/* Bottom bar */}
-            <div className="border-t border-[#DDD5CC] py-4 px-4">
+            <div className="border-t border-line py-4 px-4">
               <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p className="text-xs text-[#9A8E88]">
+                <p className="text-xs text-ink-muted">
                   {t("footer.rights")}
                 </p>
                 <div className="flex items-center gap-5">
-                  <a href="/privacy" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.privacy")}</a>
-                  <a href="/terms"   className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.terms")}</a>
-                  <a href="/accessibility" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("a11y.title")}</a>
-                  <a href="/contact" className="text-xs text-[#9A8E88] hover:text-[#5E9E8C] transition-colors">{t("footer.contact")}</a>
+                  <a href="/privacy" className="text-xs text-ink-muted hover:text-accent transition-colors">{t("footer.privacy")}</a>
+                  <a href="/terms"   className="text-xs text-ink-muted hover:text-accent transition-colors">{t("footer.terms")}</a>
+                  <a href="/accessibility" className="text-xs text-ink-muted hover:text-accent transition-colors">{t("a11y.title")}</a>
+                  <a href="/contact" className="text-xs text-ink-muted hover:text-accent transition-colors">{t("footer.contact")}</a>
                 </div>
               </div>
             </div>

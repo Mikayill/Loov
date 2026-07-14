@@ -18,7 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const price = variable ? minEffectivePrice(product) : effectivePrice(product);
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-snappy hover:-translate-y-1 active:scale-[0.98] border border-[#DDD5CC]">
+      <div className="bg-white rounded-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-snappy hover:-translate-y-1 active:scale-[0.98] border border-line">
         {/* Image area */}
         <div
           className="relative flex items-center justify-center h-44 text-6xl select-none overflow-hidden"
@@ -39,7 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
           )}
 
           {product.isNew && (
-            <span className="absolute top-3 left-3 bg-[#5E9E8C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shadow-sm">
+            <span className="absolute top-3 left-3 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide shadow-sm">
               {t("product.new")}
             </span>
           )}
@@ -55,22 +55,22 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* Info */}
         <div className="p-4">
-          <p className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">
+          <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
             {categoryLabel(product.category, t)}
           </p>
-          <h3 className="font-bold text-[#2A2320] text-sm mb-3 group-hover:text-[#5E9E8C] transition-colors leading-snug line-clamp-2">
+          <h3 className="font-bold text-ink text-sm mb-3 group-hover:text-accent transition-colors leading-snug line-clamp-2">
             {product.name}
           </h3>
           <div className="flex items-center justify-between">
             <span className="flex items-baseline gap-1.5">
               {variable && (
-                <span className="text-[10px] font-semibold text-[#9A8E88]">{t("common.from")}</span>
+                <span className="text-[10px] font-semibold text-ink-muted">{t("common.from")}</span>
               )}
-              <span className={`text-lg font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-[#2A2320]"}`}>
+              <span className={`text-lg font-extrabold ${off > 0 ? "text-[#D9534F]" : "text-ink"}`}>
                 {formatPrice(price)}
               </span>
               {off > 0 && (
-                <span className="text-xs text-[#9A8E88] line-through">{formatPrice(product.price)}</span>
+                <span className="text-xs text-ink-muted line-through">{formatPrice(product.price)}</span>
               )}
             </span>
             <QuickAddButton product={product} />

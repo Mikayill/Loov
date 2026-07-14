@@ -110,13 +110,13 @@ function ColorPicker({ colors, onChange }: { colors: string[]; onChange: (next: 
   }
   return (
     <div>
-      <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Colors</label>
+      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Colors</label>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {CANONICAL_COLORS.map((c) => (
           <button
             key={c} type="button" onClick={() => toggle(c)}
             className={`text-xs font-semibold px-2 py-1 rounded-full border-2 transition-colors ${
-              colors.includes(c) ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#3A6B5E]" : "border-[#DDD5CC] text-[#9A8E88] hover:border-[#5E9E8C]"
+              colors.includes(c) ? "border-accent bg-accent-soft text-accent-deep" : "border-line text-ink-muted hover:border-accent"
             }`}
           >
             {c}
@@ -139,7 +139,7 @@ function ColorPicker({ colors, onChange }: { colors: string[]; onChange: (next: 
           onChange={(e) => { setCombo(e.target.value); setError(""); }}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCombo(); } }}
           placeholder="Combo, e.g. White & Sage"
-          className="flex-1 h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
+          className="flex-1 h-9 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent"
         />
         <button type="button" onClick={addCombo} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
       </div>
@@ -174,7 +174,7 @@ function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: str
   }
   return (
     <div>
-      <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Sizes</label>
+      <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Sizes</label>
       {Object.entries(SIZE_GROUPS).map(([group, opts]) => (
         <div key={group} className="mb-1.5">
           <p className="text-[9px] font-bold text-[#B0A89E] uppercase mb-1">{SIZE_GROUP_LABELS[group] ?? group}</p>
@@ -183,7 +183,7 @@ function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: str
               <button
                 key={s} type="button" onClick={() => toggle(s)}
                 className={`text-xs font-semibold px-2 py-1 rounded-full border-2 transition-colors ${
-                  sizes.includes(s) ? "border-[#5E9E8C] bg-[#EAF2F0] text-[#3A6B5E]" : "border-[#DDD5CC] text-[#9A8E88] hover:border-[#5E9E8C]"
+                  sizes.includes(s) ? "border-accent bg-accent-soft text-accent-deep" : "border-line text-ink-muted hover:border-accent"
                 }`}
               >
                 {s}
@@ -208,7 +208,7 @@ function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: str
           onChange={(e) => { setDim(e.target.value); setError(""); }}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addDimension(); } }}
           placeholder="Custom dimension, e.g. 70x140cm"
-          className="flex-1 h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
+          className="flex-1 h-9 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent"
         />
         <button type="button" onClick={addDimension} className="h-9 px-3 rounded-lg text-sm font-bold text-white" style={{ backgroundColor: "#5E9E8C" }}>Add</button>
       </div>
@@ -266,7 +266,7 @@ function NameDescriptionEditor({ draft, setDraft, save }: {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-        <label className="text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">Name &amp; Description</label>
+        <label className="text-[10px] font-bold text-ink-muted uppercase tracking-widest">Name &amp; Description</label>
         <div className="flex gap-1">
           {LANGS.map((l) => (
             <button
@@ -274,7 +274,7 @@ function NameDescriptionEditor({ draft, setDraft, save }: {
               type="button"
               onClick={() => setLang(l.code)}
               className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-                lang === l.code ? "text-white" : "bg-[#F5F0EB] text-[#9A8E88] hover:text-[#5E9E8C]"
+                lang === l.code ? "text-white" : "bg-canvas text-ink-muted hover:text-accent"
               }`}
               style={lang === l.code ? { backgroundColor: "#5E9E8C" } : undefined}
             >
@@ -284,21 +284,21 @@ function NameDescriptionEditor({ draft, setDraft, save }: {
         </div>
       </div>
       {lang !== "en" && (
-        <p className="text-[10px] text-[#9A8E88] mb-1.5">Leave blank to show the English text instead.</p>
+        <p className="text-[10px] text-ink-muted mb-1.5">Leave blank to show the English text instead.</p>
       )}
       <input
         value={nameVal}
         onChange={(e) => setName(e.target.value)}
         onBlur={saveName}
         placeholder={lang === "en" ? "Product name" : draft.name}
-        className="w-full mb-2 px-3 h-9 rounded-lg border border-[#DDD5CC] text-sm font-semibold outline-none focus:border-[#5E9E8C]"
+        className="w-full mb-2 px-3 h-9 rounded-lg border border-line text-sm font-semibold outline-none focus:border-accent"
       />
       <textarea
         value={descVal}
         onChange={(e) => setDescription(e.target.value)}
         onBlur={saveDescription}
         rows={3}
-        className="w-full px-3 py-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+        className="w-full px-3 py-2 rounded-lg border border-line text-sm outline-none focus:border-accent resize-y"
         placeholder={lang === "en" ? "Product description shown on the detail page…" : (draft.description ?? "")}
       />
     </div>
@@ -348,13 +348,13 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
           <div className="space-y-5 min-w-0">
             {/* Gallery */}
             <div>
-              <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-2">Photos ({gallery.length})</label>
+              <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-2">Photos ({gallery.length})</label>
               <div className="flex flex-wrap gap-2">
                 {gallery.map((url, i) => (
-                  <div key={url} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[#DDD5CC]">
+                  <div key={url} className="relative group w-20 h-20 rounded-control overflow-hidden border border-line">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={url} alt="" className="w-full h-full object-cover" />
-                    {i === 0 && <span className="absolute top-0.5 left-0.5 bg-[#5E9E8C] text-white text-[8px] font-bold px-1 rounded">MAIN</span>}
+                    {i === 0 && <span className="absolute top-0.5 left-0.5 bg-accent text-white text-[8px] font-bold px-1 rounded">MAIN</span>}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                       {i !== 0 && <button onClick={() => makePrimary(url)} className="text-white text-[9px] font-bold hover:underline">Make main</button>}
                       <button onClick={() => removePhoto(url)} className="text-red-300 text-[9px] font-bold hover:underline">Remove</button>
@@ -363,52 +363,52 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 ))}
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="w-20 h-20 rounded-xl border-2 border-dashed border-[#DDD5CC] flex flex-col items-center justify-center text-[#9A8E88] hover:border-[#5E9E8C] hover:text-[#5E9E8C] transition-colors"
+                  className="w-20 h-20 rounded-control border-2 border-dashed border-line flex flex-col items-center justify-center text-ink-muted hover:border-accent hover:text-accent transition-colors"
                 >
                   <span className="text-xl">+</span>
                   <span className="text-[9px] font-bold">Add photo</span>
                 </button>
                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
               </div>
-              <p className="text-[10px] text-[#9A8E88] mt-1.5">JPG/PNG/WEBP, max 5MB. First photo is the thumbnail.</p>
+              <p className="text-[10px] text-ink-muted mt-1.5">JPG/PNG/WEBP, max 5MB. First photo is the thumbnail.</p>
             </div>
 
             {/* Discount + Season */}
             <div className="flex gap-4 flex-wrap">
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Discount %</label>
+                <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Discount %</label>
                 <div className="flex items-center gap-1">
                   <input
                     type="number" min={0} max={90} step={1}
                     value={draft.discount_percent ?? 0}
                     onChange={(e) => setDraft({ ...draft, discount_percent: Number(e.target.value) })}
                     onBlur={() => save({ discount_percent: draft.discount_percent ?? 0 })}
-                    className="w-20 h-9 px-3 rounded-lg border border-[#DDD5CC] text-sm font-bold outline-none focus:border-[#5E9E8C]"
+                    className="w-20 h-9 px-3 rounded-lg border border-line text-sm font-bold outline-none focus:border-accent"
                   />
-                  <span className="text-xs text-[#9A8E88]">% off</span>
+                  <span className="text-xs text-ink-muted">% off</span>
                 </div>
                 {(draft.discount_percent ?? 0) > 0 && (
                   <p className="text-[10px] text-[#B85C38] font-bold mt-1">
-                    {Math.round(draft.price * (1 - (draft.discount_percent ?? 0) / 100))} ₾ <span className="line-through text-[#9A8E88] font-normal">{draft.price} ₾</span>
+                    {Math.round(draft.price * (1 - (draft.discount_percent ?? 0) / 100))} ₾ <span className="line-through text-ink-muted font-normal">{draft.price} ₾</span>
                   </p>
                 )}
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Season</label>
+                <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Season</label>
                 <select
                   value={draft.season ?? "all"}
                   onChange={(e) => { setDraft({ ...draft, season: e.target.value }); save({ season: e.target.value }); }}
-                  className="h-9 px-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] bg-white"
+                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white"
                 >
                   {SEASONS.map((s) => <option key={s.v} value={s.v}>{s.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Fabric</label>
+                <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Fabric</label>
                 <select
                   value={draft.fabric ?? ""}
                   onChange={(e) => { setDraft({ ...draft, fabric: e.target.value || null }); save({ fabric: e.target.value }); }}
-                  className="h-9 px-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] bg-white"
+                  className="h-9 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white"
                 >
                   {FABRICS.map((f) => <option key={f.v} value={f.v}>{f.label}</option>)}
                 </select>
@@ -418,12 +418,12 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
             {/* Per-size prices */}
             {(draft.sizes ?? []).length > 0 && (
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Price per size</label>
-                <p className="text-[10px] text-[#9A8E88] mb-2">Leave blank to use the base price ({draft.price} ₾). The discount still applies on top.</p>
+                <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Price per size</label>
+                <p className="text-[10px] text-ink-muted mb-2">Leave blank to use the base price ({draft.price} ₾). The discount still applies on top.</p>
                 <div className="space-y-1.5">
                   {(draft.sizes ?? []).map((size) => (
                     <div key={size} className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-[#2A2320] w-32 truncate">{size}</span>
+                      <span className="text-xs font-semibold text-ink w-32 truncate">{size}</span>
                       <input
                         type="number" min={0} step={1}
                         value={draft.size_prices?.[size] ?? ""}
@@ -436,9 +436,9 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                           setDraft({ ...draft, size_prices: next });
                         }}
                         onBlur={() => save({ size_prices: draft.size_prices ?? {} })}
-                        className="w-24 h-8 px-2 rounded-lg border border-[#DDD5CC] text-sm font-bold outline-none focus:border-[#5E9E8C]"
+                        className="w-24 h-8 px-2 rounded-lg border border-line text-sm font-bold outline-none focus:border-accent"
                       />
-                      <span className="text-xs text-[#9A8E88]">₾</span>
+                      <span className="text-xs text-ink-muted">₾</span>
                     </div>
                   ))}
                 </div>
@@ -456,22 +456,22 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
             {/* Per-(size,color) stock */}
             {(draft.sizes ?? []).length > 0 && (draft.colors ?? []).length > 0 && (
               <div>
-                <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Stock per size × color</label>
-                <p className="text-[10px] text-[#9A8E88] mb-2">
+                <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Stock per size × color</label>
+                <p className="text-[10px] text-ink-muted mb-2">
                   Blank = use the flat Stock number above for that combo. 0 = sold out / not offered in that size.
                 </p>
-                <div className="overflow-x-auto rounded-lg border border-[#DDD5CC]">
+                <div className="overflow-x-auto rounded-lg border border-line">
                   <table className="text-xs">
                     <thead>
-                      <tr className="bg-[#EDE5D8]">
-                        <th className="p-2 text-left font-bold text-[#2A2320]">Size</th>
-                        {(draft.colors ?? []).map((c) => <th key={c} className="p-2 font-bold text-[#2A2320] whitespace-nowrap">{c}</th>)}
+                      <tr className="bg-panel">
+                        <th className="p-2 text-left font-bold text-ink">Size</th>
+                        {(draft.colors ?? []).map((c) => <th key={c} className="p-2 font-bold text-ink whitespace-nowrap">{c}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {(draft.sizes ?? []).map((size) => (
-                        <tr key={size} className="border-t border-[#DDD5CC]">
-                          <td className="p-2 font-semibold text-[#2A2320] whitespace-nowrap">{size}</td>
+                        <tr key={size} className="border-t border-line">
+                          <td className="p-2 font-semibold text-ink whitespace-nowrap">{size}</td>
                           {(draft.colors ?? []).map((c) => (
                             <td key={c} className="p-1 text-center">
                               <input
@@ -480,7 +480,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                                 placeholder="—"
                                 onChange={(e) => setVariantStock(size, c, e.target.value)}
                                 onBlur={() => save({ stock_by_variant: draft.stock_by_variant ?? {} })}
-                                className="w-16 h-8 px-1 rounded-lg border border-[#DDD5CC] text-xs font-bold text-center outline-none focus:border-[#5E9E8C]"
+                                className="w-16 h-8 px-1 rounded-lg border border-line text-xs font-bold text-center outline-none focus:border-accent"
                               />
                             </td>
                           ))}
@@ -497,22 +497,22 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
 
             {/* Features / highlights */}
             <div>
-              <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Highlights (one per line)</label>
+              <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Highlights (one per line)</label>
               <textarea
                 value={(draft.features ?? []).join("\n")}
                 onChange={(e) => setDraft({ ...draft, features: e.target.value.split("\n") })}
                 onBlur={() => save({ features: (draft.features ?? []).map((f) => f.trim()).filter(Boolean) })}
                 rows={5}
-                className="w-full px-3 py-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+                className="w-full px-3 py-2 rounded-lg border border-line text-sm outline-none focus:border-accent resize-y"
                 placeholder={"OEKO-TEX certified\nGentle on newborn skin\nMachine washable at 30°C"}
               />
-              <p className="text-[10px] text-[#9A8E88] mt-1">Leave empty to show the default highlight list.</p>
+              <p className="text-[10px] text-ink-muted mt-1">Leave empty to show the default highlight list.</p>
             </div>
 
             {/* Materials & Care tab */}
             <div>
-              <label className="block text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1.5">Materials &amp; Care tab</label>
-              <p className="text-[10px] text-[#9A8E88] mb-2">Not every product is cotton — set the real fabric here. Empty fields show the default copy.</p>
+              <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1.5">Materials &amp; Care tab</label>
+              <p className="text-[10px] text-ink-muted mb-2">Not every product is cotton — set the real fabric here. Empty fields show the default copy.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                 {([
                   { key: "material" as const, ph: "Material — e.g. 100% Muslin" },
@@ -526,7 +526,7 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                     onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                     onBlur={() => save({ [f.key]: draft[f.key] ?? "" })}
                     placeholder={f.ph}
-                    className="h-9 px-3 rounded-lg border border-[#DDD5CC] text-xs outline-none focus:border-[#5E9E8C]"
+                    className="h-9 px-3 rounded-lg border border-line text-xs outline-none focus:border-accent"
                   />
                 ))}
               </div>
@@ -535,13 +535,13 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 onChange={(e) => setDraft({ ...draft, care_instructions: e.target.value.split("\n") })}
                 onBlur={() => save({ care_instructions: (draft.care_instructions ?? []).map((c) => c.trim()).filter(Boolean) })}
                 rows={4}
-                className="w-full px-3 py-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] resize-y"
+                className="w-full px-3 py-2 rounded-lg border border-line text-sm outline-none focus:border-accent resize-y"
                 placeholder={"Care instructions (one per line)\nMachine wash at 30°C\nDo not bleach"}
               />
             </div>
           </div>
         </div>
-      {busy && <p className="text-xs text-[#9A8E88] mt-3">Saving…</p>}
+      {busy && <p className="text-xs text-ink-muted mt-3">Saving…</p>}
     </>
   );
 }
@@ -633,7 +633,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     <button
       onClick={() => fileRef.current?.click()}
       title="Upload photo"
-      className="w-14 h-14 rounded-lg flex items-center justify-center text-2xl overflow-hidden border border-[#DDD5CC] hover:ring-2 hover:ring-[#5E9E8C] transition-all flex-shrink-0"
+      className="w-14 h-14 rounded-lg flex items-center justify-center text-2xl overflow-hidden border border-line hover:ring-2 hover:ring-accent transition-all flex-shrink-0"
       style={{ backgroundColor: draft.card_color ?? "#EAE4DC" }}
     >
       {primary ? (
@@ -646,7 +646,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
   const newToggle = (
     <button
       onClick={() => save({ is_new: !draft.is_new })}
-      className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${draft.is_new ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"}`}
+      className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${draft.is_new ? "bg-accent" : "bg-line"}`}
       title="Pin as new arrival"
     >
       <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
@@ -655,7 +655,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
 
   if (variant === "card") {
     return (
-      <div className={`bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden ${busy ? "opacity-60" : ""}`}>
+      <div className={`bg-white rounded-card border border-line overflow-hidden ${busy ? "opacity-60" : ""}`}>
         <div className="p-3 flex items-start gap-3">
           {photoButton}
           {fileInput}
@@ -664,20 +664,20 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               onBlur={() => draft.name !== row.name && save({ name: draft.name })}
-              className="w-full px-2 py-1 -mx-2 rounded-lg border border-transparent hover:border-[#DDD5CC] focus:border-[#5E9E8C] outline-none text-sm font-bold text-[#2A2320] bg-transparent"
+              className="w-full px-2 py-1 -mx-2 rounded-lg border border-transparent hover:border-line focus:border-accent outline-none text-sm font-bold text-ink bg-transparent"
             />
-            <p className="text-[10px] text-[#9A8E88] font-mono px-2">#{row.id} · {draft.slug}</p>
+            <p className="text-[10px] text-ink-muted font-mono px-2">#{row.id} · {draft.slug}</p>
             <div className="flex items-center gap-2 flex-wrap px-2 mt-1">
               <select
                 value={draft.category}
                 onChange={(e) => save({ category: e.target.value })}
-                className="px-2 py-1 rounded-lg border border-[#DDD5CC] text-xs font-semibold text-[#2A2320] bg-white outline-none focus:border-[#5E9E8C]"
+                className="px-2 py-1 rounded-lg border border-line text-xs font-semibold text-ink bg-white outline-none focus:border-accent"
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               <div className="flex items-center gap-1.5">
                 {newToggle}
-                <span className="text-[10px] font-semibold text-[#9A8E88]">New</span>
+                <span className="text-[10px] font-semibold text-ink-muted">New</span>
               </div>
             </div>
           </div>
@@ -685,45 +685,45 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
 
         <div className="px-3 pb-3 grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Price</label>
+            <label className="block text-[9px] font-bold text-ink-muted uppercase tracking-widest mb-1">Price</label>
             <div className="flex items-center gap-1">
               <input
                 type="number" min={0} step={1}
                 value={draft.price}
                 onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) })}
                 onBlur={() => draft.price !== row.price && save({ price: draft.price })}
-                className="w-full px-2 py-1.5 rounded-lg border border-[#DDD5CC] text-sm font-bold text-[#2A2320] outline-none focus:border-[#5E9E8C]"
+                className="w-full px-2 py-1.5 rounded-lg border border-line text-sm font-bold text-ink outline-none focus:border-accent"
               />
-              <span className="text-xs text-[#9A8E88]">₾</span>
+              <span className="text-xs text-ink-muted">₾</span>
             </div>
             {discounted && (
               <span className="text-[10px] font-bold text-[#B85C38]">−{draft.discount_percent}% → {Math.round(draft.price * (1 - (draft.discount_percent ?? 0) / 100))} ₾</span>
             )}
           </div>
           <div>
-            <label className="block text-[9px] font-bold text-[#9A8E88] uppercase tracking-widest mb-1">Stock</label>
+            <label className="block text-[9px] font-bold text-ink-muted uppercase tracking-widest mb-1">Stock</label>
             <input
               type="number" min={0} step={1}
               value={draft.stock ?? 0}
               onChange={(e) => setDraft({ ...draft, stock: Number(e.target.value) })}
               onBlur={() => draft.stock !== row.stock && save({ stock: draft.stock })}
-              className={`w-full px-2 py-1.5 rounded-lg border text-sm font-bold outline-none focus:border-[#5E9E8C] ${
-                (draft.stock ?? 0) <= 5 ? "border-orange-300 text-orange-600 bg-orange-50" : "border-[#DDD5CC] text-[#2A2320]"
+              className={`w-full px-2 py-1.5 rounded-lg border text-sm font-bold outline-none focus:border-accent ${
+                (draft.stock ?? 0) <= 5 ? "border-orange-300 text-orange-600 bg-orange-50" : "border-line text-ink"
               }`}
             />
           </div>
         </div>
 
-        <div className="px-3 pb-3 flex items-center gap-4 border-t border-[#F5F0EB] pt-2.5">
-          <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-[#5E9E8C] hover:underline">
+        <div className="px-3 pb-3 flex items-center gap-4 border-t border-canvas pt-2.5">
+          <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-accent hover:underline">
             {open ? "Close ▴" : "Edit ▾"}
           </button>
-          <span className={`text-xs font-bold text-[#5E9E8C] transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓ Saved</span>
-          <button onClick={remove} className="text-xs font-bold text-[#B03A3A] hover:underline ml-auto">Delete</button>
+          <span className={`text-xs font-bold text-accent transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓ Saved</span>
+          <button onClick={remove} className="text-xs font-bold text-danger hover:underline ml-auto">Delete</button>
         </div>
 
         {open && (
-          <div className="border-t border-[#F5F0EB] bg-[#FAF7F4] p-4">
+          <div className="border-t border-canvas bg-[#FAF7F4] p-4">
             <DetailsPanelContent draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} />
           </div>
         )}
@@ -733,13 +733,13 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
 
   return (
     <>
-      <tr className={`border-b border-[#F5F0EB] ${busy ? "opacity-60" : ""}`}>
+      <tr className={`border-b border-canvas ${busy ? "opacity-60" : ""}`}>
         {/* Photo */}
         <td className="p-2">
           <button
             onClick={() => fileRef.current?.click()}
             title="Upload photo"
-            className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl overflow-hidden border border-[#DDD5CC] hover:ring-2 hover:ring-[#5E9E8C] transition-all"
+            className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl overflow-hidden border border-line hover:ring-2 hover:ring-accent transition-all"
             style={{ backgroundColor: draft.card_color ?? "#EAE4DC" }}
           >
             {primary ? (
@@ -756,9 +756,9 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             onBlur={() => draft.name !== row.name && save({ name: draft.name })}
-            className="w-full px-2 py-1.5 rounded-lg border border-transparent hover:border-[#DDD5CC] focus:border-[#5E9E8C] outline-none text-sm font-semibold text-[#2A2320] bg-transparent"
+            className="w-full px-2 py-1.5 rounded-lg border border-transparent hover:border-line focus:border-accent outline-none text-sm font-semibold text-ink bg-transparent"
           />
-          <span className="text-[10px] text-[#9A8E88] font-mono px-2">#{row.id} · {draft.slug}</span>
+          <span className="text-[10px] text-ink-muted font-mono px-2">#{row.id} · {draft.slug}</span>
         </td>
 
         {/* Category */}
@@ -766,7 +766,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
           <select
             value={draft.category}
             onChange={(e) => save({ category: e.target.value })}
-            className="px-2 py-1.5 rounded-lg border border-[#DDD5CC] text-xs font-semibold text-[#2A2320] bg-white outline-none focus:border-[#5E9E8C]"
+            className="px-2 py-1.5 rounded-lg border border-line text-xs font-semibold text-ink bg-white outline-none focus:border-accent"
           >
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -780,9 +780,9 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
               value={draft.price}
               onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) })}
               onBlur={() => draft.price !== row.price && save({ price: draft.price })}
-              className="w-20 px-2 py-1.5 rounded-lg border border-[#DDD5CC] text-sm font-bold text-[#2A2320] outline-none focus:border-[#5E9E8C]"
+              className="w-20 px-2 py-1.5 rounded-lg border border-line text-sm font-bold text-ink outline-none focus:border-accent"
             />
-            <span className="text-xs text-[#9A8E88]">₾</span>
+            <span className="text-xs text-ink-muted">₾</span>
           </div>
           {discounted && (
             <span className="text-[10px] font-bold text-[#B85C38]">−{draft.discount_percent}% → {Math.round(draft.price * (1 - (draft.discount_percent ?? 0) / 100))} ₾</span>
@@ -796,8 +796,8 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
             value={draft.stock ?? 0}
             onChange={(e) => setDraft({ ...draft, stock: Number(e.target.value) })}
             onBlur={() => draft.stock !== row.stock && save({ stock: draft.stock })}
-            className={`w-16 px-2 py-1.5 rounded-lg border text-sm font-bold outline-none focus:border-[#5E9E8C] ${
-              (draft.stock ?? 0) <= 5 ? "border-orange-300 text-orange-600 bg-orange-50" : "border-[#DDD5CC] text-[#2A2320]"
+            className={`w-16 px-2 py-1.5 rounded-lg border text-sm font-bold outline-none focus:border-accent ${
+              (draft.stock ?? 0) <= 5 ? "border-orange-300 text-orange-600 bg-orange-50" : "border-line text-ink"
             }`}
           />
         </td>
@@ -806,7 +806,7 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
         <td className="p-2 text-center">
           <button
             onClick={() => save({ is_new: !draft.is_new })}
-            className={`w-10 h-6 rounded-full transition-colors relative ${draft.is_new ? "bg-[#5E9E8C]" : "bg-[#DDD5CC]"}`}
+            className={`w-10 h-6 rounded-full transition-colors relative ${draft.is_new ? "bg-accent" : "bg-line"}`}
             title="Pin as new arrival"
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${draft.is_new ? "translate-x-4" : ""}`} />
@@ -815,11 +815,11 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
 
         {/* Actions */}
         <td className="p-2 whitespace-nowrap">
-          <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-[#5E9E8C] hover:underline mr-3">
+          <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-accent hover:underline mr-3">
             {open ? "Close ▴" : "Edit ▾"}
           </button>
-          <span className={`text-xs font-bold text-[#5E9E8C] mr-2 transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓</span>
-          <button onClick={remove} className="text-xs font-bold text-[#B03A3A] hover:underline">Delete</button>
+          <span className={`text-xs font-bold text-accent mr-2 transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓</span>
+          <button onClick={remove} className="text-xs font-bold text-danger hover:underline">Delete</button>
         </td>
       </tr>
       {open && <DetailsPanel draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} />}
@@ -879,49 +879,49 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="px-4 py-2 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
+      <button onClick={() => setOpen(true)} className="px-4 py-2 rounded-control font-bold text-white text-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#5E9E8C" }}>
         + Add product
       </button>
     );
   }
   return (
-    <div className="bg-white rounded-2xl border border-[#DDD5CC] p-4 flex flex-wrap items-end gap-3">
+    <div className="bg-white rounded-card border border-line p-4 flex flex-wrap items-end gap-3">
       {/* Photo */}
       <div>
-        <label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Photo</label>
-        <button onClick={() => fileRef.current?.click()} className="w-14 h-14 rounded-lg border-2 border-dashed border-[#DDD5CC] flex items-center justify-center overflow-hidden hover:border-[#5E9E8C]">
+        <label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Photo</label>
+        <button onClick={() => fileRef.current?.click()} className="w-14 h-14 rounded-lg border-2 border-dashed border-line flex items-center justify-center overflow-hidden hover:border-accent">
           {file ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
-          ) : <span className="text-xl text-[#9A8E88]">📷</span>}
+          ) : <span className="text-xl text-ink-muted">📷</span>}
         </button>
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       </div>
-      <div className="flex-1 min-w-[140px]"><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 h-10 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]" placeholder="Product name" /></div>
-      <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Category</label>
-        <select value={category} onChange={(e) => pickCategory(e.target.value)} className="h-10 px-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] bg-white">
+      <div className="flex-1 min-w-[140px]"><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 h-10 rounded-lg border border-line text-sm outline-none focus:border-accent" placeholder="Product name" /></div>
+      <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Category</label>
+        <select value={category} onChange={(e) => pickCategory(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white">
           {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select></div>
-      <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Fabric</label>
-        <select value={fabric} onChange={(e) => setFabric(e.target.value)} className="h-10 px-2 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C] bg-white">
+      <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Fabric</label>
+        <select value={fabric} onChange={(e) => setFabric(e.target.value)} className="h-10 px-2 rounded-lg border border-line text-sm outline-none focus:border-accent bg-white">
           {FABRICS.filter((f) => f.v).map((f) => <option key={f.v} value={f.v}>{f.label}</option>)}</select></div>
-      <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Price ₾</label>
-        <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-24 h-10 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]" placeholder="0" /></div>
-      <div><label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Stock</label>
-        <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} className="w-20 h-10 px-3 rounded-lg border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]" /></div>
+      <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Price ₾</label>
+        <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-24 h-10 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent" placeholder="0" /></div>
+      <div><label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Stock</label>
+        <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} className="w-20 h-10 px-3 rounded-lg border border-line text-sm outline-none focus:border-accent" /></div>
       <div className="w-full grid sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Sizes (comma separated)</label>
-          <input value={sizes} onChange={(e) => setSizes(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-[#DDD5CC] text-xs outline-none focus:border-[#5E9E8C]" placeholder="e.g. 70×70 cm, 90×90 cm" />
+          <label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Sizes (comma separated)</label>
+          <input value={sizes} onChange={(e) => setSizes(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-line text-xs outline-none focus:border-accent" placeholder="e.g. 70×70 cm, 90×90 cm" />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-[#9A8E88] uppercase mb-1">Colors (comma separated)</label>
-          <input value={colors} onChange={(e) => setColors(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-[#DDD5CC] text-xs outline-none focus:border-[#5E9E8C]" placeholder="e.g. White, Cream" />
+          <label className="block text-[10px] font-bold text-ink-muted uppercase mb-1">Colors (comma separated)</label>
+          <input value={colors} onChange={(e) => setColors(e.target.value)} className="w-full h-10 px-3 rounded-lg border border-line text-xs outline-none focus:border-accent" placeholder="e.g. White, Cream" />
         </div>
       </div>
       <button onClick={create} disabled={busy} className="h-10 px-4 rounded-lg font-bold text-white text-sm disabled:opacity-60" style={{ backgroundColor: "#5E9E8C" }}>{busy ? "…" : "Create"}</button>
-      <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-lg font-bold text-[#5E5450] text-sm border border-[#DDD5CC]">Cancel</button>
-      <p className="w-full text-[11px] text-[#9A8E88]">Sizes, colors &amp; fabric are pre-filled from the category — edit freely. Per-size prices, discount &amp; more photos: row&apos;s <strong>Edit</strong> button after creating.</p>
+      <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-lg font-bold text-ink-soft text-sm border border-line">Cancel</button>
+      <p className="w-full text-[11px] text-ink-muted">Sizes, colors &amp; fabric are pre-filled from the category — edit freely. Per-size prices, discount &amp; more photos: row&apos;s <strong>Edit</strong> button after creating.</p>
     </div>
   );
 }
@@ -937,28 +937,28 @@ export default function ProductsClient() {
   useEffect(load, []);
 
   if (error) return <p className="text-red-500 font-semibold">{error}</p>;
-  if (!rows) return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" /></div>;
+  if (!rows) return <div className="flex items-center justify-center py-32"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>;
 
   const filtered = q.trim() ? rows.filter((r) => r.name.toLowerCase().includes(q.toLowerCase()) || r.id.includes(q)) : rows;
 
   return (
     <div className="max-w-6xl">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-1">
-        <h1 className="text-2xl font-extrabold text-[#2A2320]">Products</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Products</h1>
         <AddProduct onCreated={load} />
       </div>
-      <p className="text-[#9A8E88] text-sm mb-5">{rows.length} products · edit inline or open <strong>Edit ▾</strong> for photos, discount, colors, sizes &amp; more — everything saves automatically</p>
+      <p className="text-ink-muted text-sm mb-5">{rows.length} products · edit inline or open <strong>Edit ▾</strong> for photos, discount, colors, sizes &amp; more — everything saves automatically</p>
 
       <input
         value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products…"
-        className="w-full sm:w-72 h-10 px-4 mb-4 rounded-xl border border-[#DDD5CC] text-sm outline-none focus:border-[#5E9E8C]"
+        className="w-full sm:w-72 h-10 px-4 mb-4 rounded-control border border-line text-sm outline-none focus:border-accent"
       />
 
       {/* Desktop: dense inline-editable table */}
-      <div className="hidden sm:block bg-white rounded-2xl border border-[#DDD5CC] overflow-x-auto">
+      <div className="hidden sm:block bg-white rounded-card border border-line overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-[#DDD5CC] text-[10px] font-bold text-[#9A8E88] uppercase tracking-widest">
+            <tr className="border-b border-line text-[10px] font-bold text-ink-muted uppercase tracking-widest">
               <th className="p-2">Photo</th><th className="p-2">Name</th><th className="p-2">Category</th>
               <th className="p-2">Price</th><th className="p-2">Stock</th><th className="p-2 text-center">New</th><th className="p-2"></th>
             </tr>
@@ -971,7 +971,7 @@ export default function ProductsClient() {
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && <p className="p-6 text-center text-sm text-[#9A8E88]">No products match &ldquo;{q}&rdquo;.</p>}
+        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted">No products match &ldquo;{q}&rdquo;.</p>}
       </div>
 
       {/* Mobile: stacked cards — no horizontal table scrolling */}
@@ -981,7 +981,7 @@ export default function ProductsClient() {
             onChanged={(nr) => setRows((prev) => prev!.map((x) => x.id === nr.id ? nr : x))}
             onDeleted={(id) => setRows((prev) => prev!.filter((x) => x.id !== id))} />
         ))}
-        {filtered.length === 0 && <p className="p-6 text-center text-sm text-[#9A8E88] bg-white rounded-2xl border border-[#DDD5CC]">No products match &ldquo;{q}&rdquo;.</p>}
+        {filtered.length === 0 && <p className="p-6 text-center text-sm text-ink-muted bg-white rounded-card border border-line">No products match &ldquo;{q}&rdquo;.</p>}
       </div>
     </div>
   );

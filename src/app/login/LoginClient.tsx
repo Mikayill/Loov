@@ -199,19 +199,19 @@ export default function LoginClient() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Loov" className="h-6 w-auto" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("auth.welcomeBack")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-1">{t("auth.signInSubtitle")}</p>
+          <h1 className="text-2xl font-extrabold text-ink">{t("auth.welcomeBack")}</h1>
+          <p className="text-ink-muted text-sm mt-1">{t("auth.signInSubtitle")}</p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#DDD5CC] shadow-sm p-7 space-y-5">
+        <div className="bg-white rounded-3xl border border-line shadow-sm p-7 space-y-5">
 
           {/* ── Authenticator-app / SMS 2FA step (takes precedence over email-OTP) ── */}
           {mfaFactorId ? (
             <form onSubmit={handleMfaVerify} className="space-y-4">
               <div className="text-center">
                 <div className="text-4xl mb-2">🛡️</div>
-                <p className="font-extrabold text-[#2A2320]">{t("auth.mfaTitle")}</p>
-                <p className="text-sm text-[#9A8E88] mt-1">{mfaMethod === "phone" ? t("auth.mfaBodyPhone") : t("auth.mfaBody")}</p>
+                <p className="font-extrabold text-ink">{t("auth.mfaTitle")}</p>
+                <p className="text-sm text-ink-muted mt-1">{mfaMethod === "phone" ? t("auth.mfaBodyPhone") : t("auth.mfaBody")}</p>
               </div>
               <input
                 value={mfaCode}
@@ -219,13 +219,13 @@ export default function LoginClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
               {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
               <Button type="submit" disabled={mfaCode.length !== 6} loading={loading} loadingText={t("auth.verifying")} fullWidth>
                 {t("auth.verifyAndSignIn")} →
               </Button>
-              <button type="button" onClick={cancelMfa} className="w-full text-center text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors">
+              <button type="button" onClick={cancelMfa} className="w-full text-center text-xs font-semibold text-ink-muted hover:text-ink-soft transition-colors">
                 {t("auth.mfaCancel")}
               </button>
             </form>
@@ -234,8 +234,8 @@ export default function LoginClient() {
             <form onSubmit={handleEmailOtpVerify} className="space-y-4">
               <div className="text-center">
                 <div className="text-4xl mb-2">📧</div>
-                <p className="font-extrabold text-[#2A2320]">{t("auth.emailOtpTitle")}</p>
-                <p className="text-sm text-[#9A8E88] mt-1">{t("auth.emailOtpBody").replace("{email}", email)}</p>
+                <p className="font-extrabold text-ink">{t("auth.emailOtpTitle")}</p>
+                <p className="text-sm text-ink-muted mt-1">{t("auth.emailOtpBody").replace("{email}", email)}</p>
               </div>
               <input
                 value={emailOtpCode}
@@ -243,14 +243,14 @@ export default function LoginClient() {
                 inputMode="numeric"
                 placeholder="123456"
                 autoFocus
-                className="w-full h-12 px-4 rounded-xl border-2 border-[#DDD5CC] text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-[#5E9E8C]"
+                className="w-full h-12 px-4 rounded-control border-2 border-line text-xl font-extrabold tracking-[0.4em] text-center outline-none focus:border-accent"
               />
-              <label className="flex items-center gap-2 text-xs text-[#5E5450] font-semibold cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs text-ink-soft font-semibold cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberDevice}
                   onChange={(e) => setRememberDevice(e.target.checked)}
-                  className="w-4 h-4 rounded accent-[#5E9E8C]"
+                  className="w-4 h-4 rounded accent-accent"
                 />
                 {t("auth.emailOtpRemember")}
               </label>
@@ -264,7 +264,7 @@ export default function LoginClient() {
                 <button
                   type="button"
                   onClick={cancelEmailOtp}
-                  className="text-xs font-semibold text-[#9A8E88] hover:text-[#5E5450] transition-colors"
+                  className="text-xs font-semibold text-ink-muted hover:text-ink-soft transition-colors"
                 >
                   {t("auth.mfaCancel")}
                 </button>
@@ -272,7 +272,7 @@ export default function LoginClient() {
                   type="button"
                   onClick={handleResendEmailOtp}
                   disabled={resendCooldown > 0}
-                  className="text-xs font-semibold text-[#5E9E8C] hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-xs font-semibold text-accent hover:underline disabled:text-[#C8B8B0] disabled:no-underline disabled:cursor-not-allowed"
                 >
                   {resendCooldown > 0 ? t("auth.emailOtpResendIn").replace("{n}", String(resendCooldown)) : t("auth.emailOtpResend")}
                 </button>
@@ -285,7 +285,7 @@ export default function LoginClient() {
             <button
               onClick={() => handleSocial("google")}
               disabled={!!socialLoad}
-              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-xl border-2 border-[#DDD5CC] font-semibold text-sm text-[#2A2320] hover:border-[#9A8E88] hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2.5 h-11 rounded-control border-2 border-line font-semibold text-sm text-ink hover:border-ink-muted hover:bg-[#FAFAFA] transition-all active:scale-95 disabled:opacity-60"
             >
               {socialLoad === "google" ? <Spinner /> : <GoogleIcon />}
               <span>{t("auth.google")}</span>
@@ -294,19 +294,19 @@ export default function LoginClient() {
 
           {/* Divider */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#DDD5CC]" />
-            <span className="text-xs font-bold text-[#9A8E88]">{t("auth.or")}</span>
-            <div className="flex-1 h-px bg-[#DDD5CC]" />
+            <div className="flex-1 h-px bg-line" />
+            <span className="text-xs font-bold text-ink-muted">{t("auth.or")}</span>
+            <div className="flex-1 h-px bg-line" />
           </div>
 
           {/* Tab switcher */}
-          <div className="flex bg-[#F5F0EB] rounded-xl p-1 gap-1">
+          <div className="flex bg-canvas rounded-control p-1 gap-1">
             {(["email", "phone"] as Tab[]).map((tabKey) => (
               <button
                 key={tabKey}
                 onClick={() => { setTab(tabKey); setError(""); setOtpSent(false); }}
                 className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                  tab === tabKey ? "bg-white text-[#2A2320] shadow-sm" : "text-[#9A8E88] hover:text-[#5E5450]"
+                  tab === tabKey ? "bg-white text-ink shadow-sm" : "text-ink-muted hover:text-ink-soft"
                 }`}
               >
                 {tabKey === "email" ? t("auth.tabEmail") : t("auth.tabPhone")}
@@ -318,27 +318,27 @@ export default function LoginClient() {
           {tab === "email" && (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.emailAddress")}</label>
+                <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.emailAddress")}</label>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com" required
-                  className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors"
+                  className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
                 />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-[#2A2320]">{t("auth.password")}</label>
-                  <Link href="/forgot-password" className="text-xs font-semibold text-[#5E9E8C] hover:underline">{t("auth.forgotPassword")}</Link>
+                  <label className="text-xs font-bold text-ink">{t("auth.password")}</label>
+                  <Link href="/forgot-password" className="text-xs font-semibold text-accent hover:underline">{t("auth.forgotPassword")}</Link>
                 </div>
                 <div className="relative">
                   <input
                     type={showPass ? "text" : "password"} value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••" required
-                    className="w-full h-11 px-4 pr-11 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors"
+                    className="w-full h-11 px-4 pr-11 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors"
                   />
                   <button type="button" onClick={() => setShowPass((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8E88] hover:text-[#5E5450] transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft transition-colors">
                     {showPass
                       ? <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" /></svg>
                       : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -357,27 +357,27 @@ export default function LoginClient() {
           {tab === "phone" && (
             <form onSubmit={otpSent ? handlePhoneLogin : handleSendOtp} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.phoneNumber")}</label>
-                <div className={`flex items-stretch h-11 rounded-xl border-2 border-[#DDD5CC] bg-white overflow-hidden focus-within:border-[#5E9E8C] transition-colors ${otpSent ? "opacity-60" : ""}`}>
-                  <span className="flex items-center pl-4 pr-2 text-sm font-bold text-[#5E5450] bg-[#F5F0EB] border-r-2 border-[#DDD5CC] select-none">{PHONE_COUNTRY_CODE}</span>
+                <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.phoneNumber")}</label>
+                <div className={`flex items-stretch h-11 rounded-control border-2 border-line bg-white overflow-hidden focus-within:border-accent transition-colors ${otpSent ? "opacity-60" : ""}`}>
+                  <span className="flex items-center pl-4 pr-2 text-sm font-bold text-ink-soft bg-canvas border-r-2 border-line select-none">{PHONE_COUNTRY_CODE}</span>
                   <input
                     type="tel" value={phoneLocalPart(phone)} onChange={(e) => setPhone(withCountryCode(e.target.value))}
                     placeholder={PHONE_LOCAL_PLACEHOLDER} required disabled={otpSent}
-                    className="flex-1 min-w-0 h-full px-4 bg-transparent text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] outline-none disabled:bg-[#F5F0EB]"
+                    className="flex-1 min-w-0 h-full px-4 bg-transparent text-sm font-medium text-ink placeholder:text-[#C8B8B0] outline-none disabled:bg-canvas"
                   />
                 </div>
               </div>
               {otpSent && (
                 <div>
-                  <label className="block text-xs font-bold text-[#2A2320] mb-1.5">{t("auth.verificationCode")}</label>
+                  <label className="block text-xs font-bold text-ink mb-1.5">{t("auth.verificationCode")}</label>
                   <input
                     type="text" value={otp} onChange={(e) => setOtp(e.target.value)}
                     placeholder="6-digit code" maxLength={6} required
-                    className="w-full h-11 px-4 rounded-xl border-2 border-[#DDD5CC] text-sm font-medium text-[#2A2320] placeholder:text-[#C8B8B0] focus:border-[#5E9E8C] outline-none transition-colors tracking-widest text-center"
+                    className="w-full h-11 px-4 rounded-control border-2 border-line text-sm font-medium text-ink placeholder:text-[#C8B8B0] focus:border-accent outline-none transition-colors tracking-widest text-center"
                   />
-                  <p className="text-xs text-[#9A8E88] mt-1.5 text-center">
+                  <p className="text-xs text-ink-muted mt-1.5 text-center">
                     {t("auth.codeSentTo").replace("{phone}", phone)}{" "}
-                    <button type="button" className="text-[#5E9E8C] font-semibold hover:underline"
+                    <button type="button" className="text-accent font-semibold hover:underline"
                       onClick={() => { setOtpSent(false); setOtp(""); }}>
                       {t("auth.changeNumber")}
                     </button>
@@ -399,9 +399,9 @@ export default function LoginClient() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-[#9A8E88] mt-5">
+        <p className="text-center text-sm text-ink-muted mt-5">
           {t("auth.noAccount")}{" "}
-          <Link href="/register" className="font-bold text-[#5E9E8C] hover:underline">{t("auth.createOne")} →</Link>
+          <Link href="/register" className="font-bold text-accent hover:underline">{t("auth.createOne")} →</Link>
         </p>
       </div>
     </div>

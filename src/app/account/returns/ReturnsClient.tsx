@@ -36,7 +36,7 @@ export default function ReturnsClient() {
   if (loading || !user || fetching) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -44,22 +44,22 @@ export default function ReturnsClient() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-[#5E9E8C] transition-colors">{t("acct.title")}</Link>
+        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("acct.returns.title")}</span>
+        <span className="text-ink font-semibold">{t("acct.returns.title")}</span>
       </nav>
 
-      <h1 className="text-2xl font-extrabold text-[#2A2320] mb-1">{t("acct.returns.title")}</h1>
-      <p className="text-sm text-[#9A8E88] mb-8">{t("acct.returns.subtitle")}</p>
+      <h1 className="text-2xl font-extrabold text-ink mb-1">{t("acct.returns.title")}</h1>
+      <p className="text-sm text-ink-muted mb-8">{t("acct.returns.subtitle")}</p>
 
       {returns.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] p-12 text-center">
+        <div className="bg-white rounded-card border border-line p-12 text-center">
           <span className="text-5xl block mb-4">↩️</span>
-          <h2 className="text-lg font-extrabold text-[#2A2320] mb-2">{t("acct.returns.empty")}</h2>
-          <p className="text-sm text-[#5E5450] mb-6 max-w-md mx-auto">
+          <h2 className="text-lg font-extrabold text-ink mb-2">{t("acct.returns.empty")}</h2>
+          <p className="text-sm text-ink-soft mb-6 max-w-md mx-auto">
             {t("acct.returns.emptyBody")}
           </p>
           <Link
@@ -76,15 +76,15 @@ export default function ReturnsClient() {
             const rc = returnStatusConfig[ret.status];
             const itemCount = ret.items.reduce((s, it) => s + it.quantity, 0);
             return (
-              <div key={ret.id} className="bg-white rounded-2xl border border-[#DDD5CC] overflow-hidden">
-                <div className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-[#F5F0EB]" style={{ backgroundColor: "#FAFAF8" }}>
+              <div key={ret.id} className="bg-white rounded-card border border-line overflow-hidden">
+                <div className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-canvas" style={{ backgroundColor: "#FAFAF8" }}>
                   <div>
-                    <p className="font-mono font-extrabold text-sm text-[#2A2320]">{ret.return_number}</p>
-                    <p className="text-[11px] text-[#9A8E88] mt-0.5">
+                    <p className="font-mono font-extrabold text-sm text-ink">{ret.return_number}</p>
+                    <p className="text-[11px] text-ink-muted mt-0.5">
                       {fmtDate(ret.created_at, locale, "long")}
                       {" · "}
                       {t("acct.returns.order")}{" "}
-                      <Link href={`/account/orders/${ret.order_number}`} className="font-mono font-semibold text-[#5E9E8C] hover:underline">
+                      <Link href={`/account/orders/${ret.order_number}`} className="font-mono font-semibold text-accent hover:underline">
                         {ret.order_number}
                       </Link>
                     </p>
@@ -95,18 +95,18 @@ export default function ReturnsClient() {
                   </span>
                 </div>
                 <div className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
-                  <div className="text-xs text-[#5E5450]">
-                    <p className="font-semibold text-[#2A2320]">
+                  <div className="text-xs text-ink-soft">
+                    <p className="font-semibold text-ink">
                       {itemCount === 1 ? t("acct.returns.item1") : t("acct.returns.itemsN").replace("{n}", String(itemCount))} · {ret.items.map((it) => it.product_name).join(", ")}
                     </p>
-                    <p className="text-[#9A8E88] mt-0.5">{t("acct.returns.reason")} {returnReasonLabel(ret.reason, t)}</p>
+                    <p className="text-ink-muted mt-0.5">{t("acct.returns.reason")} {returnReasonLabel(ret.reason, t)}</p>
                     {ret.status === "rejected" && ret.admin_note && (
-                      <p className="text-[#B03A3A] mt-0.5">{t("acct.returns.note")} {ret.admin_note}</p>
+                      <p className="text-danger mt-0.5">{t("acct.returns.note")} {ret.admin_note}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] text-[#9A8E88] font-semibold">{ret.status === "refunded" ? t("acct.returns.refunded") : t("acct.returns.refund")}</p>
-                    <p className="font-extrabold text-[#2A2320]">{formatPrice(Number(ret.refund_amount))}</p>
+                    <p className="text-[11px] text-ink-muted font-semibold">{ret.status === "refunded" ? t("acct.returns.refunded") : t("acct.returns.refund")}</p>
+                    <p className="font-extrabold text-ink">{formatPrice(Number(ret.refund_amount))}</p>
                   </div>
                 </div>
               </div>

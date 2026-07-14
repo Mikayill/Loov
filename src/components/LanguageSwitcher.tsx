@@ -25,7 +25,7 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-sm font-semibold text-[#5E5450] hover:text-[#2A2320] transition-colors px-2.5 py-1.5 rounded-lg hover:bg-[#EDE5D8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5E9E8C] focus-visible:ring-offset-2"
+        className="flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink transition-colors px-2.5 py-1.5 rounded-lg hover:bg-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         aria-label="Select language"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -46,7 +46,7 @@ export default function LanguageSwitcher() {
 
       {open && (
         <ul
-          className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-lg border border-[#DDD5CC] py-1.5 min-w-[170px] z-50"
+          className="absolute right-0 top-full mt-2 bg-white rounded-card shadow-lg border border-line py-1.5 min-w-[170px] z-50"
           role="listbox"
           aria-label="Language"
         >
@@ -62,13 +62,13 @@ export default function LanguageSwitcher() {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left focus-visible:outline-none focus-visible:bg-[#F0F7F5] ${
                     selected
-                      ? "font-bold text-[#5E9E8C] bg-[#F0F7F5]"
-                      : "text-[#5E5450] hover:bg-[#F5F0EB]"
+                      ? "font-bold text-accent bg-[#F0F7F5]"
+                      : "text-ink-soft hover:bg-canvas"
                   }`}
                 >
                   <span className="text-base leading-none">{meta.flag}</span>
                   <span>{meta.label}</span>
-                  {selected && <span className="ml-auto text-[#5E9E8C]">✓</span>}
+                  {selected && <span className="ml-auto text-accent">✓</span>}
                 </button>
               </li>
             );

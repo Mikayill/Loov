@@ -49,7 +49,7 @@ function Toggle({ enabled, disabled, onClick, label }: {
       onClick={onClick}
       disabled={disabled}
       className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-        enabled ? "" : "bg-[#DDD5CC]"
+        enabled ? "" : "bg-line"
       } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       style={enabled ? { backgroundColor: "#5E9E8C" } : {}}
       aria-label={`Toggle ${label}`}
@@ -93,7 +93,7 @@ export default function NotificationsClient() {
   if (loading || !user || fetching) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-[#5E9E8C] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -121,15 +121,15 @@ export default function NotificationsClient() {
       <div className="flex items-center gap-3">
         <span className="text-xl w-8 text-center">{pref.icon}</span>
         <div>
-          <p className="font-bold text-[#2A2320] text-sm flex items-center gap-2">
+          <p className="font-bold text-ink text-sm flex items-center gap-2">
             {t(pref.labelKey)}
             {pref.alwaysOn && (
-              <span className="text-[9px] font-extrabold text-[#5E9E8C] bg-[#EAF2F0] px-2 py-0.5 rounded-full uppercase tracking-wide">
+              <span className="text-[9px] font-extrabold text-accent bg-accent-soft px-2 py-0.5 rounded-full uppercase tracking-wide">
                 {t("notif.alwaysOn")}
               </span>
             )}
           </p>
-          <p className="text-xs text-[#9A8E88] mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             {pref.alwaysOn
               ? t("notif.transactionalNote")
               : t(pref.descKey)}
@@ -148,21 +148,21 @@ export default function NotificationsClient() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-[#9A8E88] mb-6">
-        <Link href="/" className="hover:text-[#5E9E8C] transition-colors">{t("nav.home")}</Link>
+      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
+        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-[#5E9E8C] transition-colors">{t("acct.title")}</Link>
+        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
         <span>›</span>
-        <span className="text-[#2A2320] font-semibold">{t("notif.breadcrumb")}</span>
+        <span className="text-ink font-semibold">{t("notif.breadcrumb")}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#2A2320]">{t("notif.title")}</h1>
-          <p className="text-[#9A8E88] text-sm mt-0.5">{t("notif.enabledOf").replace("{n}", String(enabledCount)).replace("{total}", String(PREFS.length))}</p>
+          <h1 className="text-2xl font-extrabold text-ink">{t("notif.title")}</h1>
+          <p className="text-ink-muted text-sm mt-0.5">{t("notif.enabledOf").replace("{n}", String(enabledCount)).replace("{total}", String(PREFS.length))}</p>
         </div>
-        <Link href="/account" className="flex items-center gap-1.5 text-sm font-semibold text-[#5E9E8C] hover:underline">
+        <Link href="/account" className="flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
@@ -171,33 +171,33 @@ export default function NotificationsClient() {
       </div>
 
       {saved && (
-        <div className="mb-5 p-3 bg-[#EAF2F0] border border-[#C8DDD8] rounded-xl flex items-center gap-2 text-sm font-semibold text-[#3A7A68]">
+        <div className="mb-5 p-3 bg-accent-soft border border-sage rounded-control flex items-center gap-2 text-sm font-semibold text-accent-deep">
           <span>✓</span>
           <span>{t("notif.saved")}</span>
         </div>
       )}
       {error && (
-        <div className="mb-5 p-3 bg-[#FBF0F0] border border-[#E8C4C4] rounded-xl text-sm font-semibold text-[#B03A3A]">
+        <div className="mb-5 p-3 bg-[#FBF0F0] border border-[#E8C4C4] rounded-control text-sm font-semibold text-danger">
           {error}
         </div>
       )}
 
       {/* Email section */}
       <div className="mb-2">
-        <p className="text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest px-1 mb-3">
+        <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest px-1 mb-3">
           {t("notif.emailSection")}
         </p>
-        <div className="bg-white rounded-2xl border border-[#DDD5CC] divide-y divide-[#F5F0EB]">
+        <div className="bg-white rounded-card border border-line divide-y divide-canvas">
           {PREFS.filter((p) => p.id !== "sms").map(renderRow)}
         </div>
       </div>
 
       {/* SMS section */}
       <div className="mt-5 mb-8">
-        <p className="text-[11px] font-bold text-[#9A8E88] uppercase tracking-widest px-1 mb-3">
+        <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest px-1 mb-3">
           {t("notif.smsSection")}
         </p>
-        <div className="bg-white rounded-2xl border border-[#DDD5CC]">
+        <div className="bg-white rounded-card border border-line">
           {PREFS.filter((p) => p.id === "sms").map(renderRow)}
         </div>
       </div>
@@ -207,12 +207,12 @@ export default function NotificationsClient() {
         loading={saving}
         loadingText={t("auth.saving")}
         fullWidth
-        className="!rounded-2xl !h-auto py-3.5"
+        className="!rounded-card !h-auto py-3.5"
       >
         {t("notif.savePreferences")} →
       </Button>
 
-      <p className="text-center text-xs text-[#9A8E88] mt-3">
+      <p className="text-center text-xs text-ink-muted mt-3">
         {t("notif.privacyNote")}
       </p>
     </div>
