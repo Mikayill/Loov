@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Product } from "@/types";
-import { formatAmount } from "@/lib/format";
-import { effectivePrice } from "@/lib/pricing";
+import { formatAmount, formatPrice } from "@/lib/format";
+import { effectivePrice, basePriceForSize, discountPercent } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
-import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
+import { useSettings } from "@/lib/db/useSettings";
+import { colorLabel, sizeLabel, categoryLabel } from "@/lib/i18n/labels";
 import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
 import { variantStock } from "@/lib/stock";
+import { Stars, DealCountdown } from "./ProductCard";
 
 const colorHexMap: Record<string, string> = {
   White: "#F5F2ED", Sage: "#9BBFB8", Sand: "#D4B896", "Sky Blue": "#87BEDC",
@@ -28,13 +30,19 @@ export default function QuickViewButton({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
 
+  const { deliveryMinDays, deliveryMaxDays } = useSettings();
   const [open, setOpen]           = useState(false);
   const [mounted, setMounted]     = useState(false);
   const [selectedColor, setColor] = useState(product.colors[0]);
   const [selectedSize, setSize]   = useState(product.sizes[0]);
   const [qty, setQty]             = useState(1);
+  const [qvImg, setQvImg]         = useState(0);
   const [status, setStatus]       = useState<"idle" | "added" | "blocked">("idle");
   const shouldRenderModal = useDelayedUnmount(open, 200);
+  const gallery = product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : [];
+  const off = discountPercent(product);
+  const unitPrice = effectivePrice(product, selectedSize);
+  const unitBase = basePriceForSize(product, selectedSize);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -82,6 +90,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
     setColor(product.colors[0]);
     setSize(product.sizes[0]);
     setQty(1);
+    setQvImg(0);
     setStatus("idle");
     setOpen(true);
   }
@@ -108,7 +117,7 @@ export default function QuickViewButton({ product }: { product: Product }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="quick-view-title"
-            className={`bg-canvas rounded-card w-full max-w-sm shadow-2xl overflow-hidden ${open ? "animate-pop-in" : "animate-pop-out"}`}
+            className={`bg-canvas rounded-card w-full max-w-sm md:max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl ${open ? "animate-pop-in" : "animate-pop-out"}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -123,11 +132,72 @@ export default function QuickViewButton({ product }: { product: Product }) {
               </button>
             </div>
 
-            <div className="p-5">
-              {/* Product header */}
+            <div className="p-5 md:grid md:grid-cols-2 md:gap-6">
+              {/* ── LEFT (md+): gallery — main photo + thumbs ── */}
+              <div className="hidden md:flex flex-col gap-3">
+                <div
+                  className="relative aspect-square rounded-card overflow-hidden border border-line flex items-center justify-center text-8xl"
+                  style={{ backgroundColor: product.cardColor }}
+                >
+                  {gallery.length > 0 ? (
+                    gallery.map((src, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={src}
+                        src={src}
+                        alt={product.name}
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${i === qvImg ? "opacity-100" : "opacity-0"}`}
+                      />
+                    ))
+                  ) : (
+                    <span>{product.emoji}</span>
+                  )}
+                  {product.isNew && (
+                    <span className="absolute top-3 left-3 bg-canvas/90 text-accent text-[10px] font-bold px-2 py-1 rounded-control uppercase tracking-[0.14em]">
+                      {t("product.new")}
+                    </span>
+                  )}
+                  {gallery.length > 1 && (
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setQvImg((i) => (i - 1 + gallery.length) % gallery.length); }}
+                        aria-label="Previous photo"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-canvas/90 border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-white transition-colors active:scale-90"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setQvImg((i) => (i + 1) % gallery.length); }}
+                        aria-label="Next photo"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-canvas/90 border border-line flex items-center justify-center text-ink hover:bg-ink hover:text-white transition-colors active:scale-90"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+                {gallery.length > 1 && (
+                  <div className="grid grid-cols-5 gap-2">
+                    {gallery.slice(0, 5).map((src, i) => (
+                      <button
+                        key={src}
+                        onClick={(e) => { e.stopPropagation(); setQvImg(i); }}
+                        className={`aspect-square rounded-control border overflow-hidden transition-all ${i === qvImg ? "border-ink" : "border-line hover:border-ink-muted"}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* ── RIGHT: info + selectors ── */}
+              <div>
+              {/* Product header (thumb only on mobile — desktop has the gallery) */}
               <div className="flex gap-4 mb-4">
                 <div
-                  className="w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
+                  className="md:hidden w-20 h-20 rounded-control flex items-center justify-center text-4xl flex-shrink-0 overflow-hidden"
                   style={{ backgroundColor: hex(selectedColor) === "#C8C8C8" ? product.cardColor : hex(selectedColor) + "55" }}
                 >
                   {product.imageUrl ? (
@@ -138,17 +208,28 @@ export default function QuickViewButton({ product }: { product: Product }) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0 py-1">
-                  {product.isNew && (
-                    <span className="inline-block text-accent text-[9px] font-bold uppercase tracking-[0.14em] mb-1">
-                      {t("product.new")}
-                    </span>
-                  )}
-                  <h3 id="quick-view-title" className="font-bold text-ink text-sm leading-snug mb-1 line-clamp-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[9px] font-semibold text-ink-muted uppercase tracking-[0.14em]">{categoryLabel(product.category, t)}</span>
+                    {product.isNew && (
+                      <span className="text-accent text-[9px] font-bold uppercase tracking-[0.14em]">{t("product.new")}</span>
+                    )}
+                  </div>
+                  <h3 id="quick-view-title" className="font-bold text-ink text-[15px] leading-snug mb-1 line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-lg font-extrabold text-ink">
-                    {formatAmount(effectivePrice(product, selectedSize) * qty)} <span className="text-sm font-bold">₾</span>
-                  </p>
+                  <div className="mb-1.5"><Stars rating={product.rating} /></div>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className={`text-xl font-extrabold tabular-nums ${off > 0 ? "text-danger" : "text-ink"}`}>
+                      {formatAmount(unitPrice)} <span className="text-sm font-bold">₾</span>
+                    </span>
+                    {off > 0 && (
+                      <>
+                        <span className="text-sm text-ink-muted line-through tabular-nums">{formatPrice(unitBase)}</span>
+                        <span className="text-[10px] font-extrabold text-danger bg-danger-soft px-1.5 py-0.5 rounded-control">−{off}%</span>
+                        <DealCountdown product={product} />
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -260,6 +341,21 @@ export default function QuickViewButton({ product }: { product: Product }) {
                 >
                   {t("quick.viewDetails")} →
                 </button>
+              </div>
+
+              {/* Delivery + low-stock facts */}
+              <div className="mt-3 pt-3 border-t border-line space-y-1.5">
+                <p className="text-[11px] text-ink-soft flex items-center gap-1.5">
+                  <span aria-hidden>🚚</span>
+                  {t("topbar.delivery").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays))}
+                </p>
+                {!soldOut && stock !== null && stock <= 5 && (
+                  <p className="text-[11px] font-bold text-orange-500 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" aria-hidden />
+                    {t("pdp.onlyLeft").replace("{n}", String(stock))}
+                  </p>
+                )}
+              </div>
               </div>
             </div>
           </div>
