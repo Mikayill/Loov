@@ -9,6 +9,7 @@ import { getHomeReviews } from "@/lib/db/reviews";
 import { fmtDate } from "@/lib/i18n/format";
 import { formatPrice } from "@/lib/format";
 import BundleQuickView from "@/components/BundleQuickView";
+import HeroShowcase from "@/components/HeroShowcase";
 import { getT } from "@/lib/i18n/server";
 import { sortBySeason } from "@/lib/season";
 import Reveal from "@/components/ui/Reveal";
@@ -28,7 +29,17 @@ export default async function HomePage() {
     ...seasonSorted.filter((p) => p.isNew),
     ...seasonSorted.filter((p) => !p.isNew),
   ];
-  const heroProduct = featuredProducts[0];
+
+  /* Hero showcase — admin-picked slugs in order (Settings → Hero showcase);
+     empty setting falls back to the lead featured product. */
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
+  const heroProducts = (settings.heroSlugs || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((slug) => bySlug.get(slug))
+    .filter((p): p is NonNullable<typeof p> => !!p);
+  if (heroProducts.length === 0 && featuredProducts[0]) heroProducts.push(featuredProducts[0]);
 
   return (
     <>
@@ -63,35 +74,14 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Visual — flat tinted well with the lead product */}
-            <div className="relative hidden md:flex items-center justify-center border-l border-line min-h-[380px]"
-              style={{ background: "linear-gradient(150deg, var(--color-accent-soft), var(--color-panel))" }}>
-              {heroProduct?.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={heroProduct.imageUrl} alt={heroProduct.name} className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <span className="text-[110px] select-none">{heroProduct?.emoji ?? "🧸"}</span>
-              )}
-              {heroProduct && (
-                <Link
-                  href={`/products/${heroProduct.slug}`}
-                  className="absolute bottom-5 left-5 bg-canvas border border-line px-4 py-2.5 rounded-control hover:border-ink transition-colors"
-                >
-                  <span className="block text-[10px] uppercase tracking-[0.14em] text-ink-muted font-semibold">
-                    {t("home.featured.title")}
-                  </span>
-                  <span className="block text-[13px] font-bold text-ink mt-0.5">
-                    {heroProduct.name} — {formatPrice(heroProduct.price)}
-                  </span>
-                </Link>
-              )}
-            </div>
+            {/* Visual — admin-curated showcase (auto-slides when several products are picked) */}
+            <HeroShowcase products={heroProducts} />
           </div>
         </div>
       </section>
 
-      {/* ── Trust row — information-dense strip, Nordic ── */}
-      <section className="border-b border-line">
+      {/* ── Trust row — information-dense strip, Nordic (md+ only) ── */}
+      <section className="hidden md:block border-b border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4">
             {[
@@ -114,38 +104,66 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Shop by Category — flat tinted tiles ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="flex items-baseline justify-between gap-3 mb-4">
-          <h2 className="text-lg sm:text-2xl font-bold text-ink tracking-tight">{t("home.category.title")}</h2>
+      {/* ── Shop by Category — desktop: hairline tiles · mobile: one compact scroll row ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-10">
+        <div className="flex items-baseline justify-between gap-3 mb-2.5 sm:mb-4">
+          <h2 className="text-[15px] sm:text-2xl font-bold text-ink tracking-tight">{t("home.category.title")}</h2>
           <span className="hidden sm:block text-ink-muted text-xs">{t("home.category.subtitle")}</span>
         </div>
-        <Reveal className="grid grid-cols-3 sm:grid-cols-6 gap-px bg-line border border-line">
-          {[
+        {(() => {
+          const cats = [
             { cat: "body",    emoji: "👶", label: t("category.body"),    bg: "#C8DDD8", href: "/products?cat=body" },
             { cat: "blanket", emoji: "☁️", label: t("category.blanket"), bg: "#C4D4E4", href: "/products?cat=blanket" },
             { cat: "set",     emoji: "🎀", label: t("category.set"),     bg: "#D0E0CC", href: "/products?cat=set" },
             { cat: "towel",   emoji: "🛁", label: t("category.towel"),   bg: "#E4D8C4", href: "/products?cat=towel" },
             { cat: "romper",  emoji: "🐻", label: t("category.romper"),  bg: "#D4CAE4", href: "/products?cat=romper" },
             { cat: "bag",     emoji: "🐰", label: t("category.bag"),     bg: "#EED4BC", href: "/products?cat=bag" },
-          ].map((item) => (
-            <Link
-              key={item.cat}
-              href={item.href}
-              className="flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 py-4 sm:py-6 transition-colors cursor-pointer group bg-canvas hover:bg-panel"
-            >
-              <span
-                className="w-11 h-11 sm:w-14 sm:h-14 rounded-control flex items-center justify-center text-xl sm:text-3xl group-hover:scale-105 transition-transform duration-200"
-                style={{ backgroundColor: item.bg + "66" }}
-              >
-                {item.emoji}
-              </span>
-              <span className="text-[9.5px] sm:text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft group-hover:text-ink text-center leading-tight transition-colors">
-                {item.label}
-              </span>
-            </Link>
-          ))}
-        </Reveal>
+          ];
+          return (
+            <>
+              {/* Mobile: single horizontally-scrollable chip row */}
+              <div className="sm:hidden flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+                {cats.map((item) => (
+                  <Link
+                    key={item.cat}
+                    href={item.href}
+                    className="flex-shrink-0 flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 rounded-control border border-line bg-canvas active:scale-95 transition-transform"
+                  >
+                    <span
+                      className="w-7 h-7 rounded-control flex items-center justify-center text-sm"
+                      style={{ backgroundColor: item.bg + "66" }}
+                    >
+                      {item.emoji}
+                    </span>
+                    <span className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-soft whitespace-nowrap">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              {/* Desktop: hairline tile grid */}
+              <Reveal className="hidden sm:grid grid-cols-6 gap-px bg-line border border-line">
+                {cats.map((item) => (
+                  <Link
+                    key={item.cat}
+                    href={item.href}
+                    className="flex flex-col items-center justify-center gap-2.5 py-6 transition-colors cursor-pointer group bg-canvas hover:bg-panel"
+                  >
+                    <span
+                      className="w-14 h-14 rounded-control flex items-center justify-center text-3xl group-hover:scale-105 transition-transform duration-200"
+                      style={{ backgroundColor: item.bg + "66" }}
+                    >
+                      {item.emoji}
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-soft group-hover:text-ink text-center leading-tight transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </Reveal>
+            </>
+          );
+        })()}
       </section>
 
       {/* ── Picked for your baby (client-side, renders only for signed-in parents with a saved birthdate) ── */}

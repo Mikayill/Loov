@@ -59,21 +59,21 @@ const helpLinks = [
   { label: "My Account",  href: "/account" },
 ];
 
-/* Nordic footer: table-like column grid separated by hairlines, dark bottom bar */
+/* Nordic footer: one theme-independent dark block (matches the © bottom bar) */
 export default async function Footer() {
   const { t } = await getT();
   return (
-    <footer className="border-t border-ink bg-canvas">
+    <footer className="bg-[#141412] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10">
 
           {/* Brand + social */}
-          <div className="bg-canvas py-8 pr-6 sm:col-span-2 lg:col-span-1">
+          <div className="bg-[#141412] py-8 pr-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="Loov" className="h-5 w-auto" />
             </div>
-            <p className="text-xs text-ink-muted leading-relaxed mb-5 max-w-[30ch]">
+            <p className="text-xs text-white/55 leading-relaxed mb-5 max-w-[30ch]">
               {t("footer.tagline")}
             </p>
             <div className="flex items-center gap-1.5 mb-5">
@@ -82,7 +82,7 @@ export default async function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-8 h-8 rounded-control border border-line flex items-center justify-center text-ink-soft hover:bg-ink hover:text-white hover:border-ink transition-colors"
+                  className="w-8 h-8 rounded-control border border-white/20 flex items-center justify-center text-white/70 hover:bg-white hover:text-[#141412] hover:border-white transition-colors"
                 >
                   {social.icon}
                 </a>
@@ -91,20 +91,20 @@ export default async function Footer() {
             {/* Certifications — quiet micro list */}
             <ul className="space-y-1">
               {["Organic cotton", "Baby-safe fabrics", "Secure checkout"].map((cert) => (
-                <li key={cert} className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-muted flex items-center gap-2">
-                  <span className="text-accent">✓</span>{cert}
+                <li key={cert} className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/50 flex items-center gap-2">
+                  <span className="text-[#8AC3A8]">✓</span>{cert}
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Shop links */}
-          <div className="bg-canvas py-8 sm:pl-6">
-            <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-4">{t("footer.shop")}</p>
+          <div className="bg-[#141412] py-8 sm:pl-6">
+            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-[0.14em] mb-4">{t("footer.shop")}</p>
             <ul className="grid grid-cols-3 gap-x-3 gap-y-2 sm:grid-cols-1 sm:gap-y-2.5">
               {shopLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-[13px] text-ink-soft hover:text-accent hover:underline underline-offset-4 transition-colors font-medium">
+                  <a href={link.href} className="text-[13px] text-white/75 hover:text-white hover:underline underline-offset-4 transition-colors font-medium">
                     {link.label}
                   </a>
                 </li>
@@ -113,12 +113,12 @@ export default async function Footer() {
           </div>
 
           {/* Help links */}
-          <div className="bg-canvas py-8 sm:pl-6">
-            <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-4">{t("footer.help")}</p>
+          <div className="bg-[#141412] py-8 sm:pl-6">
+            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-[0.14em] mb-4">{t("footer.help")}</p>
             <ul className="grid grid-cols-3 gap-x-3 gap-y-2 sm:grid-cols-1 sm:gap-y-2.5">
               {helpLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-[13px] text-ink-soft hover:text-accent hover:underline underline-offset-4 transition-colors font-medium">
+                  <a href={link.href} className="text-[13px] text-white/75 hover:text-white hover:underline underline-offset-4 transition-colors font-medium">
                     {link.label}
                   </a>
                 </li>
@@ -127,17 +127,17 @@ export default async function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="bg-canvas py-8 sm:pl-6">
-            <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-4">{t("footer.contact")}</p>
-            <div className="space-y-2 text-[13px] text-ink-soft mb-5">
+          <div className="bg-[#141412] py-8 sm:pl-6">
+            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-[0.14em] mb-4">{t("footer.contact")}</p>
+            <div className="space-y-2 text-[13px] text-white/75 mb-5">
               <p>Tbilisi, Georgia</p>
-              <p className="text-ink-muted">{t("footer.hours")}</p>
-              <a href="mailto:hello@loov.ge" className="block hover:text-accent transition-colors">hello@loov.ge</a>
+              <p className="text-white/50">{t("footer.hours")}</p>
+              <a href="mailto:hello@loov.ge" className="block hover:text-white transition-colors">hello@loov.ge</a>
               <FooterPhone />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-2">{t("footer.weAccept")}</p>
-              <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.08em] bg-accent-soft text-accent-deep px-2.5 py-1.5 rounded-control">
+              <p className="text-[10px] font-semibold text-white/50 uppercase tracking-[0.14em] mb-2">{t("footer.weAccept")}</p>
+              <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.08em] bg-[#22312A] text-[#8AC3A8] px-2.5 py-1.5 rounded-control">
                 {t("checkout.paymentOnDelivery")}
               </span>
             </div>
@@ -146,7 +146,7 @@ export default async function Footer() {
       </div>
 
       {/* Bottom bar — dark, frames the page */}
-      <div className="bg-ink text-white/60 py-4 px-4">
+      <div className="bg-[#141412] text-white/50 py-4 px-4 border-t border-white/10">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-[0.08em]">
           <p>{t("footer.rights")}</p>
           <div className="flex items-center gap-5">

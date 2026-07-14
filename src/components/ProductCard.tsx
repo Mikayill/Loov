@@ -12,7 +12,7 @@ import QuickAddButton from "./QuickAddButton";
 import QuickViewButton from "./QuickViewButton";
 
 /* Small star row — review average, or a full 5 stars until the first review. */
-function Stars({ rating }: { rating?: { avg: number; count: number } }) {
+export function Stars({ rating }: { rating?: { avg: number; count: number } }) {
   const filled = rating && rating.count > 0 ? Math.round(rating.avg) : 5;
   return (
     <span className="flex items-center gap-1" aria-label={rating ? `${rating.avg}/5` : "5/5"}>

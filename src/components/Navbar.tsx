@@ -180,7 +180,7 @@ export default function Navbar() {
             already-filtered ancestor is ignored by browsers, so the <nav> stays
             plain and each bar frosts itself. */}
         <nav className="border-b border-line">
-          <div className="bg-canvas/75 backdrop-blur-xl backdrop-saturate-150">
+          <div className="bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-3 gap-3 md:gap-6">
 
@@ -325,7 +325,7 @@ export default function Navbar() {
           </div>
 
           {/* Category strip — tactile chip buttons */}
-          <div className="border-t border-line overflow-x-auto no-scrollbar bg-canvas/75 backdrop-blur-xl backdrop-saturate-150">
+          <div className="border-t border-line md:border-t-0 overflow-x-auto no-scrollbar bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 whitespace-nowrap py-2.5">
               <Link
                 href="/products"

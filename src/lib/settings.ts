@@ -40,6 +40,9 @@ export interface StoreSettings {
   loyaltyMaxRedeemPercent: number;
   /** Price of gift wrapping at checkout (₾). 0 = free. */
   giftWrapPrice: number;
+  /** Comma-separated product slugs shown in the homepage hero showcase,
+   *  in order. Empty = automatic (first featured product). */
+  heroSlugs: string;
 }
 
 export const DEFAULT_SETTINGS: StoreSettings = {
@@ -58,6 +61,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   deliveryMaxDays: 4,
   loyaltyMaxRedeemPercent: 20,
   giftWrapPrice: 5,
+  heroSlugs: "",
 };
 
 /** Map DB key → settings field. */
@@ -77,6 +81,7 @@ export const SETTING_KEYS: Record<string, keyof StoreSettings> = {
   delivery_max_days: "deliveryMaxDays",
   loyalty_max_redeem_percent: "loyaltyMaxRedeemPercent",
   gift_wrap_price: "giftWrapPrice",
+  hero_slugs: "heroSlugs",
 };
 
 /** Reverse map: settings field → DB key. */
@@ -96,6 +101,7 @@ export const FIELD_TO_KEY: Record<keyof StoreSettings, string> = {
   deliveryMaxDays: "delivery_max_days",
   loyaltyMaxRedeemPercent: "loyalty_max_redeem_percent",
   giftWrapPrice: "gift_wrap_price",
+  heroSlugs: "hero_slugs",
 };
 
 /** Build a StoreSettings from raw {key: value} DB rows, filling gaps with defaults. */
@@ -108,6 +114,11 @@ export function settingsFromRows(rows: { key: string; value: unknown }[]): Store
       // Boolean setting — accept true/false, 1/0 and their string forms.
       out.expressEnabled =
         value === true || value === 1 || value === "true" || value === "1";
+      continue;
+    }
+    if (field === "heroSlugs") {
+      // String setting — comma-separated product slugs for the hero showcase.
+      out.heroSlugs = String(value ?? "");
       continue;
     }
     if (field === "whatsappNumber") {

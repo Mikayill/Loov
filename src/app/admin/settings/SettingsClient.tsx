@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DEFAULT_SETTINGS, type StoreSettings } from "@/lib/settings";
 
 interface Field {
-  key: Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber">;
+  key: Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber" | "heroSlugs">;
   label: string;
   hint: string;
   icon: string;
@@ -153,6 +153,9 @@ export default function SettingsClient() {
   const [error, setError] = useState("");
   const [seeded, setSeeded] = useState(true);
 
+  /* Products for the hero-showcase picker (name + slug + thumb). */
+  const [heroProducts, setHeroProducts] = useState<{ slug: string; name: string; emoji?: string | null; image_url?: string | null; card_color?: string | null }[]>([]);
+
   /* Preset avatars (FAZ 7) — customers pick one of these on their account page. */
   const [avatars, setAvatars] = useState<string[]>([]);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -168,6 +171,10 @@ export default function SettingsClient() {
       })
       .catch(() => setError("Could not load settings"))
       .finally(() => setLoading(false));
+    fetch("/api/admin/products")
+      .then((r) => r.json())
+      .then((d) => setHeroProducts((d.products ?? []).map((p: Record<string, unknown>) => ({ slug: String(p.slug), name: String(p.name), emoji: p.emoji as string | null, image_url: p.image_url as string | null, card_color: p.card_color as string | null }))))
+      .catch(() => {});
     fetch("/api/admin/avatars")
       .then((r) => r.json())
       .then((d) => setAvatars(d.avatars ?? []))
@@ -407,6 +414,64 @@ export default function SettingsClient() {
             className="w-44 h-11 px-3 rounded-control border border-line text-lg font-extrabold text-ink outline-none focus:border-accent"
           />
         </div>
+      </div>
+
+      {/* ── Hero showcase (homepage) ── */}
+      <div className="mt-4 bg-canvas rounded-card border border-line p-5">
+        <label className="flex items-center gap-2 font-bold text-ink">
+          <span className="text-lg">🎬</span>
+          Hero showcase
+        </label>
+        <p className="text-xs text-ink-muted mt-1.5 leading-relaxed mb-3">
+          Products featured in the big homepage hero. Pick one for a static showcase, or several —
+          they auto-rotate every 5 seconds in the order you pick them (max 8). Leave empty to show
+          the newest featured product automatically.
+        </p>
+        {(() => {
+          const selected = (settings.heroSlugs || "").split(",").map((x) => x.trim()).filter(Boolean);
+          const toggleHero = (slug: string) =>
+            setSettings((s) => {
+              const cur = (s.heroSlugs || "").split(",").map((x) => x.trim()).filter(Boolean);
+              const next = cur.includes(slug) ? cur.filter((x) => x !== slug) : [...cur, slug].slice(0, 8);
+              return { ...s, heroSlugs: next.join(",") };
+            });
+          const ordered = [...heroProducts].sort((a, b) => {
+            const ia = selected.indexOf(a.slug); const ib = selected.indexOf(b.slug);
+            return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+          });
+          return (
+            <div className="max-h-80 overflow-y-auto border border-line rounded-control divide-y divide-line">
+              {ordered.map((p) => {
+                const idx = selected.indexOf(p.slug);
+                const on = idx !== -1;
+                return (
+                  <button
+                    key={p.slug}
+                    type="button"
+                    onClick={() => toggleHero(p.slug)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${on ? "bg-accent-soft" : "bg-canvas hover:bg-panel"}`}
+                  >
+                    <span className={`w-5 h-5 rounded-control border flex items-center justify-center text-[10px] font-extrabold flex-shrink-0 ${on ? "bg-ink text-white border-ink" : "border-line text-transparent"}`}>
+                      {on ? idx + 1 : "·"}
+                    </span>
+                    <span className="w-8 h-8 rounded-control flex items-center justify-center text-lg flex-shrink-0 overflow-hidden" style={{ backgroundColor: p.card_color ?? "var(--color-panel)" }}>
+                      {p.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        p.emoji ?? "🍼"
+                      )}
+                    </span>
+                    <span className="text-sm font-semibold text-ink truncate">{p.name}</span>
+                  </button>
+                );
+              })}
+              {heroProducts.length === 0 && (
+                <p className="p-3 text-xs text-ink-muted">Loading products…</p>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── Profile avatars (preset gallery customers pick from) ── */}

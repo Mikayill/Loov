@@ -13,7 +13,7 @@ import {
 export const dynamic = "force-dynamic";
 
 /** Bounds so an admin can't set nonsense that breaks the storefront. */
-const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber">, { min: number; max: number; int?: boolean }> = {
+const LIMITS: Record<Exclude<keyof StoreSettings, "expressEnabled" | "whatsappNumber" | "heroSlugs">, { min: number; max: number; int?: boolean }> = {
   pointsPerGel: { min: 0, max: 100 },
   freeShippingThreshold: { min: 0, max: 100000 },
   newBadgeDays: { min: 0, max: 365, int: true },
@@ -72,6 +72,16 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "WhatsApp number must be 8–15 digits (or empty to hide)" }, { status: 400 });
     }
     updates.push({ key: FIELD_TO_KEY.whatsappNumber, value: digits });
+  }
+  // Hero showcase slugs — sanitized slug list, empty allowed (auto mode).
+  if (body.heroSlugs !== undefined) {
+    const clean = String(body.heroSlugs ?? "")
+      .split(",")
+      .map((x: string) => x.trim().toLowerCase())
+      .filter((x: string) => /^[a-z0-9-]{1,80}$/.test(x))
+      .slice(0, 8)
+      .join(",");
+    updates.push({ key: FIELD_TO_KEY.heroSlugs, value: clean });
   }
   const minDays = body.deliveryMinDays !== undefined ? Number(body.deliveryMinDays) : undefined;
   const maxDays = body.deliveryMaxDays !== undefined ? Number(body.deliveryMaxDays) : undefined;
