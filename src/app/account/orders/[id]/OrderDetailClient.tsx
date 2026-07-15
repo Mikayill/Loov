@@ -123,9 +123,7 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
   };
 
   if (loading || !user || fetching) {
-    return (
-      <GhostRows />
-    );
+    return <GhostRows variant="orderDetail" />;
   }
 
   /* Order not found (or belongs to someone else — RLS returns nothing). */

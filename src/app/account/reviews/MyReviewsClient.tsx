@@ -190,9 +190,7 @@ export default function MyReviewsClient() {
   }
 
   if (loading || !user || fetching) {
-    return (
-      <GhostRows variant="list" rows={3} listHeader={false} />
-    );
+    return <GhostRows variant="list" kind="reviews" rows={3} />;
   }
 
   return (

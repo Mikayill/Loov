@@ -43,7 +43,7 @@ export default function ReturnsClient() {
   const productById = new Map(products.map((p) => [p.id, p]));
 
   if (loading || !user || fetching) {
-    return <GhostRows variant="list" rows={3} />;
+    return <GhostRows variant="list" kind="returns" rows={3} />;
   }
 
   return (

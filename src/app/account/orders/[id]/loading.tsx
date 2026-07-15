@@ -1,7 +1,7 @@
 import GhostRows from "@/components/GhostRows";
 
-// Row count must match OrderDetailClient's own <GhostRows /> call (default
-// rows) — see the note in account/orders/loading.tsx.
+// Must match OrderDetailClient's own <GhostRows variant="orderDetail" />
+// call — see the note in account/orders/loading.tsx.
 export default function Loading() {
-  return <GhostRows />;
+  return <GhostRows variant="orderDetail" />;
 }

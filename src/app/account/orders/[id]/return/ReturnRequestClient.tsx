@@ -104,9 +104,7 @@ export default function ReturnRequestClient({ orderNumber }: { orderNumber: stri
   const refundTotal = refundItems + (isFullReturn ? (order?.shippingCost ?? 0) : 0);
 
   if (loading || !user || fetching) {
-    return (
-      <GhostRows />
-    );
+    return <GhostRows variant="returnRequest" />;
   }
 
   if (!order) {

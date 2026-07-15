@@ -66,9 +66,7 @@ export default function AddressesClient() {
   }, [user]);
 
   if (loading || !user || fetching) {
-    return (
-      <GhostRows />
-    );
+    return <GhostRows variant="addresses" />;
   }
 
   function set(key: keyof typeof EMPTY_FORM, val: string) {
