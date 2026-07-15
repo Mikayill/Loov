@@ -5,80 +5,45 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { formatPrice } from "@/lib/format";
-import { effectivePrice, discountPercent } from "@/lib/pricing";
-import { Product } from "@/types";
 import { useState, useCallback } from "react";
 import { useLocale } from "@/context/LocaleContext";
-import { categoryLabel } from "@/lib/i18n/labels";
-import type { TranslationKey } from "@/lib/i18n/dictionaries";
-import { variantStock } from "@/lib/stock";
-
-function AddToCartInline({ product, t }: { product: Product; t: (key: TranslationKey) => string }) {
-  const { addItem } = useCart();
-  const [status, setStatus] = useState<"idle" | "added" | "blocked">("idle");
-  const defaultStock = variantStock(product, product.sizes[0], product.colors[0]);
-  const soldOut = defaultStock !== null && defaultStock <= 0;
-
-  function handle() {
-    if (soldOut) return;
-    const result = addItem(product, product.colors[0], product.sizes[0]);
-    if (result.added <= 0) {
-      setStatus("blocked");
-      setTimeout(() => setStatus("idle"), 1800);
-      return;
-    }
-    setStatus("added");
-    setTimeout(() => setStatus("idle"), 2000);
-  }
-
-  if (soldOut) {
-    return (
-      <button disabled className="w-full py-2.5 rounded-control text-sm font-bold bg-red-500 text-white cursor-not-allowed">
-        {t("product.outOfStock")}
-      </button>
-    );
-  }
-
-  return (
-    <button
-      onClick={handle}
-      className={`w-full py-2.5 rounded-control text-sm font-bold transition-all duration-200 ${
-        status === "added" ? "bg-green-500 text-white" :
-        status === "blocked" ? "bg-red-500 text-white" :
-        "text-white hover:opacity-90 active:scale-95"
-      }`}
-      style={status === "idle" ? { backgroundColor: "var(--color-accent)" } : {}}
-    >
-      {status === "added" ? `✓ ${t("quick.added")}` : status === "blocked" ? t("cart.cantAddMore") : t("common.addToCart")}
-    </button>
-  );
-}
+import ProductCard from "@/components/ProductCard";
+import { hasAnyStock, firstAvailableVariant } from "@/lib/stock";
 
 export default function WishlistClient() {
   const { t } = useLocale();
-  const { ids, toggle, priceDrop, lowStock, lowStockCount } = useWishlist();
+  const { ids, priceDrop, lowStock, lowStockCount } = useWishlist();
   const saved = useProductsByIds(ids);
   const { addItem } = useCart();
-  const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [addAllStatus, setAddAllStatus] = useState<"idle" | "added" | "blocked">("idle");
 
+  /* Share = a real text summary of the saved products (native share sheet,
+     or copy the same text) — the old button just shared the /wishlist URL
+     itself, which opens to whoever clicks it's OWN wishlist (or an empty
+     one), not the sender's saved items. There's no shared/public wishlist
+     page to link to, so a text list is the honest thing that actually works. */
   const handleShare = useCallback(() => {
-    const url = typeof window !== "undefined" ? window.location.href : "";
-    navigator.clipboard?.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
+    const lines = saved.map((p) => `• ${p.name} — ${formatPrice(p.price)}`);
+    const text = `${t("wl.shareIntro")}\n\n${lines.join("\n")}`;
+    if (typeof navigator.share === "function") {
+      navigator.share({ title: "Loov", text }).catch(() => {});
+      return;
+    }
+    navigator.clipboard?.writeText(text).then(() => {
+      setShared(true);
+      setTimeout(() => setShared(false), 2200);
     });
-  }, []);
+  }, [saved, t]);
 
-  const inStockSaved = saved.filter((p) => {
-    const s = variantStock(p, p.sizes[0], p.colors[0]);
-    return s === null || s > 0;
-  });
+  const inStockSaved = saved.filter(hasAnyStock);
   function handleAddAll() {
     if (inStockSaved.length === 0) return;
     let anyAdded = false;
     for (const p of inStockSaved) {
-      const result = addItem(p, p.colors[0], p.sizes[0]);
+      const variant = firstAvailableVariant(p);
+      if (!variant) continue;
+      const result = addItem(p, variant.color, variant.size, 1);
       if (result.added > 0) anyAdded = true;
     }
     if (!anyAdded) {
@@ -122,8 +87,8 @@ export default function WishlistClient() {
             {saved.length === 1 ? t("wl.saved1") : t("wl.saved").replace("{n}", String(saved.length))}
           </p>
           {lowStockCount > 0 && (
-            <p className="text-xs font-bold text-orange-600 mt-1 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-orange-400 u-skeleton inline-block" />
+            <p className="text-xs font-bold text-warning mt-1 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-warning u-skeleton inline-block" />
               {t("wl.lowStockNote").replace("{n}", String(lowStockCount))}
             </p>
           )}
@@ -132,21 +97,22 @@ export default function WishlistClient() {
           {inStockSaved.length > 1 && (
             <button
               onClick={handleAddAll}
-              className={`text-sm font-bold px-4 py-1.5 rounded-control transition-all active:scale-95 ${
-                addAllStatus === "added" ? "bg-green-500 text-white" :
-                addAllStatus === "blocked" ? "bg-red-500 text-white" :
-                "text-white hover:opacity-90"
+              className={`u-btn text-[12px] uppercase tracking-[0.06em] font-semibold px-4 py-2 rounded-control transition-all active:scale-95 ${
+                addAllStatus === "added"
+                  ? "bg-accent text-white"
+                  : addAllStatus === "blocked"
+                  ? "bg-danger text-white"
+                  : "bg-ink text-white hover:bg-ink/85"
               }`}
-              style={addAllStatus === "idle" ? { backgroundColor: "var(--color-accent)" } : {}}
             >
               {addAllStatus === "added" ? `✓ ${t("quick.added")}` : addAllStatus === "blocked" ? t("cart.cantAddMore") : t("wl.addAll")}
             </button>
           )}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 text-sm font-bold text-ink-muted hover:text-accent border border-line hover:border-accent px-3 py-1.5 rounded-full transition-all active:scale-95"
+            className="flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-ink px-3 py-1.5 rounded-control transition-all active:scale-95"
           >
-            {copied ? (
+            {shared ? (
               <>
                 <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -174,80 +140,34 @@ export default function WishlistClient() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
-        {saved.map((product) => (
-          <div
-            key={product.id}
-            className="bg-canvas rounded-card border border-line overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-          >
-            {/* Image */}
-            <Link href={`/products/${product.slug}`}>
-              <div
-                className="relative flex items-center justify-center h-40 text-5xl select-none overflow-hidden"
-                style={{ backgroundColor: product.cardColor }}
-              >
-                {product.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.imageUrl} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  product.emoji
-                )}
-                <button
-                  onClick={(e) => { e.preventDefault(); toggle(product.id, product.price); }}
-                  className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-red-400 text-white flex items-center justify-center shadow-sm hover:bg-red-500 transition-all active:scale-90"
-                  aria-label="Remove from wishlist"
-                >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </button>
-              </div>
-            </Link>
-
-            {/* Info */}
-            <div className="p-3.5">
-              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
-                {categoryLabel(product.category, t)}
-              </p>
-              <Link href={`/products/${product.slug}`}>
-                <h3 className="font-bold text-ink text-sm mb-2 hover:text-accent transition-colors line-clamp-2 leading-snug">
-                  {product.name}
-                </h3>
-              </Link>
-              {(() => {
-                const left = lowStock(product.id);
-                return left !== null ? (
-                  <p className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 rounded-full px-2 py-0.5 inline-block mb-1.5">
-                    🔥 {t("pdp.onlyLeft").replace("{n}", String(left))}
-                  </p>
-                ) : null;
-              })()}
-              {(() => {
-                const oldPrice = priceDrop(product.id);
-                return (
-                  <div className="mb-3 flex items-center gap-2 flex-wrap">
-                    <span className="font-extrabold text-ink">
-                      {formatPrice(effectivePrice(product))}
-                      {discountPercent(product) > 0 && (
-                        <span className="ml-1.5 text-xs text-ink-muted line-through">{formatPrice(product.price)}</span>
-                      )}
+      {/* Grid — the same ProductCard used everywhere else on the site, so a
+          saved item's badges/QuickAdd/QuickView all behave identically here.
+          Removing from the wishlist is the heart icon itself (already red),
+          matching how it works on every other product card. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-6 sm:gap-x-5 sm:gap-y-8">
+        {saved.map((product) => {
+          const left = lowStock(product.id);
+          const oldPrice = priceDrop(product.id);
+          return (
+            <div key={product.id}>
+              <ProductCard product={product} />
+              {(left !== null || oldPrice !== null) && (
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  {left !== null && (
+                    <span className="text-[10px] font-bold text-warning bg-warning-soft border border-warning-border rounded-full px-2 py-0.5">
+                      🔥 {t("pdp.onlyLeft").replace("{n}", String(left))}
                     </span>
-                    {oldPrice !== null && (
-                      <>
-                        <span className="text-xs text-ink-muted line-through">{formatPrice(oldPrice)}</span>
-                        <span className="text-[9px] font-bold text-white bg-red-500 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                          {t("wl.priceDrop")}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                );
-              })()}
-              <AddToCartInline product={product} t={t} />
+                  )}
+                  {oldPrice !== null && (
+                    <span className="text-[10px] font-bold text-white bg-danger px-2 py-0.5 rounded-full uppercase tracking-wide">
+                      {t("wl.priceDrop")}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

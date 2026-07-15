@@ -191,7 +191,7 @@ export default function MyReviewsClient() {
 
   if (loading || !user || fetching) {
     return (
-      <GhostRows />
+      <GhostRows variant="list" rows={3} listHeader={false} />
     );
   }
 
@@ -316,7 +316,7 @@ export default function MyReviewsClient() {
                           />
                           {t("acct.reviews.showNameCheckbox")}
                         </label>
-                        {editError && <p className="text-red-500 text-xs font-semibold mt-2">{editError}</p>}
+                        {editError && <p className="text-danger text-xs font-semibold mt-2">{editError}</p>}
                         <div className="flex items-center gap-2 mt-3">
                           <button
                             onClick={() => saveEdit(r.id)}

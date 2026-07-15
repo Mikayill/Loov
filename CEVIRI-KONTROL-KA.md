@@ -33,6 +33,9 @@
 | Giriş Yap | შესვლა | |
 | Çıkış Yap | გასვლა | |
 | Giriş Yap / Kayıt Ol | შესვლა / რეგისტრაცია | |
+| İndirimde | ფასდაკლებით | |
+| Son Görüntülenenler | ბოლოს ნანახი | |
+| Henüz görüntülenen ürün yok — mağazaya göz atın, burada görünecekler. | ჯერ არაფერი გინახავთ — დაათვალიერეთ მაღაზია და პროდუქტები აქ გამოჩნდება. | |
 
 ## 2. Duyuru Çubuğu (üstteki kayan yazılar)
 
@@ -478,6 +481,7 @@
 | 1 kayıtlı ürün / {n} kayıtlı ürün | 1 შენახული ნივთი / {n} შენახული ნივთი | |
 | Kopyalandı! | დაკოპირდა! | |
 | Paylaş | გაზიარება | |
+| Loov favori listem: | ჩემი Loov სურვილების სია: | |
 | Fiyat düştü | ფასდაკლება | |
 | Birlikte Daha Çok (setler başlığı) | ერთად მეტი | |
 | Set Fırsatları | ნაკრების შეთავაზებები | |

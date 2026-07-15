@@ -186,6 +186,11 @@ export default function ProductDetailClient({
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 });
   const [pinching, setPinching] = useState(false);
+  /* Live swipe-to-change-photo — the image now visibly tracks the finger
+     while dragging (dragX), instead of staying put and only snapping to the
+     next/previous photo once a 40px threshold is crossed on release. */
+  const [dragX, setDragX] = useState(0);
+  const [swiping, setSwiping] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const pinchRef = useRef({
     mode: "none" as "none" | "pinch" | "pan",
@@ -235,6 +240,7 @@ export default function ProductDetailClient({
       if (e.touches.length === 2) {
         e.preventDefault();
         r.mode = "pinch"; setPinching(true);
+        r.swipeX = null; setSwiping(false); setDragX(0);
         r.startDist = dist(e.touches);
         r.startScale = r.scale; r.startTx = r.tx; r.startTy = r.ty;
         return;
@@ -255,6 +261,7 @@ export default function ProductDetailClient({
       } else {
         r.mode = "none";
         r.swipeX = e.touches[0].clientX;
+        if (media.length > 1) setSwiping(true);
       }
     };
     const onMove = (e: TouchEvent) => {
@@ -267,13 +274,17 @@ export default function ProductDetailClient({
         e.preventDefault();
         const c = clamp(r.scale, e.touches[0].clientX - r.panX, e.touches[0].clientY - r.panY);
         apply(r.scale, c.tx, c.ty);
+      } else if (r.mode === "none" && r.swipeX !== null && e.touches.length === 1 && r.scale === 1) {
+        setDragX(e.touches[0].clientX - r.swipeX);
       }
     };
     const onEnd = (e: TouchEvent) => {
       if (r.mode === "none" && r.swipeX !== null && e.touches.length === 0) {
         const dx = e.changedTouches[0].clientX - r.swipeX;
-        if (Math.abs(dx) > 40 && r.scale === 1) (dx < 0 ? nextImg : prevImg)();
+        if (Math.abs(dx) > 40 && r.scale === 1 && media.length > 1) (dx < 0 ? nextImg : prevImg)();
         r.swipeX = null;
+        setSwiping(false);
+        setDragX(0);
       }
       if (e.touches.length === 0) {
         if (r.scale < 1.05) apply(1, 0, 0);
@@ -307,7 +318,7 @@ export default function ProductDetailClient({
   const zoomTransform =
     pinch.scale > 1
       ? `translate(${pinch.tx}px, ${pinch.ty}px) scale(${pinch.scale})`
-      : `scale(${desktopScale})`;
+      : `translateX(${dragX}px) scale(${desktopScale})`;
 
   const off = discountPercent(product);
   /* Price follows the selected size (per-size pricing). */
@@ -428,7 +439,7 @@ export default function ProductDetailClient({
               style={{
                 transform: zoomTransform,
                 transformOrigin: pinch.scale > 1 ? "center" : `${zoomOrigin.x}% ${zoomOrigin.y}%`,
-                transition: pinching ? "none" : "transform 0.25s var(--ease-smooth)",
+                transition: pinching || swiping ? "none" : "transform 0.25s var(--ease-smooth)",
               }}
             >
             {media.length > 0 ? (
@@ -704,27 +715,33 @@ export default function ProductDetailClient({
               {t("product.color")}:{" "}
               <span className="text-accent font-extrabold">{colorLabel(selectedColor, t)}</span>
             </p>
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {product.colors.map((color) => {
-                const disabled = !availableColors.includes(color);
+                /* Unavailable-for-this-size colours stay CLICKABLE — selecting
+                   one just surfaces the real "Out of Stock" state below
+                   (with the back-in-stock waitlist) instead of silently
+                   refusing the tap. A colour dot alone doesn't name the
+                   colour, so every swatch is now a labelled button. */
+                const unavailable = !availableColors.includes(color);
                 return (
                   <button
                     key={color}
-                    onClick={() => !disabled && setSelectedColor(color)}
-                    title={disabled ? `${colorLabel(color, t)} — ${t("pdp.colorNotInSize")}` : colorLabel(color, t)}
-                    disabled={disabled}
-                    className={`w-9 h-9 rounded-full border-2 transition-all duration-200 relative ${
+                    onClick={() => setSelectedColor(color)}
+                    title={unavailable ? `${colorLabel(color, t)} — ${t("pdp.colorNotInSize")}` : colorLabel(color, t)}
+                    className={`flex items-center gap-2 pl-2 pr-3.5 py-2 rounded-control border text-sm font-semibold transition-colors duration-200 ${
                       selectedColor === color
-                        ? "border-accent ring-2 ring-accent ring-offset-2 scale-110"
-                        : disabled
-                        ? "border-line opacity-40 cursor-not-allowed"
-                        : "border-line hover:scale-110 hover:border-ink-muted"
+                        ? "border-ink bg-ink text-white"
+                        : unavailable
+                        ? "border-line text-ink-muted hover:border-ink-muted"
+                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
                     }`}
-                    style={{ backgroundColor: hex(color) }}
                   >
-                    {disabled && (
-                      <span className="absolute inset-0 flex items-center justify-center text-ink-muted text-xs font-bold">/</span>
-                    )}
+                    <span
+                      className={`w-4 h-4 rounded-full border flex-shrink-0 ${selectedColor === color ? "border-white/50" : "border-line"}`}
+                      style={{ backgroundColor: hex(color) }}
+                      aria-hidden
+                    />
+                    <span className={unavailable ? "line-through decoration-1" : ""}>{colorLabel(color, t)}</span>
                   </button>
                 );
               })}

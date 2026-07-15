@@ -1,4 +1,8 @@
-export default function AccountLoading() {
+/* Named export so AccountClient's own "loading || !user" branch can render
+   this exact same skeleton — otherwise the route transition shows this
+   nicely-shaped one, then the client component mounts and swaps to a
+   generic one, then real content: two different ghost screens in a row. */
+export function AccountLoading() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 u-skeleton">
       <div className="flex items-center justify-between mb-8">
@@ -51,3 +55,5 @@ export default function AccountLoading() {
     </div>
   );
 }
+
+export default AccountLoading;

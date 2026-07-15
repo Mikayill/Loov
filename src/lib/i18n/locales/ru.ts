@@ -18,6 +18,9 @@ export const ru: Dictionary = {
   "nav.signIn": "Войти",
   "nav.signOut": "Выйти",
   "nav.signInRegister": "Войти / Регистрация",
+  "nav.deals": "Со скидкой",
+  "nav.recentlyViewed": "Недавно просмотренные",
+  "nav.recentlyViewedEmpty": "Вы ещё не просматривали товары — загляните в каталог, и они появятся здесь.",
 
   "announce.freeShipping": "🚀 Бесплатная доставка при заказе от {n} ₾ · Доставляем по всей Грузии",
   "announce.organic": "🌿 Мягкий, безопасный для малышей органический хлопок",
@@ -412,8 +415,6 @@ export const ru: Dictionary = {
   "shop.badgeOrganic": "100% органика",
   "shop.badgeSafe": "Безопасно и сертифицировано",
   "shop.badgeShip": "Бесплатная доставка от 100 ₾",
-  "shop.onSale": "Скидки прямо сейчас",
-  "shop.seeAll": "Смотреть все товары",
 
   "cookie.text": "Мы используем файлы cookie, чтобы улучшить ваш опыт и запомнить корзину и избранное. Продолжая, вы соглашаетесь с нашей",
   "cookie.privacyLink": "Политикой конфиденциальности",
@@ -532,6 +533,7 @@ export const ru: Dictionary = {
   "wl.saved": "{n} сохранённых товаров",
   "wl.copied": "Скопировано!",
   "wl.share": "Поделиться",
+  "wl.shareIntro": "Мой список желаний Loov:",
   "wl.priceDrop": "Цена снижена",
   "wl.lowStockNote": "{n} из сохранённых товаров почти распроданы — не ждите!",
   "wl.addAll": "Добавить всё в корзину",

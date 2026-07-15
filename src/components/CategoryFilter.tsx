@@ -5,7 +5,7 @@ import Link from "next/link";
 import ProductCard from "./ProductCard";
 import { Product, Season } from "@/types";
 import { formatPrice } from "@/lib/format";
-import { hasVariablePricing, minEffectivePrice } from "@/lib/pricing";
+import { discountPercent, hasVariablePricing, minEffectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
 import { categoryLabel, categoryPlural, colorLabel, fabricLabel, seasonLabel } from "@/lib/i18n/labels";
 import { SEASON_META, matchesSeason } from "@/lib/season";
@@ -83,10 +83,13 @@ const FABRIC_EMOJI: Record<string, string> = {
 export default function CategoryFilter({
   products,
   initialCategory,
+  initialDealOnly = false,
   advanced = false,
 }: {
   products: Product[];
   initialCategory?: string;
+  /** Set from navbar's "On Sale" link (`/products?deal=1`) — restricts to discounted products. */
+  initialDealOnly?: boolean;
   advanced?: boolean;
 }) {
   const { t } = useLocale();
@@ -97,6 +100,8 @@ export default function CategoryFilter({
      category whenever the incoming prop changes (otherwise the first pick
      "sticks" and later chips do nothing). */
   useEffect(() => { setActive((initialCategory as Cat) || "All"); }, [initialCategory]);
+  const [dealOnly, setDealOnly] = useState(initialDealOnly);
+  useEffect(() => { setDealOnly(initialDealOnly); }, [initialDealOnly]);
   const [sort,           setSort]           = useState<SortKey>("default");
   const [priceRange,     setPriceRange]     = useState<PriceRange>("all");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -169,6 +174,10 @@ export default function CategoryFilter({
       list = list.filter((p) => matchesSeason(p, seasonFilter));
     }
 
+    if (dealOnly) {
+      list = list.filter((p) => discountPercent(p) > 0);
+    }
+
     if (sort === "new")        list = [...list].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     if (sort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
@@ -187,10 +196,10 @@ export default function CategoryFilter({
     }
 
     return list;
-  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, products, preferredCats]);
+  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, products, preferredCats]);
 
   /* Reset pagination when filters change */
-  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, pageSize]);
+  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, pageSize]);
 
   const activeFilterCount =
     (priceRange !== "all" ? 1 : 0) +
@@ -198,7 +207,8 @@ export default function CategoryFilter({
     selectedFabrics.length +
     (active !== "All" ? 1 : 0) +
     (ageFilter !== "all" ? 1 : 0) +
-    (seasonFilter !== "all" ? 1 : 0);
+    (seasonFilter !== "all" ? 1 : 0) +
+    (dealOnly ? 1 : 0);
 
   function toggleColor(name: string) {
     setSelectedColors((prev) =>
@@ -220,6 +230,7 @@ export default function CategoryFilter({
     setSelectedFabrics([]);
     setAgeFilter("all");
     setSeasonFilter("all");
+    setDealOnly(false);
     setVisibleCount(pageSize);
   }
 
@@ -446,16 +457,21 @@ export default function CategoryFilter({
         {priceRange !== "all" && ` · ${t(priceRanges.find((p) => p.value === priceRange)!.labelKey)}`}
         {selectedColors.length > 0 && ` · ${selectedColors.map((c) => colorLabel(c, t)).join(", ")}`}
         {seasonFilter !== "all" && ` · ${seasonLabel(seasonFilter, t)}`}
+        {dealOnly && ` · ${t("nav.deals")}`}
       </p>
 
       {/* Products */}
       {filtered.length > 0 ? (
         <>
           {viewMode === "grid" ? (
-            /* Nordic: hairline-separated grid cells */
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-line border border-line rounded-card overflow-hidden">
+            /* Each card carries its own border/rounding — a shared
+               "gap-px bg-line" background (the old hairline-grid trick) bleeds
+               through as a big solid rectangle in any column a partial last
+               row leaves empty, since that space still belongs to the tinted
+               container and has no card painted over it. */
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {visibleProducts.map((p) => (
-                <div key={p.id} className="bg-canvas p-2.5 sm:p-3">
+                <div key={p.id} className="bg-canvas border border-line rounded-card p-2.5 sm:p-3">
                   <ProductCard product={p} />
                 </div>
               ))}

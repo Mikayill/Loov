@@ -30,7 +30,7 @@ export default function RewardsClient() {
 
   if (!hydrated) {
     return (
-      <GhostRows />
+      <GhostRows variant="rewards" />
     );
   }
 
@@ -204,7 +204,7 @@ export default function RewardsClient() {
               <div key={tx.id} className="flex items-center gap-3 py-3">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 ${
-                    tx.reason === "return" ? "bg-[#FDEDE8]" : tx.delta > 0 ? "bg-accent-soft" : "bg-[#FFF4E8]"
+                    tx.reason === "return" ? "bg-danger-soft" : tx.delta > 0 ? "bg-accent-soft" : "bg-warning-soft"
                   }`}
                 >
                   {tx.reason === "return" ? "↩️" : tx.delta > 0 ? "⭐" : "💸"}
@@ -224,7 +224,7 @@ export default function RewardsClient() {
                 </div>
                 <span
                   className={`font-extrabold text-sm flex-shrink-0 ${
-                    tx.delta > 0 ? "text-accent" : "text-[#D97706]"
+                    tx.delta > 0 ? "text-accent" : "text-warning"
                   }`}
                 >
                   {tx.delta > 0 ? "+" : ""}{tx.delta.toLocaleString()} {t("acct.rewards.pts")}

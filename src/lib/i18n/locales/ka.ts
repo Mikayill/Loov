@@ -20,6 +20,9 @@ export const ka: Dictionary = {
   "nav.signIn": "შესვლა",
   "nav.signOut": "გასვლა",
   "nav.signInRegister": "შესვლა / რეგისტრაცია",
+  "nav.deals": "ფასდაკლებით",
+  "nav.recentlyViewed": "ბოლოს ნანახი",
+  "nav.recentlyViewedEmpty": "ჯერ არაფერი გინახავთ — დაათვალიერეთ მაღაზია და პროდუქტები აქ გამოჩნდება.",
 
   "announce.freeShipping": "🚀 უფასო მიწოდება {n} ₾-ზე მეტ შეკვეთაზე · მიწოდება მთელ საქართველოში",
   "announce.organic": "🌿 რბილი, ბავშვისთვის უსაფრთხო ორგანული ბამბა",
@@ -414,8 +417,6 @@ export const ka: Dictionary = {
   "shop.badgeOrganic": "100% ორგანული",
   "shop.badgeSafe": "უსაფრთხო და სერტიფიცირებული",
   "shop.badgeShip": "უფასო მიწოდება 100+ ₾",
-  "shop.onSale": "ამჟამად ფასდაკლებაში",
-  "shop.seeAll": "ყველა პროდუქტის ნახვა",
 
   "cookie.text": "ჩვენ ვიყენებთ cookies-ს გამოცდილების გასაუმჯობესებლად და თქვენი კალათის და სურვილების დასამახსოვრებლად. გაგრძელებით თანხმდებით ჩვენს",
   "cookie.privacyLink": "კონფიდენციალურობის პოლიტიკას",
@@ -534,6 +535,7 @@ export const ka: Dictionary = {
   "wl.saved": "{n} შენახული ნივთი",
   "wl.copied": "დაკოპირდა!",
   "wl.share": "გაზიარება",
+  "wl.shareIntro": "ჩემი Loov სურვილების სია:",
   "wl.priceDrop": "ფასდაკლება",
   "wl.lowStockNote": "შენახული {n} პროდუქტი თითქმის ამოიწურა — ნუ დაიცდი!",
   "wl.addAll": "ყველას კალათაში დამატება",

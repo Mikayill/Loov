@@ -79,7 +79,11 @@ export default function CartToast() {
               {toast.emoji}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-[#C8B8B0] font-semibold">{t("toast.added")}</p>
+              {/* No explicit color here — inherits the box's own color, which
+                  already flips light↔dark with the theme (see globals.css'
+                  .bg-ink override); a hardcoded hex would go stale the moment
+                  the surface flips under it. Opacity only, for the muted look. */}
+              <p className="text-xs font-semibold opacity-70">{t("toast.added")}</p>
               <p className="text-sm font-bold truncate">{toast.name}</p>
             </div>
             <Link
@@ -93,7 +97,7 @@ export default function CartToast() {
         )}
         {toast?.kind === "warn" && (
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-white/80 font-semibold">{t("toast.maxReached")}</p>
+            <p className="text-xs font-semibold opacity-80">{t("toast.maxReached")}</p>
             <p className="text-sm font-bold leading-snug">
               {toast.available > 0
                 ? t("toast.maxReachedBody").replace("{n}", String(toast.available)).replace("{name}", toast.name)

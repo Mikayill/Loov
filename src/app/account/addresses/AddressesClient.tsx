@@ -177,7 +177,7 @@ export default function AddressesClient() {
                 )}
                 <button
                   onClick={() => handleRemove(addr.id)}
-                  className="text-xs font-bold text-red-400 hover:text-red-600 transition-colors"
+                  className="text-xs font-bold text-danger hover:opacity-75 transition-colors"
                 >
                   {t("addr.remove")}
                 </button>

@@ -93,7 +93,7 @@ export default function NotificationsClient() {
 
   if (loading || !user || fetching) {
     return (
-      <GhostRows />
+      <GhostRows variant="notifications" />
     );
   }
 

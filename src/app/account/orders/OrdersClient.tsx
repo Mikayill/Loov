@@ -47,7 +47,7 @@ export default function OrdersClient() {
 
   if (loading || !user || fetching) {
     return (
-      <GhostRows />
+      <GhostRows variant="list" rows={3} />
     );
   }
 

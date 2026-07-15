@@ -11,26 +11,13 @@ import { useLocale } from "@/context/LocaleContext";
 import { useProductSearch } from "@/lib/db/useProductSearch";
 import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { useSettings } from "@/lib/db/useSettings";
+import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
 import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
-import { categoryPlural } from "@/lib/i18n/labels";
 import Wordmark from "./Wordmark";
-import type { Product } from "@/types";
-
-const navLinks: { href: string; key: TranslationKey }[] = [
-  { href: "/",         key: "nav.home" },
-  { href: "/products", key: "nav.products" },
-  { href: "/bundles",  key: "nav.bundles" },
-  { href: "/blog",     key: "nav.blog" },
-  { href: "/about",    key: "nav.about" },
-  { href: "/contact",  key: "nav.contact" },
-];
-
-/* Nordic category tab strip under the nav row */
-const tabCategories: Product["category"][] = ["body", "blanket", "set", "towel", "romper", "bag"];
 
 export default function Navbar() {
   const { t } = useLocale();
@@ -53,12 +40,14 @@ export default function Navbar() {
   const [pointsBump, setPointsBump] = useState(false);
   const prevPoints = useRef(pointsBalance);
 
-  /* Account menu items (shown in the desktop dropdown + the mobile hamburger). */
+  /* Account menu items (shown in the desktop dropdown + the mobile hamburger).
+     Grouped by how a shopper actually uses them: order lifecycle first
+     (orders → returns), then engagement (rewards → reviews), settings last. */
   const accountLinks: { href: string; key: TranslationKey; icon: string }[] = [
     { href: "/account/orders",        key: "acct.myOrders",      icon: "📦" },
-    { href: "/account/reviews",       key: "acct.myReviews",     icon: "📝" },
     { href: "/account/returns",       key: "acct.myReturns",     icon: "↩️" },
     { href: "/account/rewards",       key: "acct.rewards",       icon: "⭐" },
+    { href: "/account/reviews",       key: "acct.myReviews",     icon: "📝" },
     { href: "/account/notifications", key: "acct.notifications", icon: "🔔" },
   ];
 
@@ -227,6 +216,13 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* Keep the mobile menu / search row mounted a beat after closing so the
+     fade-down exit animation has time to play (matches loov-fade-down's
+     200ms — otherwise they'd unmount instantly and only the open animation
+     would ever be seen). */
+  const mobileMenuRender = useDelayedUnmount(menuOpen, 200);
+  const mobileSearchRender = useDelayedUnmount(searchOpen, 200);
+
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
     const base = href.split("#")[0];
@@ -331,7 +327,7 @@ export default function Navbar() {
                   <Link
                     href="/account/rewards"
                     title={t("nav.pointsTip").replace("{n}", String(loyaltyRedeemValue))}
-                    className={`hidden sm:flex items-center gap-1 px-2.5 h-9 rounded-control bg-panel border border-line text-ink text-[12px] font-bold tabular-nums hover:border-ink transition-colors ${pointsBump ? "animate-bump" : ""}`}
+                    className={`hidden sm:flex items-center gap-1 px-2 h-9 rounded-control text-ink text-[12px] font-bold tabular-nums hover:bg-panel transition-all active:scale-90 ${pointsBump ? "animate-bump" : ""}`}
                   >
                     <span className="text-[var(--color-star)]" aria-hidden>★</span>
                     {pointsBalance.toLocaleString()}
@@ -434,54 +430,75 @@ export default function Navbar() {
           </div>
           </div>
 
-          {/* Category strip — tactile chip buttons */}
-          <div className="border-t border-line md:border-t-0 overflow-x-auto no-scrollbar bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 whitespace-nowrap py-2.5">
-              <Link
-                href="/products"
-                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
-                  pathname === "/products"
-                    ? "bg-ink text-white border-ink"
-                    : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
-                }`}
-              >
-                {t("nav.products")}
-              </Link>
-              {tabCategories.map((cat) => (
+          {/* Category strip — Ürünler / Paketler / İndirimde / Beden Kılavuzu /
+              Son Görüntülenenler / Blog. The pill row scrolls horizontally
+              (overflow-x-auto); Chromium's used-value quirk otherwise forces
+              overflow-y to "auto" too on a box with only one axis set (same
+              bug fixed on the PDP tab bar) — overflow-y-hidden pins it. */}
+          <div className="border-t border-line md:border-t-0 bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="overflow-x-auto overflow-y-hidden no-scrollbar flex items-center gap-2 whitespace-nowrap py-2.5">
                 <Link
-                  key={cat}
-                  href={`/products?cat=${cat}`}
+                  href="/products"
+                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                    pathname === "/products"
+                      ? "bg-ink text-white border-ink"
+                      : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  {t("nav.products")}
+                </Link>
+                <Link
+                  href="/bundles"
+                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-bold ${
+                    isActive("/bundles")
+                      ? "bg-ink text-white border-ink"
+                      : "bg-canvas/60 text-accent-deep border-line hover:border-ink"
+                  }`}
+                >
+                  {t("nav.bundles")}
+                </Link>
+                <Link
+                  href="/products?deal=1"
+                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-bold text-danger hover:border-danger"
+                >
+                  {t("nav.deals")}
+                </Link>
+                {/* Recently Viewed — links straight to the real section on /products
+                    (id="recently-viewed"), not a floating popover anymore. */}
+                <Link
+                  href="/products#recently-viewed"
                   className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
                 >
-                  {categoryPlural(cat, t)}
+                  {t("nav.recentlyViewed")}
                 </Link>
-              ))}
-              <Link
-                href="/blog"
-                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
-                  isActive("/blog")
-                    ? "bg-ink text-white border-ink"
-                    : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
-                }`}
-              >
-                {t("nav.blog")}
-              </Link>
-              <Link
-                href="/bundles"
-                className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-bold ${
-                  isActive("/bundles")
-                    ? "bg-ink text-white border-ink"
-                    : "bg-canvas/60 text-accent-deep border-line hover:border-ink"
-                }`}
-              >
-                {t("nav.bundles")}
-              </Link>
+                <Link
+                  href="/size-guide"
+                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                    isActive("/size-guide")
+                      ? "bg-ink text-white border-ink"
+                      : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  {t("sg.title")}
+                </Link>
+                <Link
+                  href="/blog"
+                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                    isActive("/blog")
+                      ? "bg-ink text-white border-ink"
+                      : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  {t("nav.blog")}
+                </Link>
+              </div>
             </div>
           </div>
 
           {/* Mobile search — expanding row, not a full-screen popup */}
-          {searchOpen && (
-            <div ref={mobileSearchRowRef} className="md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-3 animate-fade-up">
+          {mobileSearchRender && (
+            <div ref={mobileSearchRowRef} className={`md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-3 ${searchOpen ? "animate-fade-up" : "animate-fade-down"}`}>
               <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-control border border-line bg-panel mb-3">
                 <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -513,9 +530,11 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile dropdown — frosted, theme-aware, animated */}
-          {menuOpen && (
-            <div ref={mobileMenuRef} className="md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-4 space-y-1 animate-fade-up">
+          {/* Mobile dropdown — frosted, theme-aware, animated. shadow-2xl gives
+              the panel a clear edge against the content it pushes down,
+              instead of just blending in behind a hairline border-t. */}
+          {mobileMenuRender && (
+            <div ref={mobileMenuRef} className={`md:hidden relative z-40 border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-4 space-y-1 shadow-2xl ${menuOpen ? "animate-fade-up" : "animate-fade-down"}`}>
               {/* Signed-in header + account shortcuts (the desktop dropdown items) */}
               {user ? (
                 <>
@@ -548,25 +567,9 @@ export default function Navbar() {
                   {t("nav.signInRegister")}
                 </Link>
               )}
-              {/* Main navigation */}
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`flex items-center px-3 py-2.5 rounded-control text-sm font-semibold transition-colors ${
-                    isActive(link.href) ? "bg-panel text-ink" : "text-ink hover:bg-panel"
-                  }`}
-                >
-                  {t(link.key)}
-                </Link>
-              ))}
-              {user && (
-                <button onClick={() => { signOut(); setMenuOpen(false); }}
-                  className="w-full flex items-center px-3 py-2.5 rounded-control text-sm font-semibold text-danger hover:bg-danger-soft transition-colors">
-                  {t("nav.signOut")}
-                </button>
-              )}
+              {/* Products/Bundles/Journal live in the always-visible category
+                  strip above and Home is in the mobile bottom tab bar — no
+                  need to repeat them here. Sign Out lives on /account too. */}
               <div className="pt-2 border-t border-line mt-1">
                 <p className="text-[10px] text-ink-muted font-bold uppercase tracking-widest px-3 mb-2">Language</p>
                 <div className="px-2"><LanguageSwitcher /></div>

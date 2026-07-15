@@ -62,8 +62,11 @@ html[data-theme="dark"]:not(.route-admin) {
   --color-warning-border: #6B5424;
   color-scheme: dark;
 }
-/* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.
-   Unlayered, so it also beats an element's own `text-white` utility. */
+/* Solid ink/accent/danger surfaces flip light in dark mode → their text must
+   flip dark too, or a "text-white" button/toast/badge on top of them goes
+   white-on-near-white (ink), pale-on-mint (accent), or low-contrast
+   white-on-coral (danger). Unlayered, so it also beats an element's own
+   `text-white` utility. */
 html[data-theme="dark"]:not(.route-admin) .bg-ink,
 html[data-theme="dark"]:not(.route-admin) .hover\:bg-ink:hover {
   color: #161614;
@@ -71,6 +74,10 @@ html[data-theme="dark"]:not(.route-admin) .hover\:bg-ink:hover {
 html[data-theme="dark"]:not(.route-admin) .bg-accent,
 html[data-theme="dark"]:not(.route-admin) .hover\:bg-accent:hover {
   color: #12211B;
+}
+html[data-theme="dark"]:not(.route-admin) .bg-danger,
+html[data-theme="dark"]:not(.route-admin) .hover\:bg-danger:hover {
+  color: #2B1414;
 }
 /* Brief cross-fade when the user flips the theme (removed right after). */
 html.theme-anim,
@@ -269,6 +276,14 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
 }
 .animate-fade-up { animation: loov-fade-up 0.65s var(--ease-smooth) forwards; }
 
+/* Symmetric close for .animate-fade-up — mobile hamburger/search rows collapse
+   back down + fade instead of unmounting instantly. */
+@keyframes loov-fade-down {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(10px); opacity: 0; }
+}
+.animate-fade-down { animation: loov-fade-down 0.2s var(--ease-smooth) forwards; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,
   .animate-search-overlay,
@@ -277,5 +292,6 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
   .animate-fade-in,
   .animate-fade-out,
   .animate-bump,
-  .animate-fade-up { animation: none; }
+  .animate-fade-up,
+  .animate-fade-down { animation: none; }
 }

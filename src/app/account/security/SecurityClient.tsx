@@ -125,7 +125,7 @@ export default function SecurityClient() {
 
   if (loading || !user) {
     return (
-      <GhostRows />
+      <GhostRows variant="security" />
     );
   }
 
@@ -311,16 +311,16 @@ export default function SecurityClient() {
                   placeholder={t("sec.repeatNewPassword")}
                   className={`w-full h-10 px-3 rounded-control border-2 text-sm font-medium outline-none transition-colors ${
                     confirmPw && confirmPw !== newPw
-                      ? "border-red-300 focus:border-red-400"
+                      ? "border-danger focus:border-danger"
                       : "border-line focus:border-accent"
                   }`}
                 />
                 {confirmPw && confirmPw !== newPw && (
-                  <p className="text-xs text-red-400 font-semibold mt-1">{t("sec.passwordsNoMatch")}</p>
+                  <p className="text-xs text-danger font-semibold mt-1">{t("sec.passwordsNoMatch")}</p>
                 )}
               </div>
 
-              {pwError && <p className="text-red-400 text-xs font-semibold">{pwError}</p>}
+              {pwError && <p className="text-danger text-xs font-semibold">{pwError}</p>}
 
               <Button type="submit" loading={pwLoading} loadingText={t("sec.updating")} className="!h-10" fullWidth>
                 {isEmailProvider ? t("sec.updatePasswordBtn") : t("sec.addPasswordBtn")} →
@@ -362,7 +362,7 @@ export default function SecurityClient() {
                   </Button>
                 </form>
                 {emailInfo && <p className="text-xs text-accent font-semibold mt-1.5">{emailInfo}</p>}
-                {emailError && <p className="text-xs text-red-400 font-semibold mt-1.5">{emailError}</p>}
+                {emailError && <p className="text-xs text-danger font-semibold mt-1.5">{emailError}</p>}
               </div>
             )}
 
@@ -388,7 +388,7 @@ export default function SecurityClient() {
                         {t("sec.addPhoneBtn")}
                       </Button>
                     </form>
-                    {phoneAddError && <p className="text-xs text-red-400 font-semibold mt-1.5">{phoneAddError}</p>}
+                    {phoneAddError && <p className="text-xs text-danger font-semibold mt-1.5">{phoneAddError}</p>}
                   </>
                 )}
               </div>
@@ -408,7 +408,7 @@ export default function SecurityClient() {
               <button
                 onClick={forgetDevice}
                 disabled={forgettingDevice}
-                className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-control hover:bg-red-50 transition-all active:scale-95 disabled:opacity-60"
+                className="text-xs font-bold text-danger border-2 border-danger/40 px-4 py-1.5 rounded-control hover:bg-danger-soft transition-all active:scale-95 disabled:opacity-60"
               >
                 {forgettingDevice ? t("sec.updating") : t("sec.forgetDevice")}
               </button>
@@ -457,7 +457,7 @@ export default function SecurityClient() {
                   {t("addr.cancel")}
                 </button>
               </div>
-              {totpError && <p className="text-red-500 text-xs font-semibold">{totpError}</p>}
+              {totpError && <p className="text-danger text-xs font-semibold">{totpError}</p>}
             </form>
           ) : totpOn ? (
             showDisableTotp ? (
@@ -466,19 +466,19 @@ export default function SecurityClient() {
                 <div className="flex items-center gap-3 flex-wrap">
                   <input value={totpCode} onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" placeholder="123456"
                     className="w-36 h-11 px-4 rounded-control border border-line text-lg font-extrabold tracking-[0.3em] outline-none focus:border-accent" />
-                  <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-5 rounded-control font-bold text-white text-sm bg-red-500 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all">
+                  <button type="submit" disabled={totpBusy || totpCode.length !== 6} className="h-11 px-5 rounded-control font-bold text-white text-sm bg-danger disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all">
                     {totpBusy ? "…" : t("sec.mfaDisable")}
                   </button>
                   <button type="button" onClick={() => { setShowDisableTotp(false); setTotpCode(""); setTotpError(""); }} className="h-11 px-4 rounded-control border border-line text-sm font-bold text-ink-soft transition-all active:scale-95">
                     {t("addr.cancel")}
                   </button>
                 </div>
-                {totpError && <p className="text-red-500 text-xs font-semibold">{totpError}</p>}
+                {totpError && <p className="text-danger text-xs font-semibold">{totpError}</p>}
               </form>
             ) : (
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <p className="text-sm font-semibold text-accent">✓ {t("sec.mfaEnabledNote")}</p>
-                <button onClick={() => { setShowDisableTotp(true); setTotpError(""); }} className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-control hover:bg-red-50 transition-all active:scale-95">
+                <button onClick={() => { setShowDisableTotp(true); setTotpError(""); }} className="text-xs font-bold text-danger border-2 border-danger/40 px-4 py-1.5 rounded-control hover:bg-danger-soft transition-all active:scale-95">
                   {t("sec.mfaDisable")}
                 </button>
               </div>
@@ -488,14 +488,14 @@ export default function SecurityClient() {
               <button onClick={startEnrollTotp} disabled={totpBusy} className="u-btn font-bold px-5 py-2.5 rounded-control text-white text-sm disabled:opacity-60 active:scale-95 transition-all bg-ink hover:bg-ink/85">
                 {totpBusy ? "…" : `${t("sec.mfaEnable")} →`}
               </button>
-              {totpError && <p className="text-red-500 text-xs font-semibold mt-2">{totpError}</p>}
+              {totpError && <p className="text-danger text-xs font-semibold mt-2">{totpError}</p>}
             </div>
           )}
         </div>
 
         {/* Danger zone */}
-        <div className="bg-canvas rounded-card border-2 border-red-100 p-6">
-          <h2 className="font-extrabold text-red-400 mb-3 flex items-center gap-2">
+        <div className="bg-canvas rounded-card border-2 border-danger/25 p-6">
+          <h2 className="font-extrabold text-danger mb-3 flex items-center gap-2">
             <span>⚠️</span> {t("sec.dangerZone")}
           </h2>
           {!showDelete ? (
@@ -506,7 +506,7 @@ export default function SecurityClient() {
               </div>
               <button
                 onClick={() => setShowDelete(true)}
-                className="text-xs font-bold text-red-400 border-2 border-red-200 px-4 py-1.5 rounded-control hover:bg-red-50 transition-all active:scale-95"
+                className="text-xs font-bold text-danger border-2 border-danger/40 px-4 py-1.5 rounded-control hover:bg-danger-soft transition-all active:scale-95"
               >
                 {t("sec.deleteAccount")}
               </button>
@@ -519,9 +519,9 @@ export default function SecurityClient() {
               <input
                 value={deleteInput} onChange={(e) => setDeleteInput(e.target.value)}
                 placeholder={t("sec.typeDeletePlaceholder")}
-                className="w-full h-10 px-3 rounded-control border-2 border-red-200 text-sm font-medium focus:border-red-400 outline-none transition-colors"
+                className="w-full h-10 px-3 rounded-control border-2 border-danger/40 text-sm font-medium focus:border-danger outline-none transition-colors"
               />
-              {deleteError && <p className="text-red-500 text-xs font-semibold">{deleteError}</p>}
+              {deleteError && <p className="text-danger text-xs font-semibold">{deleteError}</p>}
               <div className="flex gap-3">
                 <Button
                   onClick={() => { setShowDelete(false); setDeleteInput(""); setDeleteError(""); }}

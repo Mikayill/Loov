@@ -20,6 +20,9 @@ export const en = {
   "nav.signIn": "Sign In",
   "nav.signOut": "Sign Out",
   "nav.signInRegister": "Sign In / Register",
+  "nav.deals": "On Sale",
+  "nav.recentlyViewed": "Recently Viewed",
+  "nav.recentlyViewedEmpty": "No products viewed yet — browse the shop and they'll show up here.",
 
   // ── Announcement bar ──
   "announce.freeShipping": "🚀 Free shipping on orders over {n} ₾ · Delivering across Georgia",
@@ -440,8 +443,6 @@ export const en = {
   "shop.badgeOrganic": "100% Organic",
   "shop.badgeSafe": "Safe & Certified",
   "shop.badgeShip": "Free Shipping 100+ ₾",
-  "shop.onSale": "On Sale Right Now",
-  "shop.seeAll": "See All Products",
 
   // ── Cookie consent ──
   "cookie.text": "We use cookies to improve your experience and remember your cart & wishlist. By continuing you agree to our",
@@ -562,6 +563,7 @@ export const en = {
   "wl.saved": "{n} saved items",
   "wl.copied": "Copied!",
   "wl.share": "Share",
+  "wl.shareIntro": "My Loov wishlist:",
   "wl.priceDrop": "Price drop",
   "wl.lowStockNote": "{n} of your saved items are almost sold out — don't wait!",
   "wl.addAll": "Add all to cart",

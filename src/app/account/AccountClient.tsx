@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GhostRows from "@/components/GhostRows";
+import { AccountLoading } from "./loading";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -83,9 +83,7 @@ export default function AccountClient() {
   }, [profile, profileSeeded, editing, locale]);
 
   if (loading || !user) {
-    return (
-      <GhostRows />
-    );
+    return <AccountLoading />;
   }
 
   const providerLabel: Record<string, string> = {

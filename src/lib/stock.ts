@@ -32,3 +32,21 @@ export function hasAnyStock(product: Product): boolean {
   }
   return false;
 }
+
+/**
+ * First (size, color) combo that actually has stock — for bulk "add all"
+ * flows that need to pick something without asking (unlike a single
+ * product's Add to Cart, which always prompts when there's more than one
+ * variant). Returns null only when hasAnyStock() would also be false.
+ */
+export function firstAvailableVariant(product: Product): { size: string; color: string } | null {
+  const sizes = product.sizes.length ? product.sizes : [""];
+  const colors = product.colors.length ? product.colors : [""];
+  for (const size of sizes) {
+    for (const color of colors) {
+      const s = variantStock(product, size, color);
+      if (s === null || s > 0) return { size, color };
+    }
+  }
+  return null;
+}

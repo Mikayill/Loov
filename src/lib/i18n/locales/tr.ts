@@ -18,6 +18,9 @@ export const tr: Dictionary = {
   "nav.signIn": "Giriş Yap",
   "nav.signOut": "Çıkış Yap",
   "nav.signInRegister": "Giriş Yap / Kayıt Ol",
+  "nav.deals": "İndirimde",
+  "nav.recentlyViewed": "Son Görüntülenenler",
+  "nav.recentlyViewedEmpty": "Henüz görüntülenen ürün yok — mağazaya göz atın, burada görünecekler.",
 
   "announce.freeShipping": "🚀 {n} ₾ üzeri siparişlerde ücretsiz kargo · Gürcistan geneline teslimat",
   "announce.organic": "🌿 Yumuşacık, bebek dostu organik pamuk",
@@ -412,8 +415,6 @@ export const tr: Dictionary = {
   "shop.badgeOrganic": "%100 Organik",
   "shop.badgeSafe": "Güvenli & Sertifikalı",
   "shop.badgeShip": "100+ ₾ Ücretsiz Kargo",
-  "shop.onSale": "Şu An İndirimde",
-  "shop.seeAll": "Tüm Ürünleri Gör",
 
   "cookie.text": "Deneyiminizi geliştirmek ve sepetinizi & favorilerinizi hatırlamak için çerezler kullanıyoruz. Devam ederek şunu kabul etmiş olursunuz:",
   "cookie.privacyLink": "Gizlilik Politikası",
@@ -532,6 +533,7 @@ export const tr: Dictionary = {
   "wl.saved": "{n} kayıtlı ürün",
   "wl.copied": "Kopyalandı!",
   "wl.share": "Paylaş",
+  "wl.shareIntro": "Loov favori listem:",
   "wl.priceDrop": "Fiyat düştü",
   "wl.lowStockNote": "Kaydettiğin {n} ürün tükenmek üzere — bekleme!",
   "wl.addAll": "Hepsini sepete ekle",

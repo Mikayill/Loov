@@ -1,7 +1,8 @@
+import GhostRows from "@/components/GhostRows";
+
+// Must match SecurityClient's own loading-state variant (see the note in
+// account/orders/loading.tsx) — was a plain spinner, causing the same
+// spinner-then-different-skeleton flicker as rewards/loading.tsx did.
 export default function Loading() {
-  return (
-    <div className="flex items-center justify-center py-32">
-      <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-    </div>
-  );
+  return <GhostRows variant="security" />;
 }
