@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -19,6 +19,8 @@ import CookieConsent from "@/components/CookieConsent";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
 import NewsletterPopup from "@/components/NewsletterPopup";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import MainPadding from "@/components/MainPadding";
 
 const archivo = Archivo({
   subsets: ["latin", "latin-ext"],
@@ -55,6 +57,16 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://loov.ge"),
 };
 
+// viewport-fit=cover lets fixed elements (bottom nav, sticky CTA) read the
+// device's safe-area-inset-* and pad themselves clear of a notch/home
+// indicator instead of sitting under it. user-scalable is left at its
+// default (pinch-zoom stays available — never disable that).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 
 export default async function RootLayout({
   children,
@@ -73,11 +85,12 @@ export default async function RootLayout({
           <WishlistProvider>
           <LoyaltyProvider>
           <StoreChromeGate><Navbar /></StoreChromeGate>
-          <main className="flex-1">{children}</main>
+          <MainPadding>{children}</MainPadding>
 
           {/* ── Footer (hidden on checkout) ── */}
           <FooterGate><Footer /></FooterGate>
           <StoreChromeGate>
+          <FooterGate><MobileBottomNav /></FooterGate>
           <BackToTop />
           <CartDrawer />
           <CartToast />

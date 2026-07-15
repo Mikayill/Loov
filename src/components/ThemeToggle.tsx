@@ -37,7 +37,7 @@ export default function ThemeToggle() {
       onClick={() => setTheme(dark ? "light" : "dark")}
       aria-label={t("theme.toggle")}
       title={t("theme.toggle")}
-      className="w-9 h-9 rounded-control flex items-center justify-center text-ink-soft hover:bg-panel hover:text-ink transition-colors active:scale-90"
+      className="w-11 h-11 rounded-control flex items-center justify-center text-ink-soft hover:bg-panel hover:text-ink transition-colors active:scale-90"
     >
       {dark ? (
         /* Sun — shown while dark, tapping returns to light */

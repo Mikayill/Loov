@@ -1024,7 +1024,10 @@ export default function ProductDetailClient({
       )}
 
       {/* ══ MOBILE STICKY CTA ══ */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 bg-canvas border-t border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}>
+      <div
+        className={`fixed left-0 right-0 z-40 bg-canvas border-t border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}
+        style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom))" }}
+      >
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex items-center border border-line rounded-control overflow-hidden">
             <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90">−</button>

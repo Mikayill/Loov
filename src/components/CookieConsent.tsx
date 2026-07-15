@@ -25,15 +25,19 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-[250] px-4 flex justify-center pointer-events-none">
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-0 right-0 z-[250] px-4 flex justify-center pointer-events-none">
       <div
         className="bg-ink text-white rounded-card shadow-2xl px-5 py-4 max-w-lg w-full pointer-events-auto flex flex-col sm:flex-row items-start sm:items-center gap-4"
       >
         <div className="flex items-start gap-3 flex-1">
           <span className="text-xl flex-shrink-0 mt-0.5">🍪</span>
-          <p className="text-xs leading-relaxed text-[#C8B8B0]">
+          {/* No explicit color on the text — inherits the box's own color,
+              which flips light↔dark with theme via globals.css' .bg-ink
+              override; hardcoded hex here would go stale under a flipped
+              surface (same bug CartToast had). */}
+          <p className="text-xs leading-relaxed opacity-75">
             {t("cookie.text")}{" "}
-            <a href="/privacy" className="underline text-[#8FD4C0] hover:text-white transition-colors">
+            <a href="/privacy" className="underline hover:opacity-100 transition-opacity">
               {t("cookie.privacyLink")}
             </a>.
           </p>

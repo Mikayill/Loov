@@ -300,18 +300,21 @@ export default function Navbar() {
                   onClick={() => (searchOpen ? closeSearch() : openSearch(true))}
                   aria-label="Search"
                   aria-expanded={searchOpen}
-                  className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
+                  className="md:hidden w-11 h-11 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
 
-                {/* Wishlist */}
+                {/* Wishlist — desktop only; the mobile bottom nav already has it
+                    (with the same urgency dot) within one-thumb reach, so
+                    repeating it up here just crowded the row (and on a 375-390px
+                    phone, pushed the hamburger button partly off-screen). */}
                 <Link
                   href="/wishlist"
                   aria-label="Wishlist"
-                  className="relative w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
+                  className="relative hidden md:flex w-11 h-11 rounded-full items-center justify-center text-ink-soft hover:bg-panel transition-all active:scale-90"
                 >
                   <svg className="w-[18px] h-[18px]" fill={wCount > 0 ? "#E8789A" : "none"} viewBox="0 0 24 24" stroke={wCount > 0 ? "#E8789A" : "currentColor"} strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -397,17 +400,19 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Cart — Nordic: solid ink block, count inline */}
+                {/* Cart — Nordic: solid ink block, count inline. Desktop/tablet
+                    only; the mobile bottom nav carries the cart tab (same
+                    badge count) within thumb reach. */}
                 <Link
                   href="/cart"
-                  className="u-btn flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] hover:bg-ink/85"
+                  className="u-btn hidden md:flex items-center gap-2 font-semibold px-4 py-2.5 rounded-control bg-ink text-white text-[12px] uppercase tracking-[0.08em] hover:bg-ink/85"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span className="hidden sm:inline">{t("nav.cart")}</span>
+                  <span>{t("nav.cart")}</span>
                   {totalItems > 0 && (
-                    <span className={`text-[11px] font-extrabold text-[#9FC7B5] leading-none ${cartBump ? "animate-bump" : ""}`}>
+                    <span className={`text-[11px] font-extrabold opacity-75 leading-none ${cartBump ? "animate-bump" : ""}`}>
                       {totalItems > 9 ? "9+" : totalItems}
                     </span>
                   )}
@@ -416,7 +421,7 @@ export default function Navbar() {
                 {/* Hamburger — mobile */}
                 <button
                   ref={hamburgerRef}
-                  className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-panel transition-all active:scale-90 gap-1.5"
+                  className="md:hidden flex flex-col justify-center items-center w-11 h-11 rounded-lg hover:bg-panel transition-all active:scale-90 gap-1.5"
                   onClick={() => { setSearchOpen(false); setMenuOpen((v) => !v); }}
                   aria-label="Toggle menu"
                   aria-expanded={menuOpen}

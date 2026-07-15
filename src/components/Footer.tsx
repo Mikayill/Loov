@@ -149,7 +149,7 @@ export default async function Footer() {
       <div className="bg-[#141412] text-white/50 py-4 px-4 border-t border-white/10">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-[0.08em]">
           <p>{t("footer.rights")}</p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 sm:gap-5">
             <a href="/privacy" className="hover:text-white transition-colors">{t("footer.privacy")}</a>
             <a href="/terms" className="hover:text-white transition-colors">{t("footer.terms")}</a>
             <a href="/accessibility" className="hover:text-white transition-colors">{t("a11y.title")}</a>

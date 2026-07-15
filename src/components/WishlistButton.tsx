@@ -14,7 +14,7 @@ export default function WishlistButton({ productId, price }: { productId: string
         toggle(productId, price);
       }}
       aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-      className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${
+      className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${
         liked
           ? "bg-red-400 text-white scale-110"
           : "bg-canvas/80 backdrop-blur-sm text-ink-muted hover:bg-canvas hover:text-red-400 hover:scale-110"

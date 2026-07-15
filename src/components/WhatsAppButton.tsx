@@ -26,7 +26,7 @@ export default function WhatsAppButton() {
       aria-label="Chat on WhatsApp"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="fixed bottom-6 sm:bottom-8 left-4 sm:left-6 z-40 flex items-center gap-2.5 transition-all duration-300"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-8 left-4 sm:left-6 z-40 flex items-center gap-2.5 transition-all duration-300"
     >
       {/* Tooltip — desktop only, so it never shifts the button off the corner on mobile */}
       <div
