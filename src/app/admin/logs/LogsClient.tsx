@@ -22,7 +22,7 @@ const TABS = [
 
 const KIND_STYLE: Record<Event["kind"], string> = {
   order: "bg-accent-soft text-accent-deep",
-  review: "bg-[#FFF6E0] text-[#8B6914]",
+  review: "bg-[#FFF6E0] text-warning",
   admin: "bg-[#F0EDE8] text-ink-soft",
 };
 
@@ -54,7 +54,7 @@ export default function LogsClient() {
       {/* Summary chips */}
       <div className="flex gap-3 mb-4 flex-wrap">
         <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-accent-soft text-accent-deep">🛒 {counts.order} orders</span>
-        <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#FFF6E0] text-[#8B6914]">⭐ {counts.review} reviews</span>
+        <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#FFF6E0] text-warning">⭐ {counts.review} reviews</span>
         <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#F0EDE8] text-ink-soft">⚙️ {counts.admin} admin actions</span>
       </div>
 

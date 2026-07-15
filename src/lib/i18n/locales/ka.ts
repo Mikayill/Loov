@@ -145,6 +145,7 @@ export const ka: Dictionary = {
   "home.bundles.title": "დაზოგეთ მეტი ერთად",
   "home.bundles.viewAll": "ყველა ნაკრების ნახვა",
   "home.bundles.save": "დაზოგე {amount}",
+  "home.bundles.pieces": "{n} ნაწილი",
 
   "home.reviews.eyebrow": "რას ამბობენ მშობლები",
   "home.reviews.title": "საქართველოს ოჯახების საყვარელი",
@@ -708,6 +709,7 @@ export const ka: Dictionary = {
   "acct.phone": "ტელეფონი",
   "acct.phoneHint": "გამოიყენება გადახდის ავტომატური შევსებისთვის.",
   "acct.yourLittleOne": "თქვენი პატარა",
+  "acct.addBabyInfo": "დაამატეთ ბავშვის სახელი და დაბადების თარიღი ასაკის მიხედვით რეკომენდაციებისთვის →",
   "acct.babyName": "ბავშვის სახელი",
   "acct.optional": "არასავალდებულო",
   "acct.birthDate": "დაბადების თარიღი",

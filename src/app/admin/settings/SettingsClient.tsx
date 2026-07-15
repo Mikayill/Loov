@@ -230,7 +230,7 @@ export default function SettingsClient() {
       <p className="text-ink-muted text-sm mb-6">Store-wide rules that apply everywhere on the site.</p>
 
       {!seeded && (
-        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">
           ⚠️ The <code className="font-mono">settings</code> table isn&apos;t set up yet. Run <code className="font-mono">supabase/features.sql</code> in the SQL Editor. Saving will still work once the table exists.
         </div>
       )}

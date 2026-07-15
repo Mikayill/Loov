@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -66,9 +67,7 @@ export default function AddressesClient() {
 
   if (loading || !user || fetching) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
+      <GhostRows />
     );
   }
 
@@ -136,7 +135,7 @@ export default function AddressesClient() {
         </div>
       )}
       {!ready && (
-        <div className="mb-5 p-3 bg-[#FFF4E5] border border-[#F0C85A] rounded-control text-sm font-semibold text-[#8B6914]">
+        <div className="mb-5 p-3 bg-warning-soft border border-warning-border rounded-control text-sm font-semibold text-warning">
           {t("addr.notReady")}
         </div>
       )}

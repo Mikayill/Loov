@@ -103,12 +103,12 @@ export default function ReturnsClient() {
       <h1 className="text-2xl font-extrabold text-ink mb-1">Returns</h1>
       <p className="text-ink-muted text-sm mb-5">
         {rows.length} request{rows.length === 1 ? "" : "s"}
-        {pending > 0 && <span className="font-bold text-[#A06820]"> · {pending} waiting for review</span>}
+        {pending > 0 && <span className="font-bold text-warning"> · {pending} waiting for review</span>}
         {" · "}refunds are paid by bank transfer to the customer&apos;s IBAN.
       </p>
 
       {!ready && (
-        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">
           ⚠️ The <code className="font-mono">returns</code> table isn&apos;t set up yet. Run{" "}
           <code className="font-mono">supabase/returns.sql</code> in the Supabase SQL Editor.
         </div>
@@ -259,8 +259,8 @@ export default function ReturnsClient() {
                     </div>
 
                     {row.admin_note && (
-                      <div className="bg-[#FFF8E8] border border-[#F0C85A] rounded-control p-3.5">
-                        <p className="text-[11px] font-bold text-[#A06820] uppercase tracking-wide mb-1">Note</p>
+                      <div className="bg-warning-soft border border-warning-border rounded-control p-3.5">
+                        <p className="text-[11px] font-bold text-warning uppercase tracking-wide mb-1">Note</p>
                         <p className="text-xs text-ink-soft">{row.admin_note}</p>
                       </div>
                     )}

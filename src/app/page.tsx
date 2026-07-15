@@ -204,48 +204,66 @@ export default async function HomePage() {
             {t("home.bundles.viewAll")}
           </Link>
         </div>
-        <Reveal className="border border-line rounded-card overflow-hidden divide-y divide-line">
+        <Reveal className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {bundles.slice(0, 4).map((bundle) => {
             const savings = bundle.originalPrice - bundle.bundlePrice;
+            const off = bundle.originalPrice > 0 ? Math.round((savings / bundle.originalPrice) * 100) : 0;
+            const itemProducts = bundle.items.map((config) => ({ config, product: productBySlug.get(config.slug) ?? null }));
+            const pieceCount = bundle.items.reduce((n, it) => n + (it.quantity ?? 1), 0);
             return (
               <Link
                 key={bundle.slug}
                 href={`/bundles/${bundle.slug}`}
-                className="group relative grid grid-cols-[56px_1fr_auto] sm:grid-cols-[64px_1.6fr_auto_auto] items-center gap-3 sm:gap-6 px-3 sm:px-5 py-3.5 bg-canvas hover:bg-panel/70 transition-colors"
+                className="group relative flex flex-col rounded-card border border-line overflow-hidden bg-canvas hover:border-ink transition-colors"
               >
-                <span
-                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-control flex items-center justify-center text-2xl sm:text-3xl overflow-hidden"
-                  style={{ backgroundColor: bundle.cardColor }}
-                >
+                {/* Visual — bundle photo, or a collage of the items inside it */}
+                <div className="relative aspect-[4/3] overflow-hidden" style={{ backgroundColor: bundle.cardColor }}>
                   {bundle.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bundle.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <img src={bundle.imageUrl} alt={bundle.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" />
                   ) : (
-                    bundle.emoji
+                    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-px p-px">
+                      {itemProducts.slice(0, 4).map(({ config, product }, i) => (
+                        <span
+                          key={config.slug + i}
+                          className="flex items-center justify-center text-2xl sm:text-3xl overflow-hidden"
+                          style={{ backgroundColor: product?.cardColor ?? bundle.cardColor }}
+                        >
+                          {product?.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            product?.emoji ?? bundle.emoji
+                          )}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[14px] sm:text-[15px] font-bold text-ink leading-snug line-clamp-1 group-hover:underline underline-offset-4">
+                  {off > 0 && (
+                    <span className="absolute top-2.5 right-2.5 bg-ink text-white text-[11px] font-extrabold px-2 py-1 rounded-control tabular-nums">
+                      −{off}%
+                    </span>
+                  )}
+                  <BundleQuickView bundle={bundle} itemProducts={itemProducts} />
+                </div>
+                {/* Info */}
+                <div className="p-3 sm:p-3.5 flex flex-col gap-1.5">
+                  <span className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+                    {t("home.bundles.pieces").replace("{n}", String(pieceCount))}
+                  </span>
+                  <span className="text-[13.5px] font-bold text-ink leading-snug line-clamp-2 group-hover:underline underline-offset-4">
                     {bundle.name}
                   </span>
-                  <span className="sm:hidden block text-[11px] font-semibold text-accent-deep mt-1">
-                    {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
-                  </span>
-                </span>
-                <span className="hidden sm:inline-block text-[10.5px] font-bold uppercase tracking-[0.1em] text-accent-deep bg-accent-soft px-3 py-1.5 rounded-control whitespace-nowrap">
-                  {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
-                </span>
-                <span className="text-right">
-                  <span className="block text-[11px] text-ink-muted line-through tabular-nums">{formatPrice(bundle.originalPrice)}</span>
-                  <span className="block text-[16px] font-bold text-ink tabular-nums">{formatPrice(bundle.bundlePrice)}</span>
-                </span>
-                <BundleQuickView
-                  bundle={bundle}
-                  itemProducts={bundle.items.map((config) => ({
-                    config,
-                    product: productBySlug.get(config.slug) ?? null,
-                  }))}
-                />
+                  <div className="flex items-end justify-between gap-2 mt-0.5">
+                    <span className="flex items-baseline gap-1.5">
+                      <span className="text-[16px] font-bold text-ink tabular-nums">{formatPrice(bundle.bundlePrice)}</span>
+                      <span className="text-[11px] text-ink-muted line-through tabular-nums">{formatPrice(bundle.originalPrice)}</span>
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-accent-deep bg-accent-soft px-2 py-1 rounded-control whitespace-nowrap">
+                      {t("home.bundles.save").replace("{amount}", formatPrice(savings))}
+                    </span>
+                  </div>
+                </div>
               </Link>
             );
           })}

@@ -198,9 +198,9 @@ export default async function SizeGuidePage() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-start gap-3 bg-[#FFF8E8] border border-[#F0C85A] rounded-card p-4 mt-4">
+        <div className="flex items-start gap-3 bg-warning-soft border border-warning-border rounded-card p-4 mt-4">
           <span className="text-xl flex-shrink-0">🛡️</span>
-          <p className="text-sm text-[#8B6914] font-medium leading-relaxed">{t("sg.togNote")}</p>
+          <p className="text-sm text-warning font-medium leading-relaxed">{t("sg.togNote")}</p>
         </div>
       </section>
 

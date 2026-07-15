@@ -27,7 +27,7 @@ interface ProductInfo { slug: string; image_url: string | null; emoji: string | 
 
 const STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
 const STATUS_STYLE: Record<string, string> = {
-  pending: "bg-[#FFF8E8] text-[#A06820] border-[#F0C85A]",
+  pending: "bg-warning-soft text-warning border-warning-border",
   processing: "bg-[#EAF0F8] text-[#2A5A8E] border-[#A9C5E5]",
   shipped: "bg-[#EAF0F8] text-[#2A5A8E] border-[#A9C5E5]",
   delivered: "bg-accent-soft text-accent-deep border-[#A9D5C8]",
@@ -230,11 +230,11 @@ export default function OrdersClient() {
                     </div>
 
                     {(o.gift_wrap || o.notes) && (
-                      <div className="mt-3 bg-[#FFF8E8] rounded-control border border-[#F0C85A] p-3 space-y-1.5 text-xs">
+                      <div className="mt-3 bg-warning-soft rounded-control border border-warning-border p-3 space-y-1.5 text-xs">
                         {o.gift_wrap && (
-                          <p className="text-[#8B6914]"><strong>🎁 Gift wrap requested</strong>{o.gift_message ? ` — message: “${o.gift_message}”` : " (no message)"}</p>
+                          <p className="text-warning"><strong>🎁 Gift wrap requested</strong>{o.gift_message ? ` — message: “${o.gift_message}”` : " (no message)"}</p>
                         )}
-                        {o.notes && <p className="text-[#8B6914]"><strong>📝 Customer note:</strong> {o.notes}</p>}
+                        {o.notes && <p className="text-warning"><strong>📝 Customer note:</strong> {o.notes}</p>}
                       </div>
                     )}
                   </div>

@@ -143,6 +143,7 @@ export const tr: Dictionary = {
   "home.bundles.title": "Birlikte Daha Çok Kazan",
   "home.bundles.viewAll": "Tüm Setleri Gör",
   "home.bundles.save": "{amount} Tasarruf",
+  "home.bundles.pieces": "{n} parça",
 
   "home.reviews.eyebrow": "Ebeveynler Ne Diyor",
   "home.reviews.title": "Gürcü Ailelerin Favorisi",
@@ -706,6 +707,7 @@ export const tr: Dictionary = {
   "acct.phone": "Telefon",
   "acct.phoneHint": "Ödemede otomatik doldurmak için kullanılır.",
   "acct.yourLittleOne": "Minik bebeğiniz",
+  "acct.addBabyInfo": "Yaşına uygun önerileri görmek için bebeğinizin adını ve doğum tarihini ekleyin →",
   "acct.babyName": "Bebeğin adı",
   "acct.optional": "Opsiyonel",
   "acct.birthDate": "Doğum tarihi",

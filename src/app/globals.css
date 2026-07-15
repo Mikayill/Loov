@@ -17,6 +17,9 @@
   --color-danger: #B03A3A;       /* errors, destructive actions */
   --color-danger-soft: #FDF3F3;  /* error backgrounds */
   --color-star: #F0B840;         /* rating stars — warm gold, not brand green */
+  --color-warning: #8B6914;          /* pending-action notices (migration needed, email sent) */
+  --color-warning-soft: #FFF8E8;     /* warning backgrounds */
+  --color-warning-border: #F0C85A;   /* warning borders */
 
   /* Pastel category/imagery tints (display layer only) */
   --color-sage: #C8DDD8;
@@ -54,6 +57,9 @@ html[data-theme="dark"]:not(.route-admin) {
   --color-danger: #E58C8C;
   --color-danger-soft: #362323;
   --color-star: #F5C65A;
+  --color-warning: #E8C878;
+  --color-warning-soft: #362E1C;
+  --color-warning-border: #6B5424;
   color-scheme: dark;
 }
 /* Solid ink/accent surfaces flip light in dark mode → their text must flip dark.
@@ -240,8 +246,8 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
   to   { transform: scale(1) translateY(0);       opacity: 1; }
 }
 @keyframes loov-pop-out {
-  from { transform: scale(1);    opacity: 1; }
-  to   { transform: scale(0.94); opacity: 0; }
+  from { transform: scale(1) translateY(0);        opacity: 1; }
+  to   { transform: scale(0.965) translateY(4px);  opacity: 0; }
 }
 .animate-pop-in  { animation: loov-pop-in 0.22s var(--ease-smooth); }
 .animate-pop-out { animation: loov-pop-out 0.16s var(--ease-smooth) forwards; }

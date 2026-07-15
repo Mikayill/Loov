@@ -12,7 +12,7 @@ export default function AccountLoading() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile card */}
         <div className="bg-canvas rounded-card border border-line p-6 text-center">
-          <div className="w-20 h-20 rounded-full bg-sage mx-auto mb-4" />
+          <div className="w-20 h-20 rounded-full bg-panel mx-auto mb-4" />
           <div className="h-5 w-32 bg-line rounded mx-auto mb-2" />
           <div className="h-4 w-44 bg-panel rounded mx-auto mb-3" />
           <div className="h-6 w-28 bg-panel rounded-full mx-auto" />
@@ -45,7 +45,7 @@ export default function AccountLoading() {
             ))}
           </div>
 
-          <div className="h-16 bg-sage rounded-card" />
+          <div className="h-16 bg-panel rounded-card" />
         </div>
       </div>
     </div>

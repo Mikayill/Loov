@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -190,9 +191,7 @@ export default function MyReviewsClient() {
 
   if (loading || !user || fetching) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
+      <GhostRows />
     );
   }
 
@@ -292,7 +291,7 @@ export default function MyReviewsClient() {
                     </div>
 
                     {r.status === "hidden" && (
-                      <div className="mt-2 rounded-lg bg-[#FFF4E5] border border-[#F0C85A] px-3 py-2 text-xs text-[#8B6914] font-semibold">
+                      <div className="mt-2 rounded-lg bg-warning-soft border border-warning-border px-3 py-2 text-xs text-warning font-semibold">
                         ⚠️ {t("acct.reviews.hiddenNotice")}
                       </div>
                     )}

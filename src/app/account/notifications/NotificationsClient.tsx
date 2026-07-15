@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState } from "react";
+import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -92,9 +93,7 @@ export default function NotificationsClient() {
 
   if (loading || !user || fetching) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
+      <GhostRows />
     );
   }
 

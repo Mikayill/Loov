@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import GhostRows from "@/components/GhostRows";
 import { useLoyalty } from "@/context/LoyaltyContext";
 import {
   tiersFromSettings,
@@ -29,9 +30,7 @@ export default function RewardsClient() {
 
   if (!hydrated) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
+      <GhostRows />
     );
   }
 
@@ -47,14 +46,11 @@ export default function RewardsClient() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
-        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
-        <span>›</span>
-        <Link href="/account" className="hover:text-accent transition-colors">{t("acct.title")}</Link>
-        <span>›</span>
-        <span className="text-ink font-semibold">{t("acct.rewards.breadcrumb")}</span>
-      </nav>
+      {/* Back to account */}
+      <Link href="/account" className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-muted hover:text-ink transition-colors mb-5">
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        {t("acct.title")}
+      </Link>
 
       <div className="flex items-center gap-3 mb-8">
         <span className="text-3xl">⭐</span>
@@ -64,13 +60,13 @@ export default function RewardsClient() {
         </div>
       </div>
 
-      {/* ── Balance card ── */}
+      {/* ── Balance card — fixed dark pine (theme-independent, like the footer) ── */}
       <div
         className="rounded-card p-6 sm:p-8 mb-6 text-white relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #5E9E8C 0%, #4A8474 100%)" }}
+        style={{ background: "linear-gradient(135deg, #2E5E4E 0%, #21453A 100%)" }}
       >
-        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-canvas/10" />
-        <div className="absolute -bottom-12 right-24 w-32 h-32 rounded-full bg-canvas/5" />
+        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5" />
+        <div className="absolute -bottom-12 right-24 w-32 h-32 rounded-full bg-white/[0.03]" />
 
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>

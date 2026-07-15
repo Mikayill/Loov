@@ -156,7 +156,7 @@ export default function BundlesListClient() {
       <p className="text-ink-muted text-sm mb-5">A bundle opens in its own editor. New bundles start <strong>hidden</strong> and can only go live once they have a photo, a description, a price and at least 2 products.</p>
 
       {!ready && (
-        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">
           ⚠️ The <code className="font-mono">bundles</code> table isn&apos;t set up yet — run <code className="font-mono">supabase/bundles.sql</code> in the SQL Editor.
         </div>
       )}

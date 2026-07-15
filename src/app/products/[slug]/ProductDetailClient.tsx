@@ -684,14 +684,14 @@ export default function ProductDetailClient({
           {/* Loyalty points */}
           <Link
             href="/account/rewards"
-            className="inline-flex items-center gap-1.5 bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-1.5 mb-5 hover:bg-[#FFF2D6] transition-colors group self-start"
+            className="inline-flex items-center gap-1.5 bg-warning-soft border border-warning-border rounded-control px-3 py-1.5 mb-5 hover:bg-[#FFF2D6] transition-colors group self-start"
             title="Loov Rewards"
           >
             <span className="text-sm">⭐</span>
-            <span className="text-xs font-bold text-[#8B6914]">
+            <span className="text-xs font-bold text-warning">
               {t("pdp.earnPoints").replace("{n}", String(pointsForAmountAt(unitPrice, pointsPerGel, tier)))}
             </span>
-            <span className="text-[10px] font-bold text-[#B8912E] opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] font-bold text-warning opacity-0 group-hover:opacity-100 transition-opacity">
               {t("pdp.how")} →
             </span>
           </Link>

@@ -131,7 +131,7 @@ function CartItemCard({
                   🎀 {t("cart.partOfSet").replace("{name}", bundleName)}
                 </span>
               ) : (
-                <span className="inline-block mt-1 text-[10px] font-bold text-[#A06820] bg-[#FFF4E5] px-2 py-0.5 rounded-full">
+                <span className="inline-block mt-1 text-[10px] font-bold text-warning bg-warning-soft px-2 py-0.5 rounded-full">
                   ⚠ {t("cart.setPriceLost")}
                 </span>
               )

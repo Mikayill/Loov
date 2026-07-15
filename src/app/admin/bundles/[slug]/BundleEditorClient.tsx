@@ -511,7 +511,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                     </p>
                   )}
                 </div>
-                <div className={`rounded-control p-3 text-sm font-bold text-center ${savings > 0 ? "bg-accent-soft text-accent-deep" : "bg-[#FFF8E8] text-[#A06820]"}`}>
+                <div className={`rounded-control p-3 text-sm font-bold text-center ${savings > 0 ? "bg-accent-soft text-accent-deep" : "bg-warning-soft text-warning"}`}>
                   {savings > 0
                     ? <>Customer saves {formatPrice(savings)} ({savingsPct}%) 🎉</>
                     : "No savings vs buying separately yet"}

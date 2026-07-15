@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -14,6 +15,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { tierName } from "@/lib/i18n/labels";
 import { useTheme } from "@/components/ThemeToggle";
+import { monthsOld, ageLabel } from "@/lib/babyAge";
 
 export default function AccountClient() {
   const router = useRouter();
@@ -82,9 +84,7 @@ export default function AccountClient() {
 
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-      </div>
+      <GhostRows />
     );
   }
 
@@ -204,7 +204,7 @@ export default function AccountClient() {
         </div>
       )}
       {saveInfo && !editing && (
-        <div className="mb-5 text-[13px] font-semibold text-ink bg-[#FFF8E8] border border-[#F0C85A] rounded-control py-2.5 px-4">
+        <div className="mb-5 text-[13px] font-semibold text-ink bg-warning-soft border border-warning-border rounded-control py-2.5 px-4">
           📬 {saveInfo}
         </div>
       )}
@@ -213,7 +213,7 @@ export default function AccountClient() {
         /* ── Edit profile ── */
         <form onSubmit={handleSaveProfile} className="max-w-2xl border border-line rounded-card p-6 sm:p-8 space-y-6 animate-fade-up">
           {!profileReady && (
-            <div className="rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-3 py-2 text-[11px] text-[#8B6914] font-semibold leading-relaxed">
+            <div className="rounded-control bg-warning-soft border border-warning-border px-3 py-2 text-[11px] text-warning font-semibold leading-relaxed">
               ⚠️ {t("acct.profileSqlNote").split("{code}")[0]}
               <code className="font-mono">supabase/profile.sql</code>
               {t("acct.profileSqlNote").split("{code}")[1]}
@@ -375,6 +375,32 @@ export default function AccountClient() {
 
             {/* ── Right rail ── */}
             <div className="space-y-6 self-start">
+              {/* Your little one — shown directly, not buried inside the edit form */}
+              <div className="border border-line rounded-card p-5">
+                <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-3">👶 {t("acct.yourLittleOne")}</p>
+                {profile?.babyName || profile?.babyBirthdate ? (
+                  <div className="flex items-center gap-3">
+                    <span className="w-10 h-10 rounded-full bg-panel flex items-center justify-center text-lg flex-shrink-0">
+                      {profile.babyGender === "girl" ? "👧" : profile.babyGender === "boy" ? "👦" : "🍼"}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink text-[13.5px] truncate">{profile.babyName || t("acct.yourLittleOne")}</p>
+                      {profile.babyBirthdate && (() => {
+                        const m = monthsOld(profile.babyBirthdate);
+                        return m !== null ? <p className="text-[11.5px] text-ink-muted">{ageLabel(m)}</p> : null;
+                      })()}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
+                    className="w-full text-left text-[12.5px] text-ink-muted hover:text-ink transition-colors"
+                  >
+                    {t("acct.addBabyInfo")}
+                  </button>
+                )}
+              </div>
+
               {/* Appearance */}
               <div className="border border-line rounded-card p-5">
                 <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-1">{t("acct.appearance")}</p>

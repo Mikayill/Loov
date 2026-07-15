@@ -152,6 +152,7 @@ export const en = {
   "home.bundles.title": "Save More Together",
   "home.bundles.viewAll": "View All Bundles",
   "home.bundles.save": "Save {amount}",
+  "home.bundles.pieces": "{n} pieces",
 
   "home.reviews.eyebrow": "What Parents Say",
   "home.reviews.title": "Loved by Georgian Families",
@@ -736,6 +737,7 @@ export const en = {
   "acct.phone": "Phone",
   "acct.phoneHint": "Used to auto-fill checkout.",
   "acct.yourLittleOne": "Your little one",
+  "acct.addBabyInfo": "Add your baby's name & birthdate for age-picked recommendations →",
   "acct.babyName": "Baby's name",
   "acct.optional": "Optional",
   "acct.birthDate": "Birth date",

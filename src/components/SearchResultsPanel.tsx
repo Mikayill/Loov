@@ -12,7 +12,7 @@ import type { Product } from "@/types";
  *  logic lives in src/lib/search.ts. */
 export default function SearchResultsPanel({
   query, setQuery, activeCat, setActiveCat, results, recentSearches, onClearRecent, onNavigate,
-  searching = false,
+  searching = false, fallback = [],
 }: {
   query: string;
   setQuery: (q: string) => void;
@@ -25,10 +25,14 @@ export default function SearchResultsPanel({
   /** True while the server round-trip is in flight — shows "Searching…" and
    *  keeps "no results" from flashing before the answer arrives. */
   searching?: boolean;
+  /** Products to show when nothing is typed (recently viewed / featured). */
+  fallback?: Product[];
 }) {
   const { t } = useLocale();
   const hasQuery = query.trim().length > 0;
-  const shown = results.slice(0, MAX_RESULTS);
+  /* With a query → search results; empty → the recently-viewed/featured pool. */
+  const listToShow = hasQuery ? results : fallback;
+  const shown = listToShow.slice(0, MAX_RESULTS);
   const viewAllHref = activeCat === "all" ? "/products" : `/products?cat=${activeCat}`;
 
   return (
@@ -96,15 +100,17 @@ export default function SearchResultsPanel({
         </div>
       )}
 
-      {/* Results */}
+      {/* Results (with a query) or recently-viewed/featured (empty) — but never
+          an empty section: skip the whole block when there's nothing to show. */}
+      {(hasQuery || listToShow.length > 0) && (
       <div className="mt-3 max-h-[60vh] overflow-y-auto -mx-1 px-1">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[9px] font-bold text-ink-muted uppercase tracking-widest">
             {hasQuery
               ? results.length === 1 ? t("search.result1") : t("search.results").replace("{n}", String(results.length))
-              : t("search.popular")}
+              : t("widget.recentlyViewed")}
           </p>
-          {results.length > MAX_RESULTS && (
+          {hasQuery && results.length > MAX_RESULTS && (
             <Link href={viewAllHref} onClick={onNavigate} className="text-xs font-bold text-accent hover:underline">
               {t("search.viewAll").replace("{n}", String(results.length))} →
             </Link>
@@ -144,14 +150,15 @@ export default function SearchResultsPanel({
               </Link>
             ))}
           </div>
-        ) : hasQuery && searching ? null : (
+        ) : hasQuery && !searching ? (
           <div className="py-8 text-center">
             <div className="text-4xl mb-2">🔍</div>
             <p className="font-bold text-ink text-sm mb-1">{t("search.noResults")}</p>
             <p className="text-xs text-ink-muted">{t("search.noResultsHint")}</p>
           </div>
-        )}
+        ) : null}
       </div>
+      )}
     </div>
   );
 }

@@ -143,6 +143,7 @@ export const ru: Dictionary = {
   "home.bundles.title": "Экономьте вместе",
   "home.bundles.viewAll": "Все наборы",
   "home.bundles.save": "Скидка {amount}",
+  "home.bundles.pieces": "{n} предмета",
 
   "home.reviews.eyebrow": "Что говорят родители",
   "home.reviews.title": "Любимы грузинскими семьями",
@@ -706,6 +707,7 @@ export const ru: Dictionary = {
   "acct.phone": "Телефон",
   "acct.phoneHint": "Используется для автозаполнения при оформлении заказа.",
   "acct.yourLittleOne": "Ваш малыш",
+  "acct.addBabyInfo": "Добавьте имя и дату рождения малыша для рекомендаций по возрасту →",
   "acct.babyName": "Имя малыша",
   "acct.optional": "Необязательно",
   "acct.birthDate": "Дата рождения",

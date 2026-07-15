@@ -19,7 +19,7 @@ interface Stats {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  pending: "bg-[#FFF8E8] text-[#A06820]",
+  pending: "bg-warning-soft text-warning",
   processing: "bg-[#EAF0F8] text-[#2A5A8E]",
   shipped: "bg-[#EAF0F8] text-[#2A5A8E]",
   delivered: "bg-accent-soft text-accent-deep",
@@ -128,7 +128,7 @@ export default function DashboardClient() {
                 <div key={p.id} className="flex items-center gap-3 px-5 py-3">
                   <span className="text-xl">{p.emoji}</span>
                   <p className="flex-1 text-sm font-bold text-ink truncate">{p.name}</p>
-                  <span className={`text-xs font-extrabold px-2 py-1 rounded-lg ${p.stock <= 0 ? "bg-danger-soft text-danger" : "bg-[#FFF4E8] text-[#A06820]"}`}>
+                  <span className={`text-xs font-extrabold px-2 py-1 rounded-lg ${p.stock <= 0 ? "bg-danger-soft text-danger" : "bg-[#FFF4E8] text-warning"}`}>
                     {p.stock <= 0 ? "Out" : `${p.stock} left`}
                   </span>
                 </div>

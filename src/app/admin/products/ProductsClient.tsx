@@ -130,7 +130,7 @@ function ColorPicker({ colors, onChange }: { colors: string[]; onChange: (next: 
       {legacy.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2">
           {legacy.map((c) => (
-            <span key={c} className="inline-flex items-center gap-1 bg-[#FFF4E5] text-[#8B6914] text-xs font-semibold px-2 py-1 rounded-full">
+            <span key={c} className="inline-flex items-center gap-1 bg-warning-soft text-warning text-xs font-semibold px-2 py-1 rounded-full">
               {c}
               <button onClick={() => onChange(colors.filter((x) => x !== c))} className="hover:text-red-500 font-bold">×</button>
             </span>
@@ -199,7 +199,7 @@ function SizePicker({ sizes, onChange }: { sizes: string[]; onChange: (next: str
       {legacy.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2 mt-1">
           {legacy.map((s) => (
-            <span key={s} className="inline-flex items-center gap-1 bg-[#FFF4E5] text-[#8B6914] text-xs font-semibold px-2 py-1 rounded-full">
+            <span key={s} className="inline-flex items-center gap-1 bg-warning-soft text-warning text-xs font-semibold px-2 py-1 rounded-full">
               {s}
               <button onClick={() => onChange(sizes.filter((x) => x !== s))} className="hover:text-red-500 font-bold">×</button>
             </span>

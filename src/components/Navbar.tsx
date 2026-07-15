@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLoyalty } from "@/context/LoyaltyContext";
 import { useLocale } from "@/context/LocaleContext";
 import { useProductSearch } from "@/lib/db/useProductSearch";
+import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { useSettings } from "@/lib/db/useSettings";
 import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
@@ -82,7 +83,17 @@ export default function Navbar() {
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
+  /* Recently-viewed products — the fallback shown in the search panel before
+     the shopper types anything (so it's never an empty "no results"). */
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  useEffect(() => {
+    setRecentSearches(loadRecentSearches());
+    try {
+      const ids: string[] = JSON.parse(localStorage.getItem("loov_recently_viewed") ?? "[]");
+      if (Array.isArray(ids)) setRecentIds(ids.slice(0, 6));
+    } catch { /* ignore */ }
+  }, [searchOpen]);
+  const recentProducts = useProductsByIds(recentIds);
 
   const { results: queryMatches, loading: searchLoading } = useProductSearch(query, 50);
   const searchResults = useMemo(
@@ -278,7 +289,7 @@ export default function Navbar() {
                         query={query} setQuery={setQuery}
                         activeCat={activeCat} setActiveCat={setActiveCat}
                         results={searchResults} recentSearches={recentSearches}
-                        onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading}
+                        onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading} fallback={recentProducts}
                       />
                     </div>
                   )}
@@ -497,7 +508,7 @@ export default function Navbar() {
                 query={query} setQuery={setQuery}
                 activeCat={activeCat} setActiveCat={setActiveCat}
                 results={searchResults} recentSearches={recentSearches}
-                onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading}
+                onClearRecent={clearRecent} onNavigate={navigateFromSearch} searching={searchLoading} fallback={recentProducts}
               />
             </div>
           )}

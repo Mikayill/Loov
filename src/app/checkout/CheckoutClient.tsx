@@ -917,13 +917,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
             {/* Loov Rewards — redeem points */}
             {loyalty.hydrated && loyalty.balance >= REDEEM_BLOCK && (
-              <div className="bg-[#FFF8E8] border border-[#F0C85A] rounded-card p-5">
+              <div className="bg-warning-soft border border-warning-border rounded-card p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">⭐</span>
                     <div>
                       <p className="font-extrabold text-ink text-sm">{t("checkout.usePoints")}</p>
-                      <p className="text-xs text-[#8B6914]">
+                      <p className="text-xs text-warning">
                         <strong>{t("checkout.youHavePoints").replace("{n}", loyalty.balance.toLocaleString())}</strong>
                         {redeemablePoints > 0 ? (
                           <> {t("checkout.redeemFor").replace("{n}", redeemablePoints.toLocaleString()).split("{amount}")[0]}
@@ -953,8 +953,8 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   </button>
                 </div>
                 {usePoints && pointsDiscount > 0 && (
-                  <div className="mt-3 pt-3 border-t border-[#F0C85A]/40 flex items-center justify-between text-sm">
-                    <span className="font-bold text-[#8B6914]">−{redeemPts.toLocaleString()} points</span>
+                  <div className="mt-3 pt-3 border-t border-warning-border/40 flex items-center justify-between text-sm">
+                    <span className="font-bold text-warning">−{redeemPts.toLocaleString()} points</span>
                     <span className="font-extrabold text-accent">−{formatPrice(pointsDiscount)}</span>
                   </div>
                 )}
@@ -1065,9 +1065,9 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 justify-center bg-[#FFF8E8] border border-[#F0C85A] rounded-control px-3 py-2">
+                <div className="flex items-center gap-1.5 justify-center bg-warning-soft border border-warning-border rounded-control px-3 py-2">
                   <span className="text-sm">⭐</span>
-                  <span className="text-[11px] font-bold text-[#8B6914]">
+                  <span className="text-[11px] font-bold text-warning">
                     {/* Same earn base as the server: merchandise after discounts — shipping/gift wrap never earn. */}
                     {t("checkout.willEarn").replace("{n}", String(pointsForAmountAt(Math.max(0, postPromoSubtotal - pointsDiscount), pointsPerGel, loyalty.tier)))}
                   </span>

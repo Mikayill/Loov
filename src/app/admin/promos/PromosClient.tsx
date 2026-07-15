@@ -110,7 +110,7 @@ export default function PromosClient() {
       </p>
 
       {!ready && (
-        <div className="mb-5 rounded-control bg-[#FFF4E5] border border-[#F0C85A] px-4 py-3 text-sm text-[#8B6914]">
+        <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">
           ⚠️ The <code className="font-mono">promo_codes</code> table isn&apos;t set up yet. Run <code className="font-mono">supabase/promos.sql</code> in the SQL Editor.
         </div>
       )}
