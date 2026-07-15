@@ -92,6 +92,11 @@ export default function CategoryFilter({
   const { t } = useLocale();
   const pageSize = advanced ? 16 : 8;
   const [active,         setActive]         = useState<Cat>((initialCategory as Cat) || "All");
+  /* Sticky category chips do client-side nav to /products?cat=X, but this
+     component stays mounted across those navigations — so re-sync the active
+     category whenever the incoming prop changes (otherwise the first pick
+     "sticks" and later chips do nothing). */
+  useEffect(() => { setActive((initialCategory as Cat) || "All"); }, [initialCategory]);
   const [sort,           setSort]           = useState<SortKey>("default");
   const [priceRange,     setPriceRange]     = useState<PriceRange>("all");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);

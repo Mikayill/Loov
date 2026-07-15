@@ -9,7 +9,7 @@ export const en = {
   "nav.shop": "Shop",
   "nav.home": "Home",
   "nav.products": "Products",
-  "nav.bundles": "Bundles",
+  "nav.bundles": "Bundle Deals",
   "nav.blog": "Journal",
   "nav.about": "About",
   "nav.contact": "Contact",

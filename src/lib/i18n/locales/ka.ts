@@ -9,7 +9,7 @@ export const ka: Dictionary = {
   "nav.shop": "მაღაზია",
   "nav.home": "მთავარი",
   "nav.products": "პროდუქტები",
-  "nav.bundles": "ნაკრები",
+  "nav.bundles": "პაკეტები",
   "nav.blog": "ბლოგი",
   "nav.about": "ჩვენ შესახებ",
   "nav.contact": "კონტაქტი",

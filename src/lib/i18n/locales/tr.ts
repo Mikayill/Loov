@@ -7,7 +7,7 @@ export const tr: Dictionary = {
   "nav.shop": "Mağaza",
   "nav.home": "Ana Sayfa",
   "nav.products": "Ürünler",
-  "nav.bundles": "Setler",
+  "nav.bundles": "Paketler",
   "nav.blog": "Günlük",
   "nav.about": "Hakkımızda",
   "nav.contact": "İletişim",

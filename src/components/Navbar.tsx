@@ -42,11 +42,31 @@ export default function Navbar() {
   const [searchOpen,  setSearchOpen]  = useState(false);
   const { user, signOut } = useAuth();
   const [cartBump,    setCartBump]    = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [annoIdx,     setAnnoIdx]     = useState(0);
+  const [annoShown,   setAnnoShown]   = useState(true);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef  = useRef<HTMLButtonElement>(null);
+  const accountRef    = useRef<HTMLDivElement>(null);
   const prevTotalItems = useRef(totalItems);
   const [pointsBump, setPointsBump] = useState(false);
   const prevPoints = useRef(pointsBalance);
+
+  /* Account menu items (shown in the desktop dropdown + the mobile hamburger). */
+  const accountLinks: { href: string; key: TranslationKey; icon: string }[] = [
+    { href: "/account/orders",        key: "acct.myOrders",      icon: "📦" },
+    { href: "/account/reviews",       key: "acct.myReviews",     icon: "📝" },
+    { href: "/account/returns",       key: "acct.myReturns",     icon: "↩️" },
+    { href: "/account/rewards",       key: "acct.rewards",       icon: "⭐" },
+    { href: "/account/notifications", key: "acct.notifications", icon: "🔔" },
+  ];
+
+  /* Rotating store facts — one at a time on mobile (fades), all three on md+. */
+  const topbarFacts = [
+    t("topbar.shipping").replace("{n}", String(freeShippingThreshold)),
+    t("topbar.delivery").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays)),
+    t("topbar.returns"),
+  ];
 
   /* ── Search — inline bar (desktop) / expanding row (mobile), no popup ──
      Matching now happens server-side (GET /api/products/search) instead of
@@ -158,10 +178,30 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handle);
   }, [menuOpen]);
 
-  /* Close mobile menu on route change */
+  /* Close mobile menu + account dropdown on route change */
   useEffect(() => {
     setMenuOpen(false);
+    setAccountOpen(false);
   }, [pathname]);
+
+  /* Close the account dropdown on any outside click */
+  useEffect(() => {
+    if (!accountOpen) return;
+    function handle(e: MouseEvent) {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) setAccountOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [accountOpen]);
+
+  /* Rotate the top-bar fact every 4s with a quick fade (mobile shows one). */
+  useEffect(() => {
+    const id = setInterval(() => {
+      setAnnoShown(false);
+      setTimeout(() => { setAnnoIdx((i) => (i + 1) % 3); setAnnoShown(true); }, 260);
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
 
   /* ⌘K / Ctrl+K opens search and focuses whichever input is visible */
   useEffect(() => {
@@ -185,11 +225,16 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-50">
-        {/* Utility top bar — static store facts (admin-driven values) */}
-        <div className="bg-ink text-white text-[11px] tracking-[0.08em] uppercase font-medium py-2 px-4 flex items-center justify-center gap-8 whitespace-nowrap overflow-hidden">
-          <span>{t("topbar.shipping").replace("{n}", String(freeShippingThreshold))}</span>
-          <span className="hidden sm:inline opacity-90">{t("topbar.delivery").replace("{min}", String(deliveryMinDays)).replace("{max}", String(deliveryMaxDays))}</span>
-          <span className="hidden md:inline opacity-90">{t("topbar.returns")}</span>
+        {/* Utility top bar — all three facts on md+, a single rotating one below */}
+        <div className="bg-ink text-white text-[11px] tracking-[0.08em] uppercase font-medium py-2 px-4 h-[33px] flex items-center justify-center gap-8 whitespace-nowrap overflow-hidden">
+          {/* md+ : the full set */}
+          <span className="hidden md:inline">{topbarFacts[0]}</span>
+          <span className="hidden md:inline opacity-90">{topbarFacts[1]}</span>
+          <span className="hidden md:inline opacity-90">{topbarFacts[2]}</span>
+          {/* < md : one at a time, cross-fading */}
+          <span className={`md:hidden transition-opacity duration-300 ${annoShown ? "opacity-100" : "opacity-0"}`}>
+            {topbarFacts[annoIdx]}
+          </span>
         </div>
 
         {/* Frosted glass — applied per row: a nested backdrop-filter inside an
@@ -275,9 +320,9 @@ export default function Navbar() {
                   <Link
                     href="/account/rewards"
                     title={t("nav.pointsTip").replace("{n}", String(loyaltyRedeemValue))}
-                    className={`hidden sm:flex items-center gap-1 px-2.5 h-9 rounded-control bg-accent-soft text-accent-deep text-[12px] font-bold tabular-nums hover:bg-accent hover:text-white transition-colors ${pointsBump ? "animate-bump" : ""}`}
+                    className={`hidden sm:flex items-center gap-1 px-2.5 h-9 rounded-control bg-panel border border-line text-ink text-[12px] font-bold tabular-nums hover:border-ink transition-colors ${pointsBump ? "animate-bump" : ""}`}
                   >
-                    <span aria-hidden>⭐</span>
+                    <span className="text-[var(--color-star)]" aria-hidden>★</span>
                     {pointsBalance.toLocaleString()}
                   </Link>
                 )}
@@ -290,21 +335,48 @@ export default function Navbar() {
                   <LanguageSwitcher />
                 </div>
 
-                {/* Account — direct link (mobile + desktop), no dropdown */}
+                {/* Account — desktop dropdown (mobile uses the hamburger) */}
                 {user ? (
-                  <Link
-                    href="/account"
-                    aria-label="My account"
-                    title={user.name}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-ink font-extrabold text-sm bg-panel border border-line transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden"
-                  >
-                    {user.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      user.name[0]?.toUpperCase()
+                  <div ref={accountRef} className="relative hidden md:block">
+                    <button
+                      onClick={() => setAccountOpen((v) => !v)}
+                      aria-label="My account"
+                      aria-expanded={accountOpen}
+                      title={user.name}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-ink font-extrabold text-sm bg-panel border border-line transition-opacity hover:opacity-80 flex-shrink-0 overflow-hidden"
+                    >
+                      {user.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        user.name[0]?.toUpperCase()
+                      )}
+                    </button>
+                    {accountOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-60 bg-canvas rounded-card border border-line shadow-2xl p-2 z-[200] animate-pop-in">
+                        <div className="px-3 py-2 border-b border-line mb-1">
+                          <p className="text-sm font-bold text-ink truncate">{user.name}</p>
+                          {user.email && <p className="text-[11px] text-ink-muted truncate">{user.email}</p>}
+                        </div>
+                        <Link href="/account" onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-control text-[13px] font-semibold text-ink hover:bg-panel transition-colors">
+                          <span aria-hidden>⚙️</span> {t("acct.editProfile")}
+                        </Link>
+                        <div className="h-px bg-line my-1" />
+                        {accountLinks.map((l) => (
+                          <Link key={l.href} href={l.href} onClick={() => setAccountOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-control text-[13px] font-medium text-ink-soft hover:bg-panel hover:text-ink transition-colors">
+                            <span aria-hidden>{l.icon}</span> {t(l.key)}
+                          </Link>
+                        ))}
+                        <div className="h-px bg-line my-1" />
+                        <button onClick={() => { signOut(); setAccountOpen(false); }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-control text-[13px] font-semibold text-danger hover:bg-danger-soft transition-colors">
+                          <span aria-hidden>↪</span> {t("nav.signOut")}
+                        </button>
+                      </div>
                     )}
-                  </Link>
+                  </div>
                 ) : (
                   <Link
                     href="/login"
@@ -398,8 +470,8 @@ export default function Navbar() {
 
           {/* Mobile search — expanding row, not a full-screen popup */}
           {searchOpen && (
-            <div ref={mobileSearchRowRef} className="md:hidden border-t border-line bg-white px-4 py-3 animate-fade-up">
-              <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-control border-2 border-line bg-surface mb-3">
+            <div ref={mobileSearchRowRef} className="md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-3 animate-fade-up">
+              <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-control border border-line bg-panel mb-3">
                 <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -430,48 +502,59 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile dropdown */}
+          {/* Mobile dropdown — frosted, theme-aware, animated */}
           {menuOpen && (
-            <div ref={mobileMenuRef} className="md:hidden border-t border-line bg-white px-4 py-4 space-y-1">
+            <div ref={mobileMenuRef} className="md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-4 space-y-1 animate-fade-up">
+              {/* Signed-in header + account shortcuts (the desktop dropdown items) */}
+              {user ? (
+                <>
+                  <Link href="/account" onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-control bg-panel mb-1">
+                    <span className="w-9 h-9 rounded-full flex items-center justify-center text-ink text-sm font-extrabold flex-shrink-0 overflow-hidden bg-canvas border border-line">
+                      {user.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                      ) : user.name[0]?.toUpperCase()}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-bold text-ink truncate">{user.name}</span>
+                      <span className="block text-[11px] text-ink-muted">{t("acct.editProfile")} →</span>
+                    </span>
+                  </Link>
+                  <div className="grid grid-cols-2 gap-1">
+                    {accountLinks.map((l) => (
+                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-control text-[13px] font-semibold text-ink-soft hover:bg-panel hover:text-ink transition-colors">
+                        <span aria-hidden>{l.icon}</span> {t(l.key)}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="h-px bg-line my-2" />
+                </>
+              ) : (
+                <Link href="/login" onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-control text-sm font-semibold text-white bg-ink mb-2">
+                  {t("nav.signInRegister")}
+                </Link>
+              )}
+              {/* Main navigation */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className={`flex items-center px-3 py-2.5 rounded-control text-sm font-semibold transition-colors ${
-                    isActive(link.href)
-                      ? "bg-panel text-ink"
-                      : "text-ink hover:bg-panel"
+                    isActive(link.href) ? "bg-panel text-ink" : "text-ink hover:bg-panel"
                   }`}
                 >
                   {t(link.key)}
                 </Link>
               ))}
-              {user ? (
-                <div className="flex items-center justify-between px-3 py-2.5 rounded-control bg-panel">
-                  <Link
-                    href="/account"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 min-w-0"
-                  >
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-ink text-xs font-extrabold flex-shrink-0 overflow-hidden bg-canvas border border-line">
-                      {user.avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        user.name[0]?.toUpperCase()
-                      )}
-                    </div>
-                    <span className="text-sm font-semibold text-ink truncate">{user.name}</span>
-                  </Link>
-                  <button onClick={() => { signOut(); setMenuOpen(false); }}
-                    className="text-xs font-bold text-red-400 flex-shrink-0 ml-2">{t("nav.signOut")}</button>
-                </div>
-              ) : (
-                <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-control text-sm font-semibold text-white transition-colors bg-ink">
-                  {t("nav.signInRegister")}
-                </Link>
+              {user && (
+                <button onClick={() => { signOut(); setMenuOpen(false); }}
+                  className="w-full flex items-center px-3 py-2.5 rounded-control text-sm font-semibold text-danger hover:bg-danger-soft transition-colors">
+                  {t("nav.signOut")}
+                </button>
               )}
               <div className="pt-2 border-t border-line mt-1">
                 <p className="text-[10px] text-ink-muted font-bold uppercase tracking-widest px-3 mb-2">Language</p>

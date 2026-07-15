@@ -7,7 +7,7 @@ export const ru: Dictionary = {
   "nav.shop": "Магазин",
   "nav.home": "Главная",
   "nav.products": "Товары",
-  "nav.bundles": "Наборы",
+  "nav.bundles": "Комплекты",
   "nav.blog": "Журнал",
   "nav.about": "О нас",
   "nav.contact": "Контакты",
