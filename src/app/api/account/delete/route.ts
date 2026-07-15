@@ -5,14 +5,24 @@
  * the service role. Identity comes from the session cookie (not the body), so
  * a caller can only ever delete THEIR OWN account.
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  // ── CSRF: only accept same-origin requests — this is the single most
+  // destructive action in the app, so it gets the same explicit check every
+  // other state-changing route has (defense-in-depth on top of the auth
+  // cookie's own SameSite protection). ──
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("host");
+  if (!origin || !host || new URL(origin).host !== host) {
+    return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
+  }
+
   // Highest-risk action in the app — permanently deletes the account.
   // Requires a recently-verified session (AAL2 or a live trusted-device),
   // not just any valid cookie.
