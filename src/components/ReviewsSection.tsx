@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/context/LocaleContext";
@@ -76,6 +76,22 @@ export default function ReviewsSection({ productId }: { productId: string }) {
   const [error, setError] = useState("");
   const [thanks, setThanks] = useState(false);
 
+  /* Sort/filter — client-side (a product's review count is small enough that
+     a round-trip to re-query the server would only add latency). */
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
+  const [starFilter, setStarFilter] = useState<number | null>(null);
+  const visibleReviews = useMemo(() => {
+    let list = starFilter ? reviews.filter((r) => r.rating === starFilter) : reviews;
+    list = [...list].sort((a, b) => {
+      if (sortBy === "highest") return b.rating - a.rating;
+      if (sortBy === "lowest") return a.rating - b.rating;
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return sortBy === "oldest" ? ta - tb : tb - ta;
+    });
+    return list;
+  }, [reviews, sortBy, starFilter]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setLoadFailed(false);
@@ -143,24 +159,57 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         </div>
 
         {stats.count > 0 && (
-          <div className="space-y-1.5 min-w-[180px]">
+          <div className="space-y-1 min-w-[180px]">
             {[5, 4, 3, 2, 1].map((star) => {
               const c = stats.breakdown[star] ?? 0;
               const pct = stats.count ? Math.round((c / stats.count) * 100) : 0;
+              const active = starFilter === star;
               return (
-                <div key={star} className="flex items-center gap-2">
-                  <span className="text-xs text-ink-soft w-5 text-right">{star}</span>
-                  <svg className="w-3 h-3 text-[#F0B840]" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setStarFilter(active ? null : star)}
+                  aria-pressed={active}
+                  title={t("rev.filterByStars").replace("{n}", String(star))}
+                  className={`flex items-center gap-2 w-full rounded-control px-1.5 py-0.5 transition-colors ${
+                    active ? "bg-accent-soft" : "hover:bg-panel"
+                  }`}
+                >
+                  <span className={`text-xs w-5 text-right ${active ? "font-extrabold text-accent-deep" : "text-ink-soft"}`}>{star}</span>
+                  <svg className="w-3 h-3 text-[#F0B840] flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                   <div className="flex-1 h-2 bg-canvas rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#F0B840" }} />
                   </div>
-                  <span className="text-xs text-ink-muted w-8">{pct}%</span>
-                </div>
+                  <span className="text-xs text-ink-muted w-8 text-left">{pct}%</span>
+                </button>
               );
             })}
+            {starFilter && (
+              <button type="button" onClick={() => setStarFilter(null)} className="text-[11px] font-bold text-accent hover:underline mt-1">
+                {t("rev.clearFilter")}
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Sort — only worth showing once there's more than a couple to sort */}
+      {reviews.length > 1 && (
+        <div className="flex items-center gap-2 mb-5">
+          <label className="text-xs font-semibold text-ink-muted">{t("rev.sortBy")}</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="h-8 px-2.5 pr-7 rounded-control border border-line bg-canvas text-xs font-semibold text-ink-soft focus:border-ink outline-none cursor-pointer appearance-none"
+            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2373736D'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center", backgroundSize: "14px" }}
+          >
+            <option value="newest">{t("rev.sortNewest")}</option>
+            <option value="oldest">{t("rev.sortOldest")}</option>
+            <option value="highest">{t("rev.sortHighest")}</option>
+            <option value="lowest">{t("rev.sortLowest")}</option>
+          </select>
+        </div>
+      )}
 
       {/* Write-a-review area (purchase-gated) */}
       <div className="mb-8">
@@ -184,8 +233,8 @@ export default function ReviewsSection({ productId }: { productId: string }) {
             {t("rev.signInToReview")} →
           </Link>
         ) : elig.myReviewStatus === "hidden" ? (
-          <div className="rounded-card bg-amber-50 border border-amber-200 p-4 max-w-xl">
-            <p className="text-sm font-semibold text-amber-700 mb-1">{t("rev.hiddenNotice")}</p>
+          <div className="rounded-card bg-warning-soft border border-warning-border p-4 max-w-xl">
+            <p className="text-sm font-semibold text-warning mb-1">{t("rev.hiddenNotice")}</p>
             <Link href="/account/reviews" className="text-sm font-bold text-accent hover:underline">
               {t("rev.hiddenManage")} →
             </Link>
@@ -208,7 +257,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
             />
             {/* Live length hint — the 10-char minimum otherwise looks like a bug */}
             <div className="flex items-center justify-between mt-1">
-              <p className={`text-[11px] font-semibold ${text.trim().length > 0 && text.trim().length < 10 ? "text-amber-600" : "text-ink-muted"}`}>
+              <p className={`text-[11px] font-semibold ${text.trim().length > 0 && text.trim().length < 10 ? "text-warning" : "text-ink-muted"}`}>
                 {text.trim().length < 10
                   ? t("rev.minChars").replace("{n}", String(Math.max(0, 10 - text.trim().length)))
                   : "✓"}
@@ -219,7 +268,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
               <input type="checkbox" checked={showName} onChange={(e) => setShowName(e.target.checked)} className="w-4 h-4 accent-accent" />
               {t("rev.showName")}
             </label>
-            {error && <p className="text-red-500 text-xs font-semibold mt-2">{error}</p>}
+            {error && <p className="text-danger text-xs font-semibold mt-2">{error}</p>}
             <button
               onClick={submit}
               disabled={submitting || text.trim().length < 10}
@@ -240,7 +289,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         <div className="flex items-center justify-center py-10"><div className="w-6 h-6 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>
       ) : reviews.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {reviews.map((r) => {
+          {visibleReviews.map((r) => {
             const display = r.name ?? t("rev.anon");
             return (
               <div key={r.id} className="bg-canvas border border-line rounded-card p-5 space-y-3">

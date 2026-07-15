@@ -10,6 +10,7 @@
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@supabase/supabase-js";
 import type { Product } from "@/types";
 import { mapProductRow as mapRow, type ProductRow } from "@/lib/db/productMap";
@@ -145,6 +146,69 @@ export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
   } catch (e) {
     console.warn("[products] getProductsBySlugs failed — using static fallback:", (e as Error).message);
     return fallbackProducts.filter((p) => slugs.includes(p.slug));
+  }
+}
+
+/**
+ * Real "frequently bought together" — ranks OTHER products by how often
+ * they appear in the same order as `product` (aggregate order_items counts,
+ * no customer-identifying data). Needs the service role: order_items' RLS
+ * only exposes a shopper their OWN orders, but this is a statistical signal
+ * across every order, same category of aggregate info Amazon-style "bought
+ * together" widgets show. Pads with same-category-then-any products when
+ * there isn't enough order history yet (new product, low sales) — never
+ * fabricated, just less-targeted while real signal is thin.
+ */
+export async function getFrequentlyBoughtWith(
+  product: Product,
+  allProducts: Product[],
+  limit = 3
+): Promise<Product[]> {
+  const byId = new Map(allProducts.map((p) => [p.id, p]));
+  const fallbackFill = (exclude: Set<string>) => {
+    const sameCategory = allProducts.filter((p) => !exclude.has(p.id) && p.category === product.category);
+    const rest = allProducts.filter((p) => !exclude.has(p.id) && p.category !== product.category);
+    return [...sameCategory, ...rest];
+  };
+
+  const admin = createSupabaseAdminClient();
+  if (!admin) return fallbackFill(new Set([product.id])).slice(0, limit);
+
+  try {
+    const { data: orderRows, error: e1 } = await admin
+      .from("order_items")
+      .select("order_id")
+      .eq("product_id", product.id)
+      .limit(500);
+    if (e1) throw e1;
+    const orderIds = [...new Set((orderRows ?? []).map((r) => r.order_id as string))];
+
+    let ranked: Product[] = [];
+    if (orderIds.length > 0) {
+      const { data: coRows, error: e2 } = await admin
+        .from("order_items")
+        .select("product_id")
+        .in("order_id", orderIds)
+        .neq("product_id", product.id)
+        .limit(3000);
+      if (e2) throw e2;
+      const freq = new Map<string, number>();
+      for (const r of (coRows ?? []) as { product_id: string | null }[]) {
+        if (!r.product_id) continue;
+        freq.set(r.product_id, (freq.get(r.product_id) ?? 0) + 1);
+      }
+      ranked = [...freq.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => byId.get(id))
+        .filter((p): p is Product => !!p);
+    }
+
+    if (ranked.length >= limit) return ranked.slice(0, limit);
+    const used = new Set([product.id, ...ranked.map((p) => p.id)]);
+    return [...ranked, ...fallbackFill(used)].slice(0, limit);
+  } catch (e) {
+    console.warn("[products] getFrequentlyBoughtWith failed — using category fallback:", (e as Error).message);
+    return fallbackFill(new Set([product.id])).slice(0, limit);
   }
 }
 

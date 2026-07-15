@@ -240,6 +240,13 @@
 | Bu ürünü zaten yorumladın — teşekkürler! | შენ უკვე შეაფასე ეს პროდუქტი — მადლობა! | |
 | Doğrulanmış alışveriş | დადასტურებული ყიდვა | |
 | Anonim | ანონიმური | |
+| Sırala | დალაგება | |
+| En yeni | უახლესი | |
+| En eski | უძველესი | |
+| En yüksek puan | მაღალი შეფასება | |
+| En düşük puan | დაბალი შეფასება | |
+| Sadece {n} yıldızlı yorumları göster | მხოლოდ {n}-ვარსკვლავიანი შეფასებები | |
+| Filtreyi temizle | ფილტრის გასუფთავება | |
 
 ---
 
@@ -461,6 +468,7 @@
 | Onay e-postanıza ve telefonunuza gönderildi | დადასტურება გაიგზავნა თქვენს ელფოსტასა და ტელეფონზე | |
 | Takip kodu | თვალთვალის კოდი | |
 | Ana Sayfaya Dön | მთავარზე დაბრუნება | |
+| Beklerken Bunlar da Hoşunuza Gidebilir | სანამ ელოდებით — შესაძლოა მოგეწონოთ | |
 | Ürünlere Göz At | პროდუქტების დათვალიერება | |
 | Geçerli bir e-posta girin | საჭიროა სწორი ელფოსტა | |
 | Geçerli bir Gürcistan numarası girin (+995 …) | შეიყვანეთ სწორი ქართული ნომერი (+995 …) | |

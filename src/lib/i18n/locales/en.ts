@@ -234,6 +234,13 @@ export const en = {
   "rev.hiddenManage": "View it in My Reviews",
   "rev.verified": "Verified purchase",
   "rev.anon": "Anonymous",
+  "rev.sortBy": "Sort by",
+  "rev.sortNewest": "Newest",
+  "rev.sortOldest": "Oldest",
+  "rev.sortHighest": "Highest rated",
+  "rev.sortLowest": "Lowest rated",
+  "rev.filterByStars": "Show only {n}-star reviews",
+  "rev.clearFilter": "Clear filter",
 
   // ══ ATTRIBUTE LABELS ("etiket mantığı") ══
   // The admin enters canonical ENGLISH values (colors, sizes, fabrics…);
@@ -535,6 +542,7 @@ export const en = {
   "checkout.confirmationSent": "Confirmation sent to your email & phone",
   "checkout.trackingCode": "Tracking code",
   "checkout.backToHome": "Back to Home",
+  "checkout.upsellTitle": "While You Wait, You Might Also Like",
   "checkout.emptySubtitle": "Add some products before checking out.",
   "checkout.browseProducts": "Browse Products",
   "checkout.errRequired": "Required",

@@ -1,4 +1,4 @@
-import { getProductBySlug, getAllProducts } from "@/lib/db/products";
+import { getProductBySlug, getAllProducts, getFrequentlyBoughtWith } from "@/lib/db/products";
 import { getReviewStats } from "@/lib/db/reviews";
 import { hasAnyStock } from "@/lib/stock";
 import { minEffectivePrice } from "@/lib/pricing";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import ProductDetailClient from "./ProductDetailClient";
 import ProductCard from "@/components/ProductCard";
 import ReviewsSection from "@/components/ReviewsSection";
+import { getT } from "@/lib/i18n/server";
 
 // Cache the DB catalog for 60s so pages load fast; admin edits show within a minute.
 export const revalidate = 60;
@@ -31,17 +32,15 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [products, reviewStats] = await Promise.all([
+  const [products, reviewStats, { t }] = await Promise.all([
     getAllProducts(),
     getReviewStats(product.id),
+    getT(),
   ]);
-  const sameCategory = products.filter(
-    (p) => p.id !== product.id && p.category === product.category
-  );
-  const otherProducts = products.filter(
-    (p) => p.id !== product.id && p.category !== product.category
-  );
-  const related = [...sameCategory, ...otherProducts].slice(0, 3);
+  // Real co-purchase data first (what other shoppers actually bought
+  // alongside this one), padded with same-category/other products when
+  // there isn't enough order history yet — see getFrequentlyBoughtWith.
+  const related = await getFrequentlyBoughtWith(product, products, 3);
 
   /* JSON-LD structured data — lets Google show price/stock in search results */
   const jsonLd = {
@@ -79,11 +78,11 @@ export default async function ProductPage({ params }: Props) {
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-sm text-ink-muted">
         <Link href="/" className="hover:text-accent transition-colors font-medium">
-          Home
+          {t("nav.home")}
         </Link>
         <span>›</span>
         <Link href="/products" className="hover:text-accent transition-colors font-medium">
-          Products
+          {t("nav.products")}
         </Link>
         <span>›</span>
         <span className="text-ink font-semibold">{product.name}</span>
@@ -99,7 +98,7 @@ export default async function ProductPage({ params }: Props) {
       {related.length > 0 && (
         <section className="mt-20 pt-12 border-t border-line">
           <h2 className="text-2xl font-extrabold text-ink mb-8">
-            You Might Also Like
+            {t("product.youMightLike")}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {related.map((p) => (

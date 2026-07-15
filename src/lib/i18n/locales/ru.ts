@@ -225,6 +225,13 @@ export const ru: Dictionary = {
   "rev.hiddenManage": "Смотреть в «Моих отзывах»",
   "rev.verified": "Проверенная покупка",
   "rev.anon": "Аноним",
+  "rev.sortBy": "Сортировка",
+  "rev.sortNewest": "Сначала новые",
+  "rev.sortOldest": "Сначала старые",
+  "rev.sortHighest": "С высокой оценкой",
+  "rev.sortLowest": "С низкой оценкой",
+  "rev.filterByStars": "Показать только отзывы с {n} звёздами",
+  "rev.clearFilter": "Сбросить фильтр",
 
   // ── Attribute labels ──
   "label.color.white": "Белый",
@@ -505,6 +512,7 @@ export const ru: Dictionary = {
   "checkout.confirmationSent": "Подтверждение отправлено на вашу почту и телефон",
   "checkout.trackingCode": "Код отслеживания",
   "checkout.backToHome": "На главную",
+  "checkout.upsellTitle": "Пока вы ждёте — вам может понравиться",
   "checkout.emptySubtitle": "Добавьте товары перед оформлением заказа.",
   "checkout.browseProducts": "Смотреть товары",
   "checkout.errRequired": "Обязательно",

@@ -17,11 +17,13 @@ import { listAddresses, addAddress, type SavedAddress } from "@/lib/db/addresses
 import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import { buildOrderMessage } from "@/lib/i18n/orderMessages";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
-import { promoDiscountAmount, type PromoDef } from "@/lib/promo";
+import { promoDiscountAmount, type PromoDef, type PromoError } from "@/lib/promo";
 import { validatePromo } from "@/lib/db/promo";
 import { priceCartWithBundles, type BundleGroupLine } from "@/lib/bundlePricing";
 import type { Bundle } from "@/lib/bundles";
 import Button from "@/components/ui/Button";
+import ProductCard from "@/components/ProductCard";
+import { useSuggestedProducts } from "@/lib/db/useProductsByIds";
 import {
   GEORGIA_REGIONS,
   TBILISI_DISTRICTS,
@@ -182,6 +184,13 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
 
   /* Filter to only the items the user selected in cart */
   const [items, setItems] = useState<CartItem[]>(allItems);
+  /* Post-purchase "while you wait, you might also like" — real recommended
+     products (excluding what's already in this order), not a fabricated
+     upsell. Highest-converting placement per current research is right on
+     the confirmation screen, so it's computed unconditionally here (hooks
+     can't be called only when step === "success") and only rendered there. */
+  const purchasedIds = useMemo(() => items.map((i) => i.product.id), [items]);
+  const upsellProducts = useSuggestedProducts(purchasedIds, 4);
   useEffect(() => {
     try {
       const raw = localStorage.getItem("loov_checkout_keys");
@@ -304,6 +313,49 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
   function removePromo() {
     setAppliedPromo(null);
     setAppliedPromoCode("");
+  }
+
+  /* Enter a code here too — a shopper who skipped the cart page (or clicked
+     straight into checkout from a product page) previously had no way to
+     apply one at all once past /cart. Same validation/messages as the cart. */
+  const [promoInput,   setPromoInput]   = useState("");
+  const [promoMsg,     setPromoMsg]     = useState("");
+  const [promoSuccess, setPromoSuccess] = useState(false);
+  const [promoBusy,    setPromoBusy]    = useState(false);
+  const [promoSignin,  setPromoSignin]  = useState(false);
+  const promoErrorKey: Record<Exclude<PromoError, "signin">, TranslationKey> = {
+    invalid: "cart.promoInvalid",
+    expired: "cart.promoExpired",
+    limit: "cart.promoLimitReached",
+    used: "cart.promoAlreadyUsed",
+    network: "cart.promoInvalid",
+  };
+  async function handlePromo() {
+    const code = promoInput.trim().toUpperCase();
+    if (!code || promoBusy) return;
+    setPromoBusy(true);
+    setPromoSignin(false);
+    const res = await validatePromo(code);
+    setPromoBusy(false);
+    if (res.promo) {
+      setAppliedPromo(res.promo);
+      setAppliedPromoCode(res.promo.code);
+      setPromoSuccess(true);
+      setPromoMsg(
+        res.promo.type === "shipping"
+          ? t("cart.promoFreeShip")
+          : t("cart.promoPercentOff").replace("{n}", String(res.promo.value))
+      );
+      setPromoInput("");
+    } else if (res.error === "signin") {
+      setPromoSuccess(false);
+      setPromoSignin(true);
+      setPromoMsg(t("cart.promoMembersOnly"));
+    } else {
+      setPromoSuccess(false);
+      setPromoMsg(t(promoErrorKey[res.error ?? "invalid"]));
+      setTimeout(() => setPromoMsg(""), 4000);
+    }
   }
 
   /* If the admin turned Express off while it was selected, fall back to standard. */
@@ -1028,7 +1080,7 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   <div className="flex justify-between text-accent">
                     <span className="flex items-center gap-1.5">
                       {appliedPromoCode}
-                      <button type="button" onClick={removePromo} className="text-[10px] font-bold text-ink-muted hover:text-red-400 underline underline-offset-2">
+                      <button type="button" onClick={removePromo} className="text-[10px] font-bold text-ink-muted hover:opacity-70 underline underline-offset-2">
                         {t("common.remove")}
                       </button>
                     </span>
@@ -1056,6 +1108,46 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
                   <span>{t("cart.total")}</span><span>{formatPrice(total)}</span>
                 </div>
               </div>
+
+              {/* Promo entry — a shopper who reached checkout without applying
+                  a code on the cart page previously had no way to enter one
+                  here at all. */}
+              {!appliedPromo && (
+                <div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => { setPromoInput(e.target.value); setPromoMsg(""); }}
+                      onKeyDown={(e) => e.key === "Enter" && handlePromo()}
+                      placeholder={t("cart.promoPlaceholder")}
+                      className="flex-1 min-w-0 border border-line rounded-control px-3 py-2 text-xs font-medium text-ink placeholder-ink-muted focus:outline-none focus:border-accent transition-colors bg-canvas"
+                    />
+                    <button
+                      type="button"
+                      onClick={handlePromo}
+                      disabled={promoBusy}
+                      className="px-3 py-2 rounded-control border border-line text-xs font-bold text-ink-soft hover:border-accent hover:text-accent transition-colors disabled:opacity-50 flex-shrink-0"
+                    >
+                      {promoBusy ? "…" : t("common.apply")}
+                    </button>
+                  </div>
+                  {promoMsg && !promoSuccess && (
+                    <p className="text-[11px] text-danger font-semibold mt-1.5">
+                      {promoMsg}
+                      {promoSignin && (
+                        <>
+                          {" "}
+                          <Link href="/login" className="text-accent underline font-bold">
+                            {t("cart.promoSignIn")}
+                          </Link>
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {redeemPts > 0 ? (
                 /* Spending points on this order → it earns none (server enforces the same). */
                 <div className="flex items-center gap-1.5 justify-center bg-panel border border-line rounded-control px-3 py-2">
@@ -1153,6 +1245,19 @@ export default function CheckoutClient({ bundles }: { bundles: Bundle[] }) {
             >
               {t("checkout.backToHome")}
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Post-purchase upsell — wider than the confirmation column above so
+          the cards have room; real recommended products, not fabricated. */}
+      {step === "success" && upsellProducts.length > 0 && (
+        <div className="max-w-4xl mx-auto mt-12 pt-10 border-t border-line">
+          <h2 className="text-xl font-extrabold text-ink text-center mb-6">{t("checkout.upsellTitle")}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {upsellProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         </div>
       )}

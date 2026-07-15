@@ -225,6 +225,13 @@ export const tr: Dictionary = {
   "rev.hiddenManage": "Yorumlarım'da gör",
   "rev.verified": "Doğrulanmış alışveriş",
   "rev.anon": "Anonim",
+  "rev.sortBy": "Sırala",
+  "rev.sortNewest": "En yeni",
+  "rev.sortOldest": "En eski",
+  "rev.sortHighest": "En yüksek puan",
+  "rev.sortLowest": "En düşük puan",
+  "rev.filterByStars": "Sadece {n} yıldızlı yorumları göster",
+  "rev.clearFilter": "Filtreyi temizle",
 
   // ── Attribute labels ──
   "label.color.white": "Beyaz",
@@ -505,6 +512,7 @@ export const tr: Dictionary = {
   "checkout.confirmationSent": "Onay e-postanıza ve telefonunuza gönderildi",
   "checkout.trackingCode": "Takip kodu",
   "checkout.backToHome": "Ana Sayfaya Dön",
+  "checkout.upsellTitle": "Beklerken Bunlar da Hoşunuza Gidebilir",
   "checkout.emptySubtitle": "Ödeme yapmadan önce ürün ekleyin.",
   "checkout.browseProducts": "Ürünlere Göz At",
   "checkout.errRequired": "Zorunlu",

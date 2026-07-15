@@ -227,6 +227,13 @@ export const ka: Dictionary = {
   "rev.hiddenManage": "ნახე „ჩემს შეფასებებში“",
   "rev.verified": "დადასტურებული ყიდვა",
   "rev.anon": "ანონიმური",
+  "rev.sortBy": "დალაგება",
+  "rev.sortNewest": "უახლესი",
+  "rev.sortOldest": "უძველესი",
+  "rev.sortHighest": "მაღალი შეფასება",
+  "rev.sortLowest": "დაბალი შეფასება",
+  "rev.filterByStars": "მხოლოდ {n}-ვარსკვლავიანი შეფასებები",
+  "rev.clearFilter": "ფილტრის გასუფთავება",
 
   // ── Attribute labels (DRAFT — needs native review) ──
   "label.color.white": "თეთრი",
@@ -507,6 +514,7 @@ export const ka: Dictionary = {
   "checkout.confirmationSent": "დადასტურება გაიგზავნა თქვენს ელფოსტასა და ტელეფონზე",
   "checkout.trackingCode": "თვალთვალის კოდი",
   "checkout.backToHome": "მთავარზე დაბრუნება",
+  "checkout.upsellTitle": "სანამ ელოდებით — შესაძლოა მოგეწონოთ",
   "checkout.emptySubtitle": "დაამატეთ პროდუქტები გადახდამდე.",
   "checkout.browseProducts": "პროდუქტების დათვალიერება",
   "checkout.errRequired": "სავალდებულო",
