@@ -412,6 +412,8 @@ export const tr: Dictionary = {
   "shop.badgeOrganic": "%100 Organik",
   "shop.badgeSafe": "Güvenli & Sertifikalı",
   "shop.badgeShip": "100+ ₾ Ücretsiz Kargo",
+  "shop.onSale": "Şu An İndirimde",
+  "shop.seeAll": "Tüm Ürünleri Gör",
 
   "cookie.text": "Deneyiminizi geliştirmek ve sepetinizi & favorilerinizi hatırlamak için çerezler kullanıyoruz. Devam ederek şunu kabul etmiş olursunuz:",
   "cookie.privacyLink": "Gizlilik Politikası",

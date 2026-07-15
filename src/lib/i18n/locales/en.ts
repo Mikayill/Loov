@@ -440,6 +440,8 @@ export const en = {
   "shop.badgeOrganic": "100% Organic",
   "shop.badgeSafe": "Safe & Certified",
   "shop.badgeShip": "Free Shipping 100+ ₾",
+  "shop.onSale": "On Sale Right Now",
+  "shop.seeAll": "See All Products",
 
   // ── Cookie consent ──
   "cookie.text": "We use cookies to improve your experience and remember your cart & wishlist. By continuing you agree to our",
