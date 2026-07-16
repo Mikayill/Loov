@@ -23,6 +23,8 @@ export const en = {
   "nav.deals": "On Sale",
   "nav.recentlyViewed": "Recently Viewed",
   "nav.language": "Language",
+  "pref.darkMode": "Dark Mode",
+  "help.faq": "FAQ",
   "nav.recentlyViewedEmpty": "No products viewed yet — browse the shop and they'll show up here.",
 
   // ── Announcement bar ──

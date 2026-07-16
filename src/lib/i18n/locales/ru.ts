@@ -21,6 +21,8 @@ export const ru: Dictionary = {
   "nav.deals": "Со скидкой",
   "nav.recentlyViewed": "Недавно просмотренные",
   "nav.language": "Язык",
+  "pref.darkMode": "Тёмная тема",
+  "help.faq": "FAQ",
   "nav.recentlyViewedEmpty": "Вы ещё не просматривали товары — загляните в каталог, и они появятся здесь.",
 
   "announce.freeShipping": "🚀 Бесплатная доставка при заказе от {n} ₾ · Доставляем по всей Грузии",

@@ -309,10 +309,13 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Theme toggle */}
-                <ThemeToggle />
+                {/* Theme toggle — desktop only (on mobile it lives in the
+                    hamburger menu's Preferences section, per user request) */}
+                <div className="hidden md:block">
+                  <ThemeToggle />
+                </div>
 
-                {/* Language switcher — desktop only */}
+                {/* Language switcher — desktop only (mobile: hamburger) */}
                 <div className="hidden md:block">
                   <LanguageSwitcher />
                 </div>
