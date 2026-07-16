@@ -11,6 +11,7 @@ import { colorLabel, sizeLabel } from "@/lib/i18n/labels";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import LinkButton from "@/components/ui/LinkButton";
 import { variantStock } from "@/lib/stock";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 function DrawerItem({
   item,
@@ -115,11 +116,7 @@ export default function CartDrawer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
-  /* Lock body scroll */
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  useBodyScrollLock(open);
 
   const shipping     = totalPrice >= FREE_THRESHOLD ? 0 : SHIPPING_COST;
   const total        = totalPrice + shipping;

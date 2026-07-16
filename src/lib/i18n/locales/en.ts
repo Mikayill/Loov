@@ -22,6 +22,7 @@ export const en = {
   "nav.signInRegister": "Sign In / Register",
   "nav.deals": "On Sale",
   "nav.recentlyViewed": "Recently Viewed",
+  "nav.language": "Language",
   "nav.recentlyViewedEmpty": "No products viewed yet — browse the shop and they'll show up here.",
 
   // ── Announcement bar ──
@@ -325,6 +326,7 @@ export const en = {
   "label.orderStatus.delivered": "Delivered",
   "label.orderStatus.shipped": "Shipped",
   "label.orderStatus.processing": "Processing",
+  "label.orderStatus.pending": "Order Placed",
   "label.orderStatus.cancelled": "Cancelled",
 
   // ── Return statuses ──
@@ -424,6 +426,8 @@ export const en = {
   "filter.age2yPlus": "2y+",
   "filter.age2yPlusDesc": "2 years and up",
   "filter.filters": "Filters",
+  "filter.recentlyViewed": "Recently Viewed",
+  "filter.dealsHeading": "Discounted products only — everything below is on sale right now.",
   "filter.clear": "Clear",
   "filter.gridView": "Grid view",
   "filter.listView": "List view",
@@ -767,7 +771,6 @@ export const en = {
   "acct.cancel": "Cancel",
   "acct.itemsInCart": "Items in cart · {amount}",
   "acct.savedToWishlist": "Saved to wishlist",
-  "acct.bebecoPoints": "Loov points · {tier}",
   "acct.myOrders": "My Orders",
   "acct.myOrdersSub": "Track and view past orders",
   "acct.myReturns": "My Returns",
@@ -782,8 +785,10 @@ export const en = {
   "acct.notificationsSub": "Order updates and promotions",
   "acct.security": "Security",
   "acct.securitySub": "Password and account security",
-  "acct.browseCollection": "Browse the Collection",
-  "acct.findSomething": "Find something your little one will love",
+  "acct.settings": "Settings",
+  "acct.settingsSub": "Dark mode and language",
+  "acct.groupOrders": "Orders & Activity",
+  "acct.groupAccount": "Account",
 
   // ── Orders list + detail ──
   "acct.orders.title": "My Orders",
@@ -842,8 +847,6 @@ export const en = {
   "acct.return.cancelling": "Cancelling…",
   "acct.return.cancelRequest": "Cancel request",
   "acct.return.requestReturn": "Request a Return",
-  "acct.return.windowLeft1": "Return window: 1 day left",
-  "acct.return.windowLeftN": "Return window: {n} days left",
   "acct.return.windowClosed": "Return window closed ({n} days after delivery)",
   "acct.return.confirmCancel": "Cancel this return request?",
   "acct.return.cancelTooLate": "This return can no longer be cancelled — please contact us.",
@@ -1093,7 +1096,6 @@ export const en = {
   "notif.wishlistDesc": "Price drops on items you've saved",
 
   // ── Size guide ──
-  "sg.breadcrumb": "Size Guide",
   "sg.title": "Size Guide",
   "sg.subtitle": "Every baby grows at their own pace. Use these charts as a guide — when in doubt, size up!",
   "sg.proTip": "Pro tip:",
@@ -1347,7 +1349,7 @@ export const en = {
   "blog.title": "The Journal",
   "blog.subtitle": "Baby care tips, fabric guides, and honest advice for new parents.",
   "blog.readArticle": "Read article",
-  "blog.breadcrumb": "Journal",
+  "blog.backToJournal": "Back to Journal",
   "blog.authorName": "Loov Team",
   "blog.authorNote": "Written by parents, for parents. Every article is reviewed for accuracy and reflects the values we put into every product we make.",
   "blog.shopBebeco": "Shop Loov",

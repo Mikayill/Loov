@@ -61,13 +61,6 @@ export default async function SizeGuidePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-6">
-        <Link href="/" className="hover:text-accent transition-colors">{t("nav.home")}</Link>
-        <span>›</span>
-        <span className="text-ink font-semibold">{t("sg.breadcrumb")}</span>
-      </nav>
-
       {/* Header */}
       <div className="text-center mb-10">
         <div className="text-4xl mb-3">📏</div>
@@ -85,10 +78,38 @@ export default async function SizeGuidePage() {
         </p>
       </div>
 
-      {/* Clothing size chart */}
+      {/* Clothing size chart — compact cards on mobile (5 columns of dense
+          nowrap text didn't fit a phone screen without horizontal scrolling),
+          real table on desktop where there's room for it. */}
       <section className="mb-10">
         <h2 className="text-xl font-extrabold text-ink mb-4">👶 {t("sg.clothingTitle")}</h2>
-        <div className="overflow-x-auto rounded-card border border-line">
+
+        {/* Mobile: stacked cards */}
+        <div className="sm:hidden space-y-2.5">
+          {sizeRows.map((row) => (
+            <div key={row.size} className="bg-canvas rounded-card border border-line p-4">
+              <div className="flex items-center justify-between mb-2.5">
+                <p className="font-extrabold text-ink text-[15px]">{row.size}</p>
+                <p className="text-[12px] font-semibold text-accent">{localizeAge(row.age, t)}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {[
+                  { label: t("sg.colHeight"), value: row.height },
+                  { label: t("sg.colWeight"), value: row.weight },
+                  { label: t("sg.colChest"),  value: row.chest },
+                ].map((c) => (
+                  <div key={c.label} className="bg-panel rounded-control py-2 px-1">
+                    <p className="text-[9.5px] font-bold text-ink-muted uppercase tracking-[0.06em] mb-0.5">{c.label}</p>
+                    <p className="text-[12.5px] font-bold text-ink whitespace-nowrap">{c.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden sm:block overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "var(--color-panel)" }}>
@@ -178,7 +199,22 @@ export default async function SizeGuidePage() {
       <section className="mb-10">
         <h2 className="text-xl font-extrabold text-ink mb-2">🌙 {t("sg.togTitle")}</h2>
         <p className="text-sm text-ink-soft leading-relaxed mb-4 max-w-2xl">{t("sg.togIntro")}</p>
-        <div className="overflow-x-auto rounded-card border border-line">
+
+        {/* Mobile: stacked cards */}
+        <div className="sm:hidden space-y-2.5">
+          {togRows.map((row) => (
+            <div key={row.tog} className="bg-canvas rounded-card border border-line p-4">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="font-bold text-ink text-[13.5px]">{row.room}</p>
+                <span className="text-[11px] font-extrabold text-accent bg-accent-soft px-2 py-0.5 rounded-control whitespace-nowrap">{row.tog} TOG</span>
+              </div>
+              <p className="text-[12.5px] text-ink-soft leading-relaxed">{row.dress}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden sm:block overflow-x-auto rounded-card border border-line">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: "var(--color-panel)" }}>

@@ -22,6 +22,7 @@ export const ka: Dictionary = {
   "nav.signInRegister": "შესვლა / რეგისტრაცია",
   "nav.deals": "ფასდაკლებით",
   "nav.recentlyViewed": "ბოლოს ნანახი",
+  "nav.language": "ენა",
   "nav.recentlyViewedEmpty": "ჯერ არაფერი გინახავთ — დაათვალიერეთ მაღაზია და პროდუქტები აქ გამოჩნდება.",
 
   "announce.freeShipping": "🚀 უფასო მიწოდება {n} ₾-ზე მეტ შეკვეთაზე · მიწოდება მთელ საქართველოში",
@@ -308,6 +309,7 @@ export const ka: Dictionary = {
   "label.orderStatus.delivered": "მიწოდებულია",
   "label.orderStatus.shipped": "გზაშია",
   "label.orderStatus.processing": "მუშავდება",
+  "label.orderStatus.pending": "შეკვეთა განთავსებულია",
   "label.orderStatus.cancelled": "გაუქმებულია",
 
   "label.returnStatus.requested": "მოთხოვნილია",
@@ -399,6 +401,8 @@ export const ka: Dictionary = {
   "filter.age2yPlus": "2წ+",
   "filter.age2yPlusDesc": "2 წელი და მეტი",
   "filter.filters": "ფილტრები",
+  "filter.recentlyViewed": "ბოლოს ნანახი",
+  "filter.dealsHeading": "მხოლოდ ფასდაკლებული პროდუქტები — ქვემოთ ყველაფერი ახლა ფასდაკლებით იყიდება.",
   "filter.clear": "გასუფთავება",
   "filter.gridView": "ბადის ხედი",
   "filter.listView": "სიის ხედი",
@@ -739,7 +743,6 @@ export const ka: Dictionary = {
   "acct.cancel": "გაუქმება",
   "acct.itemsInCart": "ნივთი კალათაში · {amount}",
   "acct.savedToWishlist": "შენახულია სურვილებში",
-  "acct.bebecoPoints": "Loov ქულა · {tier}",
   "acct.myOrders": "ჩემი შეკვეთები",
   "acct.myOrdersSub": "თვალი ადევნეთ და ნახეთ წარსული შეკვეთები",
   "acct.myReturns": "ჩემი დაბრუნებები",
@@ -754,8 +757,10 @@ export const ka: Dictionary = {
   "acct.notificationsSub": "შეკვეთის განახლებები და აქციები",
   "acct.security": "უსაფრთხოება",
   "acct.securitySub": "პაროლი და ანგარიშის უსაფრთხოება",
-  "acct.browseCollection": "დაათვალიერეთ კოლექცია",
-  "acct.findSomething": "იპოვეთ რაღაც, რაც თქვენს პატარას მოეწონება",
+  "acct.settings": "პარამეტრები",
+  "acct.settingsSub": "მუქი რეჟიმი და ენა",
+  "acct.groupOrders": "შეკვეთები და აქტივობა",
+  "acct.groupAccount": "ანგარიში",
 
   // ── Orders list + detail ──
   "acct.orders.title": "ჩემი შეკვეთები",
@@ -814,8 +819,6 @@ export const ka: Dictionary = {
   "acct.return.cancelling": "უქმდება…",
   "acct.return.cancelRequest": "მოთხოვნის გაუქმება",
   "acct.return.requestReturn": "დაბრუნების მოთხოვნა",
-  "acct.return.windowLeft1": "დარჩენილია 1 დღე",
-  "acct.return.windowLeftN": "დარჩენილია {n} დღე",
   "acct.return.windowClosed": "დაბრუნების ვადა ამოიწურა (მიწოდებიდან {n} დღე)",
   "acct.return.confirmCancel": "გავაუქმო ეს დაბრუნების მოთხოვნა?",
   "acct.return.cancelTooLate": "ამ დაბრუნების გაუქმება აღარ არის შესაძლებელი — გთხოვთ დაგვიკავშირდეთ.",
@@ -1065,7 +1068,6 @@ export const ka: Dictionary = {
   "notif.wishlistDesc": "ფასდაკლებები შენახულ ნივთებზე",
 
   // ── Size guide ──
-  "sg.breadcrumb": "ზომების გზამკვლევი",
   "sg.title": "ზომების გზამკვლევი",
   "sg.subtitle": "თითოეული ბავშვი თავისი ტემპით იზრდება. გამოიყენეთ ეს ცხრილები ორიენტირად — თუ ეჭვობთ, აირჩიეთ უფრო დიდი ზომა!",
   "sg.proTip": "რჩევა:",
@@ -1319,7 +1321,7 @@ export const ka: Dictionary = {
   "blog.title": "ჟურნალი",
   "blog.subtitle": "ბავშვის მოვლის რჩევები, ქსოვილის გზამკვლევები და გულწრფელი რჩევები ახალი მშობლებისთვის.",
   "blog.readArticle": "სტატიის წაკითხვა",
-  "blog.breadcrumb": "ჟურნალი",
+  "blog.backToJournal": "დაბრუნება ჟურნალში",
   "blog.authorName": "Loov-ს გუნდი",
   "blog.authorNote": "დაწერილია მშობლების მიერ, მშობლებისთვის. ყოველი სტატია განიხილება სიზუსტისთვის და ასახავს ღირებულებებს, რომლებსაც ჩვენ ვდებთ ყოველ პროდუქტში.",
   "blog.shopBebeco": "Loov-ს შოპინგი",

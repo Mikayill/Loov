@@ -13,10 +13,11 @@ import { useProductsByIds } from "@/lib/db/useProductsByIds";
 import { useSettings } from "@/lib/db/useSettings";
 import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
 import { loadRecentSearches, saveRecentSearch, clearRecentSearches, type CatKey } from "@/lib/search";
-import type { TranslationKey } from "@/lib/i18n/dictionaries";
+import { ACCOUNT_LINKS } from "@/lib/accountNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
+import MobileMenuSheet from "./MobileMenuSheet";
 import Wordmark from "./Wordmark";
 
 export default function Navbar() {
@@ -33,23 +34,11 @@ export default function Navbar() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [annoIdx,     setAnnoIdx]     = useState(0);
   const [annoShown,   setAnnoShown]   = useState(true);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const hamburgerRef  = useRef<HTMLButtonElement>(null);
   const accountRef    = useRef<HTMLDivElement>(null);
   const prevTotalItems = useRef(totalItems);
   const [pointsBump, setPointsBump] = useState(false);
   const prevPoints = useRef(pointsBalance);
 
-  /* Account menu items (shown in the desktop dropdown + the mobile hamburger).
-     Grouped by how a shopper actually uses them: order lifecycle first
-     (orders → returns), then engagement (rewards → reviews), settings last. */
-  const accountLinks: { href: string; key: TranslationKey; icon: string }[] = [
-    { href: "/account/orders",        key: "acct.myOrders",      icon: "📦" },
-    { href: "/account/returns",       key: "acct.myReturns",     icon: "↩️" },
-    { href: "/account/rewards",       key: "acct.rewards",       icon: "⭐" },
-    { href: "/account/reviews",       key: "acct.myReviews",     icon: "📝" },
-    { href: "/account/notifications", key: "acct.notifications", icon: "🔔" },
-  ];
 
   /* Rotating store facts — one at a time on mobile (fades), all three on md+. */
   const topbarFacts = [
@@ -162,22 +151,6 @@ export default function Navbar() {
     prevPoints.current = pointsBalance;
   }, [pointsBalance]);
 
-  /* Close mobile menu on any outside click (except the menu / hamburger) */
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handle(e: MouseEvent) {
-      const target = e.target as Node;
-      if (
-        mobileMenuRef.current && !mobileMenuRef.current.contains(target) &&
-        hamburgerRef.current && !hamburgerRef.current.contains(target)
-      ) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
-  }, [menuOpen]);
-
   /* Close mobile menu + account dropdown on route change */
   useEffect(() => {
     setMenuOpen(false);
@@ -220,7 +193,6 @@ export default function Navbar() {
      fade-down exit animation has time to play (matches loov-fade-down's
      200ms — otherwise they'd unmount instantly and only the open animation
      would ever be seen). */
-  const mobileMenuRender = useDelayedUnmount(menuOpen, 200);
   const mobileSearchRender = useDelayedUnmount(searchOpen, 200);
 
   function isActive(href: string) {
@@ -370,10 +342,10 @@ export default function Navbar() {
                         </div>
                         <Link href="/account" onClick={() => setAccountOpen(false)}
                           className="flex items-center gap-2.5 px-3 py-2 rounded-control text-[13px] font-semibold text-ink hover:bg-panel transition-colors">
-                          <span aria-hidden>⚙️</span> {t("acct.editProfile")}
+                          <span aria-hidden>👤</span> {t("acct.editProfile")}
                         </Link>
                         <div className="h-px bg-line my-1" />
-                        {accountLinks.map((l) => (
+                        {ACCOUNT_LINKS.map((l) => (
                           <Link key={l.href} href={l.href} onClick={() => setAccountOpen(false)}
                             className="flex items-center gap-2.5 px-3 py-2 rounded-control text-[13px] font-medium text-ink-soft hover:bg-panel hover:text-ink transition-colors">
                             <span aria-hidden>{l.icon}</span> {t(l.key)}
@@ -420,7 +392,6 @@ export default function Navbar() {
 
                 {/* Hamburger — mobile */}
                 <button
-                  ref={hamburgerRef}
                   className="md:hidden flex flex-col justify-center items-center w-11 h-11 rounded-lg hover:bg-panel transition-all active:scale-90 gap-1.5"
                   onClick={() => { setSearchOpen(false); setMenuOpen((v) => !v); }}
                   aria-label="Toggle menu"
@@ -469,10 +440,12 @@ export default function Navbar() {
                 >
                   {t("nav.deals")}
                 </Link>
-                {/* Recently Viewed — links straight to the real section on /products
-                    (id="recently-viewed"), not a floating popover anymore. */}
+                {/* Recently Viewed — now a real filter on /products (?recent=1),
+                    not a separate anchor-scroll section on the same page
+                    (that used to make "Products" and "Recently Viewed" feel
+                    like two conflicting views of the same screen). */}
                 <Link
-                  href="/products#recently-viewed"
+                  href="/products?recent=1"
                   className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
                 >
                   {t("nav.recentlyViewed")}
@@ -535,52 +508,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile dropdown — frosted, theme-aware, animated. shadow-2xl gives
-              the panel a clear edge against the content it pushes down,
-              instead of just blending in behind a hairline border-t. */}
-          {mobileMenuRender && (
-            <div ref={mobileMenuRef} className={`md:hidden relative z-40 border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-4 space-y-1 shadow-2xl ${menuOpen ? "animate-fade-up" : "animate-fade-down"}`}>
-              {/* Signed-in header + account shortcuts (the desktop dropdown items) */}
-              {user ? (
-                <>
-                  <Link href="/account" onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-control bg-panel mb-1">
-                    <span className="w-9 h-9 rounded-full flex items-center justify-center text-ink text-sm font-extrabold flex-shrink-0 overflow-hidden bg-canvas border border-line">
-                      {user.avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-                      ) : user.name[0]?.toUpperCase()}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-bold text-ink truncate">{user.name}</span>
-                      <span className="block text-[11px] text-ink-muted">{t("acct.editProfile")} →</span>
-                    </span>
-                  </Link>
-                  <div className="grid grid-cols-2 gap-1">
-                    {accountLinks.map((l) => (
-                      <Link key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-control text-[13px] font-semibold text-ink-soft hover:bg-panel hover:text-ink transition-colors">
-                        <span aria-hidden>{l.icon}</span> {t(l.key)}
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="h-px bg-line my-2" />
-                </>
-              ) : (
-                <Link href="/login" onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-control text-sm font-semibold text-white bg-ink mb-2">
-                  {t("nav.signInRegister")}
-                </Link>
-              )}
-              {/* Products/Bundles/Journal live in the always-visible category
-                  strip above and Home is in the mobile bottom tab bar — no
-                  need to repeat them here. Sign Out lives on /account too. */}
-              <div className="pt-2 border-t border-line mt-1">
-                <p className="text-[10px] text-ink-muted font-bold uppercase tracking-widest px-3 mb-2">Language</p>
-                <div className="px-2"><LanguageSwitcher /></div>
-              </div>
-            </div>
-          )}
+          {/* Mobile hamburger menu — a real bottom-sheet overlay now (portal,
+              dialog semantics, baby-profile quick-edit), not an inline panel
+              that pushed page content down. */}
+          <MobileMenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
         </nav>
       </header>
     </>

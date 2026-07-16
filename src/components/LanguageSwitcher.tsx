@@ -1,19 +1,42 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLocale } from "@/context/LocaleContext";
 import { LOCALES, LOCALE_META, type Locale } from "@/lib/i18n/config";
 
+const VIEWPORT_MARGIN = 8;
+
 export default function LanguageSwitcher() {
   const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, right: 0 });
+  // `left` is provisional until the layout effect below measures the list's
+  // real (rendered) width and clamps it — see that effect for why a single
+  // right-anchored calc isn't enough once this button can sit anywhere on
+  // screen (desktop navbar: far right edge; mobile hamburger: near the left).
+  const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  // Runs synchronously before paint, so the clamp never flashes at the wrong
+  // spot: once the list is actually in the DOM we know its real width and
+  // can pin it fully inside the viewport regardless of where the trigger
+  // button is (this is the actual fix for the mobile hamburger overflow —
+  // the old code only ever accounted for the button's right edge).
+  useLayoutEffect(() => {
+    if (!open || !btnRef.current || !listRef.current) return;
+    const btn = btnRef.current.getBoundingClientRect();
+    const list = listRef.current.getBoundingClientRect();
+    const maxLeft = window.innerWidth - list.width - VIEWPORT_MARGIN;
+    const left = Math.min(Math.max(btn.left, VIEWPORT_MARGIN), Math.max(maxLeft, VIEWPORT_MARGIN));
+    const maxTop = window.innerHeight - list.height - VIEWPORT_MARGIN;
+    const top = Math.min(btn.bottom + 8, Math.max(maxTop, VIEWPORT_MARGIN));
+    if (left !== pos.left || top !== pos.top) setPos({ top, left });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -36,8 +59,11 @@ export default function LanguageSwitcher() {
 
   function toggle() {
     if (!open && btnRef.current) {
+      // Provisional guess (left-aligned to the button) — the layout effect
+      // above corrects this to the real, viewport-clamped position before
+      // the browser ever paints it, once the list's true width is known.
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+      setPos({ top: r.bottom + 8, left: r.left });
     }
     setOpen((v) => !v);
   }
@@ -76,7 +102,7 @@ export default function LanguageSwitcher() {
       {open && mounted && createPortal(
         <ul
           ref={listRef}
-          style={{ position: "fixed", top: pos.top, right: pos.right }}
+          style={{ position: "fixed", top: pos.top, left: pos.left }}
           className="bg-canvas rounded-card shadow-lg border border-line py-1.5 min-w-[170px] z-[999] animate-pop-in"
           role="listbox"
           aria-label="Language"

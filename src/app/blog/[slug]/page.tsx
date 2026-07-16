@@ -33,14 +33,16 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-ink-muted mb-8">
-        <Link href="/" className="hover:text-accent transition-colors font-medium">{t("nav.home")}</Link>
-        <span>›</span>
-        <Link href="/blog" className="hover:text-accent transition-colors font-medium">{t("blog.breadcrumb")}</Link>
-        <span>›</span>
-        <span className="text-ink font-semibold line-clamp-1">{article.title}</span>
-      </nav>
+      {/* Back to journal — a plain 3-segment breadcrumb here used to read as
+          "Home › Journal › {article title}", which on mobile felt like it
+          had wandered away from the journal into some unrelated deep page.
+          A single, unambiguous back-link reads clearer. */}
+      <Link href="/blog" className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-muted hover:text-accent transition-colors mb-8">
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        {t("blog.backToJournal")}
+      </Link>
 
       {/* Hero */}
       <div

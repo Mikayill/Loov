@@ -159,7 +159,6 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
   const activeReturn = returns.find((r) => ACTIVE_RETURN_STATUSES.includes(r.status)) ?? null;
   const windowEnd = returnWindowEndsAt(order.deliveredAt, order.date);
   const windowOpen = new Date() <= windowEnd;
-  const daysLeft = Math.max(0, Math.ceil((windowEnd.getTime() - Date.now()) / 86400000));
   const canRequestReturn = order.status === "Delivered" && windowOpen && !activeReturn;
 
   return (
@@ -401,9 +400,6 @@ export default function OrderDetailClient({ orderNumber }: { orderNumber: string
               >
                 ↩️ {t("acct.return.requestReturn")}
               </Link>
-              <p className="text-[11px] text-ink-muted text-center mt-1.5">
-                {daysLeft === 1 ? t("acct.return.windowLeft1") : t("acct.return.windowLeftN").replace("{n}", String(daysLeft))}
-              </p>
             </div>
           )}
           {order.status === "Delivered" && !windowOpen && !activeReturn && (

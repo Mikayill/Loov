@@ -284,6 +284,19 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
 }
 .animate-fade-down { animation: loov-fade-down 0.2s var(--ease-smooth) forwards; }
 
+/* Bottom sheet (mobile hamburger menu) — slides up from off-screen instead of
+   pushing content down like the old inline dropdown panel. */
+@keyframes loov-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes loov-sheet-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+.animate-sheet-up   { animation: loov-sheet-up 0.28s var(--ease-smooth) forwards; }
+.animate-sheet-down { animation: loov-sheet-down 0.22s var(--ease-smooth) forwards; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,
   .animate-search-overlay,
@@ -293,5 +306,7 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
   .animate-fade-out,
   .animate-bump,
   .animate-fade-up,
-  .animate-fade-down { animation: none; }
+  .animate-fade-down,
+  .animate-sheet-up,
+  .animate-sheet-down { animation: none; }
 }

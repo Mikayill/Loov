@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import CategoryFilter from "@/components/CategoryFilter";
-import RecentlyViewedSection from "@/components/RecentlyViewedSection";
 import { getAllProducts } from "@/lib/db/products";
 import { getT } from "@/lib/i18n/server";
 
@@ -13,19 +12,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface Props {
-  searchParams: Promise<{ cat?: string; deal?: string }>;
+  searchParams: Promise<{ cat?: string; deal?: string; recent?: string }>;
 }
 
 export default async function ProductsPage({ searchParams }: Props) {
   const { t } = await getT();
-  const { cat, deal } = await searchParams;
+  const { cat, deal, recent } = await searchParams;
   const initialCategory = cat;
   const initialDealOnly = deal === "1";
+  const initialRecentOnly = recent === "1";
   const products = await getAllProducts();
   const newCount = products.filter((p) => p.isNew).length;
 
   return (
-    <>
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Page header */}
       <div className="mb-8">
@@ -73,12 +72,14 @@ export default async function ProductsPage({ searchParams }: Props) {
 
       {/* Product grid with filters */}
       <div id="products-grid">
-        <CategoryFilter products={products} initialCategory={initialCategory} initialDealOnly={initialDealOnly} advanced />
+        <CategoryFilter
+          products={products}
+          initialCategory={initialCategory}
+          initialDealOnly={initialDealOnly}
+          initialRecentOnly={initialRecentOnly}
+          advanced
+        />
       </div>
     </div>
-
-    {/* Recently viewed — its own panel (own max-width wrapper), only renders when history exists */}
-    <RecentlyViewedSection />
-    </>
   );
 }

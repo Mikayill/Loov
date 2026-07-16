@@ -14,7 +14,6 @@ import { fetchMyProfile, updateMyProfile, fetchAvatarPresets, type MyProfile, ty
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { tierName } from "@/lib/i18n/labels";
-import { useTheme } from "@/components/ThemeToggle";
 import { monthsOld, ageLabel } from "@/lib/babyAge";
 
 export default function AccountClient() {
@@ -24,7 +23,6 @@ export default function AccountClient() {
   const { count: wishCount } = useWishlist();
   const { balance: pointsBalance, tier } = useLoyalty();
   const { locale, setLocale, t } = useLocale();
-  const [theme, setTheme] = useTheme();
 
   /* Hooks must run unconditionally on every render — declare them before any
      early return. */
@@ -330,114 +328,101 @@ export default function AccountClient() {
         </form>
       ) : (
         <>
-          {/* ── Stat strip — hairline cells ── */}
-          <div className="grid grid-cols-3 gap-px bg-line border border-line rounded-card overflow-hidden mb-6">
+          {/* ── Stat cards — real spaced cards with icons, not a flat hairline grid ── */}
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mb-5">
             {[
-              { href: "/cart", value: String(totalItems), label: t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice)) },
-              { href: "/wishlist", value: String(wishCount), label: t("acct.savedToWishlist") },
-              { href: "/account/rewards", value: pointsBalance.toLocaleString(), label: t("acct.bebecoPoints").replace("{tier}", `${tier.emoji} ${tierName(tier.id, t)}`) },
+              { href: "/cart", icon: "🛒", value: String(totalItems), label: t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice)) },
+              { href: "/wishlist", icon: "❤️", value: String(wishCount), label: t("acct.savedToWishlist") },
+              { href: "/account/rewards", icon: tier.emoji, value: pointsBalance.toLocaleString(), label: tierName(tier.id, t) },
             ].map((s) => (
-              <Link key={s.href + s.label} href={s.href} className="bg-canvas px-4 py-5 hover:bg-panel transition-colors group">
-                <p className="text-2xl font-bold text-ink tabular-nums tracking-tight">{s.value}</p>
-                <p className="text-[11px] text-ink-muted font-medium mt-1 leading-snug">{s.label}</p>
+              <Link
+                key={s.href + s.label}
+                href={s.href}
+                className="bg-canvas border border-line rounded-card px-3 py-4 sm:px-4 sm:py-5 hover:border-ink transition-colors group"
+              >
+                <span className="text-lg leading-none">{s.icon}</span>
+                <p className="text-xl sm:text-2xl font-bold text-ink tabular-nums tracking-tight mt-2">{s.value}</p>
+                <p className="text-[10.5px] sm:text-[11px] text-ink-muted font-medium mt-0.5 leading-snug line-clamp-2">{s.label}</p>
               </Link>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* ── Account ledger ── */}
-            <div className="lg:col-span-2 border border-line rounded-card overflow-hidden divide-y divide-line self-start">
-              {[
-                { icon: "📦", label: t("acct.myOrders"),      sub: t("acct.myOrdersSub"),       href: "/account/orders" },
-                { icon: "↩️", label: t("acct.myReturns"),     sub: t("acct.myReturnsSub"),      href: "/account/returns" },
-                { icon: "📝", label: t("acct.myReviews"),     sub: t("acct.myReviewsSub"),      href: "/account/reviews" },
-                { icon: "⭐", label: t("acct.rewards"),       sub: t("acct.rewardsSub"),        href: "/account/rewards" },
-                { icon: "📍", label: t("acct.addresses"),     sub: t("acct.addressesSub"),      href: "/account/addresses" },
-                { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"),  href: "/account/notifications" },
-                { icon: "🔒", label: t("acct.security"),      sub: t("acct.securitySub"),       href: "/account/security" },
-              ].map((item) => (
-                <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
-                      <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
+          {/* ── Your little one — shown directly, not buried inside the edit form ── */}
+          <div className="border border-line rounded-card p-4 sm:p-5 mb-5">
+            <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-3">👶 {t("acct.yourLittleOne")}</p>
+            {profile?.babyName || profile?.babyBirthdate ? (
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-full bg-panel flex items-center justify-center text-lg flex-shrink-0">
+                  {profile.babyGender === "girl" ? "👧" : profile.babyGender === "boy" ? "👦" : "🍼"}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-ink text-[13.5px] truncate">{profile.babyName || t("acct.yourLittleOne")}</p>
+                  {profile.babyBirthdate && (() => {
+                    const m = monthsOld(profile.babyBirthdate);
+                    return m !== null ? <p className="text-[11.5px] text-ink-muted">{ageLabel(m)}</p> : null;
+                  })()}
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
+                className="w-full text-left text-[12.5px] text-ink-muted hover:text-ink transition-colors"
+              >
+                {t("acct.addBabyInfo")}
+              </button>
+            )}
+          </div>
+
+          {/* ── Grouped menu — orders/activity first, account management second ── */}
+          <div className="space-y-5">
+            <div>
+              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.groupOrders")}</p>
+              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
+                {[
+                  { icon: "📦", label: t("acct.myOrders"),  sub: t("acct.myOrdersSub"),  href: "/account/orders" },
+                  { icon: "↩️", label: t("acct.myReturns"), sub: t("acct.myReturnsSub"), href: "/account/returns" },
+                  { icon: "📝", label: t("acct.myReviews"), sub: t("acct.myReviewsSub"), href: "/account/reviews" },
+                  { icon: "⭐", label: t("acct.rewards"),   sub: t("acct.rewardsSub"),   href: "/account/rewards" },
+                ].map((item) => (
+                  <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
+                        <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
+                      </div>
                     </div>
-                  </div>
-                  <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              ))}
+                    <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            {/* ── Right rail ── */}
-            <div className="space-y-6 self-start">
-              {/* Your little one — shown directly, not buried inside the edit form */}
-              <div className="border border-line rounded-card p-5">
-                <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-3">👶 {t("acct.yourLittleOne")}</p>
-                {profile?.babyName || profile?.babyBirthdate ? (
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-full bg-panel flex items-center justify-center text-lg flex-shrink-0">
-                      {profile.babyGender === "girl" ? "👧" : profile.babyGender === "boy" ? "👦" : "🍼"}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-ink text-[13.5px] truncate">{profile.babyName || t("acct.yourLittleOne")}</p>
-                      {profile.babyBirthdate && (() => {
-                        const m = monthsOld(profile.babyBirthdate);
-                        return m !== null ? <p className="text-[11.5px] text-ink-muted">{ageLabel(m)}</p> : null;
-                      })()}
+            <div>
+              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.groupAccount")}</p>
+              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
+                {[
+                  { icon: "📍", label: t("acct.addresses"),     sub: t("acct.addressesSub"),     href: "/account/addresses" },
+                  { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"), href: "/account/notifications" },
+                  { icon: "🔒", label: t("acct.security"),      sub: t("acct.securitySub"),      href: "/account/security" },
+                  { icon: "⚙️", label: t("acct.settings"),      sub: t("acct.settingsSub"),      href: "/account/settings" },
+                ].map((item) => (
+                  <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
+                        <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
-                    className="w-full text-left text-[12.5px] text-ink-muted hover:text-ink transition-colors"
-                  >
-                    {t("acct.addBabyInfo")}
-                  </button>
-                )}
+                    <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                ))}
               </div>
-
-              {/* Appearance */}
-              <div className="border border-line rounded-card p-5">
-                <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-1">{t("acct.appearance")}</p>
-                <p className="text-[12px] text-ink-muted mb-4 leading-snug">{t("acct.appearanceSub")}</p>
-                <div className="grid grid-cols-2 gap-px bg-line border border-line rounded-control overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("light")}
-                    className={`py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
-                      theme === "light" ? "bg-ink text-white" : "bg-canvas text-ink-soft hover:bg-panel"
-                    }`}
-                  >
-                    ☀ {t("theme.light")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTheme("dark")}
-                    className={`py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
-                      theme === "dark" ? "bg-ink text-white" : "bg-canvas text-ink-soft hover:bg-panel"
-                    }`}
-                  >
-                    ☾ {t("theme.dark")}
-                  </button>
-                </div>
-              </div>
-
-              {/* Browse CTA — quiet, on-system */}
-              <Link
-                href="/products"
-                className="u-btn u-btn-ghost group flex items-center justify-between p-5 rounded-card border border-line hover:border-ink"
-              >
-                <div>
-                  <p className="font-semibold text-ink text-[13.5px]">{t("acct.browseCollection")}</p>
-                  <p className="text-[11.5px] text-ink-muted mt-0.5">{t("acct.findSomething")}</p>
-                </div>
-                <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
             </div>
           </div>
         </>

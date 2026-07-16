@@ -17,6 +17,7 @@ import { formatPrice } from "@/lib/format";
 import { effectivePrice } from "@/lib/pricing";
 import { useLocale } from "@/context/LocaleContext";
 import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { variantStock } from "@/lib/stock";
 
 /** Stock for a bundle item's fixed default variant (colors[0]/sizes[0] — this
@@ -50,18 +51,13 @@ export default function BundleQuickView({
 
   const close = useCallback(() => { setOpen(false); setStatus("idle"); }, []);
 
+  useBodyScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") close(); }
     window.addEventListener("keydown", onKey);
-    const scrollbar = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`;
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
   const resolved = itemProducts.filter((x): x is { config: BundleProductConfig; product: Product } => !!x.product);

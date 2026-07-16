@@ -28,7 +28,6 @@ import { effectivePrice } from "@/lib/pricing";
 import { promoDiscountAmount } from "@/lib/promo";
 import { validatePromoServer, recordPromoUse, adjustPromoUse } from "@/lib/promoValidation";
 import { reverseOrderLoyalty } from "@/lib/loyaltyReversal";
-import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 import { priceCartWithBundles, type BundleGroupLine, type BundleDef } from "@/lib/bundlePricing";
 
 /** Fire the confirmation email via Resend. Failures never block the order. */
@@ -610,11 +609,15 @@ export async function PATCH(req: NextRequest) {
   const orderNumber = String(body?.orderNumber ?? "").trim();
   if (action !== "cancel" || !orderNumber) return bad("Invalid request");
 
-  // Order cancellation (not placement — that stays open to any valid
-  // session, matching how checkout works everywhere) requires step-up.
-  const verified = await requireVerifiedSession();
-  if (verified instanceof NextResponse) return verified;
-  const userId = verified.id;
+  // Cancelling your own pending order is a routine, low-risk, reversible
+  // action (matches placing the order itself) — it only needs a valid
+  // session, not step-up re-verification. Step-up stays reserved for
+  // genuinely high-risk flows (account deletion, returns).
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
+  if (!user) return bad("Not signed in", 401);
+  const userId = user.id;
 
   const admin = createSupabaseAdminClient();
   if (!admin) return bad("Cancellation is unavailable right now.", 500);

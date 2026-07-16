@@ -17,7 +17,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { requireVerifiedSession } from "@/lib/auth/requireVerifiedSession";
 
 export const dynamic = "force-dynamic";
 
@@ -189,9 +188,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
 
-  const verified = await requireVerifiedSession();
-  if (verified instanceof NextResponse) return verified;
-  const user = verified;
+  // Leaving/editing/deleting your own review is routine, low-risk account
+  // activity — it only needs a valid session, not step-up re-verification
+  // (step-up stays reserved for genuinely high-risk flows like account
+  // deletion or returns).
+  const supabaseAuth = await createSupabaseServerClient();
+  const { data: authData } = await supabaseAuth.auth.getUser();
+  const user = authData?.user;
+  if (!user) return NextResponse.json({ error: "Not signed in", code: "not_signed_in" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
   const productId = String(body.productId ?? "");
@@ -268,9 +272,14 @@ export async function PATCH(req: NextRequest) {
   if (crossOrigin(req)) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
-  const verified = await requireVerifiedSession();
-  if (verified instanceof NextResponse) return verified;
-  const user = verified;
+  // Leaving/editing/deleting your own review is routine, low-risk account
+  // activity — it only needs a valid session, not step-up re-verification
+  // (step-up stays reserved for genuinely high-risk flows like account
+  // deletion or returns).
+  const supabaseAuth = await createSupabaseServerClient();
+  const { data: authData } = await supabaseAuth.auth.getUser();
+  const user = authData?.user;
+  if (!user) return NextResponse.json({ error: "Not signed in", code: "not_signed_in" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
   const id = String(body.id ?? "");
@@ -312,9 +321,14 @@ export async function DELETE(req: NextRequest) {
   if (crossOrigin(req)) {
     return NextResponse.json({ error: "Cross-origin request rejected" }, { status: 403 });
   }
-  const verified = await requireVerifiedSession();
-  if (verified instanceof NextResponse) return verified;
-  const user = verified;
+  // Leaving/editing/deleting your own review is routine, low-risk account
+  // activity — it only needs a valid session, not step-up re-verification
+  // (step-up stays reserved for genuinely high-risk flows like account
+  // deletion or returns).
+  const supabaseAuth = await createSupabaseServerClient();
+  const { data: authData } = await supabaseAuth.auth.getUser();
+  const user = authData?.user;
+  if (!user) return NextResponse.json({ error: "Not signed in", code: "not_signed_in" }, { status: 401 });
 
   const id = new URL(req.url).searchParams.get("id") ?? "";
   if (!id) return NextResponse.json({ error: "Missing review id" }, { status: 400 });

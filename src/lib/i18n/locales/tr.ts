@@ -20,6 +20,7 @@ export const tr: Dictionary = {
   "nav.signInRegister": "Giriş Yap / Kayıt Ol",
   "nav.deals": "İndirimde",
   "nav.recentlyViewed": "Son Görüntülenenler",
+  "nav.language": "Dil",
   "nav.recentlyViewedEmpty": "Henüz görüntülenen ürün yok — mağazaya göz atın, burada görünecekler.",
 
   "announce.freeShipping": "🚀 {n} ₾ üzeri siparişlerde ücretsiz kargo · Gürcistan geneline teslimat",
@@ -306,6 +307,7 @@ export const tr: Dictionary = {
   "label.orderStatus.delivered": "Teslim Edildi",
   "label.orderStatus.shipped": "Kargoda",
   "label.orderStatus.processing": "Hazırlanıyor",
+  "label.orderStatus.pending": "Sipariş Verildi",
   "label.orderStatus.cancelled": "İptal Edildi",
 
   "label.returnStatus.requested": "Talep Edildi",
@@ -397,6 +399,8 @@ export const tr: Dictionary = {
   "filter.age2yPlus": "2y+",
   "filter.age2yPlusDesc": "2 yaş ve üzeri",
   "filter.filters": "Filtreler",
+  "filter.recentlyViewed": "Son Görüntülenenler",
+  "filter.dealsHeading": "Sadece indirimli ürünler — aşağıdakilerin hepsi şu anda indirimde.",
   "filter.clear": "Temizle",
   "filter.gridView": "Izgara görünümü",
   "filter.listView": "Liste görünümü",
@@ -737,7 +741,6 @@ export const tr: Dictionary = {
   "acct.cancel": "İptal",
   "acct.itemsInCart": "Sepetteki ürünler · {amount}",
   "acct.savedToWishlist": "Favorilere kaydedildi",
-  "acct.bebecoPoints": "Loov puanı · {tier}",
   "acct.myOrders": "Siparişlerim",
   "acct.myOrdersSub": "Geçmiş siparişleri takip et ve görüntüle",
   "acct.myReturns": "İadelerim",
@@ -752,8 +755,10 @@ export const tr: Dictionary = {
   "acct.notificationsSub": "Sipariş güncellemeleri ve promosyonlar",
   "acct.security": "Güvenlik",
   "acct.securitySub": "Şifre ve hesap güvenliği",
-  "acct.browseCollection": "Koleksiyonu Keşfet",
-  "acct.findSomething": "Minik bebeğinizin bayılacağı bir şeyler bulun",
+  "acct.settings": "Ayarlar",
+  "acct.settingsSub": "Karanlık mod ve dil",
+  "acct.groupOrders": "Siparişlerim",
+  "acct.groupAccount": "Hesap",
 
   // ── Orders list + detail ──
   "acct.orders.title": "Siparişlerim",
@@ -812,8 +817,6 @@ export const tr: Dictionary = {
   "acct.return.cancelling": "İptal ediliyor…",
   "acct.return.cancelRequest": "Talebi iptal et",
   "acct.return.requestReturn": "İade Talep Et",
-  "acct.return.windowLeft1": "1 gün kaldı",
-  "acct.return.windowLeftN": "{n} gün kaldı",
   "acct.return.windowClosed": "İade süresi doldu (teslimattan {n} gün sonra)",
   "acct.return.confirmCancel": "Bu iade talebini iptal etmek istiyor musunuz?",
   "acct.return.cancelTooLate": "Bu iade artık iptal edilemez — lütfen bizimle iletişime geçin.",
@@ -1063,7 +1066,6 @@ export const tr: Dictionary = {
   "notif.wishlistDesc": "Kaydettiğiniz ürünlerdeki fiyat düşüşleri",
 
   // ── Size guide ──
-  "sg.breadcrumb": "Beden Kılavuzu",
   "sg.title": "Beden Kılavuzu",
   "sg.subtitle": "Her bebek kendi hızında büyür. Bu tabloları rehber olarak kullanın — emin değilseniz büyük beden seçin!",
   "sg.proTip": "İpucu:",
@@ -1317,7 +1319,7 @@ export const tr: Dictionary = {
   "blog.title": "Günlük",
   "blog.subtitle": "Yeni ebeveynler için bebek bakım ipuçları, kumaş rehberleri ve dürüst tavsiyeler.",
   "blog.readArticle": "Yazıyı oku",
-  "blog.breadcrumb": "Günlük",
+  "blog.backToJournal": "Günlüğe dön",
   "blog.authorName": "Loov Ekibi",
   "blog.authorNote": "Ebeveynler tarafından, ebeveynler için yazıldı. Her yazı doğruluk açısından incelenir ve ürettiğimiz her üründe yansıttığımız değerleri yansıtır.",
   "blog.shopBebeco": "Loov'da Alışveriş",

@@ -39,10 +39,12 @@ interface OrderRow {
 /** DB status (lowercase) → UI status badge. */
 function mapStatus(s: string): OrderStatus {
   switch (s) {
-    case "delivered": return "Delivered";
-    case "shipped":   return "Shipped";
-    case "cancelled": return "Cancelled";
-    default:           return "Processing"; // pending / processing / unknown
+    case "delivered":  return "Delivered";
+    case "shipped":    return "Shipped";
+    case "cancelled":  return "Cancelled";
+    case "pending":    return "Pending";
+    case "processing": return "Processing";
+    default:            return "Pending"; // unknown raw status → safest is "not started yet"
   }
 }
 

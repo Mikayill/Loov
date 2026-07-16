@@ -1,6 +1,6 @@
 /**
  * Step-up verification gate for API routes that touch sensitive/destructive
- * user data (account deletion, returns, order cancellation…). This is the
+ * user data (account deletion, returns…). This is the
  * API-level counterpart to proxy.ts's page-level OTP gate — proxy.ts only
  * blocks NAVIGATION to /account and /checkout while `loov-otp-pending` is
  * set; it does nothing for direct fetch()/API calls, and that flag is a bare
@@ -16,11 +16,17 @@
  *      minted after every successful email-OTP verify, short-lived (a few
  *      hours) unless the shopper checked "remember this device" (~30 days).
  *
- * NOT gated here on purpose: routine actions already protected by nothing
- * more than a valid session in most stores (e.g. placing an order) — only
- * account-management / high-risk actions get the extra check, matching how
- * major e-commerce sites reserve step-up verification for things like
- * deleting an account or changing payout details, not everyday checkout.
+ * NOT gated here on purpose: routine, reversible, "acting on your own stuff"
+ * actions — placing an order, cancelling your own still-pending order,
+ * writing/editing/deleting your own review — are protected by nothing more
+ * than a valid session + an ownership check. Only account-management /
+ * genuinely high-risk flows (deleting the account, filing a return that
+ * moves money) get the extra step-up check, matching how major e-commerce
+ * sites reserve it for things like deleting an account or changing payout
+ * details, not everyday account activity. (Cancel/review-edit used to be
+ * gated here too — 16 Tem 2026: removed after it was found to force users
+ * through a jarring re-login whenever their short-lived trusted-device
+ * cookie had expired, without actually completing the action they wanted.)
  */
 
 import { NextResponse } from "next/server";

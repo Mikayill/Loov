@@ -20,6 +20,7 @@ export const ru: Dictionary = {
   "nav.signInRegister": "Войти / Регистрация",
   "nav.deals": "Со скидкой",
   "nav.recentlyViewed": "Недавно просмотренные",
+  "nav.language": "Язык",
   "nav.recentlyViewedEmpty": "Вы ещё не просматривали товары — загляните в каталог, и они появятся здесь.",
 
   "announce.freeShipping": "🚀 Бесплатная доставка при заказе от {n} ₾ · Доставляем по всей Грузии",
@@ -306,6 +307,7 @@ export const ru: Dictionary = {
   "label.orderStatus.delivered": "Доставлен",
   "label.orderStatus.shipped": "Отправлен",
   "label.orderStatus.processing": "В обработке",
+  "label.orderStatus.pending": "Заказ оформлен",
   "label.orderStatus.cancelled": "Отменён",
 
   "label.returnStatus.requested": "Запрошен",
@@ -397,6 +399,8 @@ export const ru: Dictionary = {
   "filter.age2yPlus": "2г+",
   "filter.age2yPlusDesc": "От 2 лет и старше",
   "filter.filters": "Фильтры",
+  "filter.recentlyViewed": "Недавно просмотренные",
+  "filter.dealsHeading": "Только товары со скидкой — всё ниже сейчас продаётся дешевле.",
   "filter.clear": "Сбросить",
   "filter.gridView": "Вид сеткой",
   "filter.listView": "Вид списком",
@@ -737,7 +741,6 @@ export const ru: Dictionary = {
   "acct.cancel": "Отмена",
   "acct.itemsInCart": "Товаров в корзине · {amount}",
   "acct.savedToWishlist": "Сохранено в избранном",
-  "acct.bebecoPoints": "Баллы Loov · {tier}",
   "acct.myOrders": "Мои заказы",
   "acct.myOrdersSub": "Отслеживайте и просматривайте прошлые заказы",
   "acct.myReturns": "Мои возвраты",
@@ -752,8 +755,10 @@ export const ru: Dictionary = {
   "acct.notificationsSub": "Обновления заказов и акции",
   "acct.security": "Безопасность",
   "acct.securitySub": "Пароль и безопасность аккаунта",
-  "acct.browseCollection": "Смотреть коллекцию",
-  "acct.findSomething": "Найдите то, что понравится вашему малышу",
+  "acct.settings": "Настройки",
+  "acct.settingsSub": "Тёмная тема и язык",
+  "acct.groupOrders": "Заказы и активность",
+  "acct.groupAccount": "Аккаунт",
 
   // ── Orders list + detail ──
   "acct.orders.title": "Мои заказы",
@@ -812,8 +817,6 @@ export const ru: Dictionary = {
   "acct.return.cancelling": "Отмена…",
   "acct.return.cancelRequest": "Отменить запрос",
   "acct.return.requestReturn": "Запросить возврат",
-  "acct.return.windowLeft1": "Осталось 1 день",
-  "acct.return.windowLeftN": "Осталось {n} дней",
   "acct.return.windowClosed": "Окно возврата закрыто ({n} дней после доставки)",
   "acct.return.confirmCancel": "Отменить этот запрос на возврат?",
   "acct.return.cancelTooLate": "Этот возврат уже нельзя отменить — пожалуйста, свяжитесь с нами.",
@@ -1063,7 +1066,6 @@ export const ru: Dictionary = {
   "notif.wishlistDesc": "Снижение цен на сохранённые товары",
 
   // ── Size guide ──
-  "sg.breadcrumb": "Таблица размеров",
   "sg.title": "Таблица размеров",
   "sg.subtitle": "Каждый малыш растёт в своём темпе. Используйте эти таблицы как ориентир — если сомневаетесь, берите размер побольше!",
   "sg.proTip": "Совет:",
@@ -1317,7 +1319,7 @@ export const ru: Dictionary = {
   "blog.title": "Журнал",
   "blog.subtitle": "Советы по уходу за малышом, гиды по тканям и честные советы для новых родителей.",
   "blog.readArticle": "Читать статью",
-  "blog.breadcrumb": "Журнал",
+  "blog.backToJournal": "Назад в журнал",
   "blog.authorName": "Команда Loov",
   "blog.authorNote": "Написано родителями для родителей. Каждая статья проверяется на точность и отражает ценности, которые мы вкладываем в каждый производимый нами товар.",
   "blog.shopBebeco": "Магазин Loov",

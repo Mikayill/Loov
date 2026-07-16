@@ -84,12 +84,19 @@ export default function CategoryFilter({
   products,
   initialCategory,
   initialDealOnly = false,
+  initialRecentOnly = false,
   advanced = false,
 }: {
   products: Product[];
   initialCategory?: string;
   /** Set from navbar's "On Sale" link (`/products?deal=1`) — restricts to discounted products. */
   initialDealOnly?: boolean;
+  /** Set from navbar's "Recently Viewed" link (`/products?recent=1`) — restricts
+   *  to products in the shopper's `loov_recently_viewed` localStorage history.
+   *  Replaces the old separate `<RecentlyViewedSection>` anchor-scroll section,
+   *  which lived on this same page and made "Products" vs. "Recently Viewed"
+   *  feel like the same screen with two confusing entry points. */
+  initialRecentOnly?: boolean;
   advanced?: boolean;
 }) {
   const { t } = useLocale();
@@ -102,6 +109,8 @@ export default function CategoryFilter({
   useEffect(() => { setActive((initialCategory as Cat) || "All"); }, [initialCategory]);
   const [dealOnly, setDealOnly] = useState(initialDealOnly);
   useEffect(() => { setDealOnly(initialDealOnly); }, [initialDealOnly]);
+  const [recentOnly, setRecentOnly] = useState(initialRecentOnly);
+  useEffect(() => { setRecentOnly(initialRecentOnly); }, [initialRecentOnly]);
   const [sort,           setSort]           = useState<SortKey>("default");
   const [priceRange,     setPriceRange]     = useState<PriceRange>("all");
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -114,11 +123,17 @@ export default function CategoryFilter({
   /* Categories the shopper browsed recently — boosts the default sort after
      mount only (server render stays plain, so no hydration mismatch). */
   const [preferredCats,  setPreferredCats]  = useState<string[]>([]);
+  /* Raw recently-viewed product ids — powers the "Recently Viewed" filter
+     chip below. Empty on the server/first paint (localStorage-only), so the
+     chip simply doesn't render until mount if there's no history — same
+     hydration-safe gating pattern as fabricsPresent/seasonsPresent. */
+  const [recentIds,      setRecentIds]      = useState<string[]>([]);
 
   useEffect(() => {
     try {
       const ids: string[] = JSON.parse(localStorage.getItem("loov_recently_viewed") ?? "[]");
       if (!Array.isArray(ids) || ids.length === 0) return;
+      setRecentIds(ids.map(String));
       const byId = new Map(products.map((p) => [String(p.id), p.category]));
       const cats: string[] = [];
       for (const id of ids) {
@@ -178,6 +193,11 @@ export default function CategoryFilter({
       list = list.filter((p) => discountPercent(p) > 0);
     }
 
+    if (recentOnly) {
+      const idSet = new Set(recentIds);
+      list = list.filter((p) => idSet.has(String(p.id)));
+    }
+
     if (sort === "new")        list = [...list].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     if (sort === "price-asc")  list = [...list].sort((a, b) => a.price - b.price);
     if (sort === "price-desc") list = [...list].sort((a, b) => b.price - a.price);
@@ -196,10 +216,10 @@ export default function CategoryFilter({
     }
 
     return list;
-  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, products, preferredCats]);
+  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, recentIds, products, preferredCats]);
 
   /* Reset pagination when filters change */
-  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, pageSize]);
+  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, pageSize]);
 
   const activeFilterCount =
     (priceRange !== "all" ? 1 : 0) +
@@ -208,7 +228,8 @@ export default function CategoryFilter({
     (active !== "All" ? 1 : 0) +
     (ageFilter !== "all" ? 1 : 0) +
     (seasonFilter !== "all" ? 1 : 0) +
-    (dealOnly ? 1 : 0);
+    (dealOnly ? 1 : 0) +
+    (recentOnly ? 1 : 0);
 
   function toggleColor(name: string) {
     setSelectedColors((prev) =>
@@ -231,6 +252,7 @@ export default function CategoryFilter({
     setAgeFilter("all");
     setSeasonFilter("all");
     setDealOnly(false);
+    setRecentOnly(false);
     setVisibleCount(pageSize);
   }
 
@@ -238,9 +260,19 @@ export default function CategoryFilter({
 
   return (
     <div>
+      {/* Deals banner — makes "deal=1" visually its own view instead of
+          blending invisibly into the plain products grid (previously the
+          only difference was a small "(1)" on the Filters button). */}
+      {dealOnly && (
+        <div className="flex items-center gap-2 mb-4 px-4 py-3 rounded-card border border-danger/30 bg-danger-soft">
+          <span className="text-lg" aria-hidden>🔥</span>
+          <p className="text-sm font-bold text-danger">{t("filter.dealsHeading")}</p>
+        </div>
+      )}
+
       {/* ── Row 1: Category pills + Sort ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 flex-1">
+        <div className="no-scrollbar flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 flex-1">
           {categories.map((cat) => {
             const label = cat === "All" ? t("filter.allProducts") : categoryPlural(cat as Product["category"], t);
             const isActive = active === cat;
@@ -248,19 +280,35 @@ export default function CategoryFilter({
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
-                className={`u-btn flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-control text-[11.5px] uppercase tracking-[0.06em] font-semibold border ${
+                className={`u-btn flex-shrink-0 flex items-center gap-1 sm:gap-1.5 pl-2 pr-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-control text-[10.5px] sm:text-[11.5px] uppercase tracking-[0.04em] sm:tracking-[0.06em] font-semibold border ${
                   isActive
                     ? "border-ink bg-ink text-white"
                     : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
                 }`}
               >
-                <span className="text-sm sm:text-base leading-none">{catIcons[cat]}</span>
+                <span className="text-xs sm:text-base leading-none">{catIcons[cat]}</span>
                 <span>{label}</span>
               </button>
             );
           })}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Recently Viewed toggle — only appears once there's history
+              (localStorage, populated after mount). Replaces the old separate
+              "Son Görüntülenenler" nav pill + anchor-scroll section, which
+              lived on this very page and read as a second, confusing
+              "Products" screen instead of a filter on this one. */}
+          {recentIds.length > 0 && (
+            <button
+              onClick={() => setRecentOnly((v) => !v)}
+              aria-pressed={recentOnly}
+              className={`flex items-center gap-1.5 h-9 px-3 rounded-control border text-[11px] uppercase tracking-[0.06em] font-semibold transition-colors whitespace-nowrap ${
+                recentOnly ? "border-ink text-ink bg-panel" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+              }`}
+            >
+              🕐 {t("filter.recentlyViewed")}
+            </button>
+          )}
           {/* Filters toggle — mobile only (panel is always visible on desktop) */}
           {advanced && (
             <button
@@ -458,6 +506,7 @@ export default function CategoryFilter({
         {selectedColors.length > 0 && ` · ${selectedColors.map((c) => colorLabel(c, t)).join(", ")}`}
         {seasonFilter !== "all" && ` · ${seasonLabel(seasonFilter, t)}`}
         {dealOnly && ` · ${t("nav.deals")}`}
+        {recentOnly && ` · ${t("filter.recentlyViewed")}`}
       </p>
 
       {/* Products */}

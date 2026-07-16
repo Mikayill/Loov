@@ -90,28 +90,42 @@ export default function MobileBottomNav() {
     },
   ];
 
+  const activeIndex = tabs.findIndex((tab) => tab.active);
+
   return (
     <nav
       className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-canvas/95 backdrop-blur-lg border-t border-line"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="grid grid-cols-5">
+      <div className="relative grid grid-cols-5">
+        {/* Sliding active-tab pill — replaces the old "just a darker text
+            color" indicator with something that's actually easy to spot at a
+            glance and animates smoothly between tabs. */}
+        {activeIndex >= 0 && (
+          <span
+            aria-hidden
+            className="absolute top-1.5 h-10 rounded-control bg-accent-soft transition-[left] duration-300"
+            style={{ left: `calc(${activeIndex} * 20% + 8px)`, width: "calc(20% - 16px)", transitionTimingFunction: "var(--ease-snappy)" }}
+          />
+        )}
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex flex-col items-center justify-center gap-0.5 h-14 transition-colors active:scale-95 ${
-              tab.active ? "text-ink" : "text-ink-muted"
+            className={`relative flex flex-col items-center justify-center gap-0.5 h-14 transition-colors active:scale-95 ${
+              tab.active ? "text-accent" : "text-ink-muted"
             }`}
           >
-            <span className="relative">
+            <span className={`relative transition-transform duration-300 ${tab.active ? "scale-110 -translate-y-0.5" : ""}`} style={tab.active ? { transitionTimingFunction: "var(--ease-snappy)" } : undefined}>
               {tab.icon}
               <Badge count={tab.badge} />
               {tab.urgent && tab.badge <= 0 && (
                 <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-danger ring-2 ring-canvas animate-pulse" />
               )}
             </span>
-            <span className="text-[10px] font-semibold leading-none truncate max-w-[60px]">{tab.label}</span>
+            <span className={`text-[10px] leading-none truncate max-w-[60px] transition-all ${tab.active ? "font-extrabold" : "font-semibold"}`}>
+              {tab.label}
+            </span>
           </Link>
         ))}
       </div>

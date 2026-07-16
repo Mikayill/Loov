@@ -12,6 +12,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { useSettings } from "@/lib/db/useSettings";
 import { colorLabel, sizeLabel, categoryLabel } from "@/lib/i18n/labels";
 import { useDelayedUnmount } from "@/hooks/useDelayedUnmount";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { variantStock } from "@/lib/stock";
 import { Stars, DealCountdown } from "./ProductCard";
 
@@ -48,20 +49,13 @@ export default function QuickViewButton({ product }: { product: Product }) {
 
   const close = useCallback(() => { setOpen(false); setStatus("idle"); setQty(1); }, []);
 
+  useBodyScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") close(); }
     window.addEventListener("keydown", onKey);
-    /* Lock scroll AND reserve the scrollbar's width as padding, so hiding the
-       body scrollbar doesn't shift the page to the right underneath the modal. */
-    const scrollbar = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`;
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
   const stock = variantStock(product, selectedSize, selectedColor);

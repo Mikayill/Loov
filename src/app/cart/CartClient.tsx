@@ -262,6 +262,11 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
     return new Set([...selected].filter((k) => keySet.has(k)));
   }, [allKeys, selected]);
 
+  /* Mobile-only: the compact sticky-bottom total/checkout bar's breakdown
+     expander (Temu-style — total + CTA always visible without scrolling,
+     tap to see the subtotal/shipping/discount lines). */
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+
   const [promoCode,    setPromoCode]    = useState("");
   const [promoMsg,     setPromoMsg]     = useState("");
   const [promoSuccess, setPromoSuccess] = useState(false);
@@ -390,7 +395,7 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
   if (items.length === 0) return <EmptyCart t={t} />;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-36 lg:pb-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
@@ -652,6 +657,75 @@ export default function CartClient({ bundles }: { bundles: Bundle[] }) {
 
       {/* Suggestions */}
       <CartSuggestions cartIds={items.map((i) => i.product.id)} t={t} />
+
+      {/* ── Mobile sticky total/checkout bar (Temu-style) ──
+          Previously the total was only visible after scrolling past the
+          entire item list + summary card. This stays pinned above the
+          bottom tab bar the whole time, with a tap-to-expand breakdown. */}
+      <div className="lg:hidden fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-40">
+        {/* Breakdown drawer */}
+        <div
+          className={`bg-canvas border-t border-x border-line rounded-t-2xl shadow-2xl px-5 overflow-hidden transition-[max-height,padding] duration-300 ease-[var(--ease-smooth)] ${
+            mobileSummaryOpen ? "max-h-56 py-4" : "max-h-0 py-0"
+          }`}
+        >
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-[13px]">
+              <span className="text-ink-soft font-medium">{t("cart.subtotal")}</span>
+              <span className="font-bold text-ink">{formatPrice(selectedSubtotal)}</span>
+            </div>
+            {appliedPromo?.type === "percent" && (
+              <div className="flex justify-between text-[13px]">
+                <span className="text-accent font-medium">{t("cart.discount").replace("{n}", String(appliedPromo.value))}</span>
+                <span className="font-bold text-accent">−{formatPrice(selectedSubtotal - discountedSubtotal)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-[13px]">
+              <span className="text-ink-soft font-medium">{t("cart.shipping")}</span>
+              {selectedSubtotal === 0 ? (
+                <span className="font-bold text-ink-muted">—</span>
+              ) : shipping === 0 ? (
+                <span className="font-bold text-accent">{t("cart.free")} 🎉</span>
+              ) : (
+                <span className="font-bold text-ink">{formatPrice(shipping)}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Compact bar — always visible, no scrolling required */}
+        <div className="bg-canvas border-t border-line shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 py-2.5 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMobileSummaryOpen((v) => !v)}
+            aria-expanded={mobileSummaryOpen}
+            className="flex flex-col items-start flex-shrink min-w-0 py-1"
+          >
+            <span className="flex items-center gap-1 text-[10px] font-bold text-ink-muted uppercase tracking-[0.08em]">
+              {t("cart.total")}
+              <svg className={`w-2.5 h-2.5 transition-transform ${mobileSummaryOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+            <span className="font-extrabold text-ink text-lg leading-tight tabular-nums">{formatPrice(total)}</span>
+          </button>
+          <Link
+            href={validSelected.size > 0 ? "/checkout" : "#"}
+            onClick={(e) => {
+              if (validSelected.size === 0) { e.preventDefault(); return; }
+              localStorage.setItem("loov_checkout_keys", JSON.stringify([...validSelected]));
+              localStorage.setItem("loov_checkout_promo", appliedPromoCode);
+            }}
+            className={`u-btn flex-1 py-3 rounded-control font-semibold uppercase tracking-[0.06em] text-white text-[12.5px] flex items-center justify-center gap-1.5 ${
+              validSelected.size > 0 ? "bg-ink hover:bg-ink/85 cursor-pointer" : "bg-ink-muted cursor-not-allowed"
+            }`}
+          >
+            {validSelected.size > 0
+              ? `${t("cart.checkoutBtn").replace("{n}", String(selectedCount))} →`
+              : t("cart.selectToCheckout")}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
