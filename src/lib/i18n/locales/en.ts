@@ -1370,6 +1370,8 @@ export const en = {
   "meta.bundles.description": "Save more with our curated baby bundles — newborn starter sets, gift bundles, and sleep comfort packs at special prices.",
   "meta.products.title": "All Products — Loov",
   "meta.products.description": "Browse our full collection of organic baby clothing — bodysuits, blankets, rompers, towels, gift sets, and bags. Delivered across Georgia.",
+  "meta.category.title": "{cat} — Loov",
+  "meta.category.description": "Shop {cat} for your baby at Loov — organic materials, fast delivery across Georgia. {n} products available.",
   "meta.faq.title": "FAQ — Loov",
   "meta.faq.description": "Frequently asked questions about Loov baby clothing — shipping, returns, sizing, materials, and more.",
   "meta.trackOrder.title": "Track Your Order — Loov",

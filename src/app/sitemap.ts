@@ -21,6 +21,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const categoryRoutes = Array.from(new Set(products.map((p) => p.category))).map((cat) => ({
+    url: `${base}/category/${cat}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.75,
+  }));
+
   const blogRoutes = getAllSlugs().map((slug) => ({
     url: `${base}/blog/${slug}`,
     lastModified: new Date(),
@@ -28,5 +35,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...productRoutes, ...blogRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes];
 }

@@ -5,7 +5,7 @@ import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { statusConfig, type MockOrder } from "@/lib/mockOrders";
+import { statusConfig, type MockOrder } from "@/lib/orderTypes";
 import { fetchMyOrders } from "@/lib/db/myOrders";
 import { formatPrice } from "@/lib/format";
 import { useLocale } from "@/context/LocaleContext";

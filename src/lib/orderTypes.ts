@@ -34,8 +34,7 @@ export interface MockOrder {
   trackingNumber?: string;
 }
 
-/* NOTE: the mock order data that used to live here was removed — order
- * history and tracking now read real orders from Supabase
+/* Order history and tracking read real orders from Supabase
  * (src/lib/db/myOrders.ts). The types + status styling below are shared
  * by those pages. */
 

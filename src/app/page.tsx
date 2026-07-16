@@ -112,12 +112,12 @@ export default async function HomePage() {
         </div>
         {(() => {
           const cats = [
-            { cat: "body",    emoji: "👶", label: t("category.body"),    bg: "#C8DDD8", href: "/products?cat=body" },
-            { cat: "blanket", emoji: "☁️", label: t("category.blanket"), bg: "#C4D4E4", href: "/products?cat=blanket" },
-            { cat: "set",     emoji: "🎀", label: t("category.set"),     bg: "#D0E0CC", href: "/products?cat=set" },
-            { cat: "towel",   emoji: "🛁", label: t("category.towel"),   bg: "#E4D8C4", href: "/products?cat=towel" },
-            { cat: "romper",  emoji: "🐻", label: t("category.romper"),  bg: "#D4CAE4", href: "/products?cat=romper" },
-            { cat: "bag",     emoji: "🐰", label: t("category.bag"),     bg: "#EED4BC", href: "/products?cat=bag" },
+            { cat: "body",    emoji: "👶", label: t("category.body"),    bg: "#C8DDD8", href: "/category/body" },
+            { cat: "blanket", emoji: "☁️", label: t("category.blanket"), bg: "#C4D4E4", href: "/category/blanket" },
+            { cat: "set",     emoji: "🎀", label: t("category.set"),     bg: "#D0E0CC", href: "/category/set" },
+            { cat: "towel",   emoji: "🛁", label: t("category.towel"),   bg: "#E4D8C4", href: "/category/towel" },
+            { cat: "romper",  emoji: "🐻", label: t("category.romper"),  bg: "#D4CAE4", href: "/category/romper" },
+            { cat: "bag",     emoji: "🐰", label: t("category.bag"),     bg: "#EED4BC", href: "/category/bag" },
           ];
           return (
             <>

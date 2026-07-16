@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { statusConfig, type MockOrder } from "@/lib/mockOrders";
+import { statusConfig, type MockOrder } from "@/lib/orderTypes";
 import { trackOrder } from "@/lib/db/myOrders";
 import { formatPrice } from "@/lib/format";
 import { useLocale } from "@/context/LocaleContext";

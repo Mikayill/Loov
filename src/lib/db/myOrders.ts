@@ -7,7 +7,7 @@
  */
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { MockOrder, OrderItem, OrderStatus } from "@/lib/mockOrders";
+import type { MockOrder, OrderItem, OrderStatus } from "@/lib/orderTypes";
 import { products } from "@/lib/products";
 
 interface OrderItemRow {

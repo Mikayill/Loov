@@ -761,6 +761,11 @@
 
 ---
 
+### 26. Kategori Sayfası (`/category/[kategori]`) meta başlık/açıklaması — YENİ (16 Tem 2026)
+Yeni SEO-amaçlı kategori sayfaları (`/category/body`, `/category/blanket`...) için 2 yeni anahtar, tüm kategorilerde ortak şablon olarak kullanılıyor — `{cat}` kategori adıyla (örn. "საბნები"), `{n}` o kategorideki ürün sayısıyla değişiyor:
+- `meta.category.title`: `"{cat} — Loov"` (çevrilecek bir şey yok, format sabit)
+- `meta.category.description`: `"შეიძინეთ {cat} თქვენი ბავშვისთვის Loov-ში — ორგანული მასალები, სწრაფი მიწოდება მთელ საქართველოში. {n} პროდუქტი ხელმისაწვდომია."` — makine kalitesinde, native inceleme bekliyor (diğer taslak bölümlerle aynı durum).
+
 ### 📌 Notlar
 - `{sayı}`, `{tutar}`, `{n}` otomatik doldurulan sayılardır (örn. "Tüm 20 Ürünü Gör", "20 ₾ Tasarruf", "24 yorum") — o kısmı çevirmeye gerek yok, olduğu gibi kalsın.
 - Emoji (🚀🌿🎁🔄💚) ve marka ismi **Loov** aynı kalmalı.

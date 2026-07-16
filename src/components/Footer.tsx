@@ -44,11 +44,11 @@ const socialLinks = [
 const shopLinks = [
   { label: "All Products", href: "/products" },
   { label: "Bundle Deals", href: "/bundles" },
-  { label: "Bodysuits",    href: "/products?cat=body" },
-  { label: "Blankets",     href: "/products?cat=blanket" },
-  { label: "Rompers",      href: "/products?cat=romper" },
-  { label: "Gift Sets",    href: "/products?cat=set" },
-  { label: "Bags",         href: "/products?cat=bag" },
+  { label: "Bodysuits",    href: "/category/body" },
+  { label: "Blankets",     href: "/category/blanket" },
+  { label: "Rompers",      href: "/category/romper" },
+  { label: "Gift Sets",    href: "/category/set" },
+  { label: "Bags",         href: "/category/bag" },
 ];
 
 const helpLinks = [

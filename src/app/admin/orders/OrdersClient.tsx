@@ -72,6 +72,37 @@ export default function OrdersClient() {
     else setActionError(data.error || "Could not update order status — please try again.");
   }
 
+  /** CSV of what's currently loaded (respects the active status filter). */
+  function exportCsv() {
+    if (!orders || orders.length === 0) return;
+    const headers = [
+      "Order #", "Date", "Status", "Customer", "Email", "Phone",
+      "Street", "District", "City", "Region", "ZIP",
+      "Items", "Subtotal", "Shipping", "Promo code", "Promo discount", "Total",
+      "Gift wrap", "Notes",
+    ];
+    const cell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = orders.map((o) => {
+      const itemCount = (o.order_items ?? []).reduce((s, it) => s + it.quantity, 0);
+      return [
+        o.order_number, new Date(o.created_at).toISOString().slice(0, 10), o.status,
+        `${o.first_name} ${o.last_name}`.trim() || "Guest", o.email, o.phone,
+        o.street, o.district ?? "", o.city, o.region, o.zip ?? "",
+        itemCount, o.subtotal, o.shipping, o.promo_code ?? "", o.promo_discount ?? 0, o.total,
+        o.gift_wrap ? "Yes" : "No", o.notes ?? "",
+      ].map(cell).join(",");
+    });
+    const csv = [headers.map(cell).join(","), ...rows].join("\r\n");
+    // BOM so Excel opens UTF-8 (Georgian/Cyrillic names) correctly instead of mangling it.
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `loov-orders-${filter || "all"}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   /** Copy everything a shipping label needs in one click. */
   function copyShippingInfo(o: Order) {
     const lines = [
@@ -89,7 +120,17 @@ export default function OrdersClient() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-2xl font-extrabold text-ink mb-1">Orders</h1>
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-1">
+        <h1 className="text-2xl font-extrabold text-ink">Orders</h1>
+        <button
+          onClick={exportCsv}
+          disabled={!orders || orders.length === 0}
+          className="text-xs font-bold text-accent border border-sage rounded-full px-3 py-1.5 hover:bg-panel transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          title="Download the currently filtered list as CSV"
+        >
+          ⬇ Export CSV
+        </button>
+      </div>
       <p className="text-ink-muted text-sm mb-5">Change an order&apos;s status with the dropdown — the customer sees it on their tracking page <strong>and gets an email</strong> (processing / shipped / delivered / cancelled).</p>
 
       {/* Filter tabs */}

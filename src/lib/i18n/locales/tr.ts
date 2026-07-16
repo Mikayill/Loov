@@ -1340,6 +1340,8 @@ export const tr: Dictionary = {
   "meta.bundles.description": "Özenle hazırlanmış bebek setlerimizle daha fazla tasarruf edin — yenidoğan başlangıç setleri, hediye setleri ve uyku konforu paketleri özel fiyatlarla.",
   "meta.products.title": "Tüm Ürünler — Loov",
   "meta.products.description": "Organik bebek giyiminin tüm koleksiyonuna göz atın — body, battaniye, tulum, havlu, hediye setleri ve çantalar. Gürcistan geneline teslimat.",
+  "meta.category.title": "{cat} — Loov",
+  "meta.category.description": "Bebeğiniz için {cat} Loov'da — organik malzemeler, Gürcistan geneline hızlı teslimat. {n} ürün mevcut.",
   "meta.faq.title": "SSS — Loov",
   "meta.faq.description": "Loov bebek giyimi hakkında sıkça sorulan sorular — kargo, iade, beden, malzemeler ve daha fazlası.",
   "meta.trackOrder.title": "Siparişinizi Takip Edin — Loov",

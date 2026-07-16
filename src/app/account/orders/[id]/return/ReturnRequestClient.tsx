@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLocale } from "@/context/LocaleContext";
 import { fmtDate } from "@/lib/i18n/format";
-import { MockOrder } from "@/lib/mockOrders";
+import { MockOrder } from "@/lib/orderTypes";
 import { fetchMyOrder } from "@/lib/db/myOrders";
 import { formatPrice } from "@/lib/format";
 import {
