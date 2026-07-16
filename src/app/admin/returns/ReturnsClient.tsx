@@ -36,6 +36,7 @@ export default function ReturnsClient() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   function load() {
     fetch("/api/admin/returns")
@@ -54,9 +55,10 @@ export default function ReturnsClient() {
   useEffect(load, []);
 
   async function move(row: ReturnRecord, status: ReturnStatus) {
+    setActionError("");
     const note = (notes[row.id] ?? "").trim();
     if (status === "rejected" && !note) {
-      alert("Write a rejection reason in the note field first — it's emailed to the customer.");
+      setActionError("Write a rejection reason in the note field first — it's emailed to the customer.");
       return;
     }
     if (!confirm(`Move ${row.return_number} to "${status}"? The customer will be emailed.`)) return;
@@ -73,7 +75,7 @@ export default function ReturnsClient() {
         prev!.map((r) => (r.id === row.id ? { ...r, status, admin_note: note || r.admin_note } : r))
       );
     } catch (e) {
-      alert((e as Error).message);
+      setActionError((e as Error).message || "Could not update the return — please try again.");
     } finally {
       setSaving(null);
     }
@@ -112,6 +114,9 @@ export default function ReturnsClient() {
           ⚠️ The <code className="font-mono">returns</code> table isn&apos;t set up yet. Run{" "}
           <code className="font-mono">supabase/returns.sql</code> in the Supabase SQL Editor.
         </div>
+      )}
+      {actionError && (
+        <div className="mb-5 rounded-control bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-danger">⚠ {actionError}</div>
       )}
 
       <div className="flex gap-2 mb-4 flex-wrap">

@@ -28,6 +28,7 @@ export default function ReviewsClient() {
   const [replyOpen, setReplyOpen] = useState<Record<string, boolean>>({});
   const [replyDraft, setReplyDraft] = useState<Record<string, string>>({});
   const [replyBusy, setReplyBusy] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   function load() {
     fetch("/api/admin/reviews").then((r) => r.json()).then((d) => {
@@ -38,13 +39,31 @@ export default function ReviewsClient() {
   useEffect(load, []);
 
   async function setStatus(id: string, status: string) {
+    setActionError("");
+    const prevRows = rows;
     setRows((prev) => prev!.map((r) => r.id === id ? { ...r, status } : r));
-    await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status }) });
+    try {
+      const res = await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status }) });
+      const data = await res.json();
+      if (!data.ok) { setRows(prevRows); setActionError(data.error || "Could not update status — please try again."); }
+    } catch {
+      setRows(prevRows);
+      setActionError("Could not update status — please try again.");
+    }
   }
   async function remove(id: string) {
     if (!confirm("Delete this review permanently?")) return;
+    setActionError("");
+    const prevRows = rows;
     setRows((prev) => prev!.filter((r) => r.id !== id));
-    await fetch(`/api/admin/reviews?id=${id}`, { method: "DELETE" });
+    try {
+      const res = await fetch(`/api/admin/reviews?id=${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!data.ok) { setRows(prevRows); setActionError(data.error || "Could not delete review — please try again."); }
+    } catch {
+      setRows(prevRows);
+      setActionError("Could not delete review — please try again.");
+    }
   }
   function openReply(r: Row) {
     setReplyDraft((prev) => ({ ...prev, [r.id]: r.admin_reply ?? "" }));
@@ -52,6 +71,7 @@ export default function ReviewsClient() {
   }
   async function saveReply(id: string, overrideText?: string) {
     const adminReply = (overrideText ?? replyDraft[id] ?? "").trim();
+    setActionError("");
     setReplyBusy(id);
     const res = await fetch("/api/admin/reviews", {
       method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -62,7 +82,7 @@ export default function ReviewsClient() {
     if (data.ok) {
       setRows((prev) => prev!.map((r) => r.id === id ? { ...r, admin_reply: adminReply || null, admin_reply_at: adminReply ? new Date().toISOString() : null } : r));
       setReplyOpen((prev) => ({ ...prev, [id]: false }));
-    } else alert(data.error || "Could not save reply");
+    } else setActionError(data.error || "Could not save reply — please try again.");
   }
   async function removeReply(id: string) {
     await saveReply(id, "");
@@ -77,6 +97,10 @@ export default function ReviewsClient() {
     <div className="max-w-4xl">
       <h1 className="text-2xl font-extrabold text-ink mb-1">Reviews</h1>
       <p className="text-ink-muted text-sm mb-5">{rows.length} reviews · only customers who received a product can post one.</p>
+
+      {actionError && (
+        <div className="mb-4 rounded-control bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-danger">⚠ {actionError}</div>
+      )}
 
       {!ready && (
         <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">

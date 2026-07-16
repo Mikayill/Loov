@@ -43,6 +43,7 @@ export default function OrdersClient() {
   const [filter, setFilter] = useState<string>("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     /* read ?status= from the URL for the dashboard "pending" shortcut */
@@ -61,13 +62,14 @@ export default function OrdersClient() {
   useEffect(() => { load(filter); }, [filter]);
 
   async function changeStatus(order: Order, status: string) {
+    setActionError("");
     const res = await fetch("/api/admin/orders", {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: order.id, status }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (data.ok) setOrders((prev) => prev ? prev.map((o) => o.id === order.id ? { ...o, status } : o) : prev);
-    else alert(data.error || "Update failed");
+    else setActionError(data.error || "Could not update order status — please try again.");
   }
 
   /** Copy everything a shipping label needs in one click. */
@@ -101,6 +103,9 @@ export default function OrdersClient() {
       </div>
 
       {error && <p className="text-red-500 font-semibold">{error}</p>}
+      {actionError && (
+        <div className="mb-4 rounded-control bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-danger">⚠ {actionError}</div>
+      )}
       {!orders && !error && <div className="flex items-center justify-center py-24"><div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin" /></div>}
       {orders && orders.length === 0 && <p className="text-ink-muted text-sm bg-canvas rounded-card border border-line p-8 text-center">No orders here.</p>}
 

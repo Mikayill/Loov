@@ -31,14 +31,17 @@ export default function RevenueChart() {
   const [range, setRange] = useState("week");
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     setLoading(true);
+    setError("");
     fetch(`/api/admin/revenue?range=${range}`)
       .then((r) => r.json())
-      .then((d) => { if (!d.error) setData(d); })
+      .then((d) => { if (d.error) setError(d.error); else setData(d); })
+      .catch(() => setError("Could not load revenue data — please try again."))
       .finally(() => setLoading(false));
   }, [range]);
 
@@ -119,6 +122,10 @@ export default function RevenueChart() {
           ))}
         </div>
       </div>
+
+      {error && (
+        <p className="mb-4 text-xs font-semibold text-danger">⚠ {error}</p>
+      )}
 
       {/* Chart */}
       <div className="relative">

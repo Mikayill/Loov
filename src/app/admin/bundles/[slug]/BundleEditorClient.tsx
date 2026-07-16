@@ -14,6 +14,7 @@ interface CatalogProduct {
   imageUrl: string | null;
   emoji: string;
   cardColor: string;
+  stock: number;
 }
 
 function unitPrice(p: CatalogProduct): number {
@@ -90,6 +91,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
             imageUrl: (p.image_url as string) ?? ((p.image_urls as string[])?.[0] ?? null),
             emoji: (p.emoji as string) || "🍼",
             cardColor: (p.card_color as string) || "#EAE4DC",
+            stock: Number(p.stock) || 0,
           })));
         } else setProductsError(d.error || "Products could not be loaded");
       })
@@ -160,16 +162,17 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
   /* ── photo (files upload immediately — clearly labelled) ── */
   async function uploadPhoto(file: File) {
     setSaving(true);
+    setSaveError("");
     const fd = new FormData();
     fd.append("file", file);
     fd.append("bundleSlug", slug);
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setSaving(false);
     if (data.ok) {
       set({ image_url: data.imageUrl });
       setLoaded((l) => l ? { ...l, image_url: data.imageUrl } : l); // photo is saved server-side already
-    } else alert(data.error || "Upload failed");
+    } else setSaveError(data.error || "Photo upload failed — please try again.");
   }
 
   /* ── save all ── */
@@ -362,6 +365,8 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                         <p className="font-bold text-ink text-sm leading-snug truncate">
                           {p.name}
                           <span className="ml-2 text-xs font-semibold text-ink-muted">{formatPrice(unitPrice(p))}</span>
+                          {p.stock <= 0 && <span className="ml-2 text-[10px] font-bold text-danger bg-danger-soft px-1.5 py-0.5 rounded-full align-middle">Out of stock</span>}
+                          {p.stock > 0 && p.stock <= 5 && <span className="ml-2 text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full align-middle">Low stock ({p.stock})</span>}
                         </p>
                       ) : (
                         <p className="font-bold text-danger text-sm">⚠ &ldquo;{it.slug}&rdquo; is no longer in the catalog — remove it</p>
@@ -430,6 +435,7 @@ export default function BundleEditorClient({ slug }: { slug: string }) {
                         <p className="text-xs text-ink-muted">
                           {formatPrice(unitPrice(p))}
                           {p.discountPercent > 0 && <span className="ml-1 text-[#B85C38] font-bold">−{p.discountPercent}%</span>}
+                          {p.stock <= 0 && <span className="ml-1.5 text-[10px] font-bold text-danger">· Out of stock</span>}
                         </p>
                       </div>
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${

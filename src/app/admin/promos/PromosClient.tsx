@@ -200,11 +200,24 @@ export default function PromosClient() {
                 {/* Code + type */}
                 <div className="min-w-[160px]">
                   <p className="font-mono font-extrabold text-ink tracking-wider">{p.code}</p>
-                  <p className="text-xs font-bold mt-0.5">
-                    {p.type === "shipping"
-                      ? <span className="text-[#4A7AC0]">🚀 Free shipping</span>
-                      : <span className="text-accent">−{p.value}%</span>}
-                  </p>
+                  {p.type === "shipping" ? (
+                    <p className="text-xs font-bold mt-0.5 text-[#4A7AC0]">🚀 Free shipping</p>
+                  ) : (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-xs font-bold text-accent">−</span>
+                      <input
+                        type="number" min={1} max={90} step={1}
+                        defaultValue={p.value}
+                        onBlur={(e) => {
+                          const v = Number(e.target.value);
+                          if (v === p.value || !Number.isFinite(v)) return;
+                          patch(p.id, { value: v });
+                        }}
+                        className="h-7 w-14 px-1.5 rounded-lg border border-line text-xs font-bold text-accent text-right outline-none focus:border-accent bg-canvas"
+                      />
+                      <span className="text-xs font-bold text-accent">%</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Usage */}

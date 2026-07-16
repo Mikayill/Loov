@@ -310,12 +310,15 @@ function NameDescriptionEditor({ draft, setDraft, save }: {
 }
 
 /* ── expandable details panel content (shared by table + card layouts) ── */
-function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
+function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy, dirty, error, saveAll }: {
   draft: Row;
   setDraft: (r: Row) => void;
   save: (patch: Partial<Row>) => void;
   uploadPhoto: (f: File) => void;
   busy: boolean;
+  dirty: boolean;
+  error: string;
+  saveAll: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const gallery = draft.image_urls ?? (draft.image_url ? [draft.image_url] : []);
@@ -412,6 +415,30 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
               </div>
               <p className="text-[10px] text-ink-muted mt-1.5">JPG/PNG/WEBP, max 5MB. First photo is the thumbnail.</p>
+            </div>
+
+            {/* Fallback appearance — only shown to customers while this product has no photo */}
+            <div>
+              <label className="block text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-2">Fallback appearance (no photo)</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={draft.card_color ?? "#EAE4DC"}
+                  onChange={(e) => setDraft({ ...draft, card_color: e.target.value })}
+                  onBlur={() => save({ card_color: draft.card_color })}
+                  className="w-10 h-10 rounded-lg border border-line cursor-pointer p-0.5 bg-canvas"
+                  title="Card background color"
+                />
+                <input
+                  value={draft.emoji ?? ""}
+                  onChange={(e) => setDraft({ ...draft, emoji: e.target.value.slice(0, 4) })}
+                  onBlur={() => save({ emoji: draft.emoji || null })}
+                  placeholder="🍼"
+                  className="w-16 h-10 px-2 rounded-lg border border-line text-xl text-center outline-none focus:border-accent"
+                  title="Placeholder emoji"
+                />
+                <p className="text-[10px] text-ink-muted flex-1">Used on cards/thumbnails only until a real photo is uploaded above.</p>
+              </div>
             </div>
 
             {/* Video — Temu-style: poster frame from the gallery + native player */}
@@ -653,7 +680,18 @@ function DetailsPanelContent({ draft, setDraft, save, uploadPhoto, busy }: {
             </div>
           </div>
         </div>
-      {busy && <p className="text-xs text-ink-muted mt-3">Saving…</p>}
+      <div className="sticky bottom-0 -mx-4 mt-4 px-4 py-3 bg-canvas border-t border-line flex items-center gap-3">
+        {error && <p className="text-xs font-semibold text-danger flex-1">⚠ {error}</p>}
+        {!error && dirty && <p className="text-xs text-ink-muted flex-1">Unsaved changes</p>}
+        {!error && !dirty && <p className="text-xs text-ink-muted flex-1">All changes saved</p>}
+        <button
+          onClick={saveAll}
+          disabled={busy || !dirty}
+          className="px-4 py-2 rounded-lg bg-accent text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent-deep transition-colors"
+        >
+          {busy ? "Saving…" : "💾 Save changes"}
+        </button>
+      </div>
     </>
   );
 }
@@ -672,14 +710,23 @@ function DetailsPanel(props: Parameters<typeof DetailsPanelContent>[0]) {
 /* ── one editable row (variant: desktop table row, or mobile card) ── */
 function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChanged: (r: Row) => void; onDeleted: (id: string) => void; variant: "table" | "card" }) {
   const [draft, setDraft] = useState(row);
+  const [baseline, setBaseline] = useState(row);
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Per-field edits already autosave on blur/change — this tracks whether
+  // *anything* differs from what's confirmed saved, so the explicit Save
+  // button (and the "unsaved changes" warning) stay accurate even if a
+  // field's own autosave hasn't fired yet (e.g. still focused).
+  const dirty = JSON.stringify(draft) !== JSON.stringify(baseline);
 
   // Map draft (snake_case) fields to the API's expected keys.
   async function save(patch: Partial<Row>) {
     setBusy(true);
+    setError("");
     const next = { ...draft, ...patch };
     setDraft(next);
     const payload: Record<string, unknown> = { id: row.id };
@@ -713,32 +760,46 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
     if ("image_urls" in patch) payload.imageUrls = next.image_urls;
     if ("video_url" in patch) payload.videoUrl = next.video_url ?? null;
     if ("video_poster_url" in patch) payload.videoPosterUrl = next.video_poster_url ?? null;
+    if ("card_color" in patch) payload.cardColor = next.card_color ?? "#EAE4DC";
+    if ("emoji" in patch) payload.emoji = next.emoji ?? "🍼";
     const res = await api("PATCH", payload);
     setBusy(false);
-    if (res.ok) { setSaved(true); onChanged(next); setTimeout(() => setSaved(false), 1500); }
-    else alert(res.error || "Save failed");
+    if (res.ok) { setSaved(true); setBaseline(next); onChanged(next); setTimeout(() => setSaved(false), 1500); }
+    else setError(res.error || "Save failed — please try again.");
+  }
+
+  /** Explicit "Save changes" button — sends the whole draft in one request,
+   *  a safety net for edits an individual field's onBlur hasn't fired for
+   *  yet (still focused, or a picker whose change doesn't blur anything). */
+  function saveAll() {
+    save(draft);
   }
 
   async function uploadPhoto(file: File) {
     setBusy(true);
+    setError("");
     const fd = new FormData();
     fd.append("file", file);
     fd.append("productId", row.id);
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
     const data = await res.json();
     setBusy(false);
-    if (data.ok) { const next = { ...draft, image_urls: data.imageUrls, image_url: data.imageUrls?.[0] ?? data.imageUrl }; setDraft(next); onChanged(next); }
-    else alert(data.error || "Upload failed");
+    if (data.ok) {
+      const next = { ...draft, image_urls: data.imageUrls, image_url: data.imageUrls?.[0] ?? data.imageUrl };
+      setDraft(next); setBaseline(next); onChanged(next);
+    }
+    else setError(data.error || "Photo upload failed — please try again.");
   }
 
   async function remove() {
     if (!confirm(`Delete "${row.name}"? This cannot be undone.`)) return;
     setBusy(true);
+    setError("");
     const res = await fetch(`/api/admin/products?id=${row.id}`, { method: "DELETE" });
     const data = await res.json();
     setBusy(false);
     if (data.ok) onDeleted(row.id);
-    else alert(data.error || "Delete failed");
+    else setError(data.error || "Delete failed — please try again.");
   }
 
   const primary = draft.image_url ?? draft.image_urls?.[0];
@@ -833,13 +894,15 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
           <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-accent hover:underline">
             {open ? "Close ▴" : "Edit ▾"}
           </button>
+          {dirty && !open && <span className="w-1.5 h-1.5 rounded-full bg-orange-400" title="Unsaved changes" />}
           <span className={`text-xs font-bold text-accent transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓ Saved</span>
+          {error && !open && <span className="text-xs font-bold text-danger" title={error}>⚠ Error</span>}
           <button onClick={remove} className="text-xs font-bold text-danger hover:underline ml-auto">Delete</button>
         </div>
 
         {open && (
           <div className="border-t border-canvas bg-[#FAF7F4] p-4">
-            <DetailsPanelContent draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} />
+            <DetailsPanelContent draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} dirty={dirty} error={error} saveAll={saveAll} />
           </div>
         )}
       </div>
@@ -933,11 +996,13 @@ function ProductRow({ row, onChanged, onDeleted, variant }: { row: Row; onChange
           <button onClick={() => setOpen((v) => !v)} className="text-xs font-bold text-accent hover:underline mr-3">
             {open ? "Close ▴" : "Edit ▾"}
           </button>
+          {dirty && !open && <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-400 mr-2" title="Unsaved changes" />}
           <span className={`text-xs font-bold text-accent mr-2 transition-opacity ${saved ? "opacity-100" : "opacity-0"}`}>✓</span>
+          {error && !open && <span className="text-xs font-bold text-danger mr-2" title={error}>⚠</span>}
           <button onClick={remove} className="text-xs font-bold text-danger hover:underline">Delete</button>
         </td>
       </tr>
-      {open && <DetailsPanel draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} />}
+      {open && <DetailsPanel draft={draft} setDraft={setDraft} save={save} uploadPhoto={uploadPhoto} busy={busy} dirty={dirty} error={error} saveAll={saveAll} />}
     </>
   );
 }
@@ -954,6 +1019,7 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
   const [fabric, setFabric] = useState(CATEGORY_TEMPLATES.body.fabric);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   /* Picking a category pre-fills sizes/colors/fabric with a sensible template
@@ -965,7 +1031,8 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
   }
 
   async function create() {
-    if (!name.trim() || !price) { alert("Name and price are required"); return; }
+    setError("");
+    if (!name.trim() || !price) { setError("Name and price are required"); return; }
     setBusy(true);
     const res = await api("POST", {
       name,
@@ -989,7 +1056,7 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
       if (tpl) { setSizes(tpl.sizes); setColors(tpl.colors); setFabric(tpl.fabric); }
       setOpen(false); onCreated();
     }
-    else alert(res.error || "Create failed");
+    else setError(res.error || "Create failed — please try again.");
   }
 
   if (!open) {
@@ -1036,6 +1103,7 @@ function AddProduct({ onCreated }: { onCreated: () => void }) {
       </div>
       <button onClick={create} disabled={busy} className="h-10 px-4 rounded-lg font-bold text-white text-sm disabled:opacity-60" style={{ backgroundColor: "var(--color-accent)" }}>{busy ? "…" : "Create"}</button>
       <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-lg font-bold text-ink-soft text-sm border border-line">Cancel</button>
+      {error && <p className="w-full text-xs font-semibold text-danger">⚠ {error}</p>}
       <p className="w-full text-[11px] text-ink-muted">Sizes, colors &amp; fabric are pre-filled from the category — edit freely. Per-size prices, discount &amp; more photos: row&apos;s <strong>Edit</strong> button after creating.</p>
     </div>
   );

@@ -44,6 +44,7 @@ export default function BundlesListClient() {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [busySlug, setBusySlug] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   function load() {
     fetch("/api/admin/bundles")
@@ -59,40 +60,43 @@ export default function BundlesListClient() {
   async function createBundle() {
     const name = newName.trim();
     if (!name) return;
+    setActionError("");
     setBusySlug("__new__");
     const res = await fetch("/api/admin/bundles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setBusySlug(null);
     if (data.ok) router.push(`/admin/bundles/${data.slug}`);
-    else alert(data.error || "Create failed");
+    else setActionError(data.error || "Could not create bundle — please try again.");
   }
 
-  async function patch(slug: string, body: Record<string, unknown>): Promise<boolean> {
+  async function patch(slug: string, body: Record<string, unknown>): Promise<{ ok: boolean; error?: string }> {
+    setActionError("");
     setBusySlug(slug);
     const res = await fetch("/api/admin/bundles", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug, ...body }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setBusySlug(null);
     if (!data.ok) {
-      if (Array.isArray(data.missing)) {
-        alert(`This bundle can't go live yet. Missing: ${data.missing.map((m: string) => MISSING_TR[m] ?? m).join(", ")}.\n\nOpen the bundle and complete it first.`);
-      } else alert(data.error || "Update failed");
-      return false;
+      const message = Array.isArray(data.missing)
+        ? `This bundle can't go live yet — missing: ${data.missing.map((m: string) => MISSING_TR[m] ?? m).join(", ")}. Open the bundle and complete it first.`
+        : (data.error || "Could not update bundle — please try again.");
+      setActionError(message);
+      return { ok: false, error: message };
     }
-    return true;
+    return { ok: true };
   }
 
   async function toggleLive(b: BundleRow) {
     const next = !(b.active ?? true);
-    const ok = await patch(b.slug, { active: next });
-    if (ok) setRows((prev) => prev!.map((x) => x.slug === b.slug ? { ...x, active: next } : x));
+    const res = await patch(b.slug, { active: next });
+    if (res.ok) setRows((prev) => prev!.map((x) => x.slug === b.slug ? { ...x, active: next } : x));
   }
 
   /** Swap sort with the neighbour above/below. */
@@ -103,26 +107,33 @@ export default function BundlesListClient() {
     if (!a || !b) return;
     const sortA = a.sort ?? index;
     const sortB = b.sort ?? index + dir;
-    const okA = await patch(a.slug, { sort: sortB });
-    const okB = okA && await patch(b.slug, { sort: sortA });
-    if (okA && okB) {
+    const resA = await patch(a.slug, { sort: sortB });
+    const resB = resA.ok ? await patch(b.slug, { sort: sortA }) : { ok: false };
+    if (resA.ok && resB.ok) {
       setRows((prev) => {
         const next = [...prev!];
         next[index] = { ...b, sort: sortA };
         next[index + dir] = { ...a, sort: sortB };
         return next;
       });
+    } else if (resA.ok && !resB.ok) {
+      // b's sort didn't move — put a's back so the DB doesn't drift from what's shown,
+      // then re-surface b's failure (patch() clears actionError on its own calls).
+      const reason = resB.error;
+      await patch(a.slug, { sort: sortA });
+      if (reason) setActionError(reason);
     }
   }
 
   async function remove(b: BundleRow) {
     if (!confirm(`Delete bundle "${b.name}"? This cannot be undone.`)) return;
+    setActionError("");
     setBusySlug(b.slug);
     const res = await fetch(`/api/admin/bundles?slug=${encodeURIComponent(b.slug)}`, { method: "DELETE" });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     setBusySlug(null);
     if (data.ok) setRows((prev) => prev!.filter((x) => x.slug !== b.slug));
-    else alert(data.error || "Delete failed");
+    else setActionError(data.error || "Could not delete bundle — please try again.");
   }
 
   if (error) return <p className="text-red-500 font-semibold">{error}</p>;
@@ -159,6 +170,9 @@ export default function BundlesListClient() {
         <div className="mb-5 rounded-control bg-warning-soft border border-warning-border px-4 py-3 text-sm text-warning">
           ⚠️ The <code className="font-mono">bundles</code> table isn&apos;t set up yet — run <code className="font-mono">supabase/bundles.sql</code> in the SQL Editor.
         </div>
+      )}
+      {actionError && (
+        <div className="mb-5 rounded-control bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-danger">⚠ {actionError}</div>
       )}
 
       <div className="space-y-3">

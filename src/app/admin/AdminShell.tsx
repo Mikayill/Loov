@@ -87,7 +87,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
           onClick={() => setMobileOpen(false)}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-control text-sm font-bold transition-colors ${
             isActive(n.href, n.exact)
-              ? "bg-accent text-white"
+              ? "bg-accent text-white shadow-sm"
               : "text-ink-soft hover:bg-panel"
           }`}
         >
@@ -100,12 +100,12 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
   );
 
   return (
-    <div className="min-h-screen flex flex-col sm:flex-row bg-canvas">
+    <div className="min-h-screen flex flex-col sm:flex-row bg-panel">
       {/* Sidebar (desktop) */}
-      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-canvas border-r border-line p-4 sticky top-0 h-screen">
-        <div className="flex items-center gap-2.5 px-2 mb-6">
+      <aside className="hidden sm:flex sm:flex-col w-60 flex-shrink-0 bg-canvas border-r border-line p-4 sticky top-0 h-screen z-20">
+        <div className="flex items-center gap-2 px-2 mb-6">
           <Wordmark className="text-[17px] text-ink" />
-          <p className="text-[10px] font-bold text-accent uppercase tracking-widest mt-0.5">Admin</p>
+          <span className="text-[9px] font-extrabold text-accent uppercase tracking-widest bg-accent-soft px-1.5 py-0.5 rounded-full">Admin</span>
         </div>
         {nav}
         <div className="mt-auto pt-4 border-t border-canvas">
@@ -125,7 +125,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
       </aside>
 
       {/* Top bar (mobile) */}
-      <header className="sm:hidden flex items-center justify-between bg-canvas border-b border-line px-4 py-3 sticky top-0 z-30">
+      <header className="sm:hidden flex items-center justify-between bg-canvas border-b border-line px-4 py-3 sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-2">
           <Wordmark className="text-[17px] text-ink" />
           <span className="font-extrabold text-accent text-sm">Admin</span>
@@ -135,7 +135,7 @@ export default function AdminShell({ admin, children }: { admin: AdminUser; chil
         </button>
       </header>
       {mobileOpen && (
-        <div className="sm:hidden bg-canvas border-b border-line px-4 py-3">
+        <div className="sm:hidden bg-canvas border-b border-line px-4 py-3 shadow-sm">
           {nav}
           <div className="flex gap-2 mt-3 pt-3 border-t border-canvas">
             <Link href="/" className="flex-1 text-center text-xs font-bold text-accent border border-line rounded-lg py-2">View site</Link>
