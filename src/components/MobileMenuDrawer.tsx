@@ -97,10 +97,14 @@ export default function MobileMenuDrawer({ open, onClose }: { open: boolean; onC
         aria-label="Menu"
         className={`fixed right-0 top-0 z-[600] w-[80%] max-w-[320px] bg-canvas border-l border-line shadow-2xl flex flex-col ${ABOVE_BOTTOM_NAV} ${open ? "animate-drawer-in" : "animate-drawer-out"}`}
       >
-        {/* Header — wordmark + close */}
+        {/* Header — wordmark + close. paddingTop 45px + pr-4 put the ✕ at the
+            exact spot of the navbar's hamburger button (its top edge sits at
+            45px: 33px announcement strip + nav-row padding; both bars are
+            sticky, so the position is the same at any scroll depth) — the
+            open/close buttons overlap instead of the ✕ floating higher. */}
         <div
-          className="flex items-center justify-between pl-4 pr-2 pb-2 border-b border-line flex-shrink-0"
-          style={{ paddingTop: "calc(0.625rem + env(safe-area-inset-top))" }}
+          className="flex items-center justify-between pl-4 pr-4 pb-2 border-b border-line flex-shrink-0"
+          style={{ paddingTop: "45px" }}
         >
           <Wordmark className="text-base text-ink" />
           <button

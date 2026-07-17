@@ -15,6 +15,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { tierName } from "@/lib/i18n/labels";
 import { monthsOld, ageLabel } from "@/lib/babyAge";
+import { useTheme } from "@/components/ThemeToggle";
 
 export default function AccountClient() {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function AccountClient() {
   const { count: wishCount } = useWishlist();
   const { balance: pointsBalance, tier } = useLoyalty();
   const { locale, setLocale, t } = useLocale();
+  const [theme, setTheme] = useTheme();
+  const darkMode = theme === "dark";
 
   /* Hooks must run unconditionally on every render — declare them before any
      early return. */
@@ -407,7 +410,6 @@ export default function AccountClient() {
                   { icon: "📍", label: t("acct.addresses"),     sub: t("acct.addressesSub"),     href: "/account/addresses" },
                   { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"), href: "/account/notifications" },
                   { icon: "🔒", label: t("acct.security"),      sub: t("acct.securitySub"),      href: "/account/security" },
-                  { icon: "⚙️", label: t("acct.settings"),      sub: t("acct.settingsSub"),      href: "/account/settings" },
                 ].map((item) => (
                   <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
                     <div className="flex items-center gap-3.5 min-w-0">
@@ -422,6 +424,67 @@ export default function AccountClient() {
                     </svg>
                   </Link>
                 ))}
+              </div>
+            </div>
+
+            {/* ── Preferences — dark mode + language, INLINE controls (the
+                separate /account/settings page was removed as redundant:
+                its other two entries already live in the group above). ── */}
+            <div>
+              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.preferences")}</p>
+              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
+                {/* Dark mode — inline switch */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={darkMode}
+                  onClick={() => setTheme(darkMode ? "light" : "dark")}
+                  className="w-full flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="w-9 h-9 rounded-control bg-panel flex items-center justify-center text-base flex-shrink-0">
+                      {darkMode ? "🌙" : "☀️"}
+                    </span>
+                    <p className="font-semibold text-ink text-[13.5px]">{t("pref.darkMode")}</p>
+                  </div>
+                  <span
+                    aria-hidden
+                    className={`relative w-11 h-6 rounded-full flex-shrink-0 transition-colors ${darkMode ? "bg-accent" : "bg-line"}`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-[left] duration-200 ${darkMode ? "left-[22px]" : "left-0.5"}`}
+                    />
+                  </span>
+                </button>
+
+                {/* Site language — inline chips, applies immediately */}
+                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 bg-canvas flex-wrap">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="w-9 h-9 rounded-control bg-panel flex items-center justify-center text-base flex-shrink-0">🌐</span>
+                    <p className="font-semibold text-ink text-[13.5px]">{t("acct.siteLanguage")}</p>
+                  </div>
+                  <div className="flex gap-1 flex-shrink-0">
+                    {LOCALES.map((code) => {
+                      const selected = locale === code;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => setLocale(code)}
+                          aria-pressed={selected}
+                          title={LOCALE_META[code].label}
+                          className={`h-9 min-w-[40px] px-1.5 rounded-control text-[11px] font-extrabold uppercase tracking-wide border transition-colors ${
+                            selected
+                              ? "border-accent bg-accent-soft text-accent"
+                              : "border-line text-ink-muted hover:border-ink-muted hover:text-ink"
+                          }`}
+                        >
+                          {code}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

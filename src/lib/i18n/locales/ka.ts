@@ -759,8 +759,6 @@ export const ka: Dictionary = {
   "acct.notificationsSub": "შეკვეთის განახლებები და აქციები",
   "acct.security": "უსაფრთხოება",
   "acct.securitySub": "პაროლი და ანგარიშის უსაფრთხოება",
-  "acct.settings": "პარამეტრები",
-  "acct.settingsSub": "მუქი რეჟიმი და ენა",
   "acct.groupOrders": "შეკვეთები და აქტივობა",
   "acct.groupAccount": "ანგარიში",
 

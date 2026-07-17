@@ -757,8 +757,6 @@ export const tr: Dictionary = {
   "acct.notificationsSub": "Sipariş güncellemeleri ve promosyonlar",
   "acct.security": "Güvenlik",
   "acct.securitySub": "Şifre ve hesap güvenliği",
-  "acct.settings": "Ayarlar",
-  "acct.settingsSub": "Karanlık mod ve dil",
   "acct.groupOrders": "Siparişlerim",
   "acct.groupAccount": "Hesap",
 

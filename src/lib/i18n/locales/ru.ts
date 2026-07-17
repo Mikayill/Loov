@@ -757,8 +757,6 @@ export const ru: Dictionary = {
   "acct.notificationsSub": "Обновления заказов и акции",
   "acct.security": "Безопасность",
   "acct.securitySub": "Пароль и безопасность аккаунта",
-  "acct.settings": "Настройки",
-  "acct.settingsSub": "Тёмная тема и язык",
   "acct.groupOrders": "Заказы и активность",
   "acct.groupAccount": "Аккаунт",
 

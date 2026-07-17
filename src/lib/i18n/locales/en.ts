@@ -787,8 +787,6 @@ export const en = {
   "acct.notificationsSub": "Order updates and promotions",
   "acct.security": "Security",
   "acct.securitySub": "Password and account security",
-  "acct.settings": "Settings",
-  "acct.settingsSub": "Dark mode and language",
   "acct.groupOrders": "Orders & Activity",
   "acct.groupAccount": "Account",
 
