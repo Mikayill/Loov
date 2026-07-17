@@ -2,7 +2,7 @@
 
 /**
  * Shared preference rows — dark mode + language, rendered as stacked
- * app-settings rows. Used by BOTH the mobile menu sheet and the
+ * app-settings rows. Used by BOTH the mobile hamburger dropdown and the
  * /account/settings page so the two can never drift apart in design
  * or behavior (they manage the same cookie-backed preferences).
  */
