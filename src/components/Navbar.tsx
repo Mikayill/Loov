@@ -17,7 +17,7 @@ import { ACCOUNT_LINKS } from "@/lib/accountNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
-import MobileMenuSheet from "./MobileMenuSheet";
+import MobileMenuDrawer from "./MobileMenuDrawer";
 import Wordmark from "./Wordmark";
 
 export default function Navbar() {
@@ -309,8 +309,11 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* Theme toggle */}
-                <ThemeToggle />
+                {/* Theme toggle — desktop only; on mobile dark mode lives in
+                    the hamburger drawer's Preferences row (no duplication). */}
+                <div className="hidden md:block">
+                  <ThemeToggle />
+                </div>
 
                 {/* Language switcher — desktop only */}
                 <div className="hidden md:block">
@@ -508,10 +511,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile hamburger menu — a real bottom-sheet overlay now (portal,
-              dialog semantics, baby-profile quick-edit), not an inline panel
-              that pushed page content down. */}
-          <MobileMenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+          {/* Mobile hamburger menu — right-side drawer over a blurred page,
+              bottom tab bar stays visible (user-picked "design 4"; holds only
+              what the bottom bar doesn't: Shop / Preferences / Help). */}
+          <MobileMenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
         </nav>
       </header>
     </>

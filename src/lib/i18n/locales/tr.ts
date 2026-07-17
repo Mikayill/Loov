@@ -21,6 +21,8 @@ export const tr: Dictionary = {
   "nav.deals": "İndirimde",
   "nav.recentlyViewed": "Son Görüntülenenler",
   "nav.language": "Dil",
+  "pref.darkMode": "Karanlık Mod",
+  "help.faq": "SSS",
   "nav.recentlyViewedEmpty": "Henüz görüntülenen ürün yok — mağazaya göz atın, burada görünecekler.",
 
   "announce.freeShipping": "🚀 {n} ₾ üzeri siparişlerde ücretsiz kargo · Gürcistan geneline teslimat",

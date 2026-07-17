@@ -24,6 +24,8 @@ export const en = {
   "nav.recentlyViewed": "Recently Viewed",
   "nav.language": "Language",
   "nav.recentlyViewedEmpty": "No products viewed yet — browse the shop and they'll show up here.",
+  "pref.darkMode": "Dark Mode",
+  "help.faq": "FAQ",
 
   // ── Announcement bar ──
   "announce.freeShipping": "🚀 Free shipping on orders over {n} ₾ · Delivering across Georgia",
