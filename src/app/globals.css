@@ -284,18 +284,18 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
 }
 .animate-fade-down { animation: loov-fade-down 0.2s var(--ease-smooth) forwards; }
 
-/* Mobile hamburger menu — a full-screen panel that slides in from the right
-   (classic app hamburger, NOT a popup/bottom-sheet — user rejected those). */
-@keyframes loov-menu-in {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+/* Bottom sheet (mobile hamburger menu) — slides up from off-screen instead of
+   pushing content down like the old inline dropdown panel. */
+@keyframes loov-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
-@keyframes loov-menu-out {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+@keyframes loov-sheet-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
 }
-.animate-menu-in  { animation: loov-menu-in 0.26s var(--ease-smooth) forwards; }
-.animate-menu-out { animation: loov-menu-out 0.2s var(--ease-smooth) forwards; }
+.animate-sheet-up   { animation: loov-sheet-up 0.28s var(--ease-smooth) forwards; }
+.animate-sheet-down { animation: loov-sheet-down 0.22s var(--ease-smooth) forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,
@@ -307,6 +307,6 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
   .animate-bump,
   .animate-fade-up,
   .animate-fade-down,
-  .animate-menu-in,
-  .animate-menu-out { animation: none; }
+  .animate-sheet-up,
+  .animate-sheet-down { animation: none; }
 }

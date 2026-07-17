@@ -90,14 +90,3 @@ Tüm sayfalar 390×844'te tek tek gezilecek: taşma, boş-durum, eğreti bileşe
 - Yakalanan altyapı hatası: ilk doğrulamada ESKİ sunucu süreci 3000 portunu tuttuğu için eski build'i görüntülemişim — süreç öldürülüp yeni build ile tekrar doğrulandı (bir önceki turdaki "hâlâ eski görünüyor" riskine karşı ders: her görsel doğrulamadan önce sunucunun gerçekten yeni build'i sunduğunu kontrol et).
 
 **D (derin site taraması) yarına bırakıldı — kullanıcı kararı.**
-
----
-
-## 🔁 4. TUR (17 Tem 2026, sabah) — "POP UP DEĞİL, HAMBURGER"
-
-Kullanıcı bottom-sheet sunumunu da reddetti: içerik doğruydu ama kabuk hâlâ bir POPUP'tı (alttan fırlıyor, arkası karartılmış). Yapılan:
-- `MobileMenuSheet.tsx` SİLİNDİ → yeni `MobileMenu.tsx`: **tam ekran, sağdan kayarak açılan gerçek hamburger menü sayfası** (karartılmış arka plan yok, tutma çubuğu yok, yuvarlatılmış üst köşe yok). Üstte LOOV wordmark + ✕, altında kaydırılabilir menü gövdesi.
-- Menüye **Mağaza bölümü eklendi** (Ürünler / Paketler / İndirimde / Blog) — gerçek hamburger menülerde ana navigasyon da olur; misafir görünümündeki boş alt yarı da böylece doldu.
-- Satır içeriği (profil / 👶 bebek / Hesabım 7 satır / Tercihler / Yardım / Çıkış) aynen korundu; PreferenceRows paylaşımı bozulmadı.
-- `globals.css`: `loov-sheet-up/down` → `loov-menu-in/out` (translateX'li yatay kayma).
-- Doğrulama: tsc + 60 test + build temiz; 390×844'te taze production sunucusunda (port önceden boşaltıldı, log temiz) misafir menü AÇIK/KAPALI + karanlık mod anahtarı canlı test edildi, konsol 0 hata.
