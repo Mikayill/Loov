@@ -17,7 +17,7 @@ import { ACCOUNT_LINKS } from "@/lib/accountNav";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ThemeToggle from "./ThemeToggle";
 import SearchResultsPanel from "./SearchResultsPanel";
-import MobileMenuSheet from "./MobileMenuSheet";
+import MobileMenu from "./MobileMenu";
 import Wordmark from "./Wordmark";
 
 export default function Navbar() {
@@ -511,10 +511,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile hamburger menu — a real bottom-sheet overlay now (portal,
-              dialog semantics, baby-profile quick-edit), not an inline panel
-              that pushed page content down. */}
-          <MobileMenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} />
+          {/* Mobile hamburger menu — full-screen panel sliding in from the
+              right (classic app hamburger; the popup/bottom-sheet versions
+              were rejected). */}
+          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
         </nav>
       </header>
     </>
