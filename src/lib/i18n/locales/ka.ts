@@ -23,8 +23,6 @@ export const ka: Dictionary = {
   "nav.deals": "ფასდაკლებით",
   "nav.recentlyViewed": "ბოლოს ნანახი",
   "nav.language": "ენა",
-  "pref.darkMode": "მუქი რეჟიმი",
-  "help.faq": "ხშირი კითხვები",
   "nav.recentlyViewedEmpty": "ჯერ არაფერი გინახავთ — დაათვალიერეთ მაღაზია და პროდუქტები აქ გამოჩნდება.",
 
   "announce.freeShipping": "🚀 უფასო მიწოდება {n} ₾-ზე მეტ შეკვეთაზე · მიწოდება მთელ საქართველოში",
