@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-sm text-ink-muted">
+      <nav className="mb-4 sm:mb-8 flex items-center gap-2 text-xs sm:text-sm text-ink-muted">
         <Link href="/" className="hover:text-accent transition-colors font-medium">
           {t("nav.home")}
         </Link>

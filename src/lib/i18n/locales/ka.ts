@@ -209,6 +209,8 @@ export const ka: Dictionary = {
   "pdp.reviewsTitle": "მომხმარებელთა შეფასებები",
   "pdp.showAllReviews": "ყველა {n} შეფასების ნახვა",
   "pdp.save": "დაზოგე {n}%",
+  "pdp.youSave": "დაზოგავ {n} ₾",
+  "pdp.buyNow": "ახლავე ყიდვა",
 
   // ── Reviews (DRAFT — needs native review) ──
   "rev.noReviews": "ჯერ შეფასება არ არის — იყავი პირველი შენაძენის მიღების შემდეგ!",

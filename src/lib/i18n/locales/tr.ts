@@ -207,6 +207,8 @@ export const tr: Dictionary = {
   "pdp.reviewsTitle": "Müşteri Yorumları",
   "pdp.showAllReviews": "{n} yorumun tümünü gör",
   "pdp.save": "%{n} İndirim",
+  "pdp.youSave": "{n} ₾ tasarruf",
+  "pdp.buyNow": "Hemen Al",
 
   // ── Reviews ──
   "rev.noReviews": "Henüz yorum yok — siparişin ulaştıktan sonra ilk yorumu sen yap!",

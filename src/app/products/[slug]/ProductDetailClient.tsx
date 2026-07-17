@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
@@ -92,6 +93,7 @@ export default function ProductDetailClient({
   reviewStats?: { avg: number; count: number };
 }) {
   const { addItem } = useCart();
+  const router = useRouter();
   const { user } = useAuth();
   const { has, toggle } = useWishlist();
   const { tier } = useLoyalty();
@@ -413,6 +415,26 @@ export default function ProductDetailClient({
     setTimeout(() => setCartStatus("idle"), 2200);
   }
 
+  /* Buy Now — add the item, then jump straight to checkout scoped to ONLY
+     this item (loov_checkout_keys is the same handoff the cart page uses, so
+     checkout won't also bill whatever else is sitting in the cart). */
+  function handleBuyNow() {
+    if (outOfStock) return;
+    if (!selectedSize) { setNoSize(true); return; }
+    setNoSize(false);
+    const result = addItem(product, selectedColor, selectedSize, quantity);
+    if (result.added <= 0) {
+      setCartStatus("blocked");
+      setTimeout(() => setCartStatus("idle"), 1800);
+      return;
+    }
+    try {
+      const key = `${product.id}::${selectedColor}::${selectedSize}::`;
+      localStorage.setItem("loov_checkout_keys", JSON.stringify([key]));
+    } catch { /* checkout falls back to the whole cart — non-fatal */ }
+    router.push("/checkout");
+  }
+
   const features = product.features && product.features.length ? product.features : DEFAULT_FEATURES;
 
   return (
@@ -425,7 +447,7 @@ export default function ProductDetailClient({
           {/* Main image — colour selection does NOT change the photo */}
           <div
             ref={galleryRef}
-            className={`relative w-full aspect-square rounded-card flex items-center justify-center overflow-hidden border border-line select-none ${
+            className={`relative w-full aspect-square flex items-center justify-center overflow-hidden select-none -mx-4 sm:mx-0 sm:rounded-card sm:border border-line ${
               zoomStep >= ZOOM_STEPS.length - 1 ? "md:cursor-zoom-out" : "md:cursor-zoom-in"
             }`}
             style={{ backgroundColor: product.cardColor, touchAction: pinch.scale > 1 || pinching ? "none" : "pan-y" }}
@@ -511,10 +533,11 @@ export default function ProductDetailClient({
             )}
             {media.length > 1 && (
               <>
+                {/* Arrows — desktop only; mobile uses swipe + the dots below */}
                 <button
                   onClick={(e) => { e.stopPropagation(); prevImg(); }}
                   aria-label="Previous photo"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
+                  className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -523,14 +546,41 @@ export default function ProductDetailClient({
                 <button
                   onClick={(e) => { e.stopPropagation(); nextImg(); }}
                   aria-label="Next photo"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
+                  className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm border border-line items-center justify-center text-ink shadow-md hover:bg-ink/85 hover:text-white hover:border-accent active:scale-90 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
+                {/* Photo counter (Temu-style) */}
+                <span className="absolute bottom-3 left-3 bg-ink/60 text-white text-[11px] font-bold px-2.5 py-1 rounded-full tabular-nums pointer-events-none">
+                  {activeImg + 1} / {media.length}
+                </span>
+                {/* Dot indicators */}
+                <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex gap-1.5 pointer-events-none">
+                  {media.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1.5 rounded-full transition-all ${i === activeImg ? "w-4 bg-white" : "w-1.5 bg-white/55"}`}
+                    />
+                  ))}
+                </div>
               </>
             )}
+            {/* Wishlist heart — corner button (replaces the old full-width
+                "Save to wishlist" button lower down; Temu keeps it on the image).
+                Bottom-right so it never collides with the NEW / discount badges. */}
+            <button
+              onClick={(e) => { e.stopPropagation(); toggle(product.id, product.price); }}
+              aria-label={has(product.id) ? t("pdp.savedWishlist") : t("pdp.saveWishlist")}
+              className={`absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-line flex items-center justify-center shadow-md active:scale-90 transition-all ${
+                has(product.id) ? "text-danger" : "text-ink-soft hover:text-danger"
+              }`}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill={has(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
           </div>
 
           {/* Thumbnails — photos + a ▶-badged poster for the video */}
@@ -568,63 +618,73 @@ export default function ProductDetailClient({
 
         {/* ── RIGHT: Info ── */}
         <div className="flex flex-col">
-          {/* Category tag */}
-          <span className="inline-block self-start bg-panel text-ink-soft text-[11px] font-bold uppercase tracking-[0.12em] px-3 py-1 rounded-control mb-3">
-            {categoryLabel(product.category, t)}
-          </span>
-
-          {/* Name */}
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-ink leading-tight mb-3">
-            {product.name}
-          </h1>
-
-          {/* Stars — real review data only; hidden until the product has reviews */}
-          {reviewStats.count > 0 && (
-            <div className="flex items-center gap-2 mb-5">
-              <Stars rating={reviewStats.avg} />
-              <span className="text-sm text-ink-muted font-medium">
-                {reviewStats.avg} · {t("pdp.reviewsCount").replace("{n}", String(reviewStats.count))}
-              </span>
-            </div>
-          )}
-
-          {/* Price + stock + share */}
-          <div className="flex items-end justify-between mb-5 flex-wrap gap-3">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <p className={`text-4xl font-extrabold tabular-nums ${off > 0 ? "text-danger" : "text-ink"}`}>
-                {formatAmount(unitPrice)} <span className="text-2xl">₾</span>
-              </p>
+          {/* ── Price block FIRST (Temu-style: the number leads) ── */}
+          <div className="flex items-start justify-between gap-3 mb-1.5 mt-4 sm:mt-0">
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <p className={`text-3xl sm:text-4xl font-extrabold tabular-nums ${off > 0 ? "text-danger" : "text-ink"}`}>
+                  {formatAmount(unitPrice)} <span className="text-2xl">₾</span>
+                </p>
+                {off > 0 && (
+                  <>
+                    <span className="text-lg text-ink-muted line-through">{formatAmount(baseForSize)} ₾</span>
+                    <span className="text-[13px] font-extrabold text-danger bg-danger-soft border border-danger/30 px-2 py-0.5 rounded-control">
+                      {t("pdp.save").replace("{n}", String(off))}
+                    </span>
+                  </>
+                )}
+              </div>
               {off > 0 && (
-                <p className="text-xl text-ink-muted line-through">{formatAmount(baseForSize)} ₾</p>
+                <p className="text-[12.5px] font-bold text-accent-deep mt-1">
+                  {t("pdp.youSave").replace("{n}", formatAmount(baseForSize - unitPrice))}
+                </p>
               )}
             </div>
+            {/* Share — compact icon button so the price stays the star */}
             <button
               onClick={handleShare}
-              className={`flex items-center gap-2 px-4 py-2 rounded-control border text-sm font-semibold transition-colors ${
+              aria-label={t("pdp.share")}
+              className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center transition-colors ${
                 copied
                   ? "border-accent bg-accent-soft text-accent-deep"
                   : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
               }`}
             >
               {copied ? (
-                <>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {t("pdp.copied")}
-                </>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  {t("pdp.share")}
-                </>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
               )}
             </button>
           </div>
 
           {off > 0 && <DealCountdown product={product} className="mb-3 text-[11.5px]" />}
+
+          {/* Category + name (name is smaller now — the price leads) */}
+          <span className="inline-block self-start bg-panel text-ink-soft text-[11px] font-bold uppercase tracking-[0.12em] px-3 py-1 rounded-control mt-3 mb-2">
+            {categoryLabel(product.category, t)}
+          </span>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-ink leading-snug mb-3">
+            {product.name}
+          </h1>
+
+          {/* Rating — tappable chip that jumps to the reviews section (hidden
+              until the product actually has reviews; never fabricated). */}
+          {reviewStats.count > 0 && (
+            <a
+              href="#reviews"
+              className="inline-flex items-center gap-2 self-start mb-5 px-3 py-1.5 rounded-control border border-line hover:border-ink transition-colors"
+            >
+              <Stars rating={reviewStats.avg} />
+              <span className="text-sm text-ink font-bold">{reviewStats.avg}</span>
+              <span className="text-sm text-ink-muted">· {t("pdp.reviewsCount").replace("{n}", String(reviewStats.count))}</span>
+              <span className="text-ink-muted">›</span>
+            </a>
+          )}
 
           {/* Stock indicator */}
           {outOfStock ? (
@@ -797,85 +857,85 @@ export default function ProductDetailClient({
 
           <div className="h-px bg-line mb-6" />
 
-          {/* ── Quantity + Add to cart ── */}
-          <div ref={ctaRef} className="flex items-center gap-3 mb-4">
-            <div className="flex items-center border border-line rounded-control overflow-hidden flex-shrink-0">
+          {/* ── Quantity + Add to cart + Buy now ── */}
+          <div ref={ctaRef} className="mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-line rounded-control overflow-hidden flex-shrink-0">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90"
+                >
+                  −
+                </button>
+                <span className="w-10 text-center font-extrabold text-ink text-base">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))}
+                  disabled={atMax || outOfStock}
+                  className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Add to cart — secondary (outline); status flips it to a filled
+                  colour on success/blocked so the feedback still reads clearly */}
               <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90"
+                onClick={handleAddToCart}
+                disabled={outOfStock}
+                className={`u-btn flex-1 h-12 rounded-control font-semibold uppercase tracking-[0.04em] transition-all duration-300 flex items-center justify-center gap-2 text-[12.5px] border ${
+                  cartStatus === "added"
+                    ? "scale-95 bg-accent border-accent text-white"
+                    : cartStatus === "blocked" || outOfStock
+                    ? "bg-danger border-danger text-white"
+                    : "bg-canvas border-ink text-ink hover:bg-ink hover:text-white active:scale-95"
+                } ${outOfStock ? "cursor-not-allowed" : ""}`}
               >
-                −
-              </button>
-              <span className="w-10 text-center font-extrabold text-ink text-base">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))}
-                disabled={atMax || outOfStock}
-                className="w-11 h-12 flex items-center justify-center text-ink font-bold text-xl hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed"
-              >
-                +
+                {outOfStock ? (
+                  t("pdp.outOfStockBtn")
+                ) : cartStatus === "added" ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {t("pdp.added")}
+                  </>
+                ) : cartStatus === "blocked" ? (
+                  t("cart.cantAddMore")
+                ) : (
+                  <>🛒 {t("common.addToCart")}</>
+                )}
               </button>
             </div>
 
+            {/* Buy now — primary (accent), goes straight to checkout for this item */}
             <button
-              onClick={handleAddToCart}
+              onClick={handleBuyNow}
               disabled={outOfStock}
-              className={`u-btn flex-1 h-12 rounded-control font-semibold uppercase tracking-[0.06em] text-white transition-all duration-300 flex items-center justify-center gap-2 text-[13px] ${
-                cartStatus === "added"
-                  ? "scale-95 bg-accent"
-                  : cartStatus === "blocked" || outOfStock
-                  ? "bg-danger"
-                  : "bg-ink hover:bg-ink/85 active:scale-95"
-              } ${outOfStock ? "cursor-not-allowed" : ""}`}
+              className="u-btn w-full h-12 mt-2.5 rounded-control font-semibold uppercase tracking-[0.06em] text-white bg-accent hover:bg-accent-deep active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-[13px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {outOfStock ? (
-                t("pdp.outOfStockBtn")
-              ) : cartStatus === "added" ? (
-                <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {t("pdp.added")}
-                </>
-              ) : cartStatus === "blocked" ? (
-                t("cart.cantAddMore")
-              ) : (
-                <>🛒 {t("common.addToCart")} &nbsp;·&nbsp; {formatPrice(unitPrice * quantity)}</>
-              )}
+              ⚡ {t("pdp.buyNow")} &nbsp;·&nbsp; {formatPrice(unitPrice * quantity)}
             </button>
           </div>
 
           {atMax && !outOfStock && (
-            <p className="text-sm font-bold text-orange-600 mb-3 -mt-1 bg-orange-50 border border-orange-200 rounded-control px-3 py-2 inline-block">
+            <p className="text-sm font-bold text-orange-600 mb-3 bg-orange-50 border border-orange-200 rounded-control px-3 py-2 inline-block">
               {t("pdp.thatsAll").replace("{n}", String(stock))}
             </p>
           )}
 
-          {/* Wishlist */}
-          <button
-            onClick={() => toggle(product.id, product.price)}
-            className={`w-full h-12 rounded-control border-2 font-semibold transition-all duration-200 mb-7 flex items-center justify-center gap-2 text-sm ${
-              has(product.id)
-                ? "border-red-400 bg-red-50 text-red-500 hover:bg-red-100"
-                : "border-line text-ink-soft hover:border-accent hover:text-accent hover:bg-[#F5F8F7]"
-            }`}
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill={has(product.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            {has(product.id) ? t("pdp.savedWishlist") : t("pdp.saveWishlist")}
-          </button>
+          <div className="mb-7" />
 
-          {/* Trust bar */}
-          <div className="bg-canvas rounded-card p-5 space-y-3">
+          {/* Trust bar — compact 2-column band (Temu density) */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-line p-4">
             {[
               { icon: "🌿", text: t("pdp.trustOrganic") },
               { icon: "🚀", text: t("pdp.trustShipping").replace("{n}", String(freeShippingThreshold)) },
               { icon: "🔄", text: t("pdp.trustReturns") },
               { icon: "🔒", text: t("pdp.trustSecure") },
             ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3">
-                <span className="text-base">{item.icon}</span>
-                <span className="text-sm text-ink-soft font-medium">{item.text}</span>
+              <div key={item.text} className="flex items-center gap-2.5">
+                <span className="text-base flex-shrink-0">{item.icon}</span>
+                <span className="text-[12px] text-ink-soft font-medium leading-snug">{item.text}</span>
               </div>
             ))}
           </div>
@@ -884,7 +944,7 @@ export default function ProductDetailClient({
 
       {/* ══ TABS ══ */}
       <div className="mt-16">
-        <div className="flex border-b border-line mb-8 overflow-x-auto overflow-y-hidden gap-2">
+        <div className="flex border-b border-line mb-8 overflow-x-auto overflow-y-hidden gap-2 no-scrollbar">
           {(
             [
               { id: "description", label: t("pdp.tabDescription") },
@@ -1028,22 +1088,31 @@ export default function ProductDetailClient({
         className={`fixed left-0 right-0 z-40 bg-canvas border-t border-line px-4 py-3 sm:hidden shadow-2xl transition-transform duration-300 ${showSticky ? "translate-y-0" : "translate-y-full"}`}
         style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom))" }}
       >
-        <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <div className="flex items-center border border-line rounded-control overflow-hidden">
-            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90">−</button>
-            <span className="w-8 text-center font-extrabold text-ink">{quantity}</span>
-            <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-10 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          <div className="flex items-center border border-line rounded-control overflow-hidden flex-shrink-0">
+            <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-8 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90">−</button>
+            <span className="w-7 text-center font-extrabold text-ink text-sm tabular-nums">{quantity}</span>
+            <button onClick={() => setQuantity((q) => Math.min(stock ?? Infinity, q + 1))} disabled={atMax || outOfStock} className="w-8 h-11 flex items-center justify-center font-bold text-lg hover:bg-panel transition-all active:scale-90 disabled:opacity-30 disabled:active:scale-100 disabled:cursor-not-allowed">+</button>
           </div>
+          {/* Add to cart — secondary (outline) */}
           <button
             onClick={handleAddToCart}
             disabled={outOfStock}
-            className={`u-btn flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.04em] text-white text-[12.5px] transition-all duration-300 flex items-center justify-center gap-1.5 ${
-              cartStatus === "added" ? "bg-accent scale-95" :
-              cartStatus === "blocked" || outOfStock ? "bg-danger" :
-              "bg-ink hover:bg-ink/85 active:scale-95"
+            className={`u-btn flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.03em] text-[11.5px] transition-all duration-300 flex items-center justify-center gap-1 border ${
+              cartStatus === "added" ? "bg-accent border-accent text-white scale-95" :
+              cartStatus === "blocked" || outOfStock ? "bg-danger border-danger text-white" :
+              "bg-canvas border-ink text-ink active:scale-95"
             } ${outOfStock ? "cursor-not-allowed" : ""}`}
           >
-            {outOfStock ? t("pdp.outOfStockBtn") : cartStatus === "added" ? `✓ ${t("pdp.added")}` : cartStatus === "blocked" ? t("cart.cantAddMore") : `🛒 ${t("common.addToCart")} · ${formatPrice(unitPrice * quantity)}`}
+            {outOfStock ? t("pdp.outOfStockBtn") : cartStatus === "added" ? `✓ ${t("pdp.added")}` : cartStatus === "blocked" ? t("cart.cantAddMore") : `🛒 ${t("common.addToCart")}`}
+          </button>
+          {/* Buy now — primary (accent), straight to checkout */}
+          <button
+            onClick={handleBuyNow}
+            disabled={outOfStock}
+            className="u-btn flex-1 h-11 rounded-control font-semibold uppercase tracking-[0.03em] text-white text-[11.5px] bg-accent hover:bg-accent-deep active:scale-95 transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ⚡ {t("pdp.buyNow")}
           </button>
         </div>
       </div>

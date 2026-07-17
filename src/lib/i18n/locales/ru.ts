@@ -207,6 +207,8 @@ export const ru: Dictionary = {
   "pdp.reviewsTitle": "Отзывы покупателей",
   "pdp.showAllReviews": "Показать все {n} отзывов",
   "pdp.save": "Скидка {n}%",
+  "pdp.youSave": "Экономия {n} ₾",
+  "pdp.buyNow": "Купить сейчас",
 
   // ── Reviews ──
   "rev.noReviews": "Пока нет отзывов — станьте первым после получения заказа!",

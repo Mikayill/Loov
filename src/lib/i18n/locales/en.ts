@@ -216,6 +216,8 @@ export const en = {
   "pdp.reviewsTitle": "Customer Reviews",
   "pdp.showAllReviews": "Show all {n} reviews",
   "pdp.save": "Save {n}%",
+  "pdp.youSave": "You save {n} ₾",
+  "pdp.buyNow": "Buy Now",
 
   // ── Reviews ──
   "rev.noReviews": "No reviews yet — be the first to review it after your purchase arrives!",
