@@ -292,7 +292,10 @@ export default function CategoryFilter({
             );
           })}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* flex-wrap: below ~450px this group (recently-viewed + filters +
+            sort + view toggle + clear) is wider than the screen — without
+            wrapping it used to widen the whole page and visually split it. */}
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
           {/* Recently Viewed toggle — only appears once there's history
               (localStorage, populated after mount). Replaces the old separate
               "Son Görüntülenenler" nav pill + anchor-scroll section, which

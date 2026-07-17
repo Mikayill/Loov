@@ -93,6 +93,12 @@ html.theme-anim * {
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
+  /* Site-wide guard: body's overflow-x clip below is propagated to the
+     viewport inconsistently across browsers, so one over-wide element could
+     still pan the whole page sideways ("screen splits, right strip stays
+     fixed"). Clipping on html itself makes horizontal panning impossible
+     regardless of propagation quirks; vertical scrolling is untouched. */
+  overflow-x: clip;
 }
 
 body {
