@@ -284,18 +284,18 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
 }
 .animate-fade-down { animation: loov-fade-down 0.2s var(--ease-smooth) forwards; }
 
-/* Mobile hamburger menu — a compact dropdown box right under the hamburger
-   button (NOT a bottom sheet, NOT full-screen — both were rejected). */
-@keyframes loov-drop-in {
-  from { transform: translateY(-8px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+/* Mobile hamburger menu — a full-screen panel that slides in from the right
+   (classic app hamburger, NOT a popup/bottom-sheet — user rejected those). */
+@keyframes loov-menu-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
-@keyframes loov-drop-out {
-  from { transform: translateY(0);    opacity: 1; }
-  to   { transform: translateY(-8px); opacity: 0; }
+@keyframes loov-menu-out {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
 }
-.animate-drop-in  { animation: loov-drop-in 0.2s var(--ease-smooth) forwards; }
-.animate-drop-out { animation: loov-drop-out 0.16s var(--ease-smooth) forwards; }
+.animate-menu-in  { animation: loov-menu-in 0.26s var(--ease-smooth) forwards; }
+.animate-menu-out { animation: loov-menu-out 0.2s var(--ease-smooth) forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-search-panel,
@@ -307,6 +307,6 @@ html[data-theme="dark"]:not(.route-admin) .u-skeleton::after {
   .animate-bump,
   .animate-fade-up,
   .animate-fade-down,
-  .animate-drop-in,
-  .animate-drop-out { animation: none; }
+  .animate-menu-in,
+  .animate-menu-out { animation: none; }
 }

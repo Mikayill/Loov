@@ -35,7 +35,6 @@ export default function Navbar() {
   const [annoIdx,     setAnnoIdx]     = useState(0);
   const [annoShown,   setAnnoShown]   = useState(true);
   const accountRef    = useRef<HTMLDivElement>(null);
-  const hamburgerRef  = useRef<HTMLButtonElement>(null);
   const prevTotalItems = useRef(totalItems);
   const [pointsBump, setPointsBump] = useState(false);
   const prevPoints = useRef(pointsBalance);
@@ -396,7 +395,6 @@ export default function Navbar() {
 
                 {/* Hamburger — mobile */}
                 <button
-                  ref={hamburgerRef}
                   className="md:hidden flex flex-col justify-center items-center w-11 h-11 rounded-lg hover:bg-panel transition-all active:scale-90 gap-1.5"
                   onClick={() => { setSearchOpen(false); setMenuOpen((v) => !v); }}
                   aria-label="Toggle menu"
@@ -513,10 +511,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile hamburger menu — a compact dropdown box right under the
-              hamburger button (stacked options). NOT a bottom sheet, NOT a
-              full-screen panel — both were rejected. */}
-          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} anchorRef={hamburgerRef} />
+          {/* Mobile hamburger menu — full-screen panel sliding in from the
+              right (classic app hamburger; the popup/bottom-sheet versions
+              were rejected). */}
+          <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
         </nav>
       </header>
     </>
