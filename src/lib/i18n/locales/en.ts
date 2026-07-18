@@ -430,6 +430,8 @@ export const en = {
   "filter.age2yPlus": "2y+",
   "filter.age2yPlusDesc": "2 years and up",
   "filter.filters": "Filters",
+  "filter.showResults": "Show {n} products",
+  "filter.category": "Category",
   "filter.recentlyViewed": "Recently Viewed",
   "filter.dealsHeading": "Discounted products only — everything below is on sale right now.",
   "filter.clear": "Clear",

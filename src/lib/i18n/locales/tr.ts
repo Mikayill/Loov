@@ -403,6 +403,8 @@ export const tr: Dictionary = {
   "filter.age2yPlus": "2y+",
   "filter.age2yPlusDesc": "2 yaş ve üzeri",
   "filter.filters": "Filtreler",
+  "filter.showResults": "{n} ürünü göster",
+  "filter.category": "Kategori",
   "filter.recentlyViewed": "Son Görüntülenenler",
   "filter.dealsHeading": "Sadece indirimli ürünler — aşağıdakilerin hepsi şu anda indirimde.",
   "filter.clear": "Temizle",

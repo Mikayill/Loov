@@ -405,6 +405,8 @@ export const ka: Dictionary = {
   "filter.age2yPlus": "2წ+",
   "filter.age2yPlusDesc": "2 წელი და მეტი",
   "filter.filters": "ფილტრები",
+  "filter.showResults": "{n} პროდუქტის ჩვენება",
+  "filter.category": "კატეგორია",
   "filter.recentlyViewed": "ბოლოს ნანახი",
   "filter.dealsHeading": "მხოლოდ ფასდაკლებული პროდუქტები — ქვემოთ ყველაფერი ახლა ფასდაკლებით იყიდება.",
   "filter.clear": "გასუფთავება",

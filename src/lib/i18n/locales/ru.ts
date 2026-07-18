@@ -403,6 +403,8 @@ export const ru: Dictionary = {
   "filter.age2yPlus": "2г+",
   "filter.age2yPlusDesc": "От 2 лет и старше",
   "filter.filters": "Фильтры",
+  "filter.showResults": "Показать {n} товаров",
+  "filter.category": "Категория",
   "filter.recentlyViewed": "Недавно просмотренные",
   "filter.dealsHeading": "Только товары со скидкой — всё ниже сейчас продаётся дешевле.",
   "filter.clear": "Сбросить",

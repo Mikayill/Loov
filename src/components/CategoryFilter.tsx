@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
 import { Product, Season } from "@/types";
@@ -117,9 +118,27 @@ export default function CategoryFilter({
   const [selectedFabrics, setSelectedFabrics] = useState<string[]>([]);
   const [ageFilter,      setAgeFilter]      = useState<AgeFilter>("all");
   const [seasonFilter,   setSeasonFilter]   = useState<Season>("all");
-  const [viewMode,       setViewMode]       = useState<ViewMode>("grid");
+  /* Grid only now (Temu-style) — the list-view toggle was removed from the
+     bar; the list render below stays as a harmless dead branch. */
+  const [viewMode] = useState<ViewMode>("grid");
   const [visibleCount,   setVisibleCount]   = useState(pageSize);
-  const [filtersOpen,    setFiltersOpen]    = useState(false);
+  /* Temu-style top: a search box, a left "Filters" drawer, and two dropdown
+     buttons (Category + Sort). */
+  const [query,          setQuery]          = useState("");
+  const [drawerOpen,     setDrawerOpen]     = useState(false);
+  const [catMenuOpen,    setCatMenuOpen]    = useState(false);
+  const [sortMenuOpen,   setSortMenuOpen]   = useState(false);
+  const [mounted,        setMounted]        = useState(false);
+  useEffect(() => setMounted(true), []);
+  /* Lock body scroll while the filter drawer is open. */
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setDrawerOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
+  }, [drawerOpen]);
   /* Categories the shopper browsed recently — boosts the default sort after
      mount only (server render stays plain, so no hydration mismatch). */
   const [preferredCats,  setPreferredCats]  = useState<string[]>([]);
@@ -164,6 +183,16 @@ export default function CategoryFilter({
 
   const filtered = useMemo(() => {
     let list = active === "All" ? products : products.filter((p) => p.category === active);
+
+    /* Search box (name / category / colour, raw + translated). */
+    if (query.trim()) {
+      const q = query.trim().toLowerCase();
+      list = list.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        categoryLabel(p.category, t).toLowerCase().includes(q) ||
+        p.colors.some((c) => c.toLowerCase().includes(q) || colorLabel(c, t).toLowerCase().includes(q))
+      );
+    }
 
     if (priceRange === "under40")  list = list.filter((p) => p.price < 40);
     if (priceRange === "40to70")   list = list.filter((p) => p.price >= 40 && p.price <= 70);
@@ -216,10 +245,10 @@ export default function CategoryFilter({
     }
 
     return list;
-  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, recentIds, products, preferredCats]);
+  }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, recentIds, products, preferredCats, query, t]);
 
   /* Reset pagination when filters change */
-  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, pageSize]);
+  useEffect(() => { setVisibleCount(pageSize); }, [active, sort, priceRange, selectedColors, selectedFabrics, ageFilter, seasonFilter, dealOnly, recentOnly, pageSize, query]);
 
   const activeFilterCount =
     (priceRange !== "all" ? 1 : 0) +
@@ -253,6 +282,7 @@ export default function CategoryFilter({
     setSeasonFilter("all");
     setDealOnly(false);
     setRecentOnly(false);
+    setQuery("");
     setVisibleCount(pageSize);
   }
 
@@ -270,240 +300,134 @@ export default function CategoryFilter({
         </div>
       )}
 
-      {/* ── Row 1: Category pills + Sort ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-        <div className="no-scrollbar flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 flex-1">
-          {categories.map((cat) => {
-            const label = cat === "All" ? t("filter.allProducts") : categoryPlural(cat as Product["category"], t);
-            const isActive = active === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setActive(cat)}
-                className={`u-btn flex-shrink-0 flex items-center gap-1 sm:gap-1.5 pl-2 pr-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-control text-[10.5px] sm:text-[11.5px] uppercase tracking-[0.04em] sm:tracking-[0.06em] font-semibold border ${
-                  isActive
-                    ? "border-ink bg-ink text-white"
-                    : "border-line bg-canvas text-ink-soft hover:border-ink hover:text-ink"
-                }`}
-              >
-                <span className="text-xs sm:text-base leading-none">{catIcons[cat]}</span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-        {/* flex-wrap: below ~450px this group (recently-viewed + filters +
-            sort + view toggle + clear) is wider than the screen — without
-            wrapping it used to widen the whole page and visually split it. */}
-        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-          {/* Recently Viewed toggle — only appears once there's history
-              (localStorage, populated after mount). Replaces the old separate
-              "Son Görüntülenenler" nav pill + anchor-scroll section, which
-              lived on this very page and read as a second, confusing
-              "Products" screen instead of a filter on this one. */}
-          {recentIds.length > 0 && (
-            <button
-              onClick={() => setRecentOnly((v) => !v)}
-              aria-pressed={recentOnly}
-              className={`flex items-center gap-1.5 h-9 px-3 rounded-control border text-[11px] uppercase tracking-[0.06em] font-semibold transition-colors whitespace-nowrap ${
-                recentOnly ? "border-ink text-ink bg-panel" : "border-line text-ink-soft hover:border-ink hover:text-ink"
-              }`}
-            >
-              🕐 {t("filter.recentlyViewed")}
-            </button>
-          )}
-          {/* Filters toggle — mobile only (panel is always visible on desktop) */}
-          {advanced && (
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              aria-expanded={filtersOpen}
-              className={`sm:hidden flex items-center gap-1.5 h-9 px-3 rounded-control border text-[11px] uppercase tracking-[0.06em] font-semibold transition-colors whitespace-nowrap ${
-                filtersOpen || activeFilterCount > 0
-                  ? "border-ink text-ink bg-panel"
-                  : "border-line text-ink-soft"
-              }`}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M6 12h12M10 20h4" />
-              </svg>
-              {t("filter.filters")}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-            </button>
-          )}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="h-9 px-3 pr-8 rounded-control border border-line bg-canvas text-[12.5px] font-semibold text-ink-soft focus:border-ink outline-none cursor-pointer appearance-none"
-            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2373736D'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", backgroundSize: "16px" }}
+      {/* ── Search box (top) ── */}
+      <div className="relative mb-3">
+        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+        </svg>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("search.placeholder")}
+          className="w-full h-11 pl-10 pr-10 rounded-full border border-line bg-canvas text-sm text-ink font-medium outline-none focus:border-ink transition-colors"
+        />
+        {query && (
+          <button
+            onClick={() => setQuery("")}
+            aria-label={t("filter.clear")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-ink-muted hover:bg-panel transition-colors"
           >
-            {sortOptions.map((o) => (
-              <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
-            ))}
-          </select>
+            ✕
+          </button>
+        )}
+      </div>
 
-          {/* View mode toggle */}
-          <div className="flex items-center border border-line rounded-control overflow-hidden h-9">
-            <button
-              onClick={() => setViewMode("grid")}
-              title={t("filter.gridView")}
-              className={`w-9 h-full flex items-center justify-center transition-colors ${
-                viewMode === "grid" ? "bg-ink text-white" : "text-ink-muted hover:bg-panel"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              title={t("filter.listView")}
-              className={`w-9 h-full flex items-center justify-center border-l border-line transition-colors ${
-                viewMode === "list" ? "bg-ink text-white" : "text-ink-muted hover:bg-panel"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-
+      {/* ── Filter bar: Filtreler drawer + Kategori + Sırala ── */}
+      <div className="flex items-center gap-2 mb-4">
+        {/* Filters — opens the left drawer with every filter */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="u-btn flex-shrink-0 flex items-center gap-1.5 h-10 px-3.5 rounded-control border border-ink bg-canvas text-ink text-[12px] font-bold active:scale-95"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M6 12h12M10 20h4" />
+          </svg>
+          {t("filter.filters")}
           {activeFilterCount > 0 && (
-            <button
-              onClick={clearAll}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-control border border-danger/30 bg-danger-soft text-danger text-[11px] uppercase tracking-[0.06em] font-semibold hover:border-danger transition-colors whitespace-nowrap"
-            >
-              ✕ {t("filter.clear")} ({activeFilterCount})
-            </button>
+            <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[10px] font-extrabold flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        {/* Category dropdown */}
+        <div className="relative flex-1 min-w-0">
+          <button
+            onClick={() => { setCatMenuOpen((v) => !v); setSortMenuOpen(false); }}
+            aria-expanded={catMenuOpen}
+            className="w-full h-10 pl-3 pr-2.5 rounded-control border border-line bg-canvas text-ink text-[12px] font-semibold flex items-center justify-between gap-1.5"
+          >
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="flex-shrink-0">{catIcons[active] ?? "🌿"}</span>
+              <span className="truncate">{active === "All" ? t("filter.category") : categoryPlural(active as Product["category"], t)}</span>
+            </span>
+            <svg className={`w-3.5 h-3.5 text-ink-muted flex-shrink-0 transition-transform ${catMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {catMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-[45]" onClick={() => setCatMenuOpen(false)} />
+              <div className="absolute left-0 top-full mt-1.5 z-[50] w-60 max-h-[60vh] overflow-y-auto rounded-card border border-line bg-canvas shadow-2xl p-1.5">
+                {categories.map((cat) => {
+                  const label = cat === "All" ? t("filter.allProducts") : categoryPlural(cat as Product["category"], t);
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => { setActive(cat); setCatMenuOpen(false); }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-control text-[13px] font-semibold text-left transition-colors ${
+                        active === cat ? "bg-accent-soft text-accent-deep" : "text-ink hover:bg-panel"
+                      }`}
+                    >
+                      <span className="w-6 text-center flex-shrink-0">{catIcons[cat]}</span>
+                      <span className="flex-1 truncate">{label}</span>
+                      {active === cat && (
+                        <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Sort dropdown */}
+        <div className="relative flex-1 min-w-0">
+          <button
+            onClick={() => { setSortMenuOpen((v) => !v); setCatMenuOpen(false); }}
+            aria-expanded={sortMenuOpen}
+            className="w-full h-10 pl-3 pr-2.5 rounded-control border border-line bg-canvas text-ink text-[12px] font-semibold flex items-center justify-between gap-1.5"
+          >
+            <span className="truncate">{t(sortOptions.find((o) => o.value === sort)!.labelKey)}</span>
+            <svg className={`w-3.5 h-3.5 text-ink-muted flex-shrink-0 transition-transform ${sortMenuOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {sortMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-[45]" onClick={() => setSortMenuOpen(false)} />
+              <div className="absolute right-0 top-full mt-1.5 z-[50] w-52 rounded-card border border-line bg-canvas shadow-2xl p-1.5">
+                {sortOptions.map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => { setSort(o.value); setSortMenuOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-control text-[13px] font-semibold text-left transition-colors ${
+                      sort === o.value ? "bg-accent-soft text-accent-deep" : "text-ink hover:bg-panel"
+                    }`}
+                  >
+                    <span>{t(o.labelKey)}</span>
+                    {sort === o.value && (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
-
-      {/* ── Row 2: Advanced filters (only on /products page) ── */}
-      {advanced && (
-        <div className={`${filtersOpen ? "flex" : "hidden"} sm:flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-3 mb-4 py-2.5 sm:py-3 px-3 sm:px-4 bg-panel/60 rounded-card border border-line`}>
-          {/* Price range */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.price")}:</span>
-            {priceRanges.map((pr) => (
-              <button
-                key={pr.value}
-                onClick={() => setPriceRange(pr.value)}
-                className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
-                  priceRange === pr.value
-                    ? "border-ink bg-ink text-white"
-                    : "border-line text-ink-soft hover:border-ink hover:text-ink"
-                }`}
-              >
-                {t(pr.labelKey)}
-              </button>
-            ))}
-          </div>
-
-          {/* Divider */}
-          <div className="h-6 w-px bg-line hidden sm:block" />
-
-          {/* Age filter */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.age")}:</span>
-            {AGE_FILTERS.map((af) => (
-              <button
-                key={af.value}
-                onClick={() => setAgeFilter(af.value)}
-                title={t(af.descKey)}
-                className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
-                  ageFilter === af.value
-                    ? "border-ink bg-ink text-white"
-                    : "border-line text-ink-soft hover:border-ink hover:text-ink"
-                }`}
-              >
-                {t(af.labelKey)}
-              </button>
-            ))}
-          </div>
-
-          {/* Divider */}
-          <div className="h-6 w-px bg-line hidden sm:block" />
-
-          {/* Color filter — matching stays on the CANONICAL cf.name; only the
-              visible label goes through colorLabel(). */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.color")}:</span>
-            {COLOR_FILTERS.map((cf) => {
-              const isSelected = selectedColors.includes(cf.name);
-              return (
-                <button
-                  key={cf.name}
-                  onClick={() => toggleColor(cf.name)}
-                  title={colorLabel(cf.name, t)}
-                  aria-label={t("filter.filterBy").replace("{name}", colorLabel(cf.name, t))}
-                  className={`w-7 h-7 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
-                    isSelected
-                      ? "border-accent ring-2 ring-accent ring-offset-1 scale-110"
-                      : "border-line hover:scale-110 hover:border-ink-muted"
-                  }`}
-                  style={{ backgroundColor: cf.hex, borderColor: isSelected ? "var(--color-accent)" : (cf.border ?? cf.hex) }}
-                >
-                  {isSelected && (
-                    <svg className="w-3.5 h-3.5 text-accent drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Fabric filter — only when the catalog declares fabrics */}
-          {fabricsPresent.length > 0 && (
-            <>
-              <div className="h-6 w-px bg-line hidden sm:block" />
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.fabric")}:</span>
-                {fabricsPresent.map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => toggleFabric(f)}
-                    className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
-                      selectedFabrics.includes(f)
-                        ? "border-ink bg-ink text-white"
-                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {FABRIC_EMOJI[f]} {fabricLabel(f, t)}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Season filter — only when the catalog has a real (non-"all") season set */}
-          {seasonsPresent && (
-            <>
-              <div className="h-6 w-px bg-line hidden sm:block" />
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-widest flex-shrink-0">{t("filter.season")}:</span>
-                {(Object.keys(SEASON_META) as Season[]).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSeasonFilter(s)}
-                    className={`px-2.5 py-1 rounded-control text-[11px] sm:text-xs font-semibold border transition-colors ${
-                      seasonFilter === s
-                        ? "border-ink bg-ink text-white"
-                        : "border-line text-ink-soft hover:border-ink hover:text-ink"
-                    }`}
-                  >
-                    {SEASON_META[s].emoji} {seasonLabel(s, t)}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Result count */}
       <p className="text-xs text-ink-muted font-semibold mb-5">
         {filtered.length === 1 ? t("filter.product1") : t("filter.products").replace("{n}", String(filtered.length))}
         {active !== "All" && ` ${t("filter.inCategory").replace("{category}", categoryPlural(active as Product["category"], t))}`}
+        {query.trim() && ` · "${query.trim()}"`}
         {ageFilter !== "all" && ` · ${t(AGE_FILTERS.find((a) => a.value === ageFilter)!.descKey)}`}
         {priceRange !== "all" && ` · ${t(priceRanges.find((p) => p.value === priceRange)!.labelKey)}`}
         {selectedColors.length > 0 && ` · ${selectedColors.map((c) => colorLabel(c, t)).join(", ")}`}
@@ -511,6 +435,186 @@ export default function CategoryFilter({
         {dealOnly && ` · ${t("nav.deals")}`}
         {recentOnly && ` · ${t("filter.recentlyViewed")}`}
       </p>
+
+      {/* ── LEFT FILTER DRAWER (all filters: colour names, fabric, price, age, season) ── */}
+      {mounted && createPortal(
+        <div
+          className={`fixed inset-0 z-[600] transition-opacity duration-200 ${drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+          aria-hidden={!drawerOpen}
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: "rgba(20,20,18,0.4)" }}
+            onClick={() => setDrawerOpen(false)}
+          />
+          {/* Panel — slides in from the LEFT */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("filter.filters")}
+            className={`absolute left-0 top-0 h-full w-[86%] max-w-[360px] bg-canvas shadow-2xl flex flex-col transition-transform duration-300 ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}
+            style={{ transitionTimingFunction: "var(--ease-smooth)" }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-line flex-shrink-0">
+              <span className="text-base font-extrabold text-ink">{t("filter.filters")}</span>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:bg-panel transition-colors active:scale-90"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+              {/* Price */}
+              <div>
+                <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2.5">{t("filter.price")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {priceRanges.map((pr) => (
+                    <button
+                      key={pr.value}
+                      onClick={() => setPriceRange(pr.value)}
+                      className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                        priceRange === pr.value ? "border-ink bg-ink text-white" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {t(pr.labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Age */}
+              <div>
+                <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2.5">{t("filter.age")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {AGE_FILTERS.map((af) => (
+                    <button
+                      key={af.value}
+                      onClick={() => setAgeFilter(af.value)}
+                      title={t(af.descKey)}
+                      className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                        ageFilter === af.value ? "border-ink bg-ink text-white" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {t(af.labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Colour — NAME chips (no colour circles) */}
+              <div>
+                <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2.5">{t("filter.color")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_FILTERS.map((cf) => {
+                    const isSelected = selectedColors.includes(cf.name);
+                    return (
+                      <button
+                        key={cf.name}
+                        onClick={() => toggleColor(cf.name)}
+                        aria-pressed={isSelected}
+                        className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                          isSelected ? "border-accent bg-accent-soft text-accent-deep" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                        }`}
+                      >
+                        {colorLabel(cf.name, t)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Fabric / material — only when the catalog declares fabrics */}
+              {fabricsPresent.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2.5">{t("filter.fabric")}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {fabricsPresent.map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => toggleFabric(f)}
+                        className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                          selectedFabrics.includes(f) ? "border-ink bg-ink text-white" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                        }`}
+                      >
+                        {FABRIC_EMOJI[f]} {fabricLabel(f, t)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Season — only when the catalog has a real season set */}
+              {seasonsPresent && (
+                <div>
+                  <p className="text-[11px] font-bold text-ink-muted uppercase tracking-widest mb-2.5">{t("filter.season")}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(Object.keys(SEASON_META) as Season[]).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setSeasonFilter(s)}
+                        className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                          seasonFilter === s ? "border-ink bg-ink text-white" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                        }`}
+                      >
+                        {SEASON_META[s].emoji} {seasonLabel(s, t)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* On sale + recently viewed toggles */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setDealOnly((v) => !v)}
+                  aria-pressed={dealOnly}
+                  className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                    dealOnly ? "border-danger bg-danger-soft text-danger" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  🔥 {t("nav.deals")}
+                </button>
+                {recentIds.length > 0 && (
+                  <button
+                    onClick={() => setRecentOnly((v) => !v)}
+                    aria-pressed={recentOnly}
+                    className={`px-3.5 py-2 rounded-control text-[12.5px] font-semibold border transition-colors ${
+                      recentOnly ? "border-ink bg-ink text-white" : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                    }`}
+                  >
+                    🕐 {t("filter.recentlyViewed")}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center gap-3 px-5 py-4 border-t border-line flex-shrink-0">
+              <button
+                onClick={clearAll}
+                className="h-11 px-4 rounded-control border border-line text-[12px] font-bold text-ink-soft uppercase tracking-[0.06em] hover:border-ink hover:text-ink transition-colors"
+              >
+                {t("filter.clear")}
+              </button>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="u-btn flex-1 h-11 rounded-control bg-accent text-white text-[12.5px] font-extrabold uppercase tracking-[0.06em] hover:bg-accent-deep active:scale-[0.98] transition-all"
+              >
+                {t("filter.showResults").replace("{n}", String(filtered.length))}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Products */}
       {filtered.length > 0 ? (
