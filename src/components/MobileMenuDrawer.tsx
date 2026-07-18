@@ -31,7 +31,7 @@ import Wordmark from "./Wordmark";
 
 const SHOP_ROWS: { href: string; key: TranslationKey; icon: string }[] = [
   { href: "/bundles",           key: "nav.bundles",        icon: "🎁" },
-  { href: "/products?deal=1",   key: "nav.deals",          icon: "🏷️" },
+  { href: "/deals",             key: "nav.deals",          icon: "🏷️" },
   { href: "/products?recent=1", key: "nav.recentlyViewed", icon: "🕐" },
   { href: "/blog",              key: "nav.blog",           icon: "📖" },
   { href: "/size-guide",        key: "sg.title",           icon: "📏" },
