@@ -756,6 +756,7 @@ export const tr: Dictionary = {
   "acct.myAccounts": "Hesaplarınız",
   "acct.currentAccount": "Giriş yapıldı",
   "acct.switchAccount": "Geç",
+  "acct.switchAccountBtn": "Hesap değiştir",
   "acct.addAccount": "Hesap ekle",
   "acct.removeAccount": "Bu cihazdan kaldır",
   "acct.accountsHint": "Geçiş, yeniden güvenli girişle olur — bu cihazda şifre saklanmaz.",

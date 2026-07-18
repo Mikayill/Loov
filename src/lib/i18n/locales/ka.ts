@@ -758,6 +758,7 @@ export const ka: Dictionary = {
   "acct.myAccounts": "თქვენი ანგარიშები",
   "acct.currentAccount": "შესული ხართ",
   "acct.switchAccount": "გადართვა",
+  "acct.switchAccountBtn": "ანგარიშის შეცვლა",
   "acct.addAccount": "ანგარიშის დამატება",
   "acct.removeAccount": "ამ მოწყობილობიდან წაშლა",
   "acct.accountsHint": "გადართვა ხდება ხელახალი უსაფრთხო შესვლით — პაროლი ამ მოწყობილობაზე არ ინახება.",

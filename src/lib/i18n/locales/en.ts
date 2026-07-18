@@ -786,6 +786,7 @@ export const en = {
   "acct.myAccounts": "Your accounts",
   "acct.currentAccount": "Signed in",
   "acct.switchAccount": "Switch",
+  "acct.switchAccountBtn": "Switch account",
   "acct.addAccount": "Add account",
   "acct.removeAccount": "Remove from this device",
   "acct.accountsHint": "Switch is a fresh secure sign-in — no passwords are stored on this device.",

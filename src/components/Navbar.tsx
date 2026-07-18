@@ -416,10 +416,14 @@ export default function Navbar() {
               bug fixed on the PDP tab bar) — overflow-y-hidden pins it. */}
           <div className="border-t border-line md:border-t-0 bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="overflow-x-auto overflow-y-hidden no-scrollbar flex items-center gap-2 whitespace-nowrap py-2.5">
+              {/* Fits all 4 pills on one mobile row (justify-between spreads
+                  them); keeps overflow-x-auto + no-scrollbar as a silent safety
+                  net for longer locales (e.g. ka) so a long label can scroll
+                  instead of breaking the layout. */}
+              <div className="overflow-x-auto overflow-y-hidden no-scrollbar flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 whitespace-nowrap py-2.5">
                 <Link
                   href="/products"
-                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                  className={`u-btn px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-control border text-[10px] sm:text-[11px] uppercase tracking-[0.02em] sm:tracking-[0.08em] whitespace-nowrap font-semibold ${
                     pathname === "/products"
                       ? "bg-ink text-white border-ink"
                       : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
@@ -429,7 +433,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/bundles"
-                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-bold ${
+                  className={`u-btn px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-control border text-[10px] sm:text-[11px] uppercase tracking-[0.02em] sm:tracking-[0.08em] whitespace-nowrap font-bold ${
                     isActive("/bundles")
                       ? "bg-ink text-white border-ink"
                       : "bg-canvas/60 text-accent-deep border-line hover:border-ink"
@@ -444,7 +448,7 @@ export default function Navbar() {
                     pages. */}
                 <Link
                   href="/size-guide"
-                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                  className={`u-btn px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-control border text-[10px] sm:text-[11px] uppercase tracking-[0.02em] sm:tracking-[0.08em] whitespace-nowrap font-semibold ${
                     isActive("/size-guide")
                       ? "bg-ink text-white border-ink"
                       : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"
@@ -454,7 +458,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/blog"
-                  className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
+                  className={`u-btn px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-control border text-[10px] sm:text-[11px] uppercase tracking-[0.02em] sm:tracking-[0.08em] whitespace-nowrap font-semibold ${
                     isActive("/blog")
                       ? "bg-ink text-white border-ink"
                       : "bg-canvas/60 text-ink-soft border-line hover:border-ink hover:text-ink"

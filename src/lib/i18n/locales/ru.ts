@@ -756,6 +756,7 @@ export const ru: Dictionary = {
   "acct.myAccounts": "Ваши аккаунты",
   "acct.currentAccount": "Выполнен вход",
   "acct.switchAccount": "Сменить",
+  "acct.switchAccountBtn": "Сменить аккаунт",
   "acct.addAccount": "Добавить аккаунт",
   "acct.removeAccount": "Удалить с этого устройства",
   "acct.accountsHint": "Смена — это повторный безопасный вход; пароли на устройстве не хранятся.",
