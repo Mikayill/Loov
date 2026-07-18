@@ -16,6 +16,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { rememberAccount } from "@/lib/rememberedAccounts";
 import { useLocale } from "@/context/LocaleContext";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
@@ -170,6 +171,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, [supabase]);
+
+  /* Remember this account on the device (token-free) so /account can offer a
+     quick switch back to it later. Runs whenever a real user is present. */
+  useEffect(() => {
+    if (!user) return;
+    rememberAccount({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+      provider: user.provider,
+    });
+  }, [user]);
 
   const signInWithEmail = useCallback(async (email: string, password: string): Promise<AuthResult> => {
     if (!supabase) return { error: t("auth.notConfigured") };

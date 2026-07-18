@@ -19,6 +19,8 @@ import { useTheme } from "@/components/ThemeToggle";
 import { useSettings } from "@/lib/db/useSettings";
 import { fetchMyOrders } from "@/lib/db/myOrders";
 import type { MockOrder } from "@/lib/orderTypes";
+import { useRememberedAccounts } from "@/hooks/useRememberedAccounts";
+import { removeRememberedAccount } from "@/lib/rememberedAccounts";
 
 export default function AccountClient() {
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function AccountClient() {
   const { balance: pointsBalance, tier, lifetimeEarned, nextTier, pointsToNextTier } = useLoyalty();
   const { locale, setLocale, t } = useLocale();
   const { loyaltyRedeemValue } = useSettings();
+  const rememberedAccounts = useRememberedAccounts();
   const [theme, setTheme] = useTheme();
   const darkMode = theme === "dark";
 
@@ -495,6 +498,62 @@ export default function AccountClient() {
                   </svg>
                 </Link>
               ))}
+            </div>
+
+            {/* Your accounts — token-free multi-account switcher. Switching is a
+                real re-login (no stored passwords/tokens on the device). */}
+            <div className="col-span-2 border border-line rounded-card overflow-hidden">
+              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] px-4 sm:px-5 pt-4 pb-1">{t("acct.myAccounts")}</p>
+              <div className="divide-y divide-line">
+                {rememberedAccounts.map((a) => {
+                  const isCurrent = a.id === user.id;
+                  return (
+                    <div key={a.id} className="flex items-center gap-3 px-4 sm:px-5 py-3 bg-canvas">
+                      <span className="w-9 h-9 rounded-full bg-panel border border-line flex items-center justify-center text-ink text-sm font-bold flex-shrink-0 overflow-hidden">
+                        {a.avatar ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={a.avatar} alt="" className="w-full h-full object-cover" />
+                        ) : (a.name[0]?.toUpperCase() || "?")}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-ink text-[13px] truncate">{a.name}</p>
+                        <p className="text-[11px] text-ink-muted truncate">{a.email || a.provider}</p>
+                      </div>
+                      {isCurrent ? (
+                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-accent bg-accent-soft px-2 py-1 rounded-control flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent" />{t("acct.currentAccount")}
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            onClick={() => router.push(`/login?email=${encodeURIComponent(a.email)}&switch=1`)}
+                            className="u-btn h-8 px-3 rounded-control bg-ink text-white text-[11px] font-bold uppercase tracking-[0.06em] hover:bg-ink/85 active:scale-95"
+                          >
+                            {t("acct.switchAccount")}
+                          </button>
+                          <button
+                            onClick={() => removeRememberedAccount(a.id)}
+                            aria-label={t("acct.removeAccount")}
+                            title={t("acct.removeAccount")}
+                            className="w-8 h-8 rounded-control flex items-center justify-center text-ink-muted hover:text-danger hover:bg-danger-soft transition-colors"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {/* Add account */}
+                <button
+                  onClick={() => router.push("/login?switch=1")}
+                  className="w-full flex items-center gap-3 px-4 sm:px-5 py-3 bg-canvas hover:bg-panel transition-colors text-left"
+                >
+                  <span className="w-9 h-9 rounded-full border border-dashed border-line flex items-center justify-center text-ink-muted text-lg flex-shrink-0">＋</span>
+                  <span className="font-semibold text-accent text-[13px]">{t("acct.addAccount")}</span>
+                </button>
+              </div>
+              <p className="text-[10.5px] text-ink-muted px-4 sm:px-5 py-2.5 border-t border-line leading-snug">🔒 {t("acct.accountsHint")}</p>
             </div>
           </div>
         </>

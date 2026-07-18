@@ -38,6 +38,10 @@ export default function LoginClient() {
   const [loading,    setLoading]    = useState(false);
   const [socialLoad, setSocialLoad] = useState<"google" | null>(null);
   const [error,      setError]      = useState("");
+  /* Account-switch mode: /account sends `?email=…&switch=1` to pre-fill the
+     email and show a "switching account" hint. The switch is a real re-login
+     (no stored tokens) — Supabase just replaces the current session on success. */
+  const [switching, setSwitching] = useState(false);
   /* Mandatory email-OTP step — set once the password was right but this
      browser isn't a trusted device yet. Not shown for Google or phone-OTP
      sign-in (Google is already strongly verified; phone login IS a code). */
@@ -61,6 +65,10 @@ export default function LoginClient() {
     const err = params.get("error");
     if (err) setError(err);
     else if (params.get("verify") === "1") setError(t("auth.verifyNeeded"));
+    /* Account switch: pre-fill the email, focus the email tab, show the hint. */
+    const preEmail = params.get("email");
+    if (preEmail) { setEmail(preEmail); setTab("email"); }
+    if (params.get("switch") === "1") setSwitching(true);
   }, [t]);
 
   /* Resend cooldown countdown — 60s between sends (matches Supabase's SMTP interval). */
@@ -204,6 +212,14 @@ export default function LoginClient() {
         </div>
 
         <div className="bg-canvas rounded-card border border-line shadow-sm p-7 space-y-5">
+
+          {/* Account-switch hint */}
+          {switching && !mfaFactorId && !emailOtpStep && (
+            <div className="flex items-center gap-2.5 rounded-control bg-accent-soft border border-accent/20 px-3.5 py-2.5 text-[12.5px] font-semibold text-accent-deep">
+              <span>🔄</span>
+              <span>{email ? t("auth.switchingTo").replace("{email}", email) : t("auth.switchingAdd")}</span>
+            </div>
+          )}
 
           {/* ── Authenticator-app / SMS 2FA step (takes precedence over email-OTP) ── */}
           {mfaFactorId ? (
