@@ -216,11 +216,14 @@ export default function Navbar() {
           </span>
         </div>
 
-        {/* Frosted glass — applied per row: a nested backdrop-filter inside an
-            already-filtered ancestor is ignored by browsers, so the <nav> stays
-            plain and each bar frosts itself. */}
+        {/* Frosted glass — ONE backdrop-filter surface wraps BOTH header rows
+            (top nav + category strip) so the glass reads as a single continuous
+            pane, not two independent blur layers with mismatched reflections. A
+            divider line separates the two sections. Search/account dropdowns are
+            children of this surface, so they render crisp and ON TOP (the old
+            second blur layer used to paint over the search results). */}
         <nav className="border-b border-line">
-          <div className="bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
+          <div className="bg-canvas/70 backdrop-blur-md backdrop-saturate-150">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center py-3 gap-3 md:gap-6">
 
@@ -407,14 +410,15 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-          </div>
 
-          {/* Category strip — Ürünler / Paketler / İndirimde / Beden Kılavuzu /
-              Son Görüntülenenler / Blog. The pill row scrolls horizontally
-              (overflow-x-auto); Chromium's used-value quirk otherwise forces
-              overflow-y to "auto" too on a box with only one axis set (same
-              bug fixed on the PDP tab bar) — overflow-y-hidden pins it. */}
-          <div className="border-t border-line md:border-t-0 bg-canvas/75 backdrop-blur-lg backdrop-saturate-150">
+          {/* Category strip — shares the SINGLE frosted surface opened above
+              (one continuous glass, not two independent blur layers). This row
+              only draws the divider line between the two header sections, on
+              BOTH desktop and mobile, so they read as distinct but connected.
+              The pill row scrolls horizontally (overflow-x-auto); Chromium's
+              used-value quirk otherwise forces overflow-y to "auto" too —
+              overflow-y-hidden pins it. */}
+          <div className="border-t-2 border-line shadow-[inset_0_1px_0_rgb(255_255_255/0.14)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               {/* Fits all 4 pills on one mobile row (justify-between spreads
                   them); keeps overflow-x-auto + no-scrollbar as a silent safety
@@ -469,10 +473,11 @@ export default function Navbar() {
               </div>
             </div>
           </div>
+          </div>
 
           {/* Mobile search — expanding row, not a full-screen popup */}
           {mobileSearchRender && (
-            <div ref={mobileSearchRowRef} className={`md:hidden border-t border-line bg-canvas/95 backdrop-blur-lg px-4 py-3 ${searchOpen ? "animate-fade-up" : "animate-fade-down"}`}>
+            <div ref={mobileSearchRowRef} className={`md:hidden border-t border-line bg-canvas/90 backdrop-blur-md px-4 py-3 ${searchOpen ? "animate-fade-up" : "animate-fade-down"}`}>
               <div className="flex items-center gap-2.5 h-10 px-3.5 rounded-control border border-line bg-panel mb-3">
                 <svg className="w-4 h-4 flex-shrink-0 text-ink-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
