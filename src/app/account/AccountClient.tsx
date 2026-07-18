@@ -5,7 +5,7 @@ import GhostRows from "@/components/GhostRows";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import { useWishlist } from "@/context/WishlistContext";
 import { useLoyalty } from "@/context/LoyaltyContext";
 import { useLocale } from "@/context/LocaleContext";
@@ -16,14 +16,17 @@ import { LOCALES, LOCALE_META, isLocale, type Locale } from "@/lib/i18n/config";
 import { tierName } from "@/lib/i18n/labels";
 import { monthsOld, ageLabel } from "@/lib/babyAge";
 import { useTheme } from "@/components/ThemeToggle";
+import { useSettings } from "@/lib/db/useSettings";
+import { fetchMyOrders } from "@/lib/db/myOrders";
+import type { MockOrder } from "@/lib/orderTypes";
 
 export default function AccountClient() {
   const router = useRouter();
   const { user, loading, signOut, updateProfile } = useAuth();
-  const { totalItems, totalPrice } = useCart();
   const { count: wishCount } = useWishlist();
-  const { balance: pointsBalance, tier } = useLoyalty();
+  const { balance: pointsBalance, tier, lifetimeEarned, nextTier, pointsToNextTier } = useLoyalty();
   const { locale, setLocale, t } = useLocale();
+  const { loyaltyRedeemValue } = useSettings();
   const [theme, setTheme] = useTheme();
   const darkMode = theme === "dark";
 
@@ -48,6 +51,8 @@ export default function AccountClient() {
   const [editBabyGender, setEditBabyGender] = useState<"" | BabyGender>("");
   const [editLanguage, setEditLanguage] = useState<Locale>("en");
   const [editAvatar, setEditAvatar] = useState<string | null>(null);
+  /* Orders — powers the bento "active order" card + the orders count. */
+  const [orders, setOrders] = useState<MockOrder[] | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -68,6 +73,16 @@ export default function AccountClient() {
       setProfileReady(ready);
       setAvatarPresets(presets);
     });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  /* Load orders for the bento cards (active order + count). */
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchMyOrders()
+      .then((o) => { if (!cancelled) setOrders(o); })
+      .catch(() => { if (!cancelled) setOrders([]); });
     return () => { cancelled = true; };
   }, [user]);
 
@@ -153,6 +168,18 @@ export default function AccountClient() {
   }
 
   const avatarShown = profile?.avatarUrl || user.avatar;
+
+  /* ── Bento derived values (all from real data) ── */
+  const orderCount = orders?.length ?? 0;
+  const activeOrder = orders?.find((o) => ["Pending", "Processing", "Shipped"].includes(o.status)) ?? null;
+  const orderStep: Record<string, number> = { Pending: 1, Processing: 2, Shipped: 3, Delivered: 4 };
+  const orderStatusEmoji: Record<string, string> = { Pending: "🕐", Processing: "📦", Shipped: "🚚", Delivered: "✅" };
+  const activeStep = activeOrder ? (orderStep[activeOrder.status] ?? 1) : 0;
+  const rewardValue = (pointsBalance / 100) * loyaltyRedeemValue;
+  const tierProgress = nextTier
+    ? Math.min(100, Math.max(0, ((lifetimeEarned - tier.threshold) / (nextTier.threshold - tier.threshold)) * 100))
+    : 100;
+  const babyMonths = profile?.babyBirthdate ? monthsOld(profile.babyBirthdate) : null;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -331,161 +358,143 @@ export default function AccountClient() {
         </form>
       ) : (
         <>
-          {/* ── Stat cards — real spaced cards with icons, not a flat hairline grid ── */}
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mb-5">
-            {[
-              { href: "/cart", icon: "🛒", value: String(totalItems), label: t("acct.itemsInCart").replace("{amount}", formatPrice(totalPrice)) },
-              { href: "/wishlist", icon: "❤️", value: String(wishCount), label: t("acct.savedToWishlist") },
-              { href: "/account/rewards", icon: tier.emoji, value: pointsBalance.toLocaleString(), label: tierName(tier.id, t) },
-            ].map((s) => (
-              <Link
-                key={s.href + s.label}
-                href={s.href}
-                className="bg-canvas border border-line rounded-card px-3 py-4 sm:px-4 sm:py-5 hover:border-ink transition-colors group"
-              >
-                <span className="text-lg leading-none">{s.icon}</span>
-                <p className="text-xl sm:text-2xl font-bold text-ink tabular-nums tracking-tight mt-2">{s.value}</p>
-                <p className="text-[10.5px] sm:text-[11px] text-ink-muted font-medium mt-0.5 leading-snug line-clamp-2">{s.label}</p>
-              </Link>
-            ))}
-          </div>
+          {/* ══ BENTO PANEL — glanceable dashboard of differently-sized cards ══ */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 auto-rows-[minmax(0,auto)]">
 
-          {/* ── Your little one — shown directly, not buried inside the edit form ── */}
-          <div className="border border-line rounded-card p-4 sm:p-5 mb-5">
-            <p className="text-[11px] font-semibold text-ink-muted uppercase tracking-[0.14em] mb-3">👶 {t("acct.yourLittleOne")}</p>
-            {profile?.babyName || profile?.babyBirthdate ? (
-              <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-full bg-panel flex items-center justify-center text-lg flex-shrink-0">
-                  {profile.babyGender === "girl" ? "👧" : profile.babyGender === "boy" ? "👦" : "🍼"}
-                </span>
-                <div className="min-w-0">
-                  <p className="font-semibold text-ink text-[13.5px] truncate">{profile.babyName || t("acct.yourLittleOne")}</p>
-                  {profile.babyBirthdate && (() => {
-                    const m = monthsOld(profile.babyBirthdate);
-                    return m !== null ? <p className="text-[11.5px] text-ink-muted">{ageLabel(m)}</p> : null;
-                  })()}
-                </div>
+            {/* Rewards — big accent card (spans both columns) */}
+            <Link
+              href="/account/rewards"
+              className="col-span-2 relative overflow-hidden rounded-card p-5 text-white group"
+              style={{ background: "radial-gradient(120% 120% at 100% 0, #3A7360 0%, var(--color-accent) 45%, var(--color-accent-deep) 100%)" }}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em]" style={{ color: "#E7D9A8" }}>
+                  {tier.emoji} {t("acct.rewards")} · {tierName(tier.id, t)}
+                </p>
+                <span className="text-[11px] font-semibold opacity-80 group-hover:opacity-100 transition-opacity">{t("acct.how")} →</span>
               </div>
+              <p className="text-3xl sm:text-4xl font-extrabold tabular-nums mt-3 leading-none">
+                {pointsBalance.toLocaleString()} <span className="text-lg font-bold opacity-80">{t("acct.points")}</span>
+              </p>
+              <p className="text-[11px] opacity-85 mt-1">≈ {formatPrice(rewardValue)}</p>
+              {nextTier && (
+                <>
+                  <div className="h-1.5 rounded-full bg-white/20 mt-3.5 overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${tierProgress}%`, backgroundColor: "var(--color-star)" }} />
+                  </div>
+                  <p className="text-[10px] opacity-85 mt-1.5">
+                    {t("acct.rewards.ptsTo").replace("{n}", pointsToNextTier.toLocaleString()).replace("{tier}", `${tierName(nextTier.id, t)} ${nextTier.emoji}`)}
+                  </p>
+                </>
+              )}
+            </Link>
+
+            {/* Active order — live status with a step bar */}
+            <Link href="/account/orders" className="border border-line rounded-card p-4 bg-canvas hover:border-ink transition-colors">
+              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-[0.12em]">{t("acct.activeOrder")}</p>
+              {orders === null ? (
+                <div className="h-14 mt-2 rounded-control u-skeleton" />
+              ) : activeOrder ? (
+                <>
+                  <p className="text-[12.5px] font-bold text-ink mt-2 truncate">{activeOrder.id}</p>
+                  <div className="flex items-center gap-1 mt-2.5">
+                    {[1, 2, 3, 4].map((s) => (
+                      <span key={s} className={`flex-1 h-1 rounded-full ${s <= activeStep ? "bg-accent" : "bg-line"}`} />
+                    ))}
+                  </div>
+                  <p className="text-[11px] font-bold text-accent mt-2">{orderStatusEmoji[activeOrder.status] ?? "📦"} {t(`label.orderStatus.${activeOrder.status.toLowerCase()}` as TranslationKey)}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-extrabold text-ink tabular-nums mt-2">{orderCount}</p>
+                  <p className="text-[11px] text-ink-muted mt-0.5">{orderCount === 0 ? t("acct.noOrdersYet") : t("acct.allDelivered")}</p>
+                </>
+              )}
+            </Link>
+
+            {/* Wishlist */}
+            <Link href="/wishlist" className="border border-line rounded-card p-4 bg-canvas hover:border-ink transition-colors">
+              <p className="text-[10px] font-bold text-ink-muted uppercase tracking-[0.12em]">❤️ {t("acct.savedToWishlist")}</p>
+              <p className="text-2xl font-extrabold text-ink tabular-nums mt-2">{wishCount}</p>
+            </Link>
+
+            {/* Baby profile */}
+            {profile?.babyName || profile?.babyBirthdate ? (
+              <button
+                onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
+                className="text-left rounded-card p-4 border bg-warning-soft border-warning-border hover:border-warning transition-colors"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-warning">👶 {t("acct.yourLittleOne")}</p>
+                <p className="text-[15px] font-extrabold text-ink mt-2 truncate">
+                  {profile.babyGender === "girl" ? "👧" : profile.babyGender === "boy" ? "👦" : ""} {profile.babyName || t("acct.yourLittleOne")}
+                </p>
+                <p className="text-[11px] text-warning mt-0.5">{babyMonths !== null ? ageLabel(babyMonths) : t("acct.addBabyInfo")}</p>
+              </button>
             ) : (
               <button
                 onClick={() => { setEditing(true); setEditName(user.name); setEditEmail(user.email || ""); }}
-                className="w-full text-left text-[12.5px] text-ink-muted hover:text-ink transition-colors"
+                className="text-left rounded-card p-4 border border-dashed border-line hover:border-ink transition-colors"
               >
-                {t("acct.addBabyInfo")}
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">👶 {t("acct.yourLittleOne")}</p>
+                <p className="text-[12.5px] font-semibold text-ink-muted mt-2 leading-snug">{t("acct.addBabyInfo")}</p>
               </button>
             )}
-          </div>
 
-          {/* ── Grouped menu — orders/activity first, account management second ── */}
-          <div className="space-y-5">
-            <div>
-              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.groupOrders")}</p>
-              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
-                {[
-                  { icon: "📦", label: t("acct.myOrders"),  sub: t("acct.myOrdersSub"),  href: "/account/orders" },
-                  { icon: "↩️", label: t("acct.myReturns"), sub: t("acct.myReturnsSub"), href: "/account/returns" },
-                  { icon: "📝", label: t("acct.myReviews"), sub: t("acct.myReviewsSub"), href: "/account/reviews" },
-                  { icon: "⭐", label: t("acct.rewards"),   sub: t("acct.rewardsSub"),   href: "/account/rewards" },
-                ].map((item) => (
-                  <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
-                        <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
-                      </div>
-                    </div>
-                    <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.groupAccount")}</p>
-              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
-                {[
-                  { icon: "📍", label: t("acct.addresses"),     sub: t("acct.addressesSub"),     href: "/account/addresses" },
-                  { icon: "🔔", label: t("acct.notifications"), sub: t("acct.notificationsSub"), href: "/account/notifications" },
-                  { icon: "🔒", label: t("acct.security"),      sub: t("acct.securitySub"),      href: "/account/security" },
-                ].map((item) => (
-                  <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors group">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <span className="w-9 h-9 rounded-control bg-panel group-hover:bg-canvas flex items-center justify-center text-base flex-shrink-0 transition-colors">{item.icon}</span>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</p>
-                        <p className="text-[11px] text-ink-muted mt-0.5 truncate">{item.sub}</p>
-                      </div>
-                    </div>
-                    <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Preferences — dark mode + language, INLINE controls (the
-                separate /account/settings page was removed as redundant:
-                its other two entries already live in the group above). ── */}
-            <div>
-              <p className="text-[10.5px] font-bold text-ink-muted uppercase tracking-[0.14em] mb-2 px-1">{t("acct.preferences")}</p>
-              <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
-                {/* Dark mode — inline switch */}
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={darkMode}
-                  onClick={() => setTheme(darkMode ? "light" : "dark")}
-                  className="w-full flex items-center justify-between px-4 sm:px-5 py-4 bg-canvas hover:bg-panel transition-colors text-left"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="w-9 h-9 rounded-control bg-panel flex items-center justify-center text-base flex-shrink-0">
-                      {darkMode ? "🌙" : "☀️"}
-                    </span>
-                    <p className="font-semibold text-ink text-[13.5px]">{t("pref.darkMode")}</p>
-                  </div>
-                  <span
-                    aria-hidden
-                    className={`relative w-11 h-6 rounded-full flex-shrink-0 transition-colors ${darkMode ? "bg-accent" : "bg-line"}`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-[left] duration-200 ${darkMode ? "left-[22px]" : "left-0.5"}`}
-                    />
-                  </span>
-                </button>
-
-                {/* Site language — inline chips, applies immediately */}
-                <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 bg-canvas flex-wrap">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <span className="w-9 h-9 rounded-control bg-panel flex items-center justify-center text-base flex-shrink-0">🌐</span>
-                    <p className="font-semibold text-ink text-[13.5px]">{t("acct.siteLanguage")}</p>
-                  </div>
-                  <div className="flex gap-1 flex-shrink-0">
-                    {LOCALES.map((code) => {
-                      const selected = locale === code;
-                      return (
-                        <button
-                          key={code}
-                          type="button"
-                          onClick={() => setLocale(code)}
-                          aria-pressed={selected}
-                          title={LOCALE_META[code].label}
-                          className={`h-9 min-w-[40px] px-1.5 rounded-control text-[11px] font-extrabold uppercase tracking-wide border transition-colors ${
-                            selected
-                              ? "border-accent bg-accent-soft text-accent"
-                              : "border-line text-ink-muted hover:border-ink-muted hover:text-ink"
-                          }`}
-                        >
-                          {code}
-                        </button>
-                      );
-                    })}
-                  </div>
+            {/* Quick preference toggles */}
+            <div className="border border-line rounded-card p-4 bg-canvas flex flex-col justify-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={darkMode}
+                onClick={() => setTheme(darkMode ? "light" : "dark")}
+                className="flex items-center justify-between gap-2"
+              >
+                <span className="text-[12px] font-semibold text-ink flex items-center gap-1.5">{darkMode ? "🌙" : "☀️"} {t("pref.darkMode")}</span>
+                <span aria-hidden className={`relative w-10 h-[22px] rounded-full flex-shrink-0 transition-colors ${darkMode ? "bg-accent" : "bg-line"}`}>
+                  <span className={`absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow transition-[left] duration-200 ${darkMode ? "left-[20px]" : "left-0.5"}`} />
+                </span>
+              </button>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[12px] font-semibold text-ink flex items-center gap-1.5">🌐 {t("acct.siteLanguage")}</span>
+                <div className="flex gap-1">
+                  {LOCALES.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => setLocale(code)}
+                      aria-pressed={locale === code}
+                      title={LOCALE_META[code].label}
+                      className={`h-7 min-w-[30px] px-1 rounded-control text-[10px] font-extrabold uppercase border transition-colors ${
+                        locale === code ? "border-accent bg-accent-soft text-accent" : "border-line text-ink-muted"
+                      }`}
+                    >
+                      {code}
+                    </button>
+                  ))}
                 </div>
               </div>
+            </div>
+
+            {/* Account section — full-width list of the remaining destinations */}
+            <div className="col-span-2 border border-line rounded-card overflow-hidden divide-y divide-line">
+              {[
+                { icon: "📦", label: t("acct.myOrders"),      href: "/account/orders" },
+                { icon: "↩️", label: t("acct.myReturns"),     href: "/account/returns" },
+                { icon: "📝", label: t("acct.myReviews"),     href: "/account/reviews" },
+                { icon: "📍", label: t("acct.addresses"),     href: "/account/addresses" },
+                { icon: "🔔", label: t("acct.notifications"), href: "/account/notifications" },
+                { icon: "🔒", label: t("acct.security"),      href: "/account/security" },
+              ].map((item) => (
+                <Link key={item.href} href={item.href} className="flex items-center justify-between px-4 sm:px-5 py-3.5 bg-canvas hover:bg-panel transition-colors group">
+                  <span className="flex items-center gap-3.5 min-w-0">
+                    <span className="w-8 h-8 rounded-control bg-panel flex items-center justify-center text-base flex-shrink-0">{item.icon}</span>
+                    <span className="font-semibold text-ink text-[13.5px] group-hover:underline underline-offset-4">{item.label}</span>
+                  </span>
+                  <svg className="w-4 h-4 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              ))}
             </div>
           </div>
         </>

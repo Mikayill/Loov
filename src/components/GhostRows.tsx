@@ -84,47 +84,24 @@ function AccountGhost() {
         </div>
       </div>
 
-      {/* Stat cards — always 3 cols, even on mobile (matches the real page) */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mb-5">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-canvas border border-line rounded-card px-3 py-4 sm:px-4 sm:py-5">
-            <Bar className="h-4 w-4 mb-2" />
-            <Bar className="h-5 w-10 mb-1.5" />
-            <Bar className="h-2.5 w-16" />
-          </div>
-        ))}
-      </div>
-
-      {/* Baby info card */}
-      <div className="border border-line rounded-card p-4 sm:p-5 mb-5">
-        <Bar className="h-2.5 w-24 mb-3" />
-        <div className="flex items-center gap-3">
-          <Circle className="w-10 h-10 flex-shrink-0" />
-          <Bar className="h-3.5 w-24" />
-        </div>
-      </div>
-
-      {/* Two grouped menu lists */}
-      <div className="space-y-5">
-        {[4, 4].map((rows, g) => (
-          <div key={g}>
-            <Bar className="h-2.5 w-24 mb-2 ml-1" />
-            <div className="border border-line rounded-card overflow-hidden divide-y divide-line">
-              {Array.from({ length: rows }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between px-4 sm:px-5 py-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-9 h-9 rounded-control u-skeleton flex-shrink-0" />
-                    <div>
-                      <Bar className="h-3.5 w-28 mb-1.5" />
-                      <Bar className="h-2.5 w-36" />
-                    </div>
-                  </div>
-                  <Bar className="h-3 w-3" />
-                </div>
-              ))}
+      {/* Bento grid skeleton — matches the real dashboard shape */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="col-span-2 rounded-card u-skeleton h-28" />
+        <div className="border border-line rounded-card p-4"><Bar className="h-2.5 w-20 mb-3" /><Bar className="h-4 w-24 mb-2.5" /><Bar className="h-1 w-full" /></div>
+        <div className="border border-line rounded-card p-4"><Bar className="h-2.5 w-20 mb-3" /><Bar className="h-6 w-10" /></div>
+        <div className="border border-line rounded-card p-4"><Bar className="h-2.5 w-20 mb-3" /><Bar className="h-4 w-24" /></div>
+        <div className="border border-line rounded-card p-4 flex flex-col gap-3 justify-center"><Bar className="h-3 w-full" /><Bar className="h-3 w-full" /></div>
+        <div className="col-span-2 border border-line rounded-card overflow-hidden divide-y divide-line">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between px-4 sm:px-5 py-3.5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-8 h-8 rounded-control u-skeleton flex-shrink-0" />
+                <Bar className="h-3.5 w-28" />
+              </div>
+              <Bar className="h-3 w-3" />
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -437,22 +437,11 @@ export default function Navbar() {
                 >
                   {t("nav.bundles")}
                 </Link>
-                <Link
-                  href="/products?deal=1"
-                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-bold text-danger hover:border-danger"
-                >
-                  {t("nav.deals")}
-                </Link>
-                {/* Recently Viewed — now a real filter on /products (?recent=1),
-                    not a separate anchor-scroll section on the same page
-                    (that used to make "Products" and "Recently Viewed" feel
-                    like two conflicting views of the same screen). */}
-                <Link
-                  href="/products?recent=1"
-                  className="u-btn px-3.5 py-2 rounded-control border border-line bg-canvas/60 text-[11px] uppercase tracking-[0.08em] font-semibold text-ink-soft hover:border-ink hover:text-ink"
-                >
-                  {t("nav.recentlyViewed")}
-                </Link>
+                {/* "İndirimde" (On Sale) and "Son Görüntülenenler" (Recently
+                    Viewed) were removed from this strip — they felt low-quality
+                    tucked under the Products heading. They now live in the
+                    mobile hamburger drawer and will get their own dedicated
+                    pages. */}
                 <Link
                   href="/size-guide"
                   className={`u-btn px-3.5 py-2 rounded-control border text-[11px] uppercase tracking-[0.08em] font-semibold ${
